@@ -1,0 +1,175 @@
+---
+const quotes = [
+    {
+        "quote": "So powerful is the light of unity that it can illuminate the whole earth.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+    {
+        "quote": "Turn thy sight unto thyself, that thou mayest find Me standing within thee.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/library/authoritative-texts/bahaullah/hidden-words/"
+    },
+    {
+        "quote": "Knowledge is as wings to man's life.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+    {
+        "quote": "Religion without science is superstition, and science without religion is materialism.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/science-religion/"
+    },
+    {
+        "quote": "To be of service to the world is to be truly alive.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/service/"
+    },
+    {
+        "quote": "The world of humanity is possessed of two wings: the male and the female.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+    {
+        "quote": "Peace of mind is the condition of spiritual life.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+    {
+        "quote": "Words must be supported by deeds, for deeds are the fruits of words.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/service/"
+    },
+    {
+        "quote": "Detach from all save Me.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/library/authoritative-texts/bahaullah/hidden-words/"
+    },
+    {
+        "quote": "Ye are the fruits of one tree, and the leaves of one branch.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    }
+]
+// assign link, quote and author from random quote
+const num = Math.floor(Math.random() * quotes.length)
+const {link, quote, author} = quotes[num];
+const id = "quote-" + Math.floor(Math.random() * 1000000000);
+---
+
+<div id={id} class="quoteblock hidden sm:block text-xs w-full ml-6 mr-5 text-center color-gray-300" data-num={num}>
+  <div class="relative w-auto mx-0 sm:mx-12"><a href={link} class="link" target="_blank">
+    <div class="quote italic">{quote}</div>
+  </a></div>
+</div>
+
+<script data-quoteid={id} type="text/javascript">
+  const quoteid = document.currentScript.dataset.quoteid;
+  const quoteBlockEl = document.getElementById(quoteid);
+
+  const quotes = [
+    {
+        "quote": "So powerful is the light of unity that it can illuminate the whole earth.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+    {
+        "quote": "Turn thy sight unto thyself, that thou mayest find Me standing within thee.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/library/authoritative-texts/bahaullah/hidden-words/"
+    },
+    {
+        "quote": "Knowledge is as wings to man's life.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+    {
+        "quote": "Religion without science is superstition, and science without religion is materialism.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/science-religion/"
+    },
+    {
+        "quote": "To be of service to the world is to be truly alive.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/service/"
+    },
+    {
+        "quote": "The world of humanity is possessed of two wings: the male and the female.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+    {
+        "quote": "Peace of mind is the condition of spiritual life.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+    {
+        "quote": "Words must be supported by deeds, for deeds are the fruits of words.",
+        "author": "`Abdu'l-Bahá",
+        "link": "https://www.bahai.org/beliefs/life-spirit/service/"
+    },
+    {
+        "quote": "Detach from all save Me.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/library/authoritative-texts/bahaullah/hidden-words/"
+    },
+    {
+        "quote": "Ye are the fruits of one tree, and the leaves of one branch.",
+        "author": "Bahá'u'lláh",
+        "link": "https://www.bahai.org/beliefs/life-spirit/human-nature/"
+    },
+  ]
+
+ const typeQuote = (element, quote, index = 0, callback) => {
+  if (index < quote.length) {
+    element.innerHTML += quote.charAt(index);
+    setTimeout(() => typeQuote(element, quote, index + 1, callback), Math.random() * 150); // Randomize typing speed
+   } else if (callback) {
+     callback(); // Call the callback function once typing is complete
+   }
+ };
+  // every 20 seconds, change the quote
+ const changeQuote = () => {
+    let newNum = Math.floor(Math.random() * quotes.length)
+    while (newNum === quoteBlockEl.dataset.num) newNum = Math.floor(Math.random() * quotes.length);
+    let {link, quote} = quotes[newNum];
+    // Clear existing quote
+    const quoteElement = quoteBlockEl.querySelector(".quote");
+    quoteElement.innerHTML = '';
+    // Start typing new quote and set callback for next change
+    typeQuote(quoteElement, quote, 0, () => {
+      setTimeout(changeQuote, 10000); // Schedule next quote after current typing is complete
+    });
+    quoteBlockEl.querySelector(".link").href = link;
+    quoteBlockEl.dataset.num = newNum;
+  }
+  setTimeout(changeQuote, 10000);
+</script>
+
+<style>
+   .quote {
+     line-height: 1.5em;
+     font-family: "Courier New", Courier, monospace;
+     font-size: .8rem;
+     color: rgba(2, 2, 2, 0.65);
+   }
+   .quoteblock .quote::before {
+     font-family: "Palatino", serif;
+     content: "“";
+     font-size: 3rem;
+     color: rgba(2, 2, 2, 0.175);
+     position: absolute;
+     top: .2em;
+     left: -.5em;
+    }
+   .quoteblock .quote::after {
+     font-family: "Palatino", serif;
+     content: "”";
+     font-size: 3rem;
+     color: rgba(2, 2, 2, 0.175);
+     position: absolute;
+     top: .2em;
+     right: -.35em;
+    }
+
+</style>

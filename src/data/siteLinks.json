@@ -1,0 +1,18 @@
+{
+ "menuLinks": [
+   {"title": "Events", "path": "/events", "children": null},
+   {"title": "Arts", "path": "/arts", "children": null},
+   {"title": "Agriculture", "path": "/agriculture", "children": null},
+   {"title": "Memorium", "path": "/memori", "children": null},
+   {"title": "Contact", "path": "/contact", "children": null}
+ ],
+  "companyLinks": [
+ ],
+ "productLinks": [
+ ],
+ "resourceLinks": [
+ ]
+}
+
+
+

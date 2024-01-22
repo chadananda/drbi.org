@@ -1,0 +1,50 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import PostThumb from "@components/article/postThumb.astro";
+import AuthorCard from "@components/article/authorCard.astro";
+
+// export paths for all the authors
+export async function getStaticPaths() {
+  const authors = await getCollection("team", ({data}) => !data.draft);
+  let paths = authors.map(({ data }) => ({ params: { author: data.name_slug } }));
+  // console.log("Author paths: ", paths);
+  return paths;
+};
+
+// this author param
+const { author: thisAuthorSlug }= Astro.params;
+
+const isPublished = ({data}) => (!data.draft && data.datePublished<=new Date());
+const isDev = import.meta.env.APP_ENV==='dev';
+const allPosts = await getCollection("posts", (ar) => isPublished(ar) || isDev);
+
+// get all posts which are not in draft mode && match author
+const posts = allPosts.filter((post) => post.slug===thisAuthorSlug);
+
+// we could load this author... but author card only needs the slug
+// let author = await getEntry("team", thisAuthorSlug);
+---
+
+<Layout pageTitle={thisAuthorSlug}>
+  <Container>
+
+     <AuthorCard slug={thisAuthorSlug} size="md" />
+
+      <main class="mt-16">
+        <div class="flex flex-wrap justify-center gap-20">
+          {Array.isArray(posts) && posts.map((post) => (
+            <div class="flex-none" style={{ width: '300px' }}>
+              <PostThumb post={post} />
+            </div>
+          ))}
+        </div>
+      </main>
+
+      <button class="mt-16 text-center block mx-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">
+        <a href="/authors">Back to Authors</a>
+      </button>
+
+  </Container>
+</Layout>

@@ -1,0 +1,21 @@
+---
+import Layout from '@layouts/Layout.astro';
+const user = Astro.locals.user;
+import Logout from '@components/logout.astro';
+---
+<Layout>
+  <container class="container mx-auto m-15 px-20 text-center">
+    <h1 class="text-xl"> Admin Dashboard </h1>
+    {user && (
+      <ul>
+        <li>   {user.name},   {user.email}, {user.role}  </li>
+      </ul>
+      <Logout />
+    )}
+    {!user && (
+      <h2 class="text-lg"> No user object found </h2>
+    )}
+ </container>
+</Layout>
+
+

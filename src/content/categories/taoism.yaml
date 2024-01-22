@@ -1,0 +1,102 @@
+category: Taoism
+category_slug: taoism
+image:
+  src: ./taoism.png
+  alt: Taoism
+description: >-
+  Taoism, also known as Daoism, is an ancient Chinese philosophy and religious
+  tradition that emphasizes living in harmony with the Tao (also spelled Dao),
+  which is understood as the fundamental principle underlying the universe. It
+  encourages a way of life that is in balance with nature, promotes spiritual
+  cultivation, and values simplicity, humility, and compassionate action.
+topics:
+  tao-the-way:
+    topic: Tao (The Way)
+    description: >-
+      The central concept of Taoism representing the source, pattern, and
+      substance of everything that exists. It is the ultimate principle that is
+      both the way of the cosmos and the intrinsic nature that all things
+      follow.
+  yin-and-yang:
+    topic: Yin and Yang
+    description: >-
+      A Taoist concept symbolizing the duality of existence. Yin and Yang are
+      opposite yet complementary forces that interact to form a dynamic system
+      in which the whole is greater than the assembled parts.
+  wu-wei-effortless-action:
+    topic: Wu Wei (Effortless Action)
+    description: >-
+      A key Taoist principle that suggests the best way to live is to align with
+      the flow of life and act without force or resistance; it signifies
+      natural, spontaneous, and non-competitive action.
+  ziran-naturalness:
+    topic: Ziran (Naturalness)
+    description: >-
+      A state of being that Taoists strive to embody, characterized by
+      spontaneity and a sense of individuality that is in harmony with the Tao,
+      expressing itself without manipulation or striving.
+  qi-vital-energy:
+    topic: Qi (Vital Energy)
+    description: >-
+      In Taoism, Qi is the life force or energy that flows through everything in
+      the universe. Cultivating and balancing Qi is essential for achieving
+      health and harmony with the Tao.
+  taoist-meditation:
+    topic: Taoist Meditation
+    description: >-
+      Practices designed to quiet the mind, cultivate inner stillness, and
+      harmonize with the Tao. Techniques include breath control, visualization,
+      and movement, such as in Tai Chi and Qigong.
+  taoist-ethics:
+    topic: Taoist Ethics
+    description: >-
+      Moral principles in Taoism that promote living simply, honestly, and
+      compassionately; emphasizing virtues like humility, moderation, and
+      detachment from desires.
+  taoist-cosmology:
+    topic: Taoist Cosmology
+    description: >-
+      The Taoist view of the universe as an interconnected and constantly
+      changing entity, where the Tao gives rise to all existence and processes.
+  taoist-alchemy:
+    topic: Taoist Alchemy
+    description: >-
+      A set of practices and theories aiming for the transformation of the self
+      and the attainment of immortality through physical disciplines,
+      meditation, and the use of elixirs.
+  taoist-rituals:
+    topic: Taoist Rituals
+    description: >-
+      Ceremonies and rites practiced by Taoists to honor deities, purify the
+      self, and align with celestial forces, often involving offerings,
+      chanting, and divination.
+  laozi-lao-tzu:
+    topic: Laozi (Lao-Tzu)
+    description: >-
+      Revered as the founder of Taoism and traditionally regarded as the author
+      of the 'Tao Te Ching', Laozi's teachings form the basis of Taoist
+      philosophy.
+  zhuangzi-chuang-tzu:
+    topic: Zhuangzi (Chuang Tzu)
+    description: >-
+      An influential Taoist philosopher known for his work 'Zhuangzi', which
+      further explores Taoist wisdom and themes of spontaneity, transformation,
+      and relativism.
+  de-virtue:
+    topic: De (Virtue)
+    description: >-
+      An important concept in Taoism referring to a natural expression of the
+      Tao, characterized by a disposition toward doing good and acting in
+      accordance with the intrinsic nature.
+  taoist-literature:
+    topic: Taoist Literature
+    description: >-
+      Sacred texts and influential writings that capture the essence of Taoist
+      thought, including foundational works like the 'Tao Te Ching' and
+      'Zhuangzi'.
+  taoist-temples-and-monasteries:
+    topic: Taoist Temples and Monasteries
+    description: >-
+      Places dedicated to the practice and worship of Taoist beliefs, often set
+      in natural surroundings and serving as centers for meditation, learning,
+      and community rituals.

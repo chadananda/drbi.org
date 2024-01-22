@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+import { slugify } from "@utils/utils";
+import { getEntry } from 'astro:content';
+
+
+const { post } = Astro.props
+
+const author = await getEntry('team', post.data.author.id);
+const category = await getEntry('categories', post.data.category.id);
+
+const image = post.data.image;
+const pageURL = Astro.url.href.replace('[::1]', 'localhost').replace(/\/$/, '')
+const siteURL = new URL(pageURL).origin.replace(/\/$/, '');
+const uniqueID = 'id-' + Math.random().toString(36).slice(2, 11);
+const authorURL = `${siteURL}/authors/${author.id}`
+
+const pubdate = new Date(post.data.datePublished);
+const datePublished = pubdate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric'
+});
+---
+
+ <div id={uniqueID} class="w-[300px]">
+  <a href={`/posts/${post.slug}`}>
+    <Image
+      format={"avif"}
+      src={image.src}
+      alt={image.alt}
+      sizes="(max-width: 800px) 100vw, 800px"
+      class="w-[300px] h-[200px] object-cover rounded-lg shadow-lg border border-gray-200"
+      quality="mid"
+      transition:name={`post-img-${post.slug}`}
+    />
+   <div class="mt-4">
+     <span class="text-blue-400 uppercase tracking-wider text-xs font-medium">
+       <a href={`/categories/${category.id}`}>{category.data.category}</a>
+     </span>
+     <h2 class="text-xl font-semibold leading-snug tracking-tight mt-1" transition:persist> {post.data.title} </h2>
+     <div class="flex gap-2 mt-3 text-sm">
+      <span class="text-gray-400">
+         <a href={authorURL}>{author.data.name} </a>
+      </span>
+      <span class="text-gray-400">• </span>
+      <time class="text-gray-400" datetime={datePublished}> {datePublished} </time>
+     </div>
+   </div>
+   </a>
+ </div>
+
+

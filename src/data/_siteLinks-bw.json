@@ -1,0 +1,30 @@
+{
+ "menuLinks": [
+   {"title": "Posts", "path": "/posts", "children": null},
+   {"title": "Events", "path": "#", "children": null},
+   {"title": "Contact", "path": "/contact", "children": null}
+ ],
+  "companyLinks": [
+   { "title": "About", "path": "/about" },
+   { "title": "Hiring", "path": "/hiring" },
+   { "title": "Press", "path": "/press" },
+   { "title": "Privacy", "path": "/privacy" },
+   { "title": "Contact", "path": "/contact" }
+ ],
+ "productLinks": [
+   { "title": "For Content Creators", "path": "#" },
+   { "title": "Features", "path": "#" },
+   { "title": "Pricing", "path": "/pricing" },
+   { "title": "Integrations", "path": "/api" }
+ ],
+ "resourceLinks": [
+   { "title": "Posts", "path": "/posts" },
+   { "title": "Podcasts", "path": "#" },
+   { "title": "Help Center", "path": "#" },
+   { "title": "Guides", "path": "#" },
+   { "title": "Documentation", "path": "#" }
+ ]
+}
+
+
+

@@ -1,0 +1,53 @@
+---
+export const prerender = true;
+
+import { getCollection, getEntry } from "astro:content";
+import Layout from "@layouts/Layout.astro";
+import PostThumb from "@components/article/postThumb.astro";
+import { slugify } from "@utils/utils.js";
+import Container from "@components/container.astro";
+import Sectionhead from "@components/sectionhead.astro";
+import TopicFAQ from '@components/article/topicFAQ.astro';
+
+
+// const isDev = import.meta.env.APP_ENV==='dev';
+// console.log (isDev)
+
+export async function getStaticPaths() {
+  const allTopics = await getCollection("topics");
+  return allTopics.map((topic) => ({params: { topic: topic.id } }));
+}
+
+let { topic } = Astro.params;
+
+const isPublished = ({data}) => (!data.draft && data.datePublished<=new Date());
+const isDev = import.meta.env.APP_ENV==='dev';
+const allPosts = await getCollection("posts", (ar) => isPublished(ar) || isDev);
+
+
+// Filter posts based on the slugified tag or category
+const posts = allPosts.filter(({data}) => data.topics.map(({id}) => id).includes(topic));
+// if (data.topics) data.topics.map(({id}) => usedTopics.set(id, true));
+// console.log("posts", posts.map(({slug}) => slug));
+
+
+// load faq data by collection type and slug?
+const faqs = await getEntry('faqs', topic);
+---
+
+<Layout pageTitle={topic}>
+   { !!faqs && (<TopicFAQ faqs={faqs} max=8 />)}
+   { !faqs && (
+     <Sectionhead>
+       <Fragment slot="title"> Article Topics </Fragment>
+       <Fragment slot="desc"> Posts associated with “{topic}” </Fragment>
+     </Sectionhead>
+   )}
+  <Container class="w-full mx-5 sm:mx-15">
+    <main class="flex flex-wrap justify-center gap-20 mt-5">
+      {Array.isArray(posts) && posts.map((post) => (
+        <div class="flex-none"> <PostThumb post={post} /> </div>
+      ))}
+    </main>
+  </Container>
+</Layout>

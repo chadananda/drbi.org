@@ -1,0 +1,70 @@
+category: Sikhism
+category_slug: sikhism
+image:
+  src: ./sikhism.png
+  alt: Sikhism
+description: >-
+  Sikhism is a monotheistic religion originating from the Punjab region of the
+  Indian subcontinent in the 15th century, founded by Guru Nanak Dev Ji and
+  subsequently led by a succession of nine other Gurus. It emphasizes
+  egalitarianism, devotion to one God, the pursuit of justice, and adherence to
+  a set of values codified in the Guru Granth Sahib, the central religious
+  scripture of Sikhism. Its followers, known as Sikhs, are expected to embody
+  the principles of selfless service, community, and moral integrity.
+topics:
+  the-ten-sikh-gurus:
+    topic: The Ten Sikh Gurus
+    description: >-
+      The spiritual and temporal leaders who shaped Sikhism from Guru Nanak Dev
+      Ji to Guru Gobind Singh Ji, each contributing to the development of the
+      religion and the Sikh community.
+  guru-granth-sahib-ji:
+    topic: Guru Granth Sahib Ji
+    description: >-
+      The central religious text of Sikhism, considered the living Guru by
+      Sikhs. It is a collection of hymns and writings by the Sikh Gurus and
+      various Hindu and Muslim saints.
+  five-ks-of-sikhism:
+    topic: Five Ks of Sikhism
+    description: >-
+      The five physical symbols of faith that Sikhs are enjoined to wear at all
+      times, representing commitment and embodying the beliefs and ethics of
+      Sikhism.
+  sikh-code-of-conduct:
+    topic: Sikh Code of Conduct
+    description: >-
+      A guideline of duties and responsibilities for all Sikhs, encompassing
+      spiritual discipline, moral behavior, and community involvement.
+  sikh-festivals-and-observances:
+    topic: Sikh Festivals and Observances
+    description: >-
+      Important events in the Sikh calendar, including Gurpurabs, Vaisakhi, and
+      more, marking the anniversaries of significant moments in Sikh history.
+  sikh-worship-and-prayer:
+    topic: Sikh Worship and Prayer
+    description: >-
+      The practices and rituals associated with devotional acts, including daily
+      prayers, congregational worship, and the singing of hymns from the Guru
+      Granth Sahib Ji.
+  langar-and-community-kitchen:
+    topic: Langar and Community Kitchen
+    description: >-
+      The Sikh tradition of a free community kitchen serving meals to all
+      visitors, regardless of religion, caste, gender, or ethnicity as a
+      practice of equality and charity.
+  sikhism-and-social-justice:
+    topic: Sikhism and Social Justice
+    description: >-
+      The principles and actions in Sikhism that promote equality, justice, and
+      social activism, inspired by the teachings of the Sikh Gurus.
+  the-khalsa-and-sikh-identity:
+    topic: The Khalsa and Sikh Identity
+    description: >-
+      The community of initiated Sikhs called the Khalsa, founded by Guru Gobind
+      Singh Ji, and the identity markers that signify belonging and dedication
+      to the faith.
+  sikhism-and-interfaith-relations:
+    topic: Sikhism and Interfaith Relations
+    description: >-
+      The approach of Sikhism towards other religions, promoting harmony,
+      respect, and the shared pursuit of spiritual growth and moral living.

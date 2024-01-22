@@ -1,0 +1,101 @@
+category: Judaism
+category_slug: judaism
+image:
+  src: ./judaism.png
+  alt: Judaism
+description: >-
+  Judaism is a monotheistic faith considered one of the oldest Abrahamic
+  religions. It encompasses the religion, philosophy, and culture of the Jewish
+  people, rooted in the Hebrew Bible, particularly the Torah. Judaism
+  articulates the covenantal relationship between the Children of Israel and
+  God, which is expressed through Torah observance, ethics, rites, and the
+  yearning for the coming of the Messiah.
+topics:
+  torah-study:
+    topic: Torah Study
+    description: >-
+      The continual learning and analysis of the Torah, encompassing the
+      Pentateuch, Talmud, and rabbinical commentaries that form the cornerstone
+      of Jewish knowledge and law.
+  jewish-rituals:
+    topic: Jewish Rituals
+    description: >-
+      The practices, ceremonies, and rites integral to Jewish observance and
+      lifecycle events, including Sabbath and holiday observances, dietary laws,
+      and prayer rituals.
+  jewish-holidays:
+    topic: Jewish Holidays
+    description: >-
+      Holy days and festivals celebrated throughout the Jewish calendar year,
+      including Passover, Rosh Hashanah, Yom Kippur, Sukkot, Hanukkah, and
+      Purim, each with their unique customs and religious significance.
+  jewish-ethics:
+    topic: Jewish Ethics
+    description: >-
+      The moral principles derived from Jewish teachings that guide behavior and
+      decision-making, such as the concepts of Tzedakah (charity), justice, and
+      repairing the world (Tikkun Olam).
+  zionism:
+    topic: Zionism
+    description: >-
+      The national movement for the return of the Jewish people to their
+      homeland and the resumption of Jewish sovereignty in the Land of Israel.
+  kabbalah:
+    topic: Kabbalah
+    description: >-
+      The esoteric and mystical aspect of Judaism, exploring deeper spiritual
+      meanings in Jewish practice and understanding the nature of divinity, the
+      universe, and the soul.
+  jewish-identity:
+    topic: Jewish Identity
+    description: >-
+      The study of what constitutes Jewish identity, including religious,
+      cultural, and ethnic components, and how these elements play out in
+      personal and communal life.
+  hebrew-language:
+    topic: Hebrew Language
+    description: >-
+      The ancient Semitic language of the Hebrew Bible, which has been revived
+      as the spoken language in the modern State of Israel and used in liturgy
+      and religious study.
+  halacha:
+    topic: Halacha
+    description: >-
+      Jewish religious law derived from the Torah and rabbinic texts, covering
+      all aspects of life, from daily interactions to religious observances.
+  anti-semitism:
+    topic: Anti-Semitism
+    description: >-
+      The history, causes, and manifestations of prejudice and discrimination
+      against Jews, and the strategies for combating anti-Jewish sentiment and
+      actions.
+  holocaust-studies:
+    topic: Holocaust Studies
+    description: >-
+      The examination of the genocide against the Jewish people during World War
+      II, its impact on Jewish life, and its lasting significance on global and
+      Jewish perspectives.
+  jewish-prayer:
+    topic: Jewish Prayer
+    description: >-
+      An exploration of the structures, texts, and intentions of Jewish prayers,
+      including weekday, Sabbath, and festival prayers, as well as the role of
+      the synagogue and personal supplication.
+  jewish-philosophy:
+    topic: Jewish Philosophy
+    description: >-
+      The study of philosophical underpinnings in Judaism, discussing God,
+      ethics, theodicy, free will, and the nature of the Jewish people through
+      works of philosophers like Maimonides.
+  jewish-community-life:
+    topic: Jewish Community Life
+    description: >-
+      The social and cultural structures, organizations, and communal
+      institutions that provide support, education, and religious services to
+      Jewish populations.
+  conversion-to-judaism:
+    topic: Conversion to Judaism
+    description: >-
+      The process and requirements for a non-Jew to become a member of the
+      Jewish faith, including study, ritual immersion, circumcision (for males),
+      and acceptance by a Jewish community.

@@ -1,0 +1,47 @@
+---
+export const prerender = true;
+
+import { getCollection } from "astro:content";
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import Sectionhead from "@components/sectionhead.astro";
+
+// get all posts which are not in draft mode && match author
+// const posts = await getCollection("topics", (faq) => {
+//   return  (post.data.draft !== true) && (Astro.params.author=== slugify(post.data.author.name))
+// });
+
+const isPublished = ({data}) => (!data.draft && data.datePublished<=new Date());
+const isDev = import.meta.env.APP_ENV==='dev';
+const allPosts = await getCollection("posts", (ar) => isPublished(ar) || isDev);
+
+const allTopics = await getCollection("topics");
+
+const usedTopics = new Map();
+allPosts.forEach(({data}) => {
+  if (data.topics) data.topics.map(({id}) => usedTopics.set(id, true));
+});
+
+const topicLinks = allTopics.map((topic) => ({
+  name: topic.data.topic,
+  href: `/topics/${topic.id}`,
+  text: topic.data.topic,
+  id: topic.id,
+  used: !!usedTopics.get(topic.id),
+  classes: usedTopics.get(topic.id) ? 'underline text-blue-700' : 'text-gray-300'
+}));
+---
+
+<Layout pageTitle="All Tags">
+  <Container>
+    <Sectionhead>
+      <Fragment slot="title"> The Big Ideas </Fragment>
+      <Fragment slot="desc">   </Fragment>
+    </Sectionhead>
+      <div class="text-center">
+         {topicLinks.map((tag) => (
+              <a href={tag.href} class={tag.classes}>{tag.name}</a> <span class="text-gray-200"> | </span>
+          ))}
+      </div>
+  </Container>
+</Layout>

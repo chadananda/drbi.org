@@ -1,0 +1,73 @@
+category: seo
+category_slug: seo
+image:
+  src: ./seo.png
+  alt: seo
+description: >-
+  SEO, or Search Engine Optimization, encompasses strategies and techniques used
+  to increase the visibility of websites and improve their rankings in search
+  engine results pages (SERPs). Effective SEO involves understanding both the
+  technical aspects of how search engines work and the content-related
+  strategies that resonate with users and search algorithms alike, aiming to
+  drive organic traffic and enhance the user experience.
+topics:
+  keyword-research:
+    topic: Keyword Research
+    description: >-
+      The practice of identifying and analyzing the terms and phrases that users
+      enter into search engines with the goal of using this data for a strategic
+      approach in content creation to boost SEO rankings.
+  on-page-seo:
+    topic: On-Page SEO
+    description: >-
+      Involves optimizing individual web pages by using optimized tags,
+      high-quality and relevant content, and effective keywords placement to
+      improve the page's visibility.
+  off-page-seo:
+    topic: Off-Page SEO
+    description: >-
+      Refers to actions taken outside of a website to impact rankings within
+      search engine results pages, including link building, social media
+      marketing, and mentions by other websites.
+  technical-seo:
+    topic: Technical SEO
+    description: >-
+      Focuses on the technical aspects of improving SEO such as website
+      structure, URL optimization, and ensuring site compatibility with mobile
+      devices and search engine guidelines.
+  content-strategy:
+    topic: Content Strategy
+    description: >-
+      The process of planning, developing, and managing website content with SEO
+      objectives in mind to meet user needs and enhance engagement, relevance,
+      and authority.
+  local-seo:
+    topic: Local SEO
+    description: >-
+      A subset of SEO strategies that focuses on optimizing a business's
+      visibility for geographically-related searches, aiming to promote services
+      to local customers.
+  link-building:
+    topic: Link Building
+    description: >-
+      Acquiring hyperlinks from other sites to your own, which is a critical
+      strategy for SEO as search engines use these links as signals to determine
+      the quality and relevance of your site.
+  seo-analytics:
+    topic: SEO Analytics
+    description: >-
+      The process of collecting, tracking, and analyzing a website's SEO
+      performance data to understand the impact of SEO efforts and make informed
+      decisions for further optimization.
+  mobile-seo:
+    topic: Mobile SEO
+    description: >-
+      Optimizing SEO for mobile platforms to cater to increasing mobile usage
+      and Google's mobile-first indexing, ensuring that sites perform well
+      across all devices.
+  voice-search-optimization:
+    topic: Voice Search Optimization
+    description: >-
+      Adapting SEO strategies for voice-activated searches, which often involve
+      natural language and question-based queries, requiring different
+      optimization techniques.

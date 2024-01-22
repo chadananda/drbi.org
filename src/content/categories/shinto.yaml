@@ -1,0 +1,85 @@
+category: Shinto
+category_slug: shinto
+image:
+  src: ./shinto.png
+  alt: Shinto
+description: >-
+  Shinto, also known as kami-no-michi, is the indigenous spirituality of Japan
+  and involves the worship of kami, the gods or spirits. It focuses on ritual
+  practices to be carried out diligently to establish a connection between
+  present-day Japan and its ancient past. Shinto practices were first recorded
+  and codified in the written historical records of the Kojiki and Nihon Shoki
+  in the 8th century. However, these practices have been woven into Japanese
+  life long before that. Shinto has no absolute founder, no dogma, no foreign
+  influence, and it has survived in various forms through the ages.
+topics:
+  shinto-shrines:
+    topic: Shinto Shrines
+    description: >-
+      Dedicated spaces for the veneration of kami, Shinto shrines are a seminal
+      aspect of the religion. They range from grand architectural monuments to
+      modest roadside stones, serving as a focal point for Shinto rites and
+      festivals.
+  kami-worship:
+    topic: Kami Worship
+    description: >-
+      Central to Shinto belief is the worship of kami, deities or spirits that
+      exist within nature, objects, or ancestors. Kami worship involves prayer,
+      purification, offerings, and festivals to show reverence and maintain
+      harmony with these spirits.
+  purification-rites:
+    topic: Purification Rites
+    description: >-
+      Shinto emphasizes purity and cleanliness, and various purification
+      rituals, known as 'harae' or 'misogi,' are performed to restore order and
+      balance. These include ablutions, offerings, and prayers that are integral
+      to maintaining spiritual and physical wellness.
+  matsuri-festivals:
+    topic: Matsuri Festivals
+    description: >-
+      Matsuri are traditional Shinto festivals and ceremonies that honor kami.
+      These lively events are marked by processions, music, dance, and
+      offerings, deeply reflecting the communal and celebratory aspects of
+      Shinto.
+  shinto-mythology:
+    topic: Shinto Mythology
+    description: >-
+      A rich tapestry of tales and folklore, Shinto mythology includes the
+      creation myth of Japan, stories of deities, and spiritual tales that form
+      the ethos of Shinto and provide context for the many rituals and
+      practices.
+  shinto-ethics:
+    topic: Shinto Ethics
+    description: >-
+      While Shinto lacks a formal set of commandments, it promotes a set of
+      virtues such as sincerity, humility, and purity. These ethical principles
+      guide adherents in leading a life that is in harmony with nature and the
+      surrounding community.
+  emperor-worship:
+    topic: Emperor Worship
+    description: >-
+      The Emperor of Japan holds a significant religious role within Shinto as a
+      descendent of the sun goddess Amaterasu. Emperor worship, once central to
+      Shinto, focuses on rituals and ceremonies affirming the sacred status of
+      the imperial family.
+  amaterasu-omikami:
+    topic: Amaterasu Omikami
+    description: >-
+      The sun goddess Amaterasu, considered the principal deity in Shinto,
+      symbolizes the importance of the sun for Japan. Her mythology and worship
+      are tied to the imperial lineage and are vital to understanding the
+      spiritual structure of Shinto.
+  shinbutsu-shugo:
+    topic: Shinbutsu Shugo
+    description: >-
+      The syncretism of Shinto and Buddhism in Japan is referred to as
+      'Shinbutsu Shugo.' This topic explores the blending of Buddhist deities
+      with kami, and the complex religious fabric that results from this
+      amalgamation.
+  ritual-tools-and-objects:
+    topic: Ritual Tools and Objects
+    description: >-
+      Shinto rituals entail a variety of traditional objects such as the
+      shimenawa (sacred rope), torii gates, paper streamers (shide), and other
+      ceremonial items that carry symbolic meanings and are crucial to the
+      enactment of Shinto rites.

@@ -1,0 +1,40 @@
+{
+  "site": "DRBI",
+  "siteName": "DRBI",
+  "title": "Desert Rose Bahá’í Institute",
+  "subtitle": "A center for learning and community",
+  "description": "Desert Rose is a Bahá’í Educational Institute located in Eloy, Arizona.",
+  "description_long": "Desert Rose is a Bahá’í Institute located in Eloy, Arizona. It is a center for learning and community.",
+  "author": "DRBI",
+
+  "url": "https://drbi.org",
+  "logo": "/logo.svg",
+  "vercel_project_id": "drbi",
+  "vercel_project_name": "drbi",
+  "vercel_project_domain": "drbi-org.vercel.app",
+  "vercel_project_url": "https://drbi-org.vercel.app",
+  "vercel_project_dashboard": "https://drbi.com/chadananda/blogworks/deployments",
+  "github_project_url": "https://github.com/chadananda/drbi",
+  "company": "DRBI, Inc.",
+  "address": "1950 W. William Sears Dr.",
+  "email": "info@drbi.org",
+  "phone": "(520) 466-7961",
+  "web3forms_access_key": "a7763c6b-35e2-4a39-9d3e-d165cec6f2e8",
+  "logo": "/logo.svg",
+  "youtube": {
+    "channel": "UCJ5h9jIq6xv6T9XwzZX3qWQ",
+    "channel_name": "drbi"
+  },
+  "twitter": {
+    "creator": "@chadananda",
+    "site": "@drbi"
+  },
+  "facebook": {
+    "author": "chadananda",
+    "publisher": "drbi"
+  },
+  "linkedin": {
+    "author": "chadananda",
+    "publisher": "drbi"
+  }
+}

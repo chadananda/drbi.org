@@ -1,0 +1,34 @@
+{
+  "site": "BlogWorks.ai",
+  "siteName": "BlogWorks",
+  "title": "BlogWorks.ai - A Quality-Focused AI-tooled Blog Platform",
+  "subtitle": "AI powered content marketing",
+  "description": "Blogworks is an AI powered content marketing platform that helps brands create and distribute content at scale.",
+  "description_long": "BlogWorks is a high-performance blogging platform with integrated tools allowing creators to assess, improve, rewrite and promote their content. Instead of replacing humans with AI, BlogWorks leverages AI to improve human output and amplify human skills.",
+  "author": "BlogWorks",
+  "url": "https://blogworks.ai",
+  "vercel_project_id": "blogworks",
+  "vercel_project_name": "blogworks",
+  "vercel_project_domain": "blogworks.vercel.app",
+  "vercel_project_url": "https://blogworks.vercel.app",
+  "vercel_project_dashboard": "https://vercel.com/chadananda/blogworks/deployments",
+  "github_project_url": "https://github.com/chadananda/koc",
+  "company": "Blogworks, LLC",
+  "address": "PO Box 1234, San Francisco, CA 94111",
+  "email": "sales@blogworks.ai",
+  "phone": "+1 (415) 555-5555",
+  "web3forms_access_key": "a7763c6b-35e2-4a39-9d3e-d165cec6f2e8",
+  "logo": "https://blogworks.ai/favicon.png",
+  "twitter": {
+    "creator": "@chadananda",
+    "site": "@blogworksai"
+  },
+  "facebook": {
+    "author": "chadananda",
+    "publisher": "blogworksai"
+  },
+  "linkedin": {
+    "author": "chadananda",
+    "publisher": "blogworksai"
+  }
+}

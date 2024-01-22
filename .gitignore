@@ -19,4 +19,39 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# AI Assistant, much better than Copilot!
 .aider*
+
+*.m4v
+
+# Vercel static generation
+.vercel/
+
+
+.vercel
+
+extra/
+
+# content collection static asset files copied over to public
+public/article/
+public/team/
+public/categories/
+public/faqs/
+public/topics/
+public/subtopics/
+public/posts/
+
+public/blog/
+public/course/
+public/episode/
+public/product/
+public/series/
+public/podcast/
+public/talk/
+public/tutorial/
+public/accommodation/
+public/activity/
+public/attraction/
+public/food/
+

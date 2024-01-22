@@ -1,0 +1,86 @@
+category: Hinduism
+category_slug: hinduism
+image:
+  src: ./hinduism.png
+  alt: Hinduism
+description: >-
+  Hinduism is one of the oldest religions in the world, known for its rich
+  tapestry of philosophy, mythology, rituals, and spiritual practices. It is a
+  complex, polytheistic religion with an emphasis on dharma (moral law), samsara
+  (reincarnation), karma (action and subsequent reaction), and moksha
+  (liberation from the cycle of life and death). Hinduism is deeply interwoven
+  with the cultural and social fabric of the Indian subcontinent, offering a
+  pluralistic approach to spirituality.
+topics:
+  vedic-literature:
+    topic: Vedic Literature
+    description: >-
+      Vedic Literature constitutes the foundational scriptures of Hindu
+      practices, composed of the Vedas, Brahmanas, Aranyakas, and Upanishads,
+      detailing rituals, spiritual concepts, and philosophic inquiries.
+  deities-and-iconography:
+    topic: Deities and Iconography
+    description: >-
+      This topic explores the pantheon of Hindu gods and goddesses, their
+      iconography, attributes, and the symbolism they represent in religious and
+      cultural contexts.
+  hindu-festivals:
+    topic: Hindu Festivals
+    description: >-
+      A look into the myriad of Hindu festivals that mark the calendar,
+      celebrating a variety of deities, seasons, and mythological events, each
+      with its own customs and traditions.
+  yoga-and-meditation:
+    topic: Yoga and Meditation
+    description: >-
+      This aspect examines the practice and philosophy of Yoga and Meditation in
+      Hinduism, emphasizing their roles in achieving spiritual growth, health,
+      and self-realization.
+  dharma-and-ethical-living:
+    topic: Dharma and Ethical Living
+    description: >-
+      Dharma encompasses the duties, rights, laws, conduct, virtues, and 'right
+      way of living' in Hinduism. This topic delves into its principles and
+      their application in everyday life.
+  rituals-and-worship:
+    topic: Rituals and Worship
+    description: >-
+      The elaborate and symbolic rituals in Hindu worship (Puja), including
+      rites of passage, daily worship practices, and the specific rituals
+      performed in temples and homes.
+  hindu-philosophy-schools:
+    topic: Hindu Philosophy Schools
+    description: >-
+      Analysis of the six orthodox schools of Hindu philosophy - Nyaya,
+      Vaisheshika, Samkhya, Yoga, Mimamsa, and Vedanta - each presenting a
+      unique perspective on reality and methods for liberation.
+  epics-and-puranas:
+    topic: Epics and Puranas
+    description: >-
+      Focuses on the Hindu epics, the Ramayana and Mahabharata, as well as the
+      Puranas, which are ancient narratives featuring divine beings and their
+      interactions with humans.
+  caste-and-social-structure:
+    topic: Caste and Social Structure
+    description: >-
+      This topic addresses the complex Hindu social hierarchy known as the caste
+      system, its historical development, influence on society, and contemporary
+      issues.
+  pilgrimage-and-sacred-sites:
+    topic: Pilgrimage and Sacred Sites
+    description: >-
+      Discussion of the importance of pilgrimage in Hindu practice, exploring
+      various sacred sites across India, their significance, and the rituals
+      performed there.
+  hindu-reform-movements:
+    topic: Hindu Reform Movements
+    description: >-
+      Examination of various movements aimed at reforming and revitalizing
+      Hinduism, addressing issues such as caste discrimination and gender
+      equity.
+  hindu-diaspora:
+    topic: Hindu Diaspora
+    description: >-
+      The expansion of Hindu culture, practices, and religious life outside of
+      the Indian subcontinent, focusing on the adaptation and integration into a
+      global context.

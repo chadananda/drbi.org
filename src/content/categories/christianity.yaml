@@ -1,0 +1,98 @@
+category: Christianity
+category_slug: christianity
+image:
+  src: ./christianity.png
+  alt: Christianity
+description: >-
+  Christianity is a monotheistic religion based on the life and teachings of
+  Jesus Christ as presented in the New Testament. It is the world's largest
+  religion, with numerous denominations, practices, and theological
+  perspectives, but unified by the belief in one God and the narrative of Jesus'
+  life, death, and resurrection as the foundation for salvation and eternal
+  life. Christian doctrine and worship are influenced by a rich historical
+  tradition and an extensive body of scripture and ecclesiastical literature.
+topics:
+  christology:
+    topic: Christology
+    description: >-
+      Central beliefs concerning the nature of Jesus Christ, including His
+      divinity, incarnation, atonement, and resurrection, which are foundational
+      to Christian theology and practice.
+  christian-worship-and-sacraments:
+    topic: Christian Worship and Sacraments
+    description: >-
+      The worship practices including sacraments such as baptism and communion,
+      liturgical rites, prayer, and forms of communal and individual worship
+      across different denominations.
+  ethical-teachings-of-jesus:
+    topic: Ethical Teachings of Jesus
+    description: >-
+      The interpretation and application of the life lessons, moral teachings,
+      parables, and commands of Jesus as found in the Gospels and throughout
+      Christian teachings.
+  biblical-studies:
+    topic: Biblical Studies
+    description: >-
+      The narratives, laws, poetry, prophecies, and history contained within the
+      Christian biblical canon, composed of the Old and New Testaments, their
+      interpretation, and significance in belief and practice.
+  historical-christian-figures:
+    topic: Historical Christian Figures
+    description: >-
+      Prominent figures in Christian history such as church fathers, martyrs,
+      reformers, theologians, and significant leaders who shaped the development
+      of the church and its doctrine.
+  church-history:
+    topic: Church History
+    description: >-
+      The history and development of the institutional church from its Apostolic
+      roots through the ages, including major splits such as the East-West
+      Schism and the Protestant Reformation.
+  christian-denominations:
+    topic: Christian Denominations
+    description: >-
+      The different branches of Christianity, including Catholicism, Orthodoxy,
+      Protestantism, and emerging branches, each with its own unique theology,
+      traditions, and governance.
+  christian-theodicy-and-eschatology:
+    topic: Christian Theodicy and Eschatology
+    description: >-
+      Christian responses to and interpretations of the problem of evil,
+      suffering, human freewill versus divine sovereignty, and the ultimate
+      purpose of creation.
+  spiritual-life-and-mysticism:
+    topic: Spiritual Life and Mysticism
+    description: >-
+      Religious experiences, mysticism, personal transformation, and encounters
+      with the divine as described in the lives of believers, along with their
+      theological implications.
+  eschatology-and-apocalypticism:
+    topic: Eschatology and Apocalypticism
+    description: >-
+      The study of the end of the world and the second coming of Christ as
+      prophesied in Christian scripture, including varying perspectives on the
+      timing and nature of eschatological events.
+  christian-mission-and-evangelism:
+    topic: Christian Mission and Evangelism
+    description: >-
+      The mission-oriented actions and philosophies in Christianity aimed at
+      spreading the Christian faith, including evangelism, mission work, and
+      interfaith dialogue.
+  christianity-and-society:
+    topic: Christianity and Society
+    description: >-
+      Social, political, and cultural engagement from a Christian perspective,
+      including social justice, political activism, and ethical implications in
+      contemporary issues.
+  christian-doctrine-and-theology:
+    topic: Christian Doctrine and Theology
+    description: >-
+      The process by which beliefs and doctrines have been formulated, debated,
+      and defined through councils, creeds, and official church documents over
+      centuries.
+  church-leadership-and-polity:
+    topic: Church Leadership and Polity
+    description: >-
+      Roles and functions of religious leaders such as priests, pastors,
+      bishops, and the papacy, including their ordination, responsibilities, and
+      significance within various denominations.

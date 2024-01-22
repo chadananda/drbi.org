@@ -1,0 +1,62 @@
+category: Jainism
+category_slug: jainism
+image:
+  src: ./jainism.png
+  alt: Jainism
+description: >-
+  Jainism is an ancient Indian religion emphasizing non-violence towards all
+  living beings, truth, and asceticism. Jains believe in karma and the cycle of
+  rebirth, seeking liberation through ethical living and mental purification.
+topics:
+  tirthankaras-and-mahavira:
+    topic: Tirthankaras and Mahavira
+    description: >-
+      In depth look at the 24 spiritual leaders in Jainism called Tirthankaras,
+      with a special focus on the last Tirthankara, Mahavira, and his teachings.
+  jain-cosmology:
+    topic: Jain Cosmology
+    description: >-
+      Exploration of the Jain concepts of the universe's structure, including
+      the realms of existence and the cyclic nature of time (kālacakra).
+  jain-ethics-and-five-vows:
+    topic: Jain Ethics and Five Vows
+    description: >-
+      Analysis of the moral and ethical framework of Jainism, centered around
+      the Five Great Vows: non-violence, truthfulness, non-stealing, celibacy,
+      and non-possessiveness.
+  jain-festivals-and-rituals:
+    topic: Jain Festivals and Rituals
+    description: >-
+      Overview of Jain religious practices, including Paryushana and Diwali, and
+      understanding the rituals and ceremonies specific to the Jain faith.
+  jain-philosophy:
+    topic: Jain Philosophy
+    description: >-
+      An examination of the key philosophical concepts in Jainism such as
+      Anekantavada (non-one-sidedness), Syadvada (conditional viewpoints), and
+      Karma theory.
+  jain-sects-digambara-and-svetambara:
+    topic: 'Jain Sects: Digambara and Śvētāmbara'
+    description: >-
+      Distinct characteristics and differences between the two main sects of
+      Jainism, highlighting their practices, beliefs and historical evolution.
+  jain-diet-and-fasting:
+    topic: Jain Diet and Fasting
+    description: >-
+      Insights into the principles of vegetarianism in Jainism, dietary
+      restrictions, and the role of fasting in spiritual purification.
+  jain-art-and-architecture:
+    topic: Jain Art and Architecture
+    description: >-
+      The contribution of Jainism to Indian art and architecture, focusing on
+      temples, statues and manuscripts, and their symbolic significance.
+  jain-literature:
+    topic: Jain Literature
+    description: >-
+      Survey of Jain scriptures and literary works, including the Agamas,
+      biographies of Tirthankaras, and other influential texts.
+  jain-community-and-lay-practices:
+    topic: Jain Community and Lay Practices
+    description: >-
+      Role of the layperson in Jainism, their religious duties, lifestyle
+      choices, and the interaction between monastic and the lay community.

@@ -1,0 +1,89 @@
+category: Buddhism
+category_slug: buddhism
+image:
+  src: ./buddhism.png
+  alt: Buddhism
+description: >-
+  Buddhism is a spiritual tradition that focuses on personal spiritual
+  development and the attainment of a deep insight into the true nature of life.
+  It encompasses a variety of traditions, beliefs, and spiritual practices
+  largely based on teachings attributed to Siddhartha Gautama, who is commonly
+  known as the Buddha (the awakened one). Buddhism originates in India but has
+  spread throughout Asia and the world, evolving into a diverse array of
+  practices and philosophical approaches.
+topics:
+  four-noble-truths:
+    topic: Four Noble Truths
+    description: >-
+      Central to Buddhist doctrine, these truths outline the nature of
+      suffering, its cause, the possibility of its cessation, and the path
+      leading to its cessation, signifying the essence of the Buddha's
+      teachings.
+  noble-eightfold-path:
+    topic: Noble Eightfold Path
+    description: >-
+      An early guide to ethical and mental development with the goal of freeing
+      the individual from attachments and delusions; includes right
+      understanding, intention, speech, action, livelihood, effort, mindfulness,
+      and concentration.
+  three-marks-of-existence:
+    topic: Three Marks of Existence
+    description: >-
+      A fundamental understanding in Buddhism that all conditioned phenomena are
+      impermanent (anicca), suffering (dukkha), and not-self (anatta), which
+      leads to insight into the nature of reality.
+  buddhist-meditation:
+    topic: Buddhist Meditation
+    description: >-
+      Covers practices like mindfulness and concentration that are part of the
+      path to enlightenment, aiming to develop clarity, emotional positivity,
+      and calmness by focusing on aspects of the present moment or specific
+      spiritual truths.
+  the-five-precepts:
+    topic: The Five Precepts
+    description: >-
+      A set of moral guidelines for the lay Buddhist community, these include
+      refraining from killing, stealing, sexual misconduct, lying, and
+      intoxication, as a foundation for personal and social ethics.
+  buddhist-teachings-on-karma:
+    topic: Buddhist Teachings on Karma
+    description: >-
+      Explores the concept of karma as the force that drives the cycle of
+      suffering and rebirth for each being through their actions, and how
+      ethical conduct leads to a better rebirth or liberation.
+  rebirth-and-samsara:
+    topic: Rebirth and Samsara
+    description: >-
+      A complex topic involving the cycle of birth, death, and rebirth, driven
+      by karma, ignorance, and desire, with the ultimate aim of Buddhism being
+      to escape this cycle and attain Nirvana.
+  the-sangha:
+    topic: The Sangha
+    description: >-
+      Refers to the Buddhist community of monks, nuns, novices, and laypersons
+      who follow the teachings and support one another in the practice,
+      representing one of the Three Jewels of Buddhism.
+  mahayana-buddhism:
+    topic: Mahayana Buddhism
+    description: >-
+      A large branch of Buddhism that focuses on the Bodhisattva path,
+      emphasizing the importance of helping all beings achieve enlightenment,
+      with a diverse pantheon of Buddhas and Bodhisattvas.
+  theravada-buddhism:
+    topic: Theravada Buddhism
+    description: >-
+      The oldest surviving branch of Buddhism, emphasizing monastic life and
+      meditation as key to attaining Nirvana, and focusing heavily on monastic
+      codes and the earliest Buddhist texts.
+  vajrayana-buddhism:
+    topic: Vajrayana Buddhism
+    description: >-
+      Known for its ritual practices and esoteric teachings, this form of
+      Buddhism includes Tantra and Dzogchen, and is most prevalent in Tibet and
+      the Himalayan region.
+  zen-buddhism:
+    topic: Zen Buddhism
+    description: >-
+      Emphasizes the practice of zazen, or seated meditation, and the personal
+      expression of experiential wisdom, especially through koans to trigger
+      breakthroughs in understanding.

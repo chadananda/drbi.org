@@ -1,0 +1,105 @@
+---
+import { Image, Picture } from "astro:assets";
+import artsImg from "../assets/drbi/arts.png"
+import cemeteryImg from "../assets/drbi/cemetery.png"
+import studyImg from "../assets/drbi/study.png"
+import soilImg from "../assets/drbi/soil.png"
+import kureImg from "../assets/drbi/kure.png"
+
+---
+
+<div id="drbicategories" class="mt-12">
+
+ <div class="finearts category-card shadow-lg hover:shadow-2xl">
+  <a href="/arts">
+   <Image src={artsImg} alt="The Fine Arts" />
+   <h1>The Fine Arts</h1>  </a>
+   <p> <a href="https://oceanlibrary.com/link/AUspr/uncompiled-published-letters_shoghi-effendi/">“...the Cause spread like wildfire when its spirit and teachings are presented on the stage or in art and literature as a whole.”</a></p>
+
+ </div>
+
+ <div class="soil category-card shadow-lg hover:shadow-2xl">
+   <a href="/agriculture">
+   <Image src={soilImg} alt="The Soil" />
+  <h1> The Soil </h1> </a>
+  <p> <a href="https://oceanlibrary.com/link/nJPL4/promulgation-of-universal-peace_abdul-baha/">“The fundamental basis of the community is agriculture, tillage of the soil. All must be producers.”</a>
+  </p>
+ </div>
+
+ <div class="learning category-card shadow-lg hover:shadow-2xl">
+   <a href="/learning">
+   <Image src={studyImg} alt="Lifelong Learning" />
+  <h1> Lifelong Learning</h1> </a>
+ <p> Because <a href="https://oceanlibrary.com/link/ZnGD4/bahai-world-faith-abdul-baha-section_2/">“By faith is meant, first, conscious knowledge”</a></p>
+ </div>
+
+ <div class="radio category-card shadow-lg hover:shadow-2xl">
+   <a href="/radio">
+   <Image src={kureImg} alt="Radio and Media" />
+  <h1>Radio and Media</h1> </a>
+  <p> KURE 100.3 FM -- service outreach</p>
+ </div>
+
+ <div class="memorial category-card shadow-lg hover:shadow-2xl">
+   <a href="/memorial">
+   <Image src={cemeteryImg} alt="Memorial" />
+  <h1>Eternal Rest </h1> </a>
+  <p> <a href="https://oceanlibrary.com/link/5KkNE/hidden-words-of-bahaullah/">“I have made death a messenger of joy to thee. Wherefore dost thou grieve? I made the light to shed on thee its splendor.”</a></p>
+ </div>
+</div>
+
+
+<style>
+
+#drbicategories {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 20px; /* Adjust the space between cards */
+ justify-content: center; /* Centers the cards in the container */
+ padding: 20px; /* Optional padding around the container */
+}
+
+.category-card {
+ position: relative;
+  overflow: hidden;
+ flex: 0 1 200px; /* Cards will not grow, can shrink, and start at 200px wide */
+ /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); Optional shadow for depth */
+ padding: 3px;
+ margin: 10px; /* Space around each card */
+ border-radius: 10px; /* Optional rounded corners */
+ background-color: #ffffff; /* Optional background color */
+ text-align: center;
+ border: 1px solid rgb(220, 220, 220);
+}
+
+.category-card h1 {
+ margin-top: 0;
+ margin-x: 4px;
+ font-size: 1.5em; /* Adjust heading size */
+}
+
+.category-card p {
+ margin-x: 4px;
+ font-size: 1em; /* Adjust paragraph size */
+}
+
+
+.category-card Image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures image covers the card */
+  z-index: 1;
+}
+
+.category-card h1, .category-card p {
+  position: relative;
+  z-index: 2; /* Ensures text is above the image */
+  color: rgb(44, 44, 44); /* Change text color for visibility */
+}
+
+
+
+</style>
