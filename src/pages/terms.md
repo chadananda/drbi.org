@@ -1,5 +1,5 @@
 ---
-layout: "@layouts/MdLayout.astro"
+layout: "@layouts/MDLayout.astro"
 title: "Terms & Conditions"
 author: "Matthew Phillips"
 date: "09 Aug 2023"

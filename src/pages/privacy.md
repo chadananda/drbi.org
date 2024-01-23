@@ -1,5 +1,5 @@
 ---
-layout: "@layouts/MdLayout.astro"
+layout: "@layouts/MDLayout.astro"
 title: "Privacy Policy"
 author: "Matthew Phillips"
 date: "09 Aug 2023"

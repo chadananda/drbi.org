@@ -1,5 +1,5 @@
 ---
-layout: "@layouts/MdLayout.astro"
+layout: "@layouts/MDLayout.astro"
 title: "About BlogWorks.ai"
 author: "Matthew Phillips"
 ---
