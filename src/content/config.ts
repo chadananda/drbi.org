@@ -19,7 +19,7 @@ const LANG_CODES = [
   'za','zu'
 ];
 
-const POST_TYPES = ["Article", "WebPage", "Event", "Organization", "Person", "LocalBusiness", "Product", "Recipe", "Review", "BreadcrumbList", "Course", "JobPosting", "Movie", "MusicAlbum", "QAPage", "SearchResultsPage", "SoftwareApplication", "VideoObject"];
+const POST_TYPES = ["Article", "WebPage", "Event", "Organization", "Person", "LocalBusiness", "Product", "Recipe", "Review", "BreadcrumbList", "Course", "JobPosting", "Movie", "MusicAlbum", "QAPage", "SearchResultsPage", "SoftwareApplication", "VideoObject", "Newsletter"];
 
 const ORG_TYPE = ["Organization", "Corporation", "GovernmentOrganization", "NGO", "EducationalOrganization", "SportsTeam", "MusicGroup", "PerformingGroup", "NewsMediaOrganization", "FundingScheme", "LibrarySystem", "MedicalOrganization", "WorkersUnion", "Consortium", "Airline", "Brand"];
 
