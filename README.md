@@ -2,21 +2,21 @@
 
 > Implement a DRBI version  
 
-[x] copy base site, remove existing content collections
-[x] rebrand, remove most pages
-[x] change "articles" to "posts" with "post_type" and build test
-[x] build out page stubs for key content, using MD
-[x] add super header component to home page with video background
-[x] add links to category pages, events calendar and wade's video to home
-[ ] create git repo, add deploy to vercel
-[ ] generate category files and develop description and topics based on DRBI core ideas
-    [ ] add category description to category generator
-[ ] redo readme, add Telahoun and begin migrate as much content as possible
-[ ] add post types for:
-    [ ] events
-    [ ] newsletter ??
-    [ ] in memorium
-    [ ]
+- [x] copy base site, remove existing content collections
+- [x] rebrand, remove most pages
+- [x] change "articles" to "posts" with "post_type" and build test
+- [x] build out page stubs for key content, using MD
+- [x] add super header component to home page with video background
+- [x] add links to category pages, events calendar and wade's video to home
+- [ ] create git repo, add deploy to vercel
+- [ ] generate category files and develop description and topics based on DRBI core ideas
+    - [ ] add category description to category generator
+- [ ] redo readme, add Telahoun and begin migrate as much content as possible
+- [ ] add post types for:
+    - [ ] events
+    - [ ] newsletter ??
+    - [ ] in memorium
+    - [ ]
 
 
  
