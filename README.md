@@ -1,36 +1,25 @@
 # DRBI Refresh
 
-> Implement a DRBI version of the Blogworks.ai site
+> Implement a DRBI version  
 
-[x] copy blogworks, remove existing content collections
-[ ] rebrand, remove most pages
-[ ] change "articles" to "posts" with "post_type" and build test
-[ ] build out page stubs for key content, using MD
-[ ] add super header component to home page with video background
-[ ] add links to category pages, events calendar and wade's video to home
-[ ] create git repo, add deploy to vercel
-[ ] generate category files and develop description and topics based on DRBI core ideas
-    [ ] add category description to category generator
-[ ] redo readme, add Telahoun and begin migrate as much content as possible
-[ ] add post types for:
-    [ ] events
-    [ ] newsletter ??
-    [ ] in memorium
-    [ ]
-
-
+- [x] copy base site, remove existing content collections
+- [x] rebrand, remove most pages
+- [x] change "articles" to "posts" with "post_type" and build test
+- [x] build out page stubs for key content, using MD
+- [x] add super header component to home page with video background
+- [x] add links to category pages, events calendar and wade's video to home
+- [ ] create git repo, add deploy to vercel
+- [ ] generate category files and develop description and topics based on DRBI core ideas
+    - [ ] add category description to category generator
+- [ ] redo readme, add Telahoun and begin migrate as much content as possible
+- [ ] add post types for:
+    - [ ] events
+    - [ ] newsletter ??
+    - [ ] in memorium
+    - [ ]
 
 
-
-
-
-# BlogWorks.ai
-
-BlogWorks.ai harnesses the power of an entire team of AI assistants to boost the quality of content creation. Our suite of AI-driven tools works collaboratively to enhance existing content through meticulous editing, comprehensive fact-checking, intelligent rewriting, and the generation of extensive "content pyramids" to promote each piece of content effectively. By focusing on the quality of content, BlogWorks.ai ensures that every post is not just created but crafted with precision and care.
-
-Posts created and promoted with BlogWorks focus on reader usefulness and user information gain. Instead of trying to hit a bunch of SEO keywords, our process focuses on reader experience and information accuracy and utility. This leads to much higher quality content that readers actually want to engage with, instead of just scanning past.
-
-All the functionality on this site is API-driven and the APIs are available for your integration.
+ 
 
 ## Coding style guide (for Copilot/Aider)
 
