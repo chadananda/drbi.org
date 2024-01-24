@@ -9,7 +9,7 @@
 - [x] add super header component to home page with video background
 - [x] add links to category pages, events calendar and wade's video to home
 - [x] create git repo, add deploy to vercel
-- [ ] generate category files and develop description and topics based on DRBI core ideas
+- [x] generate category files and develop description and topics based on DRBI core ideas
     - [ ] add category description to category generator
 - [ ] redo readme, add Telahoun and begin migrate as much content as possible
 - [ ] add post types for:

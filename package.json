@@ -7,14 +7,14 @@
     "sync-assets": "node syncAssets.js",
     "dev": "npm run sync-assets && astro dev",
     "vercel-dev": "npm run sync-assets && vercel dev --listen 3000",
-    "build": "astro build",
-    "buildfull": "set LOG_LEVEL=* && npm run sync-assets && astro build",
+    "build": "astro build", 
     "preview": "npm run sync-assets && vercel preview",
     "astro": "astro",
     "vercel": "vercel",
     "sync": "astro sync",
     "aider": "aider --model gpt-4-1106-preview",
-    "category": "node ./src/scripts/_create_category.js"
+    "add_category": "node ./src/scripts/_create_category.js",
+    "add_topics": "node ./src/scripts/_create_topics.js"
   },
   "dependencies": {
     "@astrojs/markdoc": "^0.8.2",

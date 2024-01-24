@@ -3,14 +3,25 @@
    {"title": "Events", "path": "/events", "children": null},
    {"title": "Arts", "path": "/arts", "children": null},
    {"title": "Agriculture", "path": "/agriculture", "children": null},
-   {"title": "Memorium", "path": "/memori", "children": null},
-   {"title": "Contact", "path": "/contact", "children": null}
+   {"title": "Memorium", "path": "/memorial", "children": null},
+   {"title": "Contact", "path": "/contact-us", "children": null}
  ],
   "companyLinks": [
+
+    {"title": "About", "path": "/about", "children": null},
+    {"title": "Privacy", "path": "/privacy", "children": null},
+    {"title": "Terms", "path": "/terms", "children": null},
+    {"title": "Sitemap", "path": "/sitemap", "children": null},
+    {"title": "Contact", "path": "/contact-us", "children": null}
  ],
  "productLinks": [
  ],
  "resourceLinks": [
+  {"title": "Events", "path": "/events", "children": null},
+  {"title": "Facility", "path": "/facility", "children": null},
+  {"title": "Contributions", "path": "/contribute", "children": null},
+  {"title": "The Bahá’í Faith", "path": "/the-bahai-faith", "children": null}
+
  ]
 }
 

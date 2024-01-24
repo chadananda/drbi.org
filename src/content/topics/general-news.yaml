@@ -1,0 +1,104 @@
+topic: General News
+topic_slug: general-news
+category: drbi-newsletter
+description: >-
+  Catch up on the latest news from DRBI, encompassing updates on various
+  programs, achievements of our community members, and developments within the
+  institute.
+subtopics:
+  - name: DRBI Institute Milestones
+    slug: drbi-institute-milestones
+    description: >-
+      Chronicles major milestones marking DRBI's growth in programs and
+      community reach.
+  - name: Strategic Expansion Initiatives
+    slug: strategic-expansion-initiatives
+    description: >-
+      Covers strategic plans for DRBI's expansion and how they impact the
+      institute's future.
+  - name: Leadership Announcements
+    slug: leadership-announcements
+    description: >-
+      Introduces new leadership roles and changes within DRBI's management
+      hierarchy.
+  - name: DRBI Academic Achievements
+    slug: drbi-academic-achievements
+    description: >-
+      Highlights scholarly recognitions and achievements of DRBI's staff and
+      students.
+  - name: Research Breakthroughs at DRBI
+    slug: research-breakthroughs-at-drbi
+    description: >-
+      Summarizes significant research findings and innovations developed at
+      DRBI.
+  - name: Community Impact Reports
+    slug: community-impact-reports
+    description: >-
+      Analyzes DRBI's outreach efforts and their effects on the surrounding
+      community.
+  - name: Infrastructure Development News
+    slug: infrastructure-development-news
+    description: >-
+      Details new facilities, renovations and technological upgrades at DRBI's
+      campus.
+  - name: DRBI Program Launches
+    slug: drbi-program-launches
+    description: >-
+      Announcements of new educational or enrichment programs introduced by
+      DRBI.
+  - name: Faculty and Staff Highlights
+    slug: faculty-and-staff-highlights
+    description: >-
+      Profiles noteworthy contributions and accolades of DRBI's faculty and
+      staff members.
+  - name: DRBI Policy Updates
+    slug: drbi-policy-updates
+    description: >-
+      Informs about updated governing policies affecting DRBI's operations and
+      community.
+  - name: Global Partnerships and Collaborations
+    slug: global-partnerships-and-collaborations
+    description: >-
+      Focuses on DRBI's international alliances and joint ventures in education
+      and research.
+  - name: Alumni Success Stories
+    slug: alumni-success-stories
+    description: Features notable achievements and career advancements of DRBI alumni.
+  - name: Technical Innovation at DRBI
+    slug: technical-innovation-at-drbi
+    description: Showcases technology-driven solutions and projects spearheaded by DRBI.
+  - name: Institute Accreditation News
+    slug: institute-accreditation-news
+    description: >-
+      Reports on accreditation milestones and quality assurance metrics for
+      DRBI's programs.
+  - name: DRBI Cultural and Artistic Initiatives
+    slug: drbi-cultural-and-artistic-initiatives
+    description: >-
+      Describes events and initiatives that promote the cultural and artistic
+      facets of DRBI.
+  - name: DRBI Sustainability Efforts
+    slug: drbi-sustainability-efforts
+    description: >-
+      Documents DRBI's commitment and practices towards ecological
+      sustainability and responsibility.
+  - name: Student Outreach and Support
+    slug: student-outreach-and-support
+    description: >-
+      Explores DRBI's programs aimed at student welfare, inclusion, and support
+      systems.
+  - name: DRBI's Technological Advancements
+    slug: drbis-technological-advancements
+    description: >-
+      Elucidates emerging technology implementations enhancing DRBI's
+      educational offerings.
+  - name: DRBI in the Media
+    slug: drbi-in-the-media
+    description: >-
+      Gathers media mentions, interviews, and articles featuring DRBI and its
+      initiatives.
+  - name: Innovative Learning Methodologies
+    slug: innovative-learning-methodologies
+    description: >-
+      Discusses new pedagogical approaches and learning techniques employed by
+      the institute.

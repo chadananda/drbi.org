@@ -17,8 +17,9 @@ pnpm-debug.log*
 .env
 .env.production
 
-# aider data
+#  data files
 .aider/
+.vite/
 
 # macOS-specific files
 .DS_Store
