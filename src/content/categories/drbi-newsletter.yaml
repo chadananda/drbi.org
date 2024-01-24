@@ -1,0 +1,52 @@
+category: drbi-newsletter
+category_slug: drbi-newsletter
+image:
+  src: ./drbi-newsletter.png
+  alt: drbi-newsletter
+description: >-
+  The drbi-newsletter category encompasses the diverse activities and programs offered by the Desert Rose Bahá'í Institute. Covering areas such as Fine Arts, Agriculture, Education, KURE Radio, and the Memorial Garden, the newsletter provides insights into the spiritual, artistic, intellectual, and practical dimensions of learning at DRBI. It is aimed at community members, educators, and enthusiasts interested in the Bahá'í-inspired approach to holistic development and community service.
+topics:
+  fine-arts-at-drbi:
+    topic: Fine Arts at DRBI
+    description: >-
+      Exploring the artistic programs and events at DRBI, including workshops, exhibitions, and creative retreats that engage the soul and inspire artistic expression.
+
+  sustainable-agriculture:
+    topic: Sustainable Agriculture
+    description: >-
+      Insights into the agricultural initiatives at DRBI, focusing on sustainable practices, environmental stewardship, and the spiritual connection to the land.
+
+  education-and-learning:
+    topic: Education and Learning
+    description: >-
+      Highlighting the educational programs at DRBI, ranging from spiritual studies to practical skills, fostering intellectual growth and community development.
+
+  kure-radio:
+    topic: KURE Radio
+    description: >-
+      Updates and features from KURE Radio, DRBI's platform for sharing ideas, music, and discussions that reflect the institute's values and community outreach.
+
+  memorial-garden:
+    topic: Memorial Garden
+    description: >-
+      Sharing stories and developments from the Memorial Garden, a serene space at DRBI dedicated to reflection, remembrance, and the celebration of life.
+
+  drbi-events:
+    topic: DRBI Events
+    description: >-
+      Stay informed about upcoming and recent events at DRBI, including seminars, workshops, and community gatherings that reflect our mission of holistic learning and development.
+
+  general-news:
+    topic: General News
+    description: >-
+      Catch up on the latest news from DRBI, encompassing updates on various programs, achievements of our community members, and developments within the institute.
+
+  fundraising-projects:
+    topic: Fundraising Projects
+    description: >-
+      Learn about our ongoing and planned fundraising projects that support the growth and sustainability of DRBI. Find out how you can contribute to our mission and make a difference.
+
+  visitors-and-groups:
+    topic: Visitors and Visiting Groups
+    description: >-
+      Information for visitors and groups planning to visit DRBI. This includes details on tours, accommodations, and how to make the most of your visit to our vibrant learning community.
