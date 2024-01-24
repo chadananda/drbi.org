@@ -18,8 +18,31 @@
     - [ ] in memorium
     - [ ]
 
+## Contribution
 
- 
+This is the rough outline of a high-performance blogging site. We'll add a CMS later so for now this is all a construction zone. All content will be added by developers. To be a developer, you need to be added to the github repository (https://github.com/chadananda/drbi.org)
+
+There is a dev environment set up under codespaces in that repository which has all the information necessary to develop on the application. However, be aware of a few things:
+
+1) There is no staging envronment. All code pushed to the main branch gets deployed automatically to the website. And you should deploy constantly. Just make sure with every session you first pull, then make changes, test with `npm run build` then commit and push those changes. The good news is that Vercel will not update the last version of the website unless the build is successful. 
+
+2) Astro is a great platform, but it has some content opinions. Basically you can create any page ad-hoc by just adding a `page.astro` or `page.md` file. But for posts, you'll have to add the document under the `src/content/posts` section. Each post can be of various types like Newsletter, Event, Article, etc. These documents have a very strict YAML header with some required fields. You'll have to come to understand Astro content collections. (https://docs.astro.build/en/guides/content-collections/)
+
+3) The content posts are in a format called "MarkDoc" which provides embeddable widgets mapped to Astro components. 
+
+## Developer Contribution Process:
+
+In short, the development process looks like this:
+
+1. Go to the repository, click the "code" button and select the `DRBI-Development` codespace.
+2. Immediately open the terminal and `git pull` so you are working on the latest code
+3. Next, open the dev site with `npm run vercel-dev` it will prompt you to open in a Browser
+4. When done editing, test your changes with `npm run build`. 
+5. When no errors, add new files and commmit your code with `git add ...` and `git commit -am "describe your changes"`
+6. Finally, `git push` to deploy your changes to production. For now, production is at:
+ [https://drbi-org.vercel.app](https://drbi-org.vercel.app)
+
+
 
 ## Coding style guide (for Copilot/Aider)
 
