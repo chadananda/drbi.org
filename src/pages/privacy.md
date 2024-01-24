@@ -5,15 +5,15 @@ author: "Matthew Phillips"
 date: "09 Aug 2023"
 ---
 
-At BlogWorks, we prioritize your privacy and are dedicated to safeguarding your personal information. This Privacy Policy explains our practices regarding data collection, usage, and protection when you use our services.
+At DRBI, we prioritize your privacy and are dedicated to safeguarding your personal information. This Privacy Policy explains our practices regarding data collection, usage, and protection when you use our services.
 
-By using BlogWorks, you consent to the practices in this Privacy Policy. If you disagree, please refrain from using our services.
+By using DRBI, you consent to the practices in this Privacy Policy. If you disagree, please refrain from using our services.
 
 ## 1. Information We Collect
 
 1.1. **Personal Information**: We may collect personal details such as your name and email address when you create an account or use certain features.
 
-1.2. **Usage Data**: Information on how you interact with and use BlogWorks may be collected.
+1.2. **Usage Data**: Information on how you interact with and use DRBI may be collected.
 
 1.3. **Cookies and Similar Technologies**: We use cookies and similar technologies to enhance user experience and gather usage data.
 
@@ -29,7 +29,7 @@ By using BlogWorks, you consent to the practices in this Privacy Policy. If you 
 
 3.1. We do not sell, rent, or lease your personal information.
 
-3.2. Trusted service providers assisting in operating BlogWorks will have access to your information, under confidentiality agreements.
+3.2. Trusted service providers assisting in operating DRBI will have access to your information, under confidentiality agreements.
 
 3.3. Information may be disclosed if legally required or to protect our rights.
 
@@ -39,11 +39,11 @@ By using BlogWorks, you consent to the practices in this Privacy Policy. If you 
 
 ## 5. Third-Party Links
 
-5.1. BlogWorks may contain third-party links. We are not responsible for their privacy practices.
+5.1. DRBI may contain third-party links. We are not responsible for their privacy practices.
 
 ## 6. Children's Privacy
 
-6.1. BlogWorks is not intended for children under 13. We do not knowingly collect their data.
+6.1. DRBI is not intended for children under 13. We do not knowingly collect their data.
 
 ## 7. Changes to this Privacy Policy
 
@@ -51,4 +51,4 @@ By using BlogWorks, you consent to the practices in this Privacy Policy. If you 
 
 ## 8. Contact Us
 
-8.1. For questions about this Privacy Policy, contact us at sales@Blogworks.ai.
+8.1. For questions about this Privacy Policy, contact us at sales@DRBI.ai.

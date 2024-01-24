@@ -5,7 +5,7 @@ author: "Matthew Phillips"
 date: "09 Aug 2023"
 ---
 
-Welcome to BlogWorks.ai Our innovative AI-driven content services are tailored to enhance your content creation. Before using our services, please read these Terms and Conditions.
+Welcome to DRBI.org Our innovative AI-driven content services are tailored to enhance your content creation. Before using our services, please read these Terms and Conditions.
 
 By using BWorks, you agree to these terms. If you disagree, please do not use our services.
 
@@ -69,4 +69,4 @@ By using BWorks, you agree to these terms. If you disagree, please do not use ou
 
 9.1. These Terms are governed by Arizona law.
 
-By using BWorks, you acknowledge and agree to these Terms. Contact us at sales@blogworks.ai for inquiries.
+Contact us at info@drbi.org for inquiries.

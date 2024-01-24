@@ -56,9 +56,6 @@ const resolvedImageWithDomain = new URL(
 
 const { title, footerMargin = true } = Astro.props;
 
-const makeTitle = title
-  ? title + " | " + "BlogWorks.ai"
-  : "BlogWorks - A Quality-Focused AI-tooled Blog Platform";
 */
 
 //
@@ -76,7 +73,7 @@ const makeTitle = title
 
     <SEO
       title={makeTitle}
-      description="BlogWorks - A Quality-Focused AI-tooled Blog Platform"
+      description="A Quality-Focused AI-tooled Blog Platform"
       canonical={pageURL}
       twitter={{
         creator: "@surjithctly",
@@ -87,11 +84,11 @@ const makeTitle = title
         basic: {
           url: pageURL,
           type: "website",
-          title: `BlogWorks - A Quality-Focused AI-tooled Blog Platform`,
+          title: ``,
           image: resolvedImageWithDomain,
         },
         image: {
-          alt: "BlogWorks Homepage Screenshot",
+          alt: " Homepage Screenshot",
         },
       }}
     />
