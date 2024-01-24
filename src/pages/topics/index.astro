@@ -15,14 +15,15 @@ const isPublished = ({data}) => (!data.draft && data.datePublished<=new Date());
 const isDev = import.meta.env.APP_ENV==='dev';
 const allPosts = await getCollection("posts", (ar) => isPublished(ar) || isDev);
 
-const allTopics = await getCollection("topics");
+
 
 const usedTopics = new Map();
 allPosts.forEach(({data}) => {
-  if (data.topics) data.topics.map(({id}) => usedTopics.set(id, true));
+  if (Array.isArray(data.topics)) data.topics?.map(({id}) => usedTopics.set(id, true));
 });
 
-const topicLinks = allTopics.map((topic) => ({
+const allTopics = await getCollection("topics") || [];
+const topicLinks = allTopics?.map((topic) => ({
   name: topic.data.topic,
   href: `/topics/${topic.id}`,
   text: topic.data.topic,
@@ -39,7 +40,7 @@ const topicLinks = allTopics.map((topic) => ({
       <Fragment slot="desc">   </Fragment>
     </Sectionhead>
       <div class="text-center">
-         {topicLinks.map((tag) => (
+         {Array.isArray(topicLinks) && topicLinks?.map((tag) => (
               <a href={tag.href} class={tag.classes}>{tag.name}</a> <span class="text-gray-200"> | </span>
           ))}
       </div>

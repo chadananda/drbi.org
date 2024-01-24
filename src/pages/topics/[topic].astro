@@ -15,7 +15,8 @@ import TopicFAQ from '@components/article/topicFAQ.astro';
 
 export async function getStaticPaths() {
   const allTopics = await getCollection("topics");
-  return allTopics.map((topic) => ({params: { topic: topic.id } }));
+  if (!allTopics) return [];
+  return allTopics?.map((topic) => ({params: { topic: topic.id } }));
 }
 
 let { topic } = Astro.params;
@@ -26,7 +27,7 @@ const allPosts = await getCollection("posts", (ar) => isPublished(ar) || isDev);
 
 
 // Filter posts based on the slugified tag or category
-const posts = allPosts.filter(({data}) => data.topics.map(({id}) => id).includes(topic));
+const posts = allPosts?.filter(({data}) => data.topics?.map(({id}) => id).includes(topic));
 // if (data.topics) data.topics.map(({id}) => usedTopics.set(id, true));
 // console.log("posts", posts.map(({slug}) => slug));
 
@@ -45,7 +46,7 @@ const faqs = await getEntry('faqs', topic);
    )}
   <Container class="w-full mx-5 sm:mx-15">
     <main class="flex flex-wrap justify-center gap-20 mt-5">
-      {Array.isArray(posts) && posts.map((post) => (
+      {Array.isArray(posts) && posts?.map((post) => (
         <div class="flex-none"> <PostThumb post={post} /> </div>
       ))}
     </main>

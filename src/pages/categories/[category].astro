@@ -22,7 +22,8 @@ import CategoryCard from '@components/article/categoryCard.astro';
 
 export async function getStaticPaths() {
   const categories = await getCollection("categories");
-  return categories.map(({data}) => ({ params: { category: data.category_slug } }));
+  if (!categories) return [];
+  return categories?.map(({data}) => ({ params: { category: data.category_slug } }));
 }
 
 // this category slug
@@ -38,10 +39,10 @@ const isPublished = ({data}) => (!data.draft && data.datePublished<=new Date());
 const isDev = import.meta.env.APP_ENV==='dev';
 const allPosts = await getCollection("posts", (ar) => isPublished(ar) || isDev);
 
-const matchingPosts = allPosts.filter((ar) => ar.data.category.id===category_slug);
+const matchingPosts = allPosts?.filter((ar) => ar.data.category.id===category_slug);
 
 // all authors who wrote these articles, without duplication
-const matchingAuthors = [...new Set(matchingPosts.map(post => post.data.author))];
+const matchingAuthors = [...new Set(matchingPosts?.map(post => post.data.author))];
 // console.log('matchingAuthors: ', matchingAuthors.length);
 
 // faq matching this category, if it exsits
@@ -62,7 +63,7 @@ const faqs = await getEntry('faqs', category_slug);
     <CategoryCard slug={category_slug} size="lg" />
 
     <main class="flex flex-wrap justify-center gap-20 mt-10">
-      {Array.isArray(matchingPosts) && matchingPosts.map((post) => (
+      {Array.isArray(matchingPosts) && matchingPosts?.map((post) => (
         <div class="flex-none"> <PostThumb post={post} /> </div>
       ))}
     </main>
