@@ -1,43 +1,37 @@
 ---
-import { Picture } from 'astro:assets';
-import { getEntry } from 'astro:content';
+// import { Picture } from 'astro:assets';
+import { currentURL, displayImageObj, hashstr } from '@utils/utils.js';
+// console.log('authorCard author:', Astro.props.author);
+const author = Astro.props.author
+const name_slug = author.id
+var { image_src, image_alt, name, type, worksFor_type, worksFor_name, description, sameAs } = author.data;
 
-if (!Astro.props.slug) console.error("Warning: no author slug provided!");
-
-console.log("Astro.props.slug: ", Astro.props.slug);
-const author = await getEntry('team', Astro.props.slug)
-console.log("Author: ", author);
-var { image, name, type, url, worksFor, description, sameAs, name_slug } = author.data;
-
-// console.log("Imported image: ", image);
-
-// we don't need this anymore because we figured out how to import the image in the frontmatter
-// const image = image ? (async () => {
-//   const images = await import.meta.glob('/src/content/*/*/*.{jpeg,jpg,png,gif,webp,avif,svg}');
-//   const imgKey = `/src/content/team/${name_slug}/${image}`.replace(/\/\//g, '/');
-//   return images[imgKey]?.();
-// })() : '';
-
-// const profileImage = '/team/'+name_slug+'/'+image
-const size = Astro.props.size || 'sm';
-const pageURL = Astro.url.href.replace('[::1]', 'localhost').replace(/\/$/, '') //.replace(/:(\d+)/, ':3000')
+const pageURL = currentURL(Astro);
 const siteURL = new URL(pageURL).origin.replace(/\/$/, '');
-//const imageURL = image ? siteURL + (await image)?.default?.src : '';
+const authorURL = author.data.url || `${siteURL}/authors/${name_slug}`;
+const size = Astro.props.size || 'sm';
 
-const imageURL = image ? siteURL + image.src : '';
-const uniqueID = 'id-' + Math.random().toString(36).slice(2, 11);
+// (url, alt='', width=0, height=0, format='webp', quality=80)
+const bioImage = displayImageObj(image_src, image_alt, 1200, 600, 'jpg', 80);
+const imgSm = displayImageObj(image_src, image_alt, 180, 180, 'webp', 90);
+const imgMd = displayImageObj(image_src, image_alt, 120, 120, 'webp', 90);
+const imgLg = displayImageObj(image_src, image_alt, 300, 300, 'webp', 90);
+const imgBio = displayImageObj(image_src, image_alt, 188, 188, 'webp', 90);
+const imgFull = displayImageObj(image_src, image_alt, 800, 800, 'webp', 90);
+
+// const imageURL = '';
+const uniqueID = 'id-' + hashstr(pageURL + authorURL + size) //Math.random().toString(36).slice(2, 11);
 const AuthorBioIDURL = `${pageURL}#${uniqueID}`;
-const authorURL = (url & author.data.url.length) ? url : `${siteURL}/authors/${name_slug}` // absolute url for this author tag
 
 var schema = {
   "@context": "https://schema.org",
   "@type": type,
-  '@id': `${authorURL}`,
+  '@id': authorURL,
   name: name,
   url: authorURL,
-  image: imageURL,
-  description: description,
-  sameAs: sameAs, // an array of social media urls
+  image: bioImage?.src,
+  description,
+  sameAs, // an array of social media urls
   mainEntityOfPage: {
     "@type": "WebPageElement",
     id: AuthorBioIDURL,
@@ -45,17 +39,22 @@ var schema = {
 };
 if (type === 'Person') {
   schema.jobTitle = "Writer";
-  schema.worksFor = { "@type": worksFor['@type'], name: worksFor.name, }
+  schema.worksFor = { "@type": worksFor_type, name: worksFor_name, }
   schema.isPartOf = { "@type": "WebPage", "@id": pageURL}
 }
+
+const language = "en";
+const dir = "ltr";
 ---
 
-
 { size==='sm' && (
-<div id={uniqueID} class="author w-48 h-48 shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-1">
-  <a href={authorURL} >
+<div id={uniqueID} class="author w-48 h-48 shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-1" lang={language} dir={dir}>
+
     <div class="relative h-full">
-      <Picture src={image.src} class="w-full h-full object-cover rounded-md" alt={image.alt} />
+     <a href={authorURL} aria-label={image_alt} >
+      <img src={imgSm?.src} class="w-full h-full object-cover rounded-md" alt={image_alt}
+          width={imgSm?.width} height={imgSm?.height} />
+     </a>
       <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-35 rounded-b-lg">
         <div class="text-white px-1 py-1">
           <h3 class="text-sm font-semibold">{name}</h3>
@@ -63,20 +62,24 @@ if (type === 'Person') {
         </div>
       </div>
     </div>
-  </a>
+
 </div>
 )}
 
 
 { size==='md' && (
-  <div id={uniqueID} class="author max-w-64 max-h-96 shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-2 text-center">
+  <div id={uniqueID} class="author max-w-64 max-h-96 shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-2 text-center" lang={language} dir={dir}>
+
+    <a href={authorURL} aria-label={image_alt}>
     <div class="relative pb-32 overflow-hidden">
       <div class="absolute inset-0">
       <div class="w-32 h-32 overflow-hidden rounded-full border-4 border-gray-400 mx-auto">
-        <Picture src={image.src} class="w-full h-full object-cover" alt={image.alt} />
+          <img src={imgMd?.src} class="w-full h-full object-cover" alt={image_alt}
+               width={imgMd?.width} height={imgMd?.height} />
       </div>
       </div>
     </div>
+    </a>
     <div class="px-0 py-2">
       <h3 class="text-lg font-semibold text-gray-800">{name}</h3>
       <p class="text-gray-600 text-sm">{author.data.description_125}</p>
@@ -87,25 +90,30 @@ if (type === 'Person') {
 
 
 { size==='lg' && (
-  <div id={uniqueID} class="author max-w-64 max-h-96 shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-2 text-center">
-    <div class="relative pb-32 overflow-hidden">
-      <div class="absolute inset-0">
-      <div class="w-32 h-32 overflow-hidden rounded-full border-4 border-gray-400 mx-auto">
-        <Picture src={image.src} class="w-full h-full object-cover" alt={image.alt} />
+  <div id={uniqueID} class="author max-w-64 max-h-96 shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-2 text-center" lang={language} dir={dir}>
+    <a href={authorURL} aria-label={image_alt}>
+      <div class="relative pb-32 overflow-hidden">
+        <div class="absolute inset-0">
+        <div class="w-32 h-32 overflow-hidden rounded-full border-4 border-gray-400 mx-auto">
+            <img src={imgLg.src} class="w-full h-full object-cover" alt={image_alt}
+                width={imgLg.width} height={imgLg.height} />
+        </div>
+        </div>
       </div>
-      </div>
-    </div>
+    </a>
     <div class="px-0 py-2">
       <h3 class="text-lg font-semibold text-gray-800">{name}</h3>
       <p class="text-gray-600 text-sm">{author.data.description_125}</p>
     </div>
   </div>
+
 )}
 
 
 
 { size==='bio' && (
-  <div id={uniqueID} class="author-bio w-full my-20 border border-y-4 border-x-0 border-gray-200 p-3">
+
+  <div id={uniqueID} class="author-bio w-full my-20 border border-y-4 border-x-0 border-gray-200 p-3" lang={language} dir={dir}>
     <div class="flex flex-wrap sm:flex-nowrap">
       <div class="flex-1 order-2 sm:order-1 mt-4 sm:mt-0 sm:mr-4 text-center sm:text-start">
         <div class="author-bio-title text-lg font-semibold italic text-gray-500">About {name}</div>
@@ -114,28 +122,29 @@ if (type === 'Person') {
       </div>
       <div class="w-full sm:w-auto sm:flex-shrink-0 order-1 sm:order-2 flex justify-center items-center">
         <div class="w-48 h-48 overflow-hidden rounded-full relative opacity-75 shadow-md border border-gray-400 border-2">
-          <a href={authorURL}>
-          <Picture src={image.src} alt={image.alt}
-            class="absolute inset-0 w-full h-full object-cover rounded-full"
-            formats={['avif', 'webp']}
-            decoding="async"
-            loading="lazy"
-            height={185} quality="med" /></a>
+          <a href={authorURL} aria-label={image_alt}>
+            <img src={imgBio?.src} class="w-full h-full object-cover" alt={image_alt}
+                  width={imgBio?.width} height={imgBio?.height} />
+            </a>
         </div>
       </div>
     </div>
   </div>
+  </a>
 )}
 
 { size==='full' && (
-  <div id={uniqueID} class="author max-w-64 max-h-96 shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-2 text-center">
+  <div id={uniqueID} class="author max-w-64 max-h-96 shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-2 text-center" lang={language} dir={dir}>
+    <a href={authorURL} aria-label={image_alt}>
     <div class="relative pb-32 overflow-hidden">
       <div class="absolute inset-0">
       <div class="w-32 h-32 overflow-hidden rounded-full border-4 border-gray-400 mx-auto">
-        <Picture src={image.src} class="w-full h-full object-cover" alt={image.alt} />
+            <img src={imgFull?.src} class="w-full h-full object-cover" alt={image_alt}
+                width={imgFull?.width} height={imgFull?.height} />
       </div>
       </div>
     </div>
+    </a>
     <div class="px-0 py-2">
       <h3 class="text-lg font-semibold text-gray-800">{name}</h3>
       <p class="text-gray-600 text-sm">{author.data.description_125}</p>

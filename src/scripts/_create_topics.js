@@ -20,7 +20,6 @@
  *   - Includes error handling and logging for API interactions and file operations.
  */
 
-import axios from 'axios';
 import yaml from 'js-yaml';
 import slugifier from 'slugify';
 // import inquirer from 'inquirer';
@@ -200,19 +199,19 @@ const SUBTOPIC_PROMPT = {
 
 
 const getCategoryFile = (category) => {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url))
+  const __dirname = path.dirname(fileURLToPath(import.meta?.url))
   return path.join(__dirname, '../content/categories', `${slugify(category)}.yaml`);
 }
 const getTopicFile = (topic) => {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url))
+  const __dirname = path.dirname(fileURLToPath(import.meta?.url))
   return path.join(__dirname, '../content/topics', `${slugify(topic)}.yaml`);
 }
 const getFAQFile = (topic) => {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url))
+  const __dirname = path.dirname(fileURLToPath(import.meta?.url))
   return path.join(__dirname, '../content/faqs', `${slugify(topic)}.yaml`);
 }
 const getSubtopicsFile = (topic) => {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url))
+  const __dirname = path.dirname(fileURLToPath(import.meta?.url))
   return path.join(__dirname, '../content/subtopics', `${slugify(topic)}.yaml`);
 }
 const loadCategoryJSON = async (category) => {

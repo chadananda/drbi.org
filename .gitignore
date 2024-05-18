@@ -1,10 +1,13 @@
 # build output
 dist/
-# generated types
 .astro/
+.vercel/
+.vercel
+.aider*
 
 # dependencies
 node_modules/
+package-lock.json
 
 # logs
 npm-debug.log*
@@ -12,50 +15,21 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-
 # environment variables
 .env
 .env.production
+.env.development.local
 
-#  data files
-.aider/
-.vite/
-
-# macOS-specific files
+# macOS-specific files and dev
 .DS_Store
+.vscode
 
-# AI Assistant, much better than Copilot!
-.aider*
-
-*.m4v
-
-# Vercel static generation
-.vercel/
-
-
-.vercel
-
+# misc
 extra/
-
-# content collection static asset files copied over to public
-public/article/
-public/team/
-public/categories/
-public/faqs/
-public/topics/
-public/subtopics/
 public/posts/
 
-public/blog/
-public/course/
-public/episode/
-public/product/
-public/series/
-public/podcast/
-public/talk/
-public/tutorial/
-public/accommodation/
-public/activity/
-public/attraction/
-public/food/
+# backup and research
+work/
 
+# local test db
+tmpdata.db

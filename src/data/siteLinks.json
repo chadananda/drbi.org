@@ -7,7 +7,6 @@
    {"title": "Contact", "path": "/contact-us", "children": null}
  ],
   "companyLinks": [
-
     {"title": "About", "path": "/about", "children": null},
     {"title": "Privacy", "path": "/privacy", "children": null},
     {"title": "Terms", "path": "/terms", "children": null},
@@ -21,7 +20,6 @@
   {"title": "Facility", "path": "/facilities-and-rentals", "children": null},
   {"title": "Contributions", "path": "/contribute", "children": null},
   {"title": "The Bahá’í Faith", "path": "/the-bahai-faith", "children": null}
-
  ]
 }
 

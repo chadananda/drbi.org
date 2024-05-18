@@ -1,12 +1,9 @@
 ---
-import { getCollection } from "astro:content";
 import { Picture } from "astro:assets";
-import brand from "@data/branding.json"
+import brand from "@data/site.json"
+import { getTeam } from '@utils/utils.js';
 
-// Filter team entries with 'draft: false' & date before current date
-const publishedTeamMembers = await getCollection("team", ({ data }) => {
-  return !data.draft && data.datePublished < new Date();
-});
+const publishedTeamMembers = getTeam(({ data }) => !data.draft);
 ---
 
 
@@ -32,8 +29,9 @@ const publishedTeamMembers = await getCollection("team", ({ data }) => {
            loading="lazy"
            width={400}
            height={400}
-           formats={["avif", "webp"]}
+           formats={["webp", "jpg"]}
            class="w-full h-full object-cover bg-white rounded transition group-hover:-translate-y-1 group-hover:shadow-xl"
+           widths={[120, 188, 300, 372, 788, 1000, 1280]}
          />
        </div>
 

@@ -1,15 +1,14 @@
 ---
-import { getCollection } from 'astro:content';
+export const prerender = true;
+
 import Layout from  "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import Sectionhead from "@components/sectionhead.astro";
 import AuthorCard from "@components/article/authorCard.astro";
+import { getTeam } from "@utils/utils.js";
 
-const authors = await getCollection("team", ({ data }) => !data.draft)
-const author_slugs = authors.map((author) => author.data.name_slug);
-
-// console.log(author_slugs);
-
+const authors = await getTeam(({data}) => !data.draft);
+// const author_slugs = authors.map((author) => author.id);
 ---
 
 <Layout pageTitle="All Authors">
@@ -20,8 +19,8 @@ const author_slugs = authors.map((author) => author.data.name_slug);
     </Sectionhead>
 
     <main class="flex flex-wrap justify-center gap-5 mt-5">
-      {Array.isArray(author_slugs) && author_slugs.map((slug) => (
-        <div class="flex-none"> <AuthorCard slug={slug} size="sm" /> </div>
+      {Array.isArray(authors) && authors.map(author => (
+        <div class="flex-none"> <AuthorCard size="sm" author={author}/> </div>
       ))}
     </main>
 

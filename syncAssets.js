@@ -1,54 +1,35 @@
 import fs from 'fs-extra';
 import path from 'path';
-import glob from 'glob';
-import assetConfig from './assetConfig.json' assert { type: 'json' };
+import glob from 'fast-glob';
 
-// Corrected paths
-const srcDir = path.join(process.cwd(), 'src', 'content');
-const destDir = path.join(process.cwd(), 'public');
-
-// console.log(`Source Directory: ${srcDir}`);
-// console.log(`Destination Directory: ${destDir}`);
-
-const patterns = assetConfig.staticFilePatterns.join('|');
-// console.log(`Patterns: ${patterns}`);
+const srcDir = path.join(process.cwd(), 'src', 'content', 'posts');
+const destDir = path.join(process.cwd(), 'public', 'posts');
 
 function syncAssets() {
-  const globPattern = `${srcDir}/**/*.+(${patterns})`;
-  // console.log(`Glob Pattern: ${globPattern}`);
+  const globPattern = `${srcDir}/**/*.*`; // Select all files
+  try {
+    const files = glob.sync(globPattern, { nodir: true })
+      .filter(file => !file.match(/\.(jpg|jpeg|png|gif|mdoc|txt)$/i)); // Exclude image, txt and .mdoc files
 
-  glob(globPattern, { nodir: true }, (err, files) => {
-    if (err) {
-      // console.error('Error finding files:', err);
-      return;
-    }
-
-    if (files.length === 0) {
-      // console.log('No files found to copy.');
-      return;
-    }
-
-    console.log(`Found ${files.length} files to copy.`);
-
-    files.forEach(file => {
+    files.forEach((file) => {
       const relativePath = path.relative(srcDir, file);
       const destPath = path.join(destDir, relativePath);
-      // console.log(`Preparing to copy: ${file} to ${destPath}`);
 
-      fs.copy(file, destPath, err => {
-        if (err) {
-          // console.error('Error copying file:', err);
-        } else {
-
-          let foldername = path.dirname(file).split(path.sep).pop();
-          // folder's parent folder, the folder of folderaname
-          let contenttype = path.dirname(file).split(path.sep).slice(-2)[0];
-          let filename = path.basename(file);
-          console.log(` ${contenttype} > ${foldername}/${filename}`);
+      const srcStat = fs.statSync(file);
+      try {
+        const destStat = fs.statSync(destPath);
+        if (srcStat.mtime > destStat.mtime) {
+          fs.copySync(file, destPath);
+         // console.log(`Copied: ${file} to ${destPath}`);
         }
-      });
+      } catch (err) {
+        fs.copySync(file, destPath);
+        //console.log(`Copied: ${file} to ${destPath}`);
+      }
     });
-  });
+  } catch (err) {
+    console.error('Error during glob processing:', err);
+  }
 }
 
 syncAssets();

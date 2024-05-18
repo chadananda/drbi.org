@@ -1,51 +1,51 @@
 ---
-const {author, datePublished} = Astro.props.meta;
-const {audio, title, description, duration, episodeNumber, seriesName, image } = Astro.props.podcast;
-
 // Import Simple Icons
 import { Twitter, Facebook, Linkedin } from 'simple-icons-astro';
-// import hamster_loader  from './_loader.gif';
+import { getArticleAudioPath, currentURL, getTeamMember, getPostFromSlug, baseURL, generateArticleImage } from '@utils/utils.js';
+import site from '@data/site.json';
 
-// manage image
-import { Image } from 'astro:assets';
-const authorImg = (async () => {
-  const images = await import.meta.glob('/src/content/*/*/*.{jpeg,jpg,png,gif,webp,avif,svg}');
-  const imgKey = `/src/content${Astro.url.pathname}/${image}`.replace(/\/\//g, '/');
-  const result = images[imgKey]?.();
-  if (!result) {
-    console.error(images)
-    console.error('key not found', imgKey);
-  }
-  return images[imgKey]?.();
-})();
+const post = Astro.props.post;
+// const meta = post.data;
+const {datePublished, audio, title, description, audio_duration: duration, title: seriesName, url: slug } = post.data;
+// const slug = meta.url;
+const episodeNumber = post.data.episode_number || 1;
 
-const imageURL = (await authorImg).default.src;
+let author = Astro.props.author || (await getTeamMember(post.data.author));
+let authorName = !!author ? author?.data?.name : site.site;
+const pageURL = currentURL(Astro);
+const baseUrl = new URL(pageURL).origin.replace(/\/$/, '');
 
-const pageURL = Astro.url.href.replace('[::1]', 'localhost').replace(/\/$/, '') //.replace(/:(\d+)/, ':3000')
-const audioURL = pageURL+'/'+audio;
-// console.log('pageURL', pageURL, 'audioURL', audioURL);
+let audioURL = `${audio}`;
+if (!audioURL.startsWith('http')) {  // convert file path to URL
+  const audioPath = await getArticleAudioPath(slug, audio);
+  audioURL = baseUrl + audioPath;
+}
+
+const src = post?.data?.audio_image || post?.data?.image;
+const img_display = await generateArticleImage(src, post, baseURL(Astro), 172, 172, 'webp', 90, post.data.image?.alt);
+const img_podcast = await generateArticleImage(src, post, baseURL(Astro), 1200, 1000, 'webp', 90, post.data.image?.alt);
 
 // this player will be used more than once per page, so we need to generate unique IDs for each instance
-const playerID = 'id-' + Math.random().toString(36).substr(2, 9);
-// const audioPlayerID = `audio-${playerID}`; // Define a unique selector for the Plyr instance
-const encodedPageURL = encodeURIComponent(pageURL);
-const encodedDesc = encodeURIComponent(title +' - '+ description);
-// const waveID = `wave-${playerID}`; // Define a unique selector for the Plyr instance
+let playerID = 'id-podcast-player-' + Math.random().toString(36).substr(2, 9);
+let audPlayer = 'id-aud-'+ Math.random().toString(36).substr(2, 9);
+// let audioPlayerID = `audio-${playerID}`; // Define a unique selector for the Plyr instance
+let encodedPageURL = encodeURIComponent(pageURL);
+let encodedDesc = encodeURIComponent(title +' - '+ description);
 
 // social links to share this page
-const twitterLink = `https://twitter.com/intent/tweet?text=${encodedDesc}&url=${encodedPageURL}`;
-const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodedPageURL}`;
-const linkedinLink = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedPageURL}`;
-const emailLink = `mailto:?subject=Interesting%20Page&body=Check%20this%20out:%20${encodedPageURL}`;
+let twitterLink = `https://twitter.com/intent/tweet?text=${encodedDesc}&url=${encodedPageURL}`;
+let facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodedPageURL}`;
+let linkedinLink = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedPageURL}`;
+let emailLink = `mailto:?subject=Interesting%20Page&body=Check%20this%20out:%20${encodedPageURL}`;
 
 // JSON-LD for this podcast episode
-const schema = {
+let schema = {
   '@context': "https://schema.org",
   '@type': "PodcastEpisode",
   '@id': `${pageURL}#${playerID}`,
   name: title,
   description: description,
-  image: imageURL,
+  image: img_podcast?.src,
   episodeNumber: episodeNumber,
   partOfSeries: {
     '@type': "PodcastSeries",
@@ -53,7 +53,7 @@ const schema = {
   },
   author: {
     "@type": "Person",
-    name: author
+    name: authorName,
   },
   datePublished: datePublished,
   timeRequired: duration,
@@ -69,29 +69,26 @@ const schema = {
   }
 };
 
-// example markdoc usage:
-//
-//    {% podcast-player   meta=$meta  podcast=$meta.podcast_main /%}
-//
 ---
 
 <!-- JSON-LD  -->
-<script type="application/ld+json" set:html={JSON.stringify(schema)} />
-
+<script type="application/ld+json" set:html={JSON.stringify(schema)} data-astro-rerun is:inline/>
 
 <!-- Our Podcast player container -->
-<div id={playerID} class="podcast-player min-h-48 bg-gray-100 shadow-md rounded-lg w-full my-10 border-4 border-gray-300 p-1 noprint
+<div id={playerID} class="podcast-player h-full sm:h-48 sm:min-h-48 sm:max-h-48 bg-gray-100 shadow-md rounded-lg w-full my-10
+border-4 border-gray-300 p-1 noprint
 - flex flex-col sm:flex-row sm:flex-nowrap
 ">
   <!-- Image and play button, the left column  -->
-  <div class="image-container sm:w-48 h-24 sm:h-48 mb-2 sm:mb-0 cursor-pointer - group relative">
-    <Image src={authorImg} alt={author} format="avif" quality="low"
-      class="rounded-md object-cover w-full sm:w-48 h-24 sm:h-48 m-0 p-0 border-2 border-gray-400 opacity-70"/>
-
+  <div class="image-container sm:w-44 sm:max-h-44 sm:h-44 mb-2 sm:mb-0 min-w-[20%] cursor-pointer - group relative">
+    <img {...img_display} class="rounded-md object-cover w-full sm:w-44 h-44 sm:h-44 m-0 p-0 min-w-[30%] border-2 border-gray-400 opacity-70" />
     <!-- Player button centered over the image -->
     <div class="playerbutton absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-      <button class="play-button w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center group-hover:bg-gray-200 focus:outline-none focus:shadow-outline shadow-md border-2 border-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="play-icon w-16 h-16 fill-current text-gray-600 group-hover:text-gray-600">
+      <button aria-label="Podcast Play Button" title="Play Podcast"
+      class="play-button w-16 h-16 rounded-full bg-gray-300 flex items-center justify-centern bg-opacity-70
+       group-hover:bg-gray-200 focus:outline-none focus:shadow-outline shadow-md border-2 border-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="play-icon w-16 h-16 fill-current
+         text-gray-600 group-hover:text-gray-600 opacity-70">
           <path d="M8 5v14l11-7z" rx="6"></path>
         </svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="pause-icon w-16 h-16 hidden fill-current text-gray-600 group-hover:text-gray-600">
@@ -103,21 +100,20 @@ const schema = {
   </div>
 
   <!-- Descriptive content and wave scrubber, the right column -->
-  <div class="content-container pl-1 flex-grow - flex flex-col">
+  <div class="content-container px-2 flex-grow - flex flex-col">
     <!-- Top description section can expand if there's room  -->
     <div class="text-details flex flex-col justify-center flex-grow">
       <div class="playertext w-full overflow-hidden m-0 sm:pl-3">
         <div class="text-base sm:text-lg font-semibold">{title}</div>
-        <div class="text-gray-600 text-xs sm:text-sm font-light sm:pl-2">by {author}</div>
+        <div class="text-gray-600 text-xs sm:text-sm font-light sm:pl-2">by {authorName}</div>
         <div class="text-gray-600 text-sm sm:text-md">{description}</div>
       </div>
     </div>
 
-
     <!-- Scrubber area, we're replacing wave with a custom solution -->
     <div class="waveform-wrapper h-14 sm:h-18 mb-0 overflow-hidden - relative">
       <!-- HTML5 Audio Player (used as source)  -->
-      <audio src={audioURL} class="mediaplayer hidden" preload="metadata"  crossorigin="anonymous"></audio>
+      <audio id={audPlayer} data-src={audioURL} src={audioURL} class="mediaplayer hidden" preload="metadata"  crossorigin="anonymous"></audio>
       <!-- Scrubber area with vertical gradient and overlapping sine waves -->
       <div class="audioscrubber w-full h-full relative">
         <!-- Transparent Background with vertical gradient and Waveform Patterns -->
@@ -135,49 +131,52 @@ const schema = {
         </svg>
         <!-- animated gif background  -->
         <div class="w-full h-full absolute top-0 left-0 z-20"
-        style="background-image: url('/article_assets/audio-wave.gif');
+        style="background-image: url('/article_assets/audio-wave.png');
         background-repeat: repeat-x; background-size: auto 100%; opacity: 0.3;"></div>
         <!-- scrubber bar  -->
         <div class="scrubber-wrapper w-full h-full absolute top-0 left-0 z-20" style="">
-          <input type="range" class="scrubber w-full"  min="0" max="100" value="0" />
+          <input type="range" aria-label="Podcast Player Scrubber" title="Scrubber"
+           class="scrubber w-full"  min="0" max="100" value="0" />
         </div>
       </div>
     </div>
     <!-- Timing and share links, positioned at the bottom -->
     <div class="time-share px-0 sm:px-2 h-8 - flex justify-between">
       <!-- Timing at the left -->
-      <div class="progress flex justify-start items-end text-sm text-gray-400">
-        <span class="play-position text-gray-600 p-0 sm:pr-2 "><span class="text-gray-400">0:00 </span></span>
+      <div class="progress flex justify-start items-end text-sm text-gray-600">
+        <span class="play-position text-gray-600 p-0 sm:pr-2 "><span class="text-gray-600">0:00 </span></span>
          /
-        <span class="total-length text-gray-600 p-0 sm:pl-2"><span class="text-gray-400"> 0:00</span></span>
+        <span class="total-length text-gray-600 p-0 sm:pl-2"><span class="text-gray-600"> 0:00</span></span>
       </div>
       <!-- Share icons at the bottom right -->
       <div class="share flex justify-end items-end space-x-2">
         <!-- Twitter -->
-        <a href={twitterLink} class="block text-gray-400 hover:text-blue-800" target="_blank" title="Share on Twitter"><Twitter /></a>
+        <a href={twitterLink} aria-label="Twitter" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on Twitter"><Twitter /></a>
         <!-- Facebook -->
-        <a href={facebookLink} class="block text-gray-400 hover:text-blue-800" target="_blank" title="Share on Facebook"><Facebook /></a>
+        <a href={facebookLink} aria-label="Facebook" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on Facebook"><Facebook /></a>
         <!-- LinkedIn -->
-        <a href={linkedinLink} class="block text-gray-400 hover:text-blue-800" target="_blank" title="Share on LinkedIn"><Linkedin /></a>
+        <a href={linkedinLink} aria-label="LinkedIn" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on LinkedIn"><Linkedin /></a>
         <!-- Share by email link -->
-        <a href={emailLink} class="block text-gray-400 hover:text-blue-800 no-underline" title="Share by Email"><span class="text-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" class="fill-current text-gray-400 hover:text-blue-800">
+        <a href={emailLink} aria-label="Email" class="block text-gray-600 hover:text-blue-800 no-underline"
+        title="Share by Email"><span class="text-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" class="fill-current text-gray-600 hover:text-blue-800">
             <path d="M0 0h24v24H0z" fill="none"/>
             <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
           </svg>
         </span></a>
         <!-- Copy to clipboard Link -->
-        <a href="#" data-pageurl={pageURL} title="Copy Link"
-           class="block text-gray-400 hover:text-blue-800 no-underline"
+        <a href="#" aria-label="clipboard" data-pageurl={pageURL} title="Copy Link"
+           class="block text-gray-600 hover:text-blue-800 no-underline"
             onclick="(function(e) {
               const pageURL = e.currentTarget.getAttribute('data-pageurl'); e.preventDefault();
               navigator.clipboard.writeText(pageURL).then(() => alert('Link copied to clipboard'))
                 .catch(err => console.error('Error copying text:', err));
             })(event)">
           <span class="text-md">
-            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" class="fill-current text-gray-400 hover:text-blue-800">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" class="fill-current text-gray-600 hover:text-blue-800">
               <path d="M0 0h24v24H0z" fill="none"/>
-              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4l6 6v10c0 1.1-.9 2-2 2H7.99C6.89 23 6 22.1 6 21l.01-14c0-1.1.89-2 1.99-2h7zm-1 7h5.5L14 6.5V12z"/>
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4l6 6v10c0 1.1-.9 2-2
+              2H7.99C6.89 23 6 22.1 6 21l.01-14c0-1.1.89-2 1.99-2h7zm-1 7h5.5L14 6.5V12z"/>
             </svg>
          </span>
         </a>
@@ -221,16 +220,33 @@ svg#play:hover #triangle {
 }
 </style>
 
-<script type="text/javascript" data-playerID={playerID}>
-  const playerID = document.currentScript.dataset.playerid;
-  const podPlay = document.getElementById(playerID);
-  const playButton = podPlay.querySelector('.image-container');
-  const playIcon = playButton.querySelector('.play-icon');
-  const pauseIcon = playButton.querySelector('.pause-icon');
-  const playPositionElement = podPlay.querySelector('.play-position');
-  const totalLengthElement = podPlay.querySelector('.total-length');
-  const audioPlayer = podPlay.querySelector('.mediaplayer');
-  const scrubber = podPlay.querySelector('.scrubber');
+<script data-playerID={playerID} data-astro-rerun is:inline client:idle>
+
+//console.log('* astro:rerun');
+
+  let playerID = document.currentScript.dataset.playerid;
+  let podPlay = document.getElementById(playerID);
+  let playButton = podPlay.querySelector('.image-container');
+  let playIcon = playButton.querySelector('.play-icon');
+  let pauseIcon = playButton.querySelector('.pause-icon');
+  let playPositionElement = podPlay.querySelector('.play-position');
+  let totalLengthElement = podPlay.querySelector('.total-length');
+  let audioPlayer = podPlay.querySelector('.mediaplayer');
+  let audioURL = audioPlayer.dataset.src;
+  let scrubber = podPlay.querySelector('.scrubber');
+
+  document.addEventListener('astro:page-load', () => {
+    //console.log('*** astro:page-load');
+    // let audioElement = document.getElementById('aud');
+    audioPlayer.pause()
+    // let audioURL = audioPlayer.src; // = audioURL;
+    audioPlayer.src = '';
+    audioPlayer.src = audioURL;
+    //console.log('=== set audioplayer url to ', audioURL);
+    // audioPlayer.play();
+    audioPlayer.play();
+  });
+
 
   scrubber.addEventListener('input', function () {
     var value = (this.value-this.min)/(this.max-this.min)*100;
@@ -238,7 +254,7 @@ svg#play:hover #triangle {
     audioPlayer.currentTime = audioPlayer.duration * (this.value / 100);
   });
 
-  const formatTime = (timeInSeconds) => {
+  let formatTime = (timeInSeconds) => {
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
     const seconds = Math.floor(timeInSeconds % 60);
@@ -249,14 +265,14 @@ svg#play:hover #triangle {
     ]; // If less than an hour, return MM:SS, otherwise HH:MM:SS
     return hours > 0 ? parts.join(':') : parts.slice(1).join(':');
   };
-  const updateTimeDisplay = (currentTime, duration) => {
+  let updateTimeDisplay = (currentTime, duration) => {
     if (!isNaN(duration)) {
       playPositionElement.textContent = formatTime(currentTime);
       totalLengthElement.textContent = formatTime(duration);
     }
   };
   // Function to update the play/pause icons
-  const updatePlayPauseIcons = () => {
+  let updatePlayPauseIcons = () => {
     if (audioPlayer.paused || audioPlayer.ended) {
       playIcon.classList.remove('hidden');
       pauseIcon.classList.add('hidden');
@@ -266,7 +282,7 @@ svg#play:hover #triangle {
     }
   };
   // Toggle play/pause for audioPlayer
-  const togglePlayPause = () => {
+  let togglePlayPause = () => {
     if (audioPlayer.paused || audioPlayer.ended)  audioPlayer.play();
       else audioPlayer.pause();
   };

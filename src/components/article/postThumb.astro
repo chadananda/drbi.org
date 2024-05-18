@@ -1,53 +1,65 @@
 ---
-import { Image } from 'astro:assets';
-import { slugify } from "@utils/utils";
-import { getEntry } from 'astro:content';
+// import { Picture } from 'astro:assets';
+import { generateArticleImage, baseURL, hashstr } from '@utils/utils.js';
 
+const { post, small, class: customClasses } = Astro.props
+const articleLink = `/${post.data?.url}`;
 
-const { post } = Astro.props
+const authorid = post.data.author || '';
+const author_name = authorid.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+const category = Astro.props.category || '';
+const siteURL = baseURL(Astro) ;//new URL(pageURL).origin.replace(/\/$/, '');
 
-const author = await getEntry('team', post.data.author.id);
-const category = await getEntry('categories', post.data.category.id);
+// console.log('siteURL:', siteURL);
 
-const image = post.data.image;
-const pageURL = Astro.url.href.replace('[::1]', 'localhost').replace(/\/$/, '')
-const siteURL = new URL(pageURL).origin.replace(/\/$/, '');
-const uniqueID = 'id-' + Math.random().toString(36).slice(2, 11);
-const authorURL = `${siteURL}/authors/${author.id}`
+const image = small ? await generateArticleImage(post.data.image?.src, post, siteURL, 198,131,'webp',90) :
+  await generateArticleImage(post.data.image?.src, post, siteURL, 298,198,'webp',90);
 
+// console.log('postThumb', {src: post.data.image?.src, post: post.id, siteURL, image: image.src});
+
+// const image = await generateArticleImage(post.data.image?.src, post, siteURL, 198,131,'webp',90);
+
+const uniqueID = 'id-' + hashstr(siteURL + post.id + author_name) ;// Math.random().toString(36).slice(2, 11);
+const authorURL = authorid ? `${siteURL}/authors/${authorid}` : '';
 const pubdate = new Date(post.data.datePublished);
-const datePublished = pubdate.toLocaleDateString('en-US', {
-  year: 'numeric',
-  month: 'short',
-  day: 'numeric'
-});
----
+const datePublished = pubdate.toLocaleDateString('en-US', {year:'numeric', month:'short', day:'numeric'});
+const isPublished = pubdate <= new Date() && !post.data.draft;
 
- <div id={uniqueID} class="w-[300px]">
-  <a href={`/posts/${post.slug}`}>
-    <Image
-      format={"avif"}
-      src={image.src}
-      alt={image.alt}
-      sizes="(max-width: 800px) 100vw, 800px"
-      class="w-[300px] h-[200px] object-cover rounded-lg shadow-lg border border-gray-200"
-      quality="mid"
-      transition:name={`post-img-${post.slug}`}
-    />
-   <div class="mt-4">
-     <span class="text-blue-400 uppercase tracking-wider text-xs font-medium">
-       <a href={`/categories/${category.id}`}>{category.data.category}</a>
-     </span>
-     <h2 class="text-xl font-semibold leading-snug tracking-tight mt-1" transition:persist> {post.data.title} </h2>
-     <div class="flex gap-2 mt-3 text-sm">
-      <span class="text-gray-400">
-         <a href={authorURL}>{author.data.name} </a>
-      </span>
-      <span class="text-gray-400">• </span>
-      <time class="text-gray-400" datetime={datePublished}> {datePublished} </time>
-     </div>
-   </div>
-   </a>
- </div>
+// console.log('postThumb', {image});
+---
+<div id={uniqueID}
+     transition:name={`post-img-${post.data.url}`}
+     class={`${customClasses} overflow-hidden ${small ? 'w-[200px]' : 'w-[302px]'} ` } >
+  <a href={articleLink} aria-label={post.data.title} >
+
+
+    <img {...image} class={`object-cover rounded-lg shadow-lg border border-gray-200
+      ${small ? 'w-[200px] h-[133px] opacity-75' : 'w-[300px] h-[200px]'}
+      ${isPublished ? '' : 'border-dashed border-4 border-green-300 opacity-50'}`} />
+
+    <div class="mt-4">
+      {!small && !!category?.data && (
+        <span class={`text-blue-400 uppercase tracking-wider ${small ? 'text-xxs' : 'text-xs'} font-medium`}>
+          <a href={`/categories/${category?.id}`} aria-label={category?.data?.category}>{category?.data?.category}</a>
+        </span>
+      )}
+      {small ? (
+        <h2 class="text-sm font-semibold leading-snug tracking-tight -mt-2 mb-10" transition:persist> {post.data.title}
+          <span><a href={authorURL} aria-label={author_name} class="text-xs font-extralight text-gray-600 ml-2">{author_name}</span>
+        </h2>
+      ) : (
+        <h2 class="text-xl font-semibold leading-snug tracking-tight mt-1" transition:persist> {post.data.title}
+        </h2>
+
+      )}
+      {!small && (
+        <div class="text-sm mt-3 flex gap-2">
+          <span class="text-gray-600"><a href={authorURL} aria-label={author_name}>{author_name} </a></span><span class="text-gray-600">• </span>
+          <time class="text-gray-600" datetime={datePublished}> {datePublished} </time>
+        </div>
+      )}
+    </div>
+  </a>
+</div>
 
 

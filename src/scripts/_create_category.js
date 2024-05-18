@@ -111,7 +111,7 @@ const CATEGORY_PROMPT = {
 };
 
 const getCategoryFolder = (category) => {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url))
+  const __dirname = path.dirname(fileURLToPath(import.meta?.url))
   const category_slug = slugify(category);
   return path.join(__dirname, '../content/categories/');
 };
@@ -185,7 +185,7 @@ const genericImagePrompt = async (PROMPT, args={}) => {
       if (!!generatedImage) break;
     }
     if (!!generatedImage) try {
-      const response = await axios.get(generatedImage.data[0].url, { responseType: 'arraybuffer', });
+      const response = await axios.get(generatedImage.data[0]?.url, { responseType: 'arraybuffer', });
       await fsPromises.mkdir(path.dirname(args.filepath), { recursive: true });
       await fsPromises.writeFile(args.filepath, response.data);
     } catch (error) { console.error(`Error downloading image: ${error.message}`); }

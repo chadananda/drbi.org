@@ -2,6 +2,7 @@
 // @ts-ignore
 import { Picture, Image } from "astro:assets";
 import Card from "@components/card.astro";
+import brand from '@data/site.json';
 import IntegrationImg from "../assets/integrations.svg?url";
 import FeatureImgOne from "../assets/features/2.png";
 import FeatureImgTwo from "../assets/features/2.png";
@@ -26,16 +27,16 @@ import FeatureImgThree from "../assets/features/3.png";
       <Picture
         src={FeatureImgOne}
         alt="Feature image"
-        formats={["avif", "webp"]}
+        formats={["webp", "jpg"]}
         class="h-full w-full object-contain"
         loading="lazy"
+        widths={[120, 188, 300, 372, 788, 1000, 1280]}
       />
     </Fragment>
     <span slot="badge"></span>
-    <span slot="title">Responsive Template</span>
+    <span slot="title"> {brand.title} </span>
     <span slot="desc">
-      {brand.site} is a creative and modern mobile responsive website template that
-      helps you create any kind of marketing websites or landing pages.
+      {brand.description}
     </span>
   </Card>
   <Card class="lg:col-span-2" color="indigo">
@@ -43,15 +44,16 @@ import FeatureImgThree from "../assets/features/3.png";
       <Picture
         src={FeatureImgTwo}
         alt="Feature image"
-        formats={["avif", "webp"]}
+        formats={["webp", "jpg"]}
         class="h-full w-full object-contain"
         loading="lazy"
+        widths={[120, 188, 300, 372, 788, 1000, 1280]}
       />
     </Fragment>
-    <span slot="badge">Creative</span>
-    <span slot="title">Next Level Template</span>
+    <span slot="badge"></span>
+    <span slot="title">{brand.title}</span>
     <span slot="desc">
-       </span
+      {brand.description}</span
     >
   </Card>
 </div>
@@ -62,9 +64,10 @@ import FeatureImgThree from "../assets/features/3.png";
       <Picture
         src={FeatureImgThree}
         alt="Feature image"
-        formats={["avif", "webp"]}
+        formats={["webp", "jpg"]}
         class="h-full w-full object-contain"
         loading="lazy"
+        widths={[120, 188, 300, 372, 788, 1000, 1280]}
       />
     </Fragment>
     <span slot="badge">Template</span>
@@ -79,9 +82,10 @@ import FeatureImgThree from "../assets/features/3.png";
       <Picture
         src={FeatureImgTwo}
         alt="Feature image"
-        formats={["avif", "webp"]}
+        formats={["webp", "jpg"]}
         class="h-full w-full object-contain"
         loading="lazy"
+        widths={[120, 188, 300, 372, 788, 1000, 1280]}
       />
     </Fragment>
     <span slot="badge">Product</span>
@@ -106,7 +110,7 @@ import FeatureImgThree from "../assets/features/3.png";
     <span slot="badge">Webhooks</span>
     <span slot="title">100+ Integrations</span>
     <span slot="desc">
-      </span
+      Integrate with hundreds of tools using Zapier.</span
     >
   </Card>
 </div>

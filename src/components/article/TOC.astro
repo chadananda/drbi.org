@@ -1,31 +1,8 @@
 ---
+import { buildToc } from '@utils/utils.js';
 
-const headings = Astro.props.headings;
-const toc = buildToc(headings);
-
-// function buildToc(headings) {
-//   const toc = [], parentHeadings = new Map();
-//   headings.forEach(h => {
-//     const heading = { ...h, subheadings: [] };
-//     parentHeadings.set(heading.depth, heading);
-//     heading.depth === 3 ? toc.push(heading) : parentHeadings.get(heading.depth - 1)?.subheadings.push(heading);
-//   });
-//   return toc;
-// }
-
-function buildToc(headings) {
-  const toc = [], parentHeadings = new Map();
-  headings.forEach(h => {
-    const heading = { ...h, subheadings: [] };
-    parentHeadings.set(heading.depth, heading);
-    if (heading.depth === 2 || heading.depth === 3) {
-      toc.push(heading);
-    } else if (heading.depth > 3) {
-      parentHeadings.get(heading.depth - 1)?.subheadings.push(heading);
-    }
-  });
-  return toc;
-}
+const { post } = Astro.props;
+const toc = buildToc(post);
 
 const largelist = toc && toc.length > 8
 const textsize = largelist ? 'text-xs lg:text-sm' : 'text-sm lg:text-base'
@@ -33,7 +10,7 @@ const textsize = largelist ? 'text-xs lg:text-sm' : 'text-sm lg:text-base'
 const tocHtml = (() => {
   return toc.map(heading => `
     <li class="overflow-hidden block text-ellipsis text-gray-600 mt-0.5 pl-2 ml-1 pt-1 pb-0 rounded-md">
-      <a href="#${heading.slug}" class="hover:text-gray-800 hover:underline">
+      <a href="#${heading.slug}" aria-label="${heading.slug}" class="hover:text-gray-800 hover:underline">
         ${heading.text}
       </a>
 
@@ -41,7 +18,7 @@ const tocHtml = (() => {
         <ul>
           ${heading.subheadings.map(subheading => `
             <li class="overflow-hidden block text-ellipsis text-gray-500 mt-0.5 pl-2 ml-1 pt-0 pb-0 rounded-md text-xs lg:text-sm">
-              <a href="#${subheading.slug}" class="hover:text-gray-800 hover:underline">
+              <a href="#${subheading.slug}" aria-label="${subheading.slug}" class="hover:text-gray-800 hover:underline">
                 ${subheading.text}
               </a>
             </li>
@@ -137,56 +114,16 @@ const tocHtml = (() => {
 </script>
 
 
-<!--
-
-<script type="text/javascript">
-  const tocToggle = document.getElementById('toc_mobile_button');
-  const mobileToc = document.getElementById('mobile-toc');
-  tocToggle.addEventListener('click', () => {
-    mobileToc.classList.toggle('-translate-x-full');
-  });
-  mobileToc.addEventListener('click', () => {
-    mobileToc.classList.toggle('-translate-x-full');
-  });
-
-  const desktopTocElem = document.getElementById('desktop-toc');
-  const mobileTocElem = document.getElementById('mobile-toc');
-
-  const syncToc = () => {
-    const desktopItems = Array.from(desktopTocElem.querySelectorAll('li'));
-    const mobileItems = Array.from(mobileTocElem.querySelectorAll('li'));
-    const combinedItems = desktopItems.concat(mobileItems);
-    combinedItems.forEach(item => item.classList.remove('visible'));
-
-    const tocItems = combinedItems.map(item => {
-      const targetId = item.querySelector('a').getAttribute('href').slice(1);
-      const targetElem = document.getElementById(targetId);
-      return targetElem ? { item, targetElem, bounds: targetElem.getBoundingClientRect() } : null;
-    }).filter(Boolean);
-
-    const { lastInView, firstPastView } = tocItems.reduce((acc, { bounds }, idx) => {
-      const vpBottom = window.innerHeight;
-      if (bounds.bottom > 0 && bounds.top < vpBottom) acc.lastInView = idx;
-      if (bounds.top > vpBottom && acc.firstPastView === -1) acc.firstPastView = idx;
-      return acc;
-    }, { lastInView: -1, firstPastView: -1 });
-
-    const idxToUse = firstPastView === -1 ? lastInView : firstPastView - 1;
-    tocItems.forEach((item, idx) => {
-      if (idx === idxToUse) {
-        desktopTocElem.querySelector(`li a[href="#${item.targetElem.id}"]`)?.parentElement.classList.add('visible');
-        mobileTocElem.querySelector(`li a[href="#${item.targetElem.id}"]`)?.parentElement.classList.add('visible');
-      }
-    });
-  };
-  syncToc();
-  window.addEventListener('resize', syncToc, { passive: true });
-  window.addEventListener('scroll', syncToc, { passive: true });
-</script> -->
-
 
 <style is:global>
   /* Styles that may not have direct Tailwind equivalents */
+  #tableofcontents nav li {
+    line-height: 1.1rem;
+    padding: 6px;
+    padding-left: 8px;
+    margin-bottom: 1px;
+    margin-top: 1px;
+  }
   #tableofcontents nav li.visible {
     color: #111;
     border-left: 2px solid #0062a3;

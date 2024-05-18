@@ -9,17 +9,18 @@ const { text, title, name, image } = Astro.props;
   <!-- <div class="absolute font-serif text-5xl left-2 top-8 text-slate-300 -z-10">
     “
   </div> -->
-  <blockquote class="text-base md:text-md [text-wrap:balance]">{text}</blockquote>
+  <blockquote class="text-lg md:text-xl [text-wrap:balance]">{text}</blockquote>
   <div class="flex items-center gap-3 mt-10">
     <div class="shrink-0">
       <Picture
         class="rounded-full w-12 h-12 object-cover bg-slate-100"
-        formats={["avif", "webp"]}
+        formats={["webp", "jpg"]}
         src={image}
         alt={name}
         width="48"
         height="48"
         loading="lazy"
+        widths={[48, 120, 188, 300, 372, 788, 1000, 1280]}
       />
     </div>
     <div>

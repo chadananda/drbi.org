@@ -3,9 +3,23 @@ const defaultTheme = require("tailwindcss/defaultTheme");
 module.exports = {
   content: ["./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}", "./api/**/*.{js,ts}"],
   theme: {
+    screens: {
+      xs: '475px',
+      ...defaultTheme.screens,
+    },
     extend: {
+      colors: {
+        background: 'hsl(var(--background) / <alpha-value>)',
+				foreground: 'hsl(var(--foreground) / <alpha-value>)',
+      },
       typography: (theme) => ({
         DEFAULT: {
+          quoteless: {
+            css: {
+              'blockquote p:first-of-type::before': { content: 'none' },
+              'blockquote p:first-of-type::after': { content: 'none' },
+            },
+          },
           css: {
             maxWidth: '750px !important',
             fontSize: "1.1rem",

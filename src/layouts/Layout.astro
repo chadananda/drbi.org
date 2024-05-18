@@ -1,20 +1,22 @@
 ---
-// import "../styles/global.css";
-import "@fontsource-variable/inter/index.css";
+export const prerender = true;
+import "../styles/global.css";
+// import "@fontsource-variable/inter/index.css";
 // import { injectSpeedInsights } from '@vercel/speed-insights';
+import  SpeedInsights  from "@vercel/speed-insights/astro"
 // Props can be documented via comments if needed
 // Expected props:
 //   title: string (optional)
 //   footerMargin: boolean (optional, default true)
 // import { ViewTransitions } from "astro:transitions";
 import { SEO } from "astro-seo";
-
 import Footer from "@components/footer.astro";
-
 import Navbar from "@components/navbar/navbar.astro";
 
-//const pageURL = Astro.url.href.replace('[::1]', 'localhost').replace(/:(\d+)/, ':3000').replace(/\/$/, '');
-const pageURL = Astro.url.href.replace('[::1]', 'localhost').replace(/\/$/, '');
+import site from "@data/site.json";
+import { currentURL } from '@utils/utils.js';
+
+const pageURL = currentURL(Astro);
 
 
 // injectSpeedInsights();
@@ -25,15 +27,13 @@ const pageURL = Astro.url.href.replace('[::1]', 'localhost').replace(/\/$/, '');
 //   footerMargin: boolean (optional, default true)
 
 
-const resolvedImageWithDomain = new URL(
-  "/opengraph.jpg",
-  Astro.site,
-).toString();
+const resolvedImageWithDomain = new URL( "/favicon.svg", Astro.site, ).toString();
 
 // console.log ('resolvedImageWithDomain', resolvedImageWithDomain);
-const { title, footerMargin = true } = Astro.props;
+const { title, footerMargin = true, description } = Astro.props;
 
-const makeTitle = title
+const makeTitle = title +' | '+ site.site;
+const makeDesc = description || site.description;
 
 
 /*
@@ -58,57 +58,58 @@ const resolvedImageWithDomain = new URL(
 
 const { title, footerMargin = true } = Astro.props;
 
+
 */
-
-//
-
-
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="sitemap" href="/sitemap-articles.xml" />
     <meta name="generator" content={Astro.generator} />
+
 
     <SEO
       title={makeTitle}
-      description="A Quality-Focused AI-tooled Blog Platform"
+      description={makeDesc}
       canonical={pageURL}
       twitter={{
-        creator: "@surjithctly",
-        site: "@web3templates",
+        creator: site.twitter.creator,
+        site: site.twitter.site,
         card: "summary_large_image",
       }}
       openGraph={{
         basic: {
           url: pageURL,
           type: "website",
-          title: ``,
+          title: makeTitle,
           image: resolvedImageWithDomain,
         },
         image: {
-          alt: " Homepage Screenshot",
+          alt: "Homepage Screenshot",
         },
       }}
     />
     <style is:global>
       /* Improve Page speed */
       /* https://css-tricks.com/almanac/properties/c/content-visibility/ */
-      img {
-        content-visibility: auto;
-      }
+      img { content-visibility: auto; }
     </style>
     <!-- <ViewTransitions /> -->
   </head>
-  <body>
+  <body class="max-w-screen">
     <Navbar />
     <slot />
     <Footer margin={footerMargin} />
-  </body>
+    <SpeedInsights />
 
+    <!-- <ViewTransitions /> -->
+    <script type="module" src="/api/crontasks" client:idle></script>
+  </body>
 </html>
 
 

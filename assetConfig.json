@@ -1,5 +1,0 @@
-{
- "staticFilePatterns": [
-   "mp3", "mp4", "zip", "pdf", "docx", "pptx", "xlsx", "jpg", "jpeg", "png", "gif", "svg"
-  ]
-}

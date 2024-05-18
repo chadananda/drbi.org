@@ -1,19 +1,14 @@
 ---
 export const prerender = true;
 
-import { getCollection } from "astro:content";
+import { ViewTransitions } from "astro:transitions";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import Sectionhead from "@components/sectionhead.astro";
-import { slugify } from "@utils/utils.js";
-
-import { getCollection } from 'astro:content';
-import Layout from  "@layouts/Layout.astro";
-import Container from "@components/container.astro";
-import Sectionhead from "@components/sectionhead.astro";
+import { getCategories } from "@utils/utils.js";
 import CategoryCard from "@components/article/categoryCard.astro";
 
-const categories = await getCollection("categories")
+const categories = await getCategories()
 ---
 
 <Layout pageTitle="All Tags">
@@ -23,18 +18,12 @@ const categories = await getCollection("categories")
       <Fragment slot="desc"> {categories.length} Categories  </Fragment>
     </Sectionhead>
 
-      <main class="flex flex-wrap justify-center gap-20 mt-5">
-        {Array.isArray(categories) && categories?.map((cat) => (
-           <div class="flex-none"> <CategoryCard slug={cat.id} size="md" /> </div>
+      <main class="flex flex-wrap justify-center gap-20 mt-5 pb-40">
+        {Array.isArray(categories) && categories.map((cat) => (
+           <div class="flex-none"> <CategoryCard slug={cat.id} size="md" category={cat} /> </div>
         ))}
+        <ViewTransitions/>
       </main>
-<!--
-      <div class="text-center">
-         {Array.isArray(categories) && categories?.map((cat) => (
-            <h3 class="text-xl">
-              <a href={`/categories/${cat.id}`} class="underline text-blue-900">{cat.data.category}</a>
-            </h3>
-          ))}
-      </div> -->
+
   </Container>
 </Layout>
