@@ -1,0 +1,14 @@
+---
+ const tldr = Astro.props.meta.tldr;
+---
+
+<div class="tldr text-base font-normal text-gray-600 italic my-5 p-3 bg-gray-100 rounded-lg border border-4 border-gray-300">
+   <div class="tldr-title text-lg sm:text-xl font-bold text-[#6c6b8b] normal-case m-0 p-0 pb-1">{tldr.title}</div>
+   <div class="tldr-content pl-0 sm:pl-4 ml-0 sm:ml-4 text-sm sm:text-base">
+     {tldr.content}
+     {tldr.link && (<a class="tldrLink block float-right text-gray-600 italic pt-2 pb-0 no-underline" target="_blank" href={tldr.link}>{tldr.linkText}</a>)}
+   </div>
+   <!-- tailwind clear  -->
+   <div class="clear-both"></div>
+</div>
+

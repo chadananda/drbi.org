@@ -1,0 +1,298 @@
+---
+// src/pages/admin/topics/[slug].astro
+export const prerender = false;  // Forces SSR so we can process form submission
+
+import Layout from '@layouts/AdminLayout.astro';
+import site from '@data/site.json'; // site info
+import { getTopic, updateTopic, slugify, transformS3Url } from "@utils/utils";
+
+const sessionid = Astro.locals.session.id;
+// console.log('sessionid', sessionid, Astro.locals.session);
+const user = Astro.locals?.user;
+if (!['admin', 'superadmin'].includes(user?.role)) return Astro.redirect('/admin');
+
+// console.log('!!! at least we got this far!');
+
+const formFields = [
+  { name: 'name', label: 'Topic Name', placeholder: 'Enter topic name', type: 'text', optional: false, pattern:'^[a-zA-Z0-9\s\-_]{5,100}$', title:"Enter a full topic name" },
+  { name: 'title', label: 'Topic Title', placeholder: 'Enter topic title', type: 'text', optional: true, colspan:3 },
+  { name: 'description', label: 'Description', placeholder: 'Enter description', type: 'textarea', optional: true, colspan:3 },
+  { name: 'image', label: 'Image URL', placeholder: 'Enter image URL', type: 'url', optional: true, pattern:'^https?:\/\/.+\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?(#.*)?$', title:"Enter a valid URL", colspan:3 }
+];
+
+
+const topic = await getTopic(Astro.params.slug) || {};
+
+let formData = { ...topic };
+let errorMsg;
+const isNew = Astro.params.slug === 'add';
+
+if (Astro.request.method === "POST") {
+    const requestBody = await Astro.request.formData();
+    // Update formData directly from requestBody to keep user inputs on validation errors
+    formData = { ...formData, ...Object.fromEntries(requestBody) };
+
+    // Assume 'faqs' from formData is already an array due to Drizzle parsing
+    formData.faqs = formData.faqs.filter(faq => faq.question.trim() && faq.answer.trim());
+    formData.faqs.push(...Array.from({length: 5}, () => ({question: '', answer: ''})));
+
+    if (!errorMsg) {
+        const topicToSave = {
+            ...formData,
+            id: isNew ? slugify(formData.name) : formData.id,
+            faqs: formData.faqs // 'faqs' should already be an array and doesn't need stringifying
+        };
+        try {
+            if (await updateTopic(topicToSave, isNew)) return Astro.redirect('/admin/topics');
+        } catch (error) {
+            errorMsg = `Error: ${error.message}`;
+        }
+    }
+}
+
+// Ensure we have at least 5 blank FAQs
+formData.faqs = formData.faqs.filter(faq => faq.question.trim() && faq.answer.trim());
+formData.faqs.push(...Array.from({length: 5}, () => ({question: '', answer: ''})));
+
+// console.log('formData faqs:', formData.faqs);
+
+const displayImage = formData.image ? transformS3Url(formData.image, 800, 0, 'webp', 80) : '';
+---
+
+<Layout user={user}>
+
+  <!-- Image Upload Modal -->
+  <div id="imageUploadModal" data-slug={Astro.params.slug} data-sessionid={sessionid} data-imgbase={site.img_base_url}
+   class="fixed inset-0 bg-black bg-opacity-50 hidden flex justify-center items-center z-10">
+    <div class="bg-white p-4 rounded-lg m-4 max-w-md w-full" style="z-index:50;">
+      <h2 class="text-lg text-center">Upload Image</h2>
+      <img id="popupImage" class="w-full h-auto rounded-lg mb-4" style="display: none;">
+      <input type="file" id="fileInput" class="block w-full text-sm text-gray-900 border rounded-lg cursor-pointer focus:outline-none">
+      <input type="text" id="directUrlInput" class="block w-full mt-4 p-2 text-sm text-gray-900 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Or paste an image URL here">
+      <div class="flex justify-center space-x-4 mt-4">
+        <button type="button" id="uploadButton" class="px-4 py-2 rounded bg-blue-500 text-white hover:bg-blue-700">Upload</button>
+        <button type="button" id="closeModalButton" class="px-4 py-2 rounded bg-gray-500 text-white hover:bg-gray-700">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mx-20 w-full prose">
+    <!-- Page Title and Breadcrumbs -->
+    <h1>Site Planning: Topics: {!isNew ? (<span>Edit Category</span>) : (<span>Add New Category</span>)}</h1>
+    <p class="ml-2 -mt-8"><a href="/">home</a> / <a href="/admin">admin</a> / <a href="/admin/topics">topics</a> / {!isNew ? 'edit' : 'add'}</p>
+
+    <!-- Error Message Display -->
+    {errorMsg && (
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <span class="block sm:inline">{errorMsg}</span>
+      </div>
+    )}
+
+    <!-- Form for Topic Data -->
+<form action="" method="POST" class="space-y-4 bg-white shadow rounded p-4 mb-20">
+  <!-- Image display with click to trigger upload -->
+  <div class="mx-auto border rounded-lg shadow-lg overflow-hidden mb-10" style="width: fit-content;">
+    <div class="flex justify-center items-center bg-gray-200 p-0" id="imageTrigger" style="cursor:pointer">
+      <img id="cardimg" src={displayImage} alt={formData.name}
+           class={`rounded-lg m-2 w-11/12 border-4 border-white shadow-lg ${displayImage ? '' : 'hidden'}`} />
+      <svg id="placeholder" class={`rounded-lg m-2 w-64 h-32 border-4 border-white shadow-lg text-gray-400 ${displayImage ? 'hidden' : ''}`}
+           fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-2 0H5V5h14v14zm-3-10l-2.5 3.01L11 11l-4 5h12z"/>
+      </svg>
+    </div>
+  </div>
+
+<!-- Dynamic Form Fields for Topic Data -->
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-lg">
+  {formFields.map((field) => (
+    <div key={field.name} class={`col-span-1 ${field.colspan ? `md:col-span-${field.colspan}` : 'md:col-span-1'}`}>
+      <label for={field.name} class="block text-sm font-medium text-gray-600">
+        {field.label}{!field.optional && '*'}
+      </label>
+      {field.type === 'textarea' ? (
+        <textarea id={field.name} name={field.name} placeholder={field.placeholder} class="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm p-2" rows="3" pattern={field.pattern} title={field.title}>{formData[field.name]}</textarea>
+      ) : (
+        <input id={field.name} type={field.type} name={field.name} value={formData[field.name]} placeholder={field.placeholder} class="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm p-2" pattern={field.pattern} title={field.title} />
+      )}
+    </div>
+  ))}
+</div>
+
+
+<!-- FAQs Section -->
+<div>
+  <h3 class="text-lg font-semibold">FAQs</h3>
+  {formData.faqs.map(({ question, answer }, index) => (
+  <div key={index} class="mb-4">
+    <label class="block text-sm font-medium text-gray-600">Question:</label>
+    <input type="text" name={`faqs[${index}].question`} placeholder="Enter FAQ question" class="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm p-2" value={question} />
+    <label class="block text-sm font-medium text-gray-600 mt-3">Answer:</label>
+    <textarea name={`faqs[${index}].answer`} placeholder="Enter FAQ answer" class="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm p-2" rows="3">{answer}</textarea>
+  </div>
+  ))}
+</div>
+
+
+  <!-- Delete Topic Option -->
+  {!isNew && (
+    <div class="col-span-1 text-2xl text-center font-mono my-4">
+      <label for="delete" class="text-red-600">Delete this topic:</label>
+      <input type="checkbox" id="delete" name="delete" class="ml-2 rounded border-2 text-9xl" />
+    </div>
+  )}
+
+  <!-- Submit Button -->
+  <button type="submit" class="w-full px-4 py-2 mt-4 bg-blue-600 text-white text-lg rounded-md hover:bg-blue-700">Save Changes</button>
+</form>
+
+  </div>
+
+
+<script>
+  // Element references
+  const modal = document.getElementById('imageUploadModal');
+  const trigger = document.getElementById('imageTrigger');
+  const closeBtn = document.getElementById('closeModalButton');
+  const fileInput = document.getElementById('fileInput');
+  const urlInput = document.getElementById('directUrlInput');
+  const imageSrcField = document.getElementById('image');
+  const popupImage = document.getElementById('popupImage');
+  const uploadBtn = document.getElementById('uploadButton');
+  const imgbase = modal.getAttribute('data-imgbase');
+
+  // Functions
+  const openModal = () => {
+    // we need a category name before we can save an image
+    if (!slugify(document.getElementById('name').value)) { alert('Please enter a name first'); return; }
+
+    // Reset inputs
+    fileInput.value = '';
+    urlInput.value = '';
+    // Display current image if exists
+    if (imageSrcField && imageSrcField.value) {
+      popupImage.src = imageSrcField.value;
+      popupImage.style.display = 'block';
+    } else {
+      popupImage.style.display = 'none';
+    }
+    // Reset and disable upload button
+    toggleUploadButton();
+    // Open modal
+    modal.classList.remove('hidden');
+  };
+  const closeModal = () => modal.classList.add('hidden');
+  const toggleUploadButton = () => {
+    if (fileInput.files.length > 0 || urlInput.value.trim() !== '') {
+      uploadBtn.disabled = false;
+      uploadBtn.classList.replace('bg-gray-500', 'bg-blue-500');
+      uploadBtn.classList.replace('hover:bg-gray-500', 'hover:bg-blue-700');
+      uploadBtn.classList.replace('cursor-not-allowed', 'cursor-pointer');
+    } else {
+      uploadBtn.disabled = true;
+      uploadBtn.classList.replace('bg-blue-500', 'bg-gray-500');
+      uploadBtn.classList.replace('hover:bg-blue-700', 'hover:bg-gray-500');
+      uploadBtn.classList.replace('cursor-pointer', 'cursor-not-allowed');
+    }
+  };
+
+  function slugify(text) {
+    return text.toLowerCase().trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+  }
+
+  const displayImagePreview = (src) => {
+    popupImage.src = src;
+    popupImage.style.display = 'block';
+  }
+
+  export const transformS3Url = (url, width = null, height = null, format = 'webp', quality = 80) => {
+    if (!url.includes('.s3.')) return url;
+    const imagePath = new URL(url).pathname;
+    let params = [];
+    if (width) params.push(`w=${width}`);
+    if (height) params.push(`h=${height}`);
+    // params.push(`fm=${format}`, `q=${quality}`);
+    params.push(`fm=${format}`, `q=${quality}`, `fit=crop`, `crop=faces`);
+    return `${imgbase}${imagePath}?${params.join('&')}`;
+  };
+
+  const uploadImage = () => {
+    const apiUrl = '/api/upload_s3';
+    const file = fileInput.files[0];
+    const imageUrl = urlInput.value;
+    const slug = slugify(document.getElementById('name').value);
+    const sessionid = modal.getAttribute('data-sessionid');
+    const cardimg = document.getElementById('cardimg')
+      const placeholder = document.getElementById('placeholder')
+    // console.log('uploadImage', slug, sessionid);
+
+    const processFile = (content, filename) => {
+      const s3key = `team/${slug || Date.now()}/${filename}`;
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'same-origin',
+        // 'Authorization': `Bearer ${sessionid}`,
+        body: JSON.stringify({ filedata: content.split(',')[1], s3key, sessionid })
+      })
+      .then(res => res.ok ? res.json() : Promise.reject('Failed to upload'))
+      .then(data => {
+        if (data.s3url) {
+          imageSrcField.value = data.s3url;
+          cardimg.src = transformS3Url(data.s3url, 800, 0, 'webp', 80);
+          cardimg.classList.remove('hidden');
+          placeholder.classList.add('hidden');
+          closeModal();
+        } else throw new Error('No URL returned ' + JSON.stringify(data));
+      })
+      .catch(error => {
+        console.error('Upload error:', error);
+        alert('Upload error: ' + error.message);
+      });
+    };
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => processFile(reader.result, file.name);
+      reader.readAsDataURL(file);
+    } else if (imageUrl) {
+      fetch(imageUrl)
+        .then(response => response.blob())
+        .then(blob => {
+          const reader = new FileReader();
+          reader.onload = () => processFile(reader.result, imageUrl.split('/').pop().split('?')[0]);
+          reader.readAsDataURL(blob);
+        })
+        .catch(console.error);
+    }
+  };
+
+  // Event listeners
+  trigger.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  window.addEventListener('click', (event) => { if (event.target === modal) closeModal(); });
+  document.getElementById('uploadButton').addEventListener('click', uploadImage); // Ensure you have an element with id='uploadButton'
+  fileInput.addEventListener('change', toggleUploadButton);
+  urlInput.addEventListener('input', toggleUploadButton);
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+      const reader = new FileReader();
+      reader.onload = (e) => displayImagePreview(e.target.result);
+      reader.readAsDataURL(fileInput.files[0]);
+    }
+    toggleUploadButton();
+  });
+  // Event listener for the URL input
+  urlInput.addEventListener('input', () => {
+    if (urlInput.value.trim() !== '') {
+      displayImagePreview(urlInput.value);
+    }
+    toggleUploadButton();
+  });
+
+</script>
+
+
+</Layout>
+
+
+

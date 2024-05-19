@@ -1,0 +1,72 @@
+---
+
+// astro component to display a hero video background for the home page
+---
+
+<div id="superhero" class="h-full w-full p-0 m-0 bg-white flex items-center justify-center relative shadow-2xl mb-48 sm:mb-8">
+ <!-- video -->
+ <video loop muted autoplay preload="auto" class="w-full h-full absolute top-0 left-0 z-5 object-cover"><source src="/drbi-open_md.mp4" type="video/mp4"></video>
+ <!-- caption -->
+ <!-- <div class="caption absolute bottom-0 pb-2 z-20 text-center text-white opacity-50">
+   <h1 class="uppercase text-2xl mb-1 leading-9">Welcome to Desert Rose</h1>
+   <h2 class="font-normal text-xl m-0 font-pt-sans">Come help us build the future...</h2>
+ </div> -->
+
+
+
+ <div class="missioncards absolute -bottom-64 sm:-bottom-12 inset-x-0 px-4 py-2 flex flex-col sm:flex-row justify-center items-center w-full z-60">
+  <div class="mission bg-white p-4 rounded-lg mb-4 sm:mb-0 sm:mr-4 border-2 border-gray-200 max-w-[500px] shadow-md">
+    <h1 class="text-xl font-bold">Our Mission</h1>
+    <p class="text-sm">Desert Rose Bahá'í Institute aims to serve communities through diverse educational programs, fostering spiritual, artistic, intellectual, and agricultural development for all ages and backgrounds.</p>
+  </div>
+  <div class="vision bg-white p-4 rounded-lg mb-4 sm:mb-0 sm:ml-4 border-2 border-gray-200 max-w-[500px] shadow-md">
+    <h1 class="text-xl font-bold">Our Vision</h1>
+    <p class="text-sm">Desert Rose aspires to be a center of learning guided by Bahá'í principles, creating a spiritually enriching environment that nurtures artistic and educational growth.</p>
+  </div>
+</div>
+
+<!-- <div class="missioncards absolute -bottom-64 sm:-bottom-12 inset-x-0 px-4 py-2 flex flex-col sm:flex-row justify-between items-center w-full z-60">
+  <div class="mission bg-white p-4 rounded-lg mb-4 sm:mb-0 sm:mr-4 border-2 border-gray-200 shadow-md max-w-[500px]">
+    <h1 class="text-xl font-bold">Our Mission</h1>
+    <p class="text-sm">Desert Rose Bahá'í Institute aims to serve communities through diverse educational programs, fostering spiritual, artistic, intellectual, and agricultural development for all ages and backgrounds.</p>
+  </div>
+  <div class="vision bg-white p-4 rounded-lg mb-4 sm:mb-0 sm:ml-4 border-2 border-gray-200 shadow-md max-w-[500px]">
+    <h1 class="text-xl font-bold">Our Vision</h1>
+    <p class="text-sm">Desert Rose aspires to be a center of learning guided by Bahá'í principles, creating a spiritually enriching environment that nurtures artistic and educational growth.</p>
+  </div>
+</div> -->
+
+
+
+
+
+</div>
+
+
+
+
+
+
+<style>
+@font-face {
+  font-family: 'Merri';
+  src: url('/fonts/Merriweather/Merriweather-Black.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+ #superhero {
+   height: 80vh;
+ }
+ #superhero .caption h1 {
+   font-family: 'merri', sans-serif;
+ }
+ #superhero .caption h2 {
+   font-family: 'PT Sans', sans-serif;
+ }
+</style>
+
+
+
+
+

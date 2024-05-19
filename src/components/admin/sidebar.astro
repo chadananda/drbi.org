@@ -1,0 +1,121 @@
+---
+ import { getAllArticles } from '@utils/utils.js';
+
+ const user  = Astro.locals?.user
+//  const { user } = Astro.props;
+ const isAdmin = ['admin', 'superadmin'].includes(user?.role);
+ const isEditor = ['editor', 'admin', 'superadmin'].includes(user?.role);
+ const isAuthor = ['author', 'editor', 'admin', 'superadmin'].includes(user?.role);
+ //console.log('user', user);
+ //console.log(user?.name, user?.role, isAdmin, isEditor, isAuthor);
+ const articles = (await getAllArticles("en")).map(post => ({...post, editLink: `/admin/articles/${post.baseid}` }));
+ // sort articles array by data.draft then article.data.datePublished
+ articles.sort((a, b) => {
+   if (a.data.draft && !b.data.draft) return 1;
+   return new Date(b.data.datePublished) - new Date(a.data.datePublished);
+ });
+
+---
+
+<div id="sidebar_container" class="relative expanded">
+
+<!-- Floating Toggle Button using Tailwind CSS -->
+<button id="toggleSidebarBtn" aria-controls="sidebar" aria-expanded="true"
+class="z-40 bg-white border border-gray-300 rounded-full shadow-lg p-2 absolute -right-1 -top-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" viewBox="0 0 20 20" fill="currentColor">
+    <path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+  </svg>
+</button>
+
+<nav id="sidebar" class="sidebar relative overflow-hidden border-4 border-l-0 border-gray-300 rounded-r-lg z-10
+ p-5 pt-0 pl-2 text-lg bg-slate-50 w-full">
+
+ <ul>
+
+  <h2><a href="/admin">Admin Dashboard</a></h2>
+
+
+  {!!isAdmin && (
+  <li><h3>Site Planning</h3>
+    <ul>
+      <li><a href="/admin/branding">Branding</a></li>
+      <li><a href="/admin/team">Team</a></li>
+      <li><a href="/admin/categories">Categories</a></li>
+      <li><a href="/admin/topics">Topics / FAQs</a></li>
+      <li><span href="">Keywords/Questions</span></li>
+     <li><span href="">Content Planning</span></li>
+    </ul>
+  </li> )}
+
+{isEditor && (
+  <li><h3>Promotion Tasks</h3>
+   <ul>
+     <li><a href="/admin/comments">Article Comment Tasks</a></li>
+     <li><span href="">Social Media Responses</span></li>
+     <li><span href="">Podcast Feed Promotion</span></li>
+     <li><span href="">Resource Page Promotion</span></li>
+     <li><span href="">Research Page PR Promotion</span></li>
+   </ul>
+ </li> )}
+
+
+{isAuthor && (
+  <li><h3><a href="/admin/articles/">Edit content</a></h3>
+    <ul>
+      {Array.isArray(articles) && articles.map((ar) => (
+        <li class={`${ar.data.draft?'draft':'published'}`}>
+          <a href={ar.editLink}>{ar.data.title}</a>
+        </li>
+      ))}
+    </ul>
+  </li> )}
+
+
+
+ </ul>
+
+</nav>
+</div>
+
+
+<style>
+  ul { margin-left: 0; padding-left: 0; }
+  h1, h2, h3 { text-decoration: underline; margin-bottom: 0.5rem; margin-top: .75em; }
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  ul { list-style: none; padding: 0; margin-bottom:1em;  }
+  ul li li {
+    font-size: 1rem;
+    margin-left: 0.5em;
+    line-height: 1.2;
+    margin-bottom: 0.5em;
+    display: block; /* or 'flex', depending on your layout */
+    white-space: nowrap; /* Prevents the text from wrapping */
+    overflow: hidden; /* Ensures the overflow text is hidden */
+    text-overflow: ellipsis; /* Adds ellipsis to overflow text */
+  }
+  li.draft:before { content: '🚧'; padding-right: 5px;  }
+  li.published:before { content: '\2713';  padding-right: 5px;  }
+  li a {text-decoration: underline;}
+  #sidebar_container { width: 55px; }
+  #sidebar_container.expanded { width: 250px; }
+
+</style>
+
+<script>
+  const container = document.getElementById('sidebar_container');
+  const btn = document.getElementById('toggleSidebarBtn');
+  const sidebar = document.getElementById('sidebar');
+
+  btn.addEventListener('click', function() {
+    // sidebar.classList.toggle('-translate-x-full');
+    sidebar.classList.toggle('hidden');
+    btn.setAttribute('aria-expanded', sidebar.classList.contains('hidden') ? 'false' : 'true');
+    // console.log('clicked');
+    sidebar_container.classList.toggle('expanded');
+  });
+</script>
+
+
+

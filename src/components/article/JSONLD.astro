@@ -1,0 +1,171 @@
+---
+// JSONLD.astro - a component to generate structured data for an article
+import site from '@data/site.json';
+import { SEO, TwitterCardType } from "astro-seo";
+import { getArticleAudioPath, getArticleTranslations, currentURL, generateArticleImage, toIsoStringWithTimezone, baseURL } from '@utils/utils.js';
+
+// type Props = CollectionEntry<'article'>['data'];
+const {category, author, post, topics} = Astro.props;
+const { title, description, desc_125, keywords, language, video_main, post_type, audio, audio_duration, url:slug, image } = post.data;
+
+// for some reason dateModified is not always rendering correctly in Astro
+let datePublished = toIsoStringWithTimezone(post.data.datePublished);
+let dateModified = toIsoStringWithTimezone(post.data.dateModified || new Date());
+
+const pageURL = currentURL(Astro);
+const siteURL = baseURL(Astro);
+
+const authorSlug = author?.data?.name ? author.id : site.siteName;
+const authorURL = `${siteURL}/authors/${authorSlug}`;
+
+var video = video_main ? {
+  url: video_main.videoURL, title: video_main.title, description: video_main.description,
+  duration: video_main.duration, image: video_main.image, transcript: video_main.transcript,
+} : null;
+
+
+// format image for large twitter card
+// console.log('image', image.src);
+
+const twitLargeImage = await generateArticleImage(image.src, post, siteURL, 600,314,'webp',80);
+const largeImage = await generateArticleImage(image.src, post, siteURL, 1200,600,'jpeg',80);
+const coverImage = await generateArticleImage(image.src, post, siteURL, 1200,600,'jpeg',80); // 1200x600 is the recommended size for OpenGraph images
+
+// console.log('coverImage',coverImage);
+
+let podcast = null;
+if (audio) {
+  // console.log('ArticleJSONLD, looking for article path for slug: ', slug);
+  const audioFilePath = await getArticleAudioPath(slug, audio);
+  podcast =  {
+    audioURL: `${siteURL}${audioFilePath}`,
+    title,
+    description,
+    duration: audio_duration,
+    episodeNumber: 1,
+    seriesName: site.siteName,
+    imageURL: coverImage?.src
+  }
+};
+
+// JSON-LD Schema for the article
+//  https://validator.schema.org/
+const schema = {
+  "@context": "https://schema.org",
+  "@type": post_type, // Article, WebPage, Event, Organization, Person, LocalBusiness, Product, Recipe, Review, BreadcrumbList, Course, JobPosting, Movie, MusicAlbum, QAPage, SearchResultsPage, SoftwareApplication, VideoObject
+  description: description,
+  keywords: keywords,
+  author: {
+    "@type": author?.data?.type || 'editor',
+    name: author?.data?.name || site.author,
+    url: authorURL,
+  },
+  publisher: {
+    "@type": "Organization", //Organization, Corporation, GovernmentOrganization, NGO, EducationalOrganization, SportsTeam, MusicGroup, PerformingGroup, NewsMediaOrganization, FundingScheme, LibrarySystem, MedicalOrganization, WorkersUnion, Consortium, Airline, Brand
+    name: site.siteName, // like "Ocean 2.0 Reader"
+    logo: {
+      "@type": "ImageObject",
+      url: site.logo,
+    },
+  },
+  headline: title,
+  image: {
+    "@type": "ImageObject",
+    "url": coverImage?.url, // how to get width and height of image?
+    "width": coverImage?.width,
+    "height": coverImage?.height,
+  },
+  url: pageURL,
+  mainEntityOfPage: pageURL,
+  articleSection: category.data.category,
+  inLanguage: language,
+  /* the schema expects Date or DateTime using ISO 8601 format.   */
+  datePublished: datePublished,
+  /* updateDate is optional frontmatter, so we conditionally add dateModified if it exists */
+  dateModified: dateModified
+};
+
+// console.log('schema', schema);
+
+// A list of all the translations of this page
+const translations = await getArticleTranslations(slug, true);
+
+let altLinks = translations.map((tr) => {
+  return { rel: "alternate", hreflang: tr.data.language || 'en', href: `/${tr.data?.url}`};
+});
+// RSS autodiscovery allows browsers and other software to automatically find a site’s RSS feed from the main URL.
+altLinks.push({
+  rel:"alternate", type:"application/rss+xml", title,
+  href:`${Astro.site}podcast/${language}.xml`
+});
+// meta links include alternate links for translations
+const metaHeaders = {
+  link: [
+    { rel: "icon", type:"image/svg+xml",  href:"/favicon.svg" },
+    { rel: "sitemap", type:"application/xml",  href:"/sitemap-index.xml" },
+    { rel: "sitemap", type:"application/xml",  href:"/sitemap-articles.xml" }
+  ].concat(altLinks),
+};
+
+const twitterHeaders = twitLargeImage ? {
+  creator: site.twitter.creator,
+  site: site.twitter.site,
+  card: "summary_large_image" as TwitterCardType,
+  title: title, // max 55 characters
+  description: desc_125, // max 125 characters
+  image: twitLargeImage?.src, // 2:1 aspect ratio, min 300x157, max 4096x4096 JPG, PNG, WEBP, and GIF
+  imageAlt: coverImage?.alt, // Alt text for the Twitter card image
+  imageWidth: twitLargeImage?.width,
+  imageHeight: twitLargeImage?.height,
+} : null;
+
+// console.log('coverImage,', coverImage);
+
+var openGraphHeaders = {
+  basic: {
+    url: pageURL,
+    secure_url: pageURL, // if https available
+    type: post_type.toLowerCase(),
+    title: title,
+    description: description, // max 155 characters
+    image: coverImage?.src, // 1.91:1 aspect ratio, min 300x157, max 4096x4096 JPG, PNG, WEBP, and GIF
+    imageAlt: coverImage?.alt,
+    imageWidth: coverImage?.width,
+    imageHeight: coverImage?.height,
+  },
+  image: {
+    alt: coverImage?.alt,
+  },
+  article: {
+    published_time: datePublished,
+    modified_time: dateModified,
+    author: authorURL,
+    section: category.data?.category,
+    tag: topics?.map(t => t.id).join(', '), // assuming topics is an array of references
+  },
+  video: {}, audio: {},
+};
+
+if (video) openGraphHeaders.video ={
+  url: video_main ? video?.url : '',
+  secure_url: video_main ? video_main?.videoURL : '', // if https available
+  type: 'video.educational', // or appropriate type
+}
+
+if (podcast) openGraphHeaders.audio = {
+  url: podcast.audioURL,
+  secure_url: podcast.audioURL, // if https available
+  type: 'audio.podcast', // or appropriate type
+}
+
+// console.log("openGraphHeaders", openGraphHeaders);
+
+---
+
+<>
+<SEO title={title} description={description} canonical={pageURL}
+  twitter={twitterHeaders} openGraph={openGraphHeaders} extend={metaHeaders} />
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+</>
+

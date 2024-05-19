@@ -1,0 +1,11 @@
+
+
+ /* This will hide the elements on screen, but show them when printing */
+ @media screen {
+  .printonly { display: none; }
+}
+
+@media print {
+  .printonly { display: block !important; }
+  .noprint { @apply hidden; display: none; }
+}

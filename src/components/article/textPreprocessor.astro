@@ -1,0 +1,20 @@
+---
+import { JSDOM } from 'jsdom';
+import { allFixes } from '@utils/typography.js';
+
+const transformText = (html, fixers) => {
+  const { document } = new JSDOM(html).window;
+  const TEXT_NODE = 3;
+  const applyFixers = node => {
+    if (node.nodeType === TEXT_NODE) fixers.forEach(fix => node.nodeValue = fix(node.nodeValue));
+      else if (node.hasChildNodes()) node.childNodes.forEach(applyFixers);
+  };
+  applyFixers(document.body);
+  return document.body.innerHTML;
+};
+
+const htmlContent = await Astro.slots.render('default');
+
+const content = transformText(htmlContent, allFixes);
+---
+<p set:html={content}></p>

@@ -1,0 +1,68 @@
+---
+export const prerender = true;
+
+import { getUsedLanguages, mainLanguages } from '@utils/utils.js'
+const langs = await getUsedLanguages();
+---
+
+<div class="flex justify-center my-5 sticky top-20 z-10">
+ <div class="max-w-2xl w-full border-2 rounded-lg shadow-md p-0 sm:p-2 flex items-center space-x-1 sm:space-x-4 bg-white overflow-hidden">
+   <input id="arfilter" type="text" class="flex-grow p-3 sm:p-4 text-md sm:text-2xl rounded-md focus:outline-none" placeholder="Title, author, topic" style="max-width: calc(100% - 100px);" />
+   <select id="langsel" class="w-32 sm:w-36 p-2 text-sm sm:text-lg rounded-md text-gray-400 text-center focus:outline-none" default="en">
+     {langs && langs.map(lang => (
+       <option value={lang}> {mainLanguages[lang].flag} {mainLanguages[lang].name}</option>
+     ))}
+   </select>
+ </div>
+</div>
+
+
+
+<script type="module" src="/js/hidePosts.js" client:idle></script>
+<script type="text/javascript" client:idle>
+
+  function initializeLanguageAndFilter() {
+    // Check if there's a selected language saved and set it
+    const savedLanguage = localStorage.getItem('selectedLanguage') || 'en';
+    const langSelectElement = document.getElementById('langsel');
+    const articleFilterElement = document.getElementById('arfilter');
+
+    if (langSelectElement && articleFilterElement) {
+      if (savedLanguage) langSelectElement.value = savedLanguage;
+      // Now trigger the filtering based on saved preferences
+      articleFilterElement.dispatchEvent(new Event('input'));
+    } else {
+      console.warn('Element(s) not found.');
+    }
+  }
+
+  initializeLanguageAndFilter();
+  // Then call it again after 250ms and 1s to ensure transitions are accounted for
+  setTimeout(initializeLanguageAndFilter, 250);
+  setTimeout(initializeLanguageAndFilter, 1000);
+
+
+  document.getElementById('arfilter').addEventListener('input', function() {
+    const searchQuery = this.value.toLowerCase();
+    const selectedLanguage = document.getElementById('langsel').value;
+    const articles = document.querySelectorAll('.articlePost');
+    articles.forEach(article => {
+      const title = article.dataset.title.toLowerCase();
+      const tags = article.dataset.tags.toLowerCase();
+      const language = article.dataset.language.toLowerCase();
+      if (language === selectedLanguage && (title.includes(searchQuery) || tags.includes(searchQuery))) {
+        article.classList.remove('hidden');
+      } else article.classList.add('hidden');
+    });
+  });
+
+  // Change language
+  document.getElementById('langsel').addEventListener('change', function() {
+    const selectedLanguage = this.value;
+    // Save the selected language to localStorage
+    localStorage.setItem('selectedLanguage', selectedLanguage);
+    // Trigger the input event handler to re-filter articles based on the new language selection
+    document.getElementById('arfilter').dispatchEvent(new Event('input'));
+    // updateArticleVisibility();
+  });
+</script>
