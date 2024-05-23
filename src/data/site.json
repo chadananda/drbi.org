@@ -18,7 +18,6 @@
   "address": "1950 W. William Sears Dr.",
   "email": "info@drbi.org",
   "phone": "(520) 466-7961",
-  "web3forms_access_key": "a7763c6b-35e2-4a39-9d3e-d165cec6f2e8",
   "logo": "/logo.svg",
 
   "youtube": {
@@ -45,7 +44,11 @@
   "vercel_project_domain": "drbi-org.vercel.app",
   "vercel_project_url": "https://drbi-org.vercel.app",
   "vercel_project_dashboard": "https://vercel.com/chads-projects-568ec869/drbi/deployments",
-  "github_project_url": "https://github.com/chadananda/drbi"
+  "github_project_url": "https://github.com/chadananda/drbi",
+
+  "web3forms_access_key": "a7763c6b-35e2-4a39-9d3e-d165cec6f2e8",
+  "img_base_url": "https://bahai-ed.imgix.net",
+  "imgix_dashboard": "https://dashboard.imgix.com/sources/661ec5ae04acc066b24e664f"
 
 
 }

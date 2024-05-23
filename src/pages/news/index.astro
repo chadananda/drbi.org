@@ -1,22 +1,19 @@
 ---
 export const prerender = true;
 
-import { getCollection } from "astro:content";
-import NewsLayout from "@layouts/NewsLayout.astro";
+import NewsLayout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import Sectionhead from "@components/sectionhead.astro";
 import PostThumb from "@components/article/postThumb.astro";
+import { getPublishedArticles } from "@utils/utils.js";
 // import Pagination from "@components/pagination.astro";
 
 /**
  * @type {any}
  */
-// const { page } = Astro.props;
 
-const isPublished = ({data}) => (!data.draft && data.datePublished<=new Date());
-const isDev = import.meta.env.APP_ENV==='dev';
-const allPosts = await getCollection("posts", (ar) => isPublished(ar) || isDev);
-const news = allPosts.filter((ar) => ar.data.post_type==='Newsletter');
+const news = (await getPublishedArticles()).filter((post)=>post.data.post_type==='Newsletter');
+// console.log(news);
 ---
 
 <NewsLayout title="Article">
@@ -29,7 +26,7 @@ const news = allPosts.filter((ar) => ar.data.post_type==='Newsletter');
 
     <main class="mt-16">
       <div class="flex flex-wrap justify-center gap-20">
-        {Array.isArray(news) && news.map((post) =>(
+        {Array.isArray(news) && news.map((post) => (
           <div class="flex-none" style={{ width: '300px' }}>
             <PostThumb post={post} />
           </div>

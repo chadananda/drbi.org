@@ -4,7 +4,7 @@
 
 import Editor from './easymde/Editor.svelte'; // markdown editor
 import MetaEditor from './MetaEditor.svelte'; // meta data editor
-import Preview from './Preview.svelte'; // preview component
+// import Preview from './Preview.svelte'; // preview component
 import TabSwitcher from './TabSwitcher.svelte';
 import LanguageSwitcher from './LanguageSwitcher.svelte';
 
@@ -17,6 +17,12 @@ export let language;
 export let sessionid;
 export let translations;
 
+let fullScreenMode = false; // Add this line
+const handleFullScreenModeChange = (event) => {
+  fullScreenMode = event.detail;
+  console.log('fullScreenMode:', fullScreenMode);
+};
+
 const articleExists = (lang) => translations.filter(t => t.data?.language === lang).length > 0;
 $: languages = languages.map(lang => ({...lang, enabled: articleExists(lang.id)}));
 // sort language list by active (language===id), then enabled, then id
@@ -26,8 +32,8 @@ languages.sort((a, b) => a.id === language ? -1 : b.id === language ? 1 : a.enab
 let activeTab = 'content'; // Default to showing the content editor
 const tabs = [
   { id: 'content', title: 'Content' },
-  { id: 'metadata', title: 'Details' },
-  { id: 'preview', title: 'Preview' }
+  { id: 'metadata', title: 'Meta' },
+  // { id: 'preview', title: 'Preview' }
 ];
 
 function handleTabSwitch(event) { activeTab = event.detail.tabId; }
@@ -57,23 +63,28 @@ let meta_props = {
   topics: topicList,
   categories: categoryList,
 };
+
+
+//Desert Rose Bahá'í Institute: Trees, Radio, and the Dawn-Breakers Challenge
+
+
 </script>
 
 
 
 <div class="editor p-0 w-full h-auto my-4 ml-6 -mt-5">
+  <!-- this content shows up in between the split panes in side-by-side editing mode -->
   <h3 class="text-xl mx-2 font-semibold ml-2 inline -mt-4"> {post?.data?.title} </h3>
+
   <div class="grid grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1">
     <div class="col-span-4">
       <TabSwitcher {tabs} {activeTab} on:tabSwitch={handleTabSwitch} />
     </div>
     <div class="col-span-4 min-w-[580px]">
       {#if !!post}
-        <!-- {#key language} -->
-          <Editor bind:post={post} {sessionid} visible={activeTab === 'content'} />
-          <MetaEditor bind:post={post} {...meta_props} visible={activeTab === 'metadata'} />
-          <Preview bind:post={post} {...meta_props} visible={activeTab === 'preview'} />
-         <!-- {/key} -->
+        <Editor bind:post={post} {sessionid} visible={activeTab === 'content'}
+              on:fullScreenModeChanged={handleFullScreenModeChange}/>
+        <MetaEditor bind:post={post} {...meta_props} visible={activeTab === 'metadata'} />
       {/if}
     </div>
     <div class="pt-3">
@@ -81,5 +92,39 @@ let meta_props = {
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
+<!--
+  <div class="editor p-0 w-full h-auto my-4 ml-6 -mt-5">
+
+  {#if !fullScreenMode} <h3 class="text-xl mx-2 font-semibold ml-2 inline -mt-4">{post?.data?.title}</h3> {/if}
+
+  <div class={`grid ${fullScreenMode ? 'grid-cols-1' : 'grid-cols-2'} gap-1`}>
+
+    {#if !fullScreenMode}
+      <div class="colspan-2">
+        <TabSwitcher {tabs} {activeTab} on:tabSwitch={handleTabSwitch} />
+      </div>
+    {/if}
+
+    <div class='col-span-1 min-w-[580px]'>
+      {#if !!post}
+        <Editor bind:post={post} {sessionid} visible={activeTab === 'content'} on:fullScreenModeChanged={handleFullScreenModeChange} />
+        <MetaEditor bind:post={post} {...meta_props} visible={activeTab === 'metadata'} />
+      {/if}
+    </div>
+
+    {#if !fullScreenMode}
+      <div class="pt-3">
+        <LanguageSwitcher {languages} {language} on:language={({ detail }) => (language = detail.id)} />
+      </div>
+    {/if}
+  </div>
+</div> -->
 
 

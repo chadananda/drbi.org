@@ -80,6 +80,16 @@ among religions. With its global scope, the Faith espouses principles of
 individual search for truth, equality of men and women, and harmonious
 development of science and religion.`, },
 
+{	id: 'drbi-newsletter',
+category: 'DRBI Newsletter',
+image: 'https://blogw-assets.s3.us-west-1.amazonaws.com/uploads/2024-01-desert-rose-bahai-institute-news/pastel-newswebp',
+description: `The Bahá'í Faith is a monotheistic religion emphasizing the spiritual unity of
+all humankind. Originating with the teachings of Bahá'u'lláh in 19th-century
+Persia, it advocates universal peace, elimination of prejudice, and unity
+among religions. With its global scope, the Faith espouses principles of
+individual search for truth, equality of men and women, and harmonious
+development of science and religion.`, },
+
 ]).execute();
 
 

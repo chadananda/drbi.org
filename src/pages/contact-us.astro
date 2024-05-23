@@ -1,10 +1,11 @@
 ---
-import { Icon } from 'astro-icon/components'
+export const prerender = true;
+// import { Icon } from 'astro-icon/components'
 import Layout from "@layouts/Layout.astro";
-import Container from "@components/container.astro";
-import Sectionhead from "@components/sectionhead.astro";
-import Contactform from "@components/contactform.astro";
-import brand from "@data/branding.json";
+import Container from "src/components/container.astro";
+import Sectionhead from "src/components/sectionhead.astro";
+import Contactform from "src/components/contactform.astro";
+import site from "@data/site.json";
 ---
 
 <Layout title="Contact">
@@ -16,23 +17,21 @@ import brand from "@data/branding.json";
 
     <div class="grid md:grid-cols-2 gap-10 mx-auto max-w-4xl mt-16">
       <div>
-        <h2 class="font-medium text-2xl text-gray-800">Contact {brand.site}</h2>
+        <h2 class="font-medium text-2xl text-gray-800">Contact {site.site}</h2>
         <p class="text-lg leading-relaxed text-slate-500 mt-3">
           Have something to say? We are here to help. Fill up the form or send
           email or call phone.
         </p>
         <div class="mt-5">
           <div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <Icon class="text-gray-400 w-4 h-4" name="uil:map-marker" />
-            <span>{brand.address}</span>
+            <!-- <Icon class="text-gray-400 w-4 h-4" name="uil:map-marker" /> -->
+            <span>{site.address}</span>
           </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <Icon class="text-gray-400 w-4 h-4" name="uil:envelope" /><a
-              href={`mailto:${brand.email}`}>{brand.email}</a
-            >
+            <!-- <Icon class="text-gray-400 w-4 h-4" name="uil:envelope" />-->
+            <a href={`mailto:${site.email}`}>{site.email}</a>
           </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <Icon class="text-gray-400 w-4 h-4" name="uil:phone" /><a
-              href="tel:+1 (987) 4587 899">{brand.phone}</a
-            >
+            <!-- <Icon class="text-gray-400 w-4 h-4" name="uil:phone" /> -->
+            <a href="tel:+1 (987) 4587 899">{site.phone}</a>
           </div>
         </div>
       </div>

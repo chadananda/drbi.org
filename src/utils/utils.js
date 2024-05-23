@@ -37,8 +37,8 @@ export const updatePost_DB = async (entry) => {
   language = language || 'en';
 
   // basic validation
-  if (!title || !description || !abstract ) {
-    console.error('updatePost_DB: missing some required fields');
+  if (!title || !description  ) {
+    console.error('updatePost_DB: missing some required fields', {title, description, abstract});
     return false;
   }
 
@@ -370,7 +370,12 @@ export const generateArticleImage = async (imgfile, post=null, baseUrl="", width
   let empty ={src:'', width, height, alt}
   if (!imgfile) return empty;
   // http image
-  if (imgfile.startsWith('http')) return displayImageObj(imgfile, alt, width, height, format, quality);
+  // console.log('generateArticleImage', { imgfile });
+  if (imgfile.startsWith('http')) {
+    const res = displayImageObj(imgfile, alt, width, height, format, quality);
+    // console.log('displayImageObj returns: ', {imgfile, res})
+    return res
+  }
   // local images need a post object to locate the asset file
   try {
     if (!post || !post.id) { console.error('generateArticleImage: post not found'); return empty; }
@@ -808,6 +813,7 @@ export const transformS3Url = (url = '', width = null, height = null, format = '
   return `${site.img_base_url}${imagePath}?${params.join('&')}`;
 }
 export const displayImageObj = (url, alt='', width=0, height=0, format='webp', quality=80) => {
+  // console.log(`>>> displayImageObj`, {url, src: (url, width, height, format, quality)});
   return {
     src: transformS3Url(url, width, height, format, quality),
     width, height, alt, isExternal: true
@@ -819,13 +825,16 @@ export const baseURL = (Astro) => {
   return url?.split('/').slice(0,3)?.join('/');
 }
 export const seedSuperUser = async () => {
+
   const email = import.meta.env.SITE_ADMIN_EMAIL.trim().toLowerCase();
+
   const userFound = (await db.select().from(Users).where(eq(Users.email, email))).length;
   const name = site.author;
   const id = slugify(name);
   const role = 'superadmin';
   const hashed_password = await argon2.hash(import.meta.env.SITE_ADMIN_PASS.trim());
   const user = { id, name, email, hashed_password, role };
+   console.log('>> seedSuperUser', user);
   if (!userFound) try {
    // console.log('Adding super user:', user);
     await db.insert(Users).values(user);
@@ -1015,8 +1024,8 @@ export const poorMansCron = async () => {
   const timeSince = (previousTime) => (new Date()-oneMinute)
   if (!previousCron) {
     // If no last call time is recorded, insert a new record
+    await crontasks();
     await db.insert(Cron).values({ task: 'cronjob' });
-    // await crontasks();
   } else if (previousCron && (timeSince(previousCron.time) > fiveMinutes)) {
     // If more than 5 minutes have passed since the last call
     try {

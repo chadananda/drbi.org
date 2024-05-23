@@ -10,12 +10,13 @@ const author_name = authorid.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperC
 const category = Astro.props.category || '';
 const siteURL = baseURL(Astro) ;//new URL(pageURL).origin.replace(/\/$/, '');
 
-// console.log('siteURL:', siteURL);
+// console.log('siteURL:', {img: post.data.image?.src, post: post.id, siteURL});
 
 const image = small ? await generateArticleImage(post.data.image?.src, post, siteURL, 198,131,'webp',90) :
   await generateArticleImage(post.data.image?.src, post, siteURL, 298,198,'webp',90);
 
 // console.log('postThumb', {src: post.data.image?.src, post: post.id, siteURL, image: image.src});
+// console.log('postThumb', { image });
 
 // const image = await generateArticleImage(post.data.image?.src, post, siteURL, 198,131,'webp',90);
 
