@@ -102,21 +102,6 @@
         background-color: #f9f9f9;
         border-left: 4px solid #ccc;
       }
-      /* Custom CSS to remove gaps
-      .CodeMirror, .CodeMirror-scroll {
-        height: auto;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-      .CodeMirror-sizer {
-        margin: 0 !important;
-      }
-      .CodeMirror-lines {
-        padding: 0 !important;
-      }
-      .CodeMirror-gutter {
-        margin: 0 !important;
-      } */
     `;
     document.head.appendChild(style);
 
