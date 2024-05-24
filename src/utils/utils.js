@@ -1,6 +1,6 @@
 // utils.js
 import slugifier from 'slugify';
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 // export a slugify function
 import path from 'path';
 import fs from 'fs';
@@ -29,21 +29,23 @@ export const genPostID = (title, datePublished) => {
   let datePart = (new Date(datePublished)).toLocaleDateString('en-CA'); // YYYY-MM-DD
   return `${datePart}-${namePart}/en.md`;
 }
-
 // updatePost requires a full post object with data and body, not a partial update
 export const updatePost_DB = async (entry) => {
+  // console.log('>>>> updatePost_DB', {  image: entry.data.image, id: entry.id });
+
   let { id, data, body } = entry;
   let { title, post_type, url, description, desc_125, abstract,  audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics,  keywords, datePublished, image, language } = data;
   language = language || 'en';
 
   // basic validation
   if (!title || !description  ) {
-    console.error('updatePost_DB: missing some required fields', {title, description, abstract});
+    console.error('updatePost_DB: missing some required fields', {title, description});
     return false;
   }
 
   // if image is an object, make it a string
   if (typeof image === 'object') image = `${image.src}`;
+  // console.log('>>> updatePost_DB', {  image });
 
   // replace index.mdoc with en.id  and  *.mdoc with *.md
   id = id || genPostID(title, datePublished);
@@ -102,15 +104,15 @@ export const updatePost_DB = async (entry) => {
     return false;
   }
 }
-
 export const importPost2DB = async (id) => {
   let post = await getPostFromID(id)
   if (!post.db) await updatePost_DB(post)
 }
-
 export const postExists = async (id) => {
-  return (await db.select({id: Posts.id}).from(Posts).where(eq(Posts.id, id))).length>0
+  const result = (await db.select({id: Posts.id}).from(Posts).where(eq(Posts.id, id))).length>0
   // this is inefficient. we should query a count instead of fetching the whole object
+  // console.log('>>> postExists', {id, exists: result});
+  return result
 }
 
 // export const postExists = async (id) => {
@@ -120,20 +122,19 @@ export const postExists = async (id) => {
 export const importAllPosts2DB = async () => {
   // let posts = await getAllArticles();
   const posts = await getAllCollectionArticles();
+  // console.log('>>>> importAllPosts2DB', posts.length);
   // sort the posts so language=en is last
   posts.sort((a, b) => a.data.language === 'en' ? 1 : -1);
   for (const post of posts) {
     let normalizeID = post.id.replace('index.mdoc', 'en.md').replace('.mdoc', '.md');
-    if (!(await postExists(normalizeID))) await updatePost_DB(post);
+    //if (!(await postExists(normalizeID)))
+    await updatePost_DB(post);
   }
 }
-
 export const normalizePost_DB = (dbpost) =>  {
   const { id, url, title, post_type, description, desc_125, abstract, language, audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics, tags, keywords, datePublished, dateModified, image, body, baseid } = dbpost;
-
   // console.log('normalizePost_DB check 1', { image } );
 // console.log('normalizePost_DB check 2', { audio, audio_image, audio_duration } );
-
   const entry = {
     id, slug: url, baseid, collection: "posts",
     data: {
@@ -148,11 +149,9 @@ export const normalizePost_DB = (dbpost) =>  {
     },
     body
   }
-  // console.log('normalizePost_DB', entry.data);
   // console.log('normalizePost_DB', entry);
   return entry;
 };
-
 export const newPostObj = (title, description, abstract='', desc_125='', body='') => {
   const datePublished = new Date(Date.now() + 604800000); // 604800000ms = 7 days
   const language = 'en';
@@ -180,24 +179,20 @@ export const newPostObj = (title, description, abstract='', desc_125='', body=''
   body,
   db: true };
 };
-
 export const deletePost = async (postid) => {
   // we should not actually delete but turn the post into a redirect
   // but for now we will delete
    await db.delete(Posts).where(eq(Posts.id, postid));
    console.log('deleted post', postid);
 }
-
-
 export const getPosts_DB = async (lang = '', filter = () => true) => {
   // const isLangMatch = (p) => !!lang ? p.data.language === lang : true;
   let posts = [];
   // rather than fetching all posts, we should fetch only the ones we need
   if (!lang) posts = await db.select().from(Posts);
     else posts = await db.select().from(Posts).where(eq(Posts.language, lang));
-  return posts.map(normalizePost_DB)
-    // .filter((post) => isLangMatch(post))  // Apply language filter to db articles
-    // .map(post => ({ ...post, db: true }));
+  const result = posts.map(normalizePost_DB)
+  return result;
 }
 
 export const getPostFromSlug_DB = async (slug) => {
@@ -212,7 +207,6 @@ export const getPostFromID_DB = async (id) => {
     .map(post => ({ ...post, db: true, helpers: getArticleHelpers(post) }))[0];
   return post;
 }
-
 export const getArticleHelpers = (article) => {
   let { datePublished, author, draft, image } = article.data;
   if (!datePublished) datePublished = new Date();
@@ -230,7 +224,6 @@ export const getArticleHelpers = (article) => {
     imgCover: transformS3Url(image.src, 1200,900),
   }
 }
-
 export const getAllCollectionArticles = async (lang='', filter=()=>true) => {
   const isBlank = (p) => p.data?.url?.toLowerCase().trim() === 'blank';
   const isLangMatch = (p) => !!lang ? p.data?.language === lang : true;
@@ -239,7 +232,6 @@ export const getAllCollectionArticles = async (lang='', filter=()=>true) => {
     .filter(filter);
   return posts;
 }
-
 export const getAllArticles = async (lang = '', filter = () => true) => {
   // make sure all collection posts are loadded into the database
   await importAllPosts2DB(); // we'll move this to a cron job or build step later
@@ -267,7 +259,6 @@ export const getPostFromSlug = async (slug) => {
   // let post = (await getCollection('posts', (post)=>post.data?.url===slug))?.pop();
   // if (!post) await getPostFromSlug_DB(slug);
   const post = await getPostFromSlug_DB(slug);
-
   // console.log('getPostFromSlug - post found:', post);
   if (!post) console.error('getPostFromSlug - post not found:', slug);
   return post;
@@ -283,7 +274,6 @@ export const getPostFromID = async (id) => {
   if (!post) console.error('getPostFromID - post not found:', id);
   return post;
 }
-
 // given a slug, return all matching translations, published or not
 export const getArticleTranslationAll = async (slug, all=false) => {
   // we can make this better by gettting baseid
@@ -296,7 +286,6 @@ export const getArticleTranslationAll = async (slug, all=false) => {
   translations = translations.map(normalizePost_DB);
   return translations;
 };
-
 export const getArticleTranslations = async (slug, all=false) => {
   const allPosts = await getPublishedArticles();
   const thisPost = allPosts.filter(post => post.data.url === slug)[0];
@@ -883,7 +872,6 @@ export const currentURL = (Astro) => {
   // Decode the URL to handle encoded characters
   return decodeURIComponent(cleanURL);
 }
-
 export const hashstr = (str, len=8) => {
   let hash = btoa(String(str.split('').reduce((hash, char) => ((hash << 5) - hash) + char.charCodeAt(0), 0) >>> 0)); // Generate Base64 encoded hash
   return hash.slice(0, len)
@@ -940,18 +928,15 @@ export const slugify = (text) => {
     remove: /[*+~.()'"!:@]/g, // remove characters that match regex, replace with replacement
   })
 }
-
 export const sanitizeHTML = (rawHTML) => {
   const window = new JSDOM('').window;
   const DOMPurify = createDOMPurify(window);
   return DOMPurify.sanitize(rawHTML);
 }
-
 export const renderMarkdown = (md) => {
   const rawHTML = marked(md);
   return sanitizeHTML(rawHTML);
 };
-
 export const buildToc = (post) => {
   const headings = MDHeadings(post.body);
   const toc = [], parentHeadings = new Map();
@@ -966,7 +951,6 @@ export const buildToc = (post) => {
   });
   return toc;
 }
-
 export const MDHeadings = (mdContent) => {
   const headings = [];
   const renderer = new marked.Renderer();
@@ -982,7 +966,6 @@ export const MDHeadings = (mdContent) => {
   marked(mdContent, { renderer });
   return headings;
 };
-
 export const sanitizeInput = (str, maxlength = null) => {
   // Remove all script tags and everything between them
   str = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
@@ -1007,7 +990,6 @@ export const sanitizeInput = (str, maxlength = null) => {
 export const isValidEmail = (email) => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
-
 export const toIsoStringWithTimezone = (d) => {
   let z = n => ('0' + n).slice(-2),
       off = d.getTimezoneOffset(),
@@ -1054,42 +1036,42 @@ export const poorMansCron = async () => {
 // in order to migrate data collections to the DB, we need to write a
 // wrapper function which fetches both the data collection and the data entry
 // TODO: phase this out entirely (only comments remain)
-export const getDataCollection = async (collection, filter = () => true) => {
-  let  collectionItems = await getCollection(collection, filter);
-  // let table = null;
-  // let dbMatches = [];
-  // if (collection === 'categories') table = Categories;
-  //  else if (collection === 'faqs') table = Faqs;
-  //  else if (collection === 'keywords') table = Keywords;
-  //  else if (collection === 'team') table = Team;
+// export const getDataCollection = async (collection, filter = () => true) => {
+//   let  collectionItems = await getCollection(collection, filter);
+//   // let table = null;
+//   // let dbMatches = [];
+//   // if (collection === 'categories') table = Categories;
+//   //  else if (collection === 'faqs') table = Faqs;
+//   //  else if (collection === 'keywords') table = Keywords;
+//   //  else if (collection === 'team') table = Team;
 
-  // if (table) dbMatches = (await db.select().from(table))
-  //   .map(row=>({id: row.id, type: "db", collection, data: row})).filter(filter);
-  // Create a map to override local items with dbMatches based on id
-  // const merged = new Map(dbMatches.map(item => [item.id, item]));
-  // local.forEach(item => merged.set(item.id, item)); // Local items are added, but don't override existing dbMatches
-  // return Array.from(merged.values());
+//   // if (table) dbMatches = (await db.select().from(table))
+//   //   .map(row=>({id: row.id, type: "db", collection, data: row})).filter(filter);
+//   // Create a map to override local items with dbMatches based on id
+//   // const merged = new Map(dbMatches.map(item => [item.id, item]));
+//   // local.forEach(item => merged.set(item.id, item)); // Local items are added, but don't override existing dbMatches
+//   // return Array.from(merged.values());
 
-  // console.log('getDataCollection', collection, dbMatches);
+//   // console.log('getDataCollection', collection, dbMatches);
 
-  return collectionItems;
-}
-export const getDataCollectionEntry = async (collection, id) => {
-  return await getEntry(collection, id)
+//   return collectionItems;
+// }
+// export const getDataCollectionEntry = async (collection, id) => {
+//   return await getEntry(collection, id)
 
 
-  // let match = null, table = null;
-  // if (collection === 'categories') table = Categories;
-  // //  else if (collection === 'faqs') table = Faqs;
-  // //  else if (collection === 'keywords') table = Keywords;
-  // //  else if (collection === 'team') table = Team;
+//   // let match = null, table = null;
+//   // if (collection === 'categories') table = Categories;
+//   // //  else if (collection === 'faqs') table = Faqs;
+//   // //  else if (collection === 'keywords') table = Keywords;
+//   // //  else if (collection === 'team') table = Team;
 
-  // // first try to fetch from the database
-  // if (table) match = (await db.select().from(table).where(  eq(table.category_slug, id) ))[0];
-  // if (match) match = { id, collection, data: match } // format like an astro content entry
-  //  else match = await getEntry(collection, id); // fall back on file system
-  // return match;
-}
+//   // // first try to fetch from the database
+//   // if (table) match = (await db.select().from(table).where(  eq(table.category_slug, id) ))[0];
+//   // if (match) match = { id, collection, data: match } // format like an astro content entry
+//   //  else match = await getEntry(collection, id); // fall back on file system
+//   // return match;
+// }
 export const getDataCollectionImage = async (collection, filename, imageType={format: 'jpg', width: 1000, height: 700}) => {
   if (!filename) return null;
   const {width, height, format} = imageType;

@@ -44,9 +44,12 @@ const language = post.data?.language || "en";
 const dir = mainLanguages[language].dir;
 const base_url = baseURL(Astro);
 
-//const cover_image = await generateArticleImage(post.data.image?.src, post, base_url, 957,384,'webp',90);
-const cover_image = await generateArticleImage(post.cover_image, post, base_url, 957,384,'webp',90);
-// console.log('[slug]: ', JSON.stringify(post.data, null, 2));
+const cover_image = await generateArticleImage(post.data?.image?.src, post, base_url, 957,384,'webp',90);
+// const cover_image = post.data.image?.src;
+// const cover_image = await generateArticleImage(post.cover_image, post, base_url, 957,384,'webp',90);
+// console.log('[slug] image: ', JSON.stringify(post.data.image?.src, null, 2));
+// console.log('[slug] author: ', JSON.stringify(author, null, 2));
+// console.log('[slug]: ',  { author, category, topics, related, translations, language, dir, base_url, cover_image } );
 ---
 <Layout {post} {author} {category} {language}>
 
@@ -67,7 +70,7 @@ const cover_image = await generateArticleImage(post.cover_image, post, base_url,
         <div class="name-date">
           {!!author && (
             <span class="text-slate-500">
-              <a href={`/authors/${author?.id}`} aria-label={author?.data.name}> {author?.data.name} </a>
+              <a href={`/authors/${author?.id}`} aria-label={author?.data?.name}> {author?.data?.name} </a>
             </span>
             <span class="text-slate-500">•</span>
           )}
@@ -76,9 +79,9 @@ const cover_image = await generateArticleImage(post.cover_image, post, base_url,
           </time>
         </div>
         <div class="w-full md:w-auto flex flex-wrap justify-center gap-1 p-0 m-0 !line-clamp-2">
-          {topics && topics.map((topic) => (
+          {topics && topics?.map((topic) => (
             <span class="text-sm text-slate-500">
-              #<a href={`/topics/${topic.id}`} aria-label={topic.name}>{topic.name}</a>
+              #<a href={`/topics/${topic?.id}`} aria-label={topic?.name}>{topic?.name}</a>
             </span>
           ))}
         </div>
@@ -110,9 +113,7 @@ const cover_image = await generateArticleImage(post.cover_image, post, base_url,
     </div>
 
     {!!author && (
-    <div class="max-w-3xl mx-auto">
-      <AuthorBio size="bio" {author} />
-    </div>
+      <div class="max-w-3xl mx-auto"> <AuthorBio size="bio" {author} /> </div>
     )}
 
     <div class="hidden md:block max-w-3xl mx-auto relative">
