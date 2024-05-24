@@ -23,11 +23,12 @@ export async function getStaticPaths() {
   });
   // const translations = (post) => articles.filter((ar) => ar.id.split('/')[0] === post.id.split('/')[0]);
   const translations = (post) => articles.filter(ar => ar.baseid === post.baseid && ar.id !== post.id);
+  // articles.map(({data}) => console.log(JSON.stringify(data.image)));
   return articles.map((post) => {
     return {
       params: { slug: post.data?.url },
       props: {
-        post,
+        post: {...post, cover_image: post.data.image?.src},
         // isDB: !!post.db,
         author: allAuthors.find((author) => author.id === post.data?.author),
         category: allCategories.find((cat) => cat.id === post.data?.category),
@@ -39,11 +40,13 @@ export async function getStaticPaths() {
 }
 
 const { post, author, category, topics, related, translations } = Astro.props;
-const language = post.data.language || "en";
+const language = post.data?.language || "en";
 const dir = mainLanguages[language].dir;
 const base_url = baseURL(Astro);
 
-const cover_image = await generateArticleImage(post.data.image?.src, post, base_url, 957,384,'webp',90);
+//const cover_image = await generateArticleImage(post.data.image?.src, post, base_url, 957,384,'webp',90);
+const cover_image = await generateArticleImage(post.cover_image, post, base_url, 957,384,'webp',90);
+// console.log('[slug]: ', JSON.stringify(post.data, null, 2));
 ---
 <Layout {post} {author} {category} {language}>
 

@@ -13,6 +13,10 @@
   "url": "https://drbi.org",
   "logo": "/logo.svg",
 
+  "podcast": {
+    "category": "Religion & Spirituality",
+    "subcategory": "Spirituality"
+  },
 
   "company": "DRBI, Inc.",
   "address": "1950 W. William Sears Dr.",

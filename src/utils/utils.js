@@ -43,7 +43,7 @@ export const updatePost_DB = async (entry) => {
   }
 
   // if image is an object, make it a string
-  if (typeof image === 'object') image = image.src;
+  if (typeof image === 'object') image = `${image.src}`;
 
   // replace index.mdoc with en.id  and  *.mdoc with *.md
   id = id || genPostID(title, datePublished);
@@ -52,6 +52,8 @@ export const updatePost_DB = async (entry) => {
   let baseid = id.split('/')[0];
 
   // console.log({ title, post_type, url, description, desc_125, abstract, language, audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics, tags, keywords, datePublished, image })
+
+  // console.log('>> updatePost_DB', {  image });
 
   // Prepare the post object for insertion or update
   const post = {
@@ -129,7 +131,7 @@ export const importAllPosts2DB = async () => {
 export const normalizePost_DB = (dbpost) =>  {
   const { id, url, title, post_type, description, desc_125, abstract, language, audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics, tags, keywords, datePublished, dateModified, image, body, baseid } = dbpost;
 
-// console.log('normalizePost_DB check 1', { audio: dbpost.audio, audio_image: dbpost.audio_image, audio_duration: dbpost.audio_duration } );
+  // console.log('normalizePost_DB check 1', { image } );
 // console.log('normalizePost_DB check 2', { audio, audio_image, audio_duration } );
 
   const entry = {
@@ -245,14 +247,18 @@ export const getAllArticles = async (lang = '', filter = () => true) => {
   const posts = (await getPosts_DB(lang, filter))
     .sort((a, b) => b.data.datePublished - a.data.datePublished)
     .map(post => ({ ...post, helpers: getArticleHelpers(post) })) // add helpers like images
+
+    // posts.map(({data}) => console.log(`>>> article image loaded: `, JSON.stringify(data.image)));
   return posts;
 }
 export const getPublishedArticles = async (lang='', filter=()=>true) => {
   const isDev = import.meta.env.APP_ENV==='dev';
   const isPublished = (p) => (!p.data.draft && p.data.datePublished<=new Date()) || isDev;
-  return (await getAllArticles(lang, (p)=>isPublished(p)))
+  const result = (await getAllArticles(lang, (p)=>isPublished(p)))
     .filter((post) => !!post.data?.url) // make sure post is ready for publication
     .filter(filter);
+  // result.map(({data}) => console.log(`>>> article image loaded: `, JSON.stringify(data.image)));
+  return result;
 }
 export const getPostFromSlug = async (slug) => {
   // return null;
@@ -366,9 +372,13 @@ export const getArticleAssetURL = async (slug, filename, full=false) => {
    else return path
 }
 export const generateArticleImage = async (imgfile, post=null, baseUrl="", width, height=100, format='webp', quality=80, alt="") => {
+  if (imgfile?.src) imgfile == imgfile.src; // in case we get an object instead of a string
   alt = alt || post.data.title;
   let empty ={src:'', width, height, alt}
-  if (!imgfile) return empty;
+  if (!imgfile) {
+    console.error('>> ERROR: generateArticleImage called with no imgfile');
+    return empty;
+  } // else console.log(" >>> converting image: ",  JSON.stringify(imgfile));
   // http image
   // console.log('generateArticleImage', { imgfile });
   if (imgfile.startsWith('http')) {
@@ -1014,7 +1024,7 @@ export const toIsoStringWithTimezone = (d) => {
 export const crontasks = async () => {
   // long running and expensive tasks on the server
   await moderateComments_openai();
-  await importAllPosts2DB();
+  // await importAllPosts2DB();
 }
 export const poorMansCron = async () => {
   // Call crontask by API if more than 5 minutes since last call
