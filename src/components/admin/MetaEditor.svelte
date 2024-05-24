@@ -2,6 +2,24 @@
   import slugger from 'slugify';
   import { createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
+  // import { transformS3Url } from "@utils/utils.js";
+
+const transformS3Url = (url = '', width = null, height = null, format = 'webp', quality=0) => {
+  url = url || '';
+  if (!url.includes('.s3.')) return url;
+  const imagePath = new URL(url).pathname;
+  let params = [];
+  if (width) params.push(`w=${width}`);
+  if (height) params.push(`h=${height}`);
+  // set default quality
+  if (quality===0 && width<400) quality = 100; else if (quality===0) quality = 80;
+  params.push(`fm=${format}`, `q=${quality}`, `fit=crop`, `crop=faces`);
+  // sharpen small images
+  if (width<400) params.push('usm=20&usmrad=20'); else params.push('sharp=20')
+  const newURL = `${site.img_base_url}${imagePath}?${params.join('&')}`;
+  console.log('Formatted URL:', newURL);
+  return newURL
+}
 
   const slugify = (text) => slugger(text, { lower: true, strict: true });
 
@@ -65,7 +83,13 @@
   let hiddenFields = ["image", "post_type", "author", "editor", "category", "topics", "keywords", "draft", "audio_image", "datePublished"];
   $: showField = (field) => !simplified || !hiddenFields.includes(field);
 
-  $: imagePreviewUrl = image || '';
+
+  // (url = '', width = null, height = null, format = 'webp', quality=0)
+  const displayURL = (s3URL) => transformS3Url(s3URL, 300, 200, 'webp', 80);
+
+
+
+  $: imagePreviewUrl = displayURL(formData['image']) || '';
   let inputKeyword = '', inputTopic = '';
   let suggestedKeywords = [], suggestedTopics = [];
 
@@ -88,7 +112,8 @@
       reader.onload = async e => {
         try {
           const s3URL = await upload_s3(e.target.result, generateS3Key(file.name));
-          formData[key] = s3URL;
+          // formData[key] = s3URL; // this is not updating
+          formData = {...formData, image: s3URL}
           if (key === 'image') imagePreviewUrl = s3URL;
         } catch (error) {
           console.error('Failed to upload media:', error);

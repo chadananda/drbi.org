@@ -49,7 +49,7 @@ export default async function() {
 	await db.insert(Categories).values([
 		{	id: 'bahai-literature',
 			category: 'Bahá’í Literature',
-			image: 'https://blogw-assets.s3.us-west-1.amazonaws.com/categories/content/bahai-literature.png',
+			image: 'https://drbi.s3.amazonaws.com/uploads/categories/bahai-literature+(2).png',
 			description: `Doctrinal Bahá’í Literature includes scripture and authoritative interpretation.
 This includes teachings, laws, and principles in hundreds of books and letters revealed by the
 faith’s central figures — Bahá’u’lláh, the Báb, and
@@ -63,7 +63,7 @@ to changing needs because they are not part of the ‘Divine Explicit Text’.`,
 
 {	id: 'bahai-education',
 category: 'Bahá’í Education',
-image: 'https://blogw-assets.s3.us-west-1.amazonaws.com/categories/content/bahai-education.png',
+image: 'https://drbi.s3.amazonaws.com/uploads/categories/bahai-education.png',
 description: `Bahá'í education encompasses the pedagogical principles and practices derived
 from the teachings of the Bahá'í Faith, aimed at personal development and
 societal transformation. It emphasizes the unity of humankind, the acquisition
@@ -72,7 +72,7 @@ religion, within formal and informal educational settings.`, },
 
 {	id: 'bahai-faith',
 category: 'Bahá’í Faith',
-image: 'https://blogw-assets.s3.us-west-1.amazonaws.com/categories/content/bahai-faith.png',
+image: 'https://drbi.s3.amazonaws.com/uploads/categories/bahai-faith.png',
 description: `The Bahá'í Faith is a monotheistic religion emphasizing the spiritual unity of
 all humankind. Originating with the teachings of Bahá'u'lláh in 19th-century
 Persia, it advocates universal peace, elimination of prejudice, and unity
@@ -82,7 +82,7 @@ development of science and religion.`, },
 
 {	id: 'drbi-newsletter',
 category: 'DRBI Newsletter',
-image: 'https://blogw-assets.s3.us-west-1.amazonaws.com/uploads/2024-01-desert-rose-bahai-institute-news/pastel-newswebp',
+image: 'https://drbi.s3.amazonaws.com/uploads/categories/pastel-news.webp',
 description: `The Bahá'í Faith is a monotheistic religion emphasizing the spiritual unity of
 all humankind. Originating with the teachings of Bahá'u'lláh in 19th-century
 Persia, it advocates universal peace, elimination of prejudice, and unity
