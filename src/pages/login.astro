@@ -11,7 +11,7 @@ import { seedSuperUser } from '@utils/utils';
 // Setup for error messaging
 let errorMsg = '';
 
-seedSuperUser();
+await seedSuperUser();
 
 if (Astro.request.method === "POST") {
   // this will fail if not SSR
