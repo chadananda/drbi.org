@@ -3,13 +3,19 @@ export const prerender = false;
 
 import Layout from '@layouts/AdminLayout.astro';
 import site from '@data/site.json';
-import { getTeamWithRole } from '@utils/utils.js';
+import { getTeamWithRole, transformS3Url } from '@utils/utils.js';
+
+// transformS3Url = (url = '', width = null, height = null, format = 'webp', quality=0)
 
 const user  = Astro.locals?.user
 // this page is only for admins
 if (!['admin','superadmin'].includes(user?.role)) return Astro.redirect('/admin');
 
-const teamMembers  = await getTeamWithRole();
+
+// add small image
+const imgSm = (url) => transformS3Url(url, 80, 80);
+const teamMembers  = (await getTeamWithRole()).map(member => ({...member, image_sm: imgSm(member.image_src)}));
+
 
 // console.log(JSON.stringify(teamMembers, null, 2))
 
@@ -31,7 +37,7 @@ const teamMembers  = await getTeamWithRole();
       <div class="relative bg-white border not-prose border-gray-100 my-2 p-4 rounded-lg shadow-md hover:shadow-lg flex flex-col md:flex-row items-start md:items-center space-x-0 md:space-x-6">
 
         <div class="flex-shrink-0 flex flex-col justify-between text-center h-auto md:h-full">
-          <img src={member.image_src} alt={member.image_alt} class="rounded-full h-16 w-16 md:h-20 md:w-20 object-cover mx-auto" />
+          <img src={member.image_sm} alt={member.image_alt} class="rounded-full h-16 w-16 md:h-20 md:w-20 object-cover mx-auto" />
           <span class="inline-block bg-gray-100 border text-xs text-gray-500 px-2 py-1 rounded-full mx-auto mt-2 md:mt-auto">{member.role}</span>
         </div>
 

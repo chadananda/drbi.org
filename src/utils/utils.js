@@ -674,6 +674,21 @@ export const getTeamMemberByEmail = async (email) => {
 export const deleteTeamMember = async (slug) => {
   return await db.delete(Team).where(eq(Team.id, slug));
 }
+
+export const syncMemberUserEntry = async (member) => {
+  const {id, role, email, name, new_password} = member;
+  const userFound = (await db.select().from(Users).where(eq(Users.id, id))).length > 0;
+  let user = { id, role, email, name }
+  if (new_password) user.hashed_password = await argon2.hash(new_password);
+  if (userFound) {
+    console.log('>>> Updating user:', user);
+    await db.update(Users).set(user).where(eq(Users.id, id));
+  } else {
+    console.log('>>> Creating user:', user);
+    await db.insert(Users).values( user);
+  }
+}
+
 // TODO: query for user id instead of using 'isNew'
 export const updateTeamMember = async (member, isNew) => {
   let success = true
@@ -681,17 +696,15 @@ export const updateTeamMember = async (member, isNew) => {
     // insert
     if ((await db.select().from(Team).where(eq(Team.email, member.email))).length>0) throw new Error(`Email "${member.email}" already in use`);
     if ((await db.select().from(Team).where(eq(Team.id, member.id))).length>0) throw new Error(`ID "${member.id}" already in use`);
-
-    const {role, email} = member; delete member.role;
+    // create team member and user entry
+    await syncMemberUserEntry(member);
+    const {role, email} = member; delete member.role; // don't update role
     await db.insert(Team).values({ ...member });
-    await db.update(Users).set({ role }).where(eq(Users.email, email));
-    // console.log('Inserted new team member', member);
   } else {
-    // update
+    // update team member and user entry
+    await syncMemberUserEntry(member);
     const {role, email, id} = member; delete member.role;
     await db.update(Team).set({ ...member }).where(eq(Team.id, id));
-    await db.update(Users).set({ role }).where(eq(Users.email, email));
-    // console.log('Updated team member', member);
   }
   return success;
 }
@@ -826,8 +839,7 @@ export const baseURL = (Astro) => {
 export const seedSuperUser = async () => {
 
   const email = import.meta.env.SITE_ADMIN_EMAIL.trim().toLowerCase();
-
-  const userFound = (await db.select().from(Users).where(eq(Users.email, email))).length;
+  const userFound = (await db.select().from(Users).where(eq(Users.email, email))).length > 0;
   const name = site.author;
   const id = slugify(name);
   const role = 'superadmin';
@@ -835,7 +847,7 @@ export const seedSuperUser = async () => {
   const user = { id, name, email, hashed_password, role };
    console.log('>> seedSuperUser', user);
   if (!userFound) try {
-   // console.log('Adding super user:', user);
+    console.log('>>> Adding super user:', user);
     await db.insert(Users).values(user);
   } catch (e) { console.error('seedSuperUser user', e); }
 
