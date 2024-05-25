@@ -855,9 +855,9 @@ export const seedSuperUser = async () => {
   const role = 'superadmin';
   const hashed_password = await argon2.hash(import.meta.env.SITE_ADMIN_PASS.trim());
   const user = { id, name, email, hashed_password, role };
-   console.log('>> seedSuperUser', user);
+  //  console.log('>> seedSuperUser', user);
   if (!userFound) try {
-    console.log('>>> Adding super user:', user);
+    // console.log('>>> Adding super user:', user);
     await db.insert(Users).values(user);
   } catch (e) { console.error('seedSuperUser user', e); }
 

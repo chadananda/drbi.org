@@ -28,7 +28,7 @@ export const onRequest = async (context, next) => {
     // Validate session and user, then proceed
     const { session, user } = await lucia.validateSession(sessionId);
     // console.log('Session and user validated:', session, user);
-    if (!['superadmin', 'admin','editor','writer'].includes(user.role)) {
+    if (!['superadmin', 'admin','editor','author'].includes(user.role)) {
       console.log('User role not allowed');
       return new Response(null, { status: 302, headers: { Location: '/login' } });
     }
