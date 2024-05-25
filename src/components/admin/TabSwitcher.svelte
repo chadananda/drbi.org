@@ -39,5 +39,5 @@ function switchTab(tabId) {
 
 <style>
  /* Ensure the button fills the tab space */
- .tab-button-full { width: 100%; color: pink;  }
+ /* .tab-button-full { width: 100%; color: pink;  } */
 </style>
