@@ -54,7 +54,7 @@ export const POST = async ({ request }) => {
       // make sure we have file data
       if (!filedata) return new Response('No filedata provided', { status: 400 });
 
-      //console.log('uploading to s3:', s3key, mimeType, filedata.length);
+      console.log('uploading to s3:', s3key, mimeType, filedata.length);
       const s3url = await uploadS3(filedata, s3key, mimeType);
 
       //console.log('s3url:', s3url);

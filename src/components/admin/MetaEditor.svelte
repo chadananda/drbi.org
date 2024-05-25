@@ -17,7 +17,7 @@ const transformS3Url = (url = '', width = null, height = null, format = 'webp', 
   // sharpen small images
   if (width<400) params.push('usm=20&usmrad=20'); else params.push('sharp=20')
   const newURL = `${site.img_base_url}${imagePath}?${params.join('&')}`;
-  console.log('Formatted URL:', newURL);
+  // console.log('Formatted URL:', newURL);
   return newURL
 }
 
