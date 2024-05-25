@@ -30,7 +30,7 @@ function switchTab(tabId) {
        class:bg-blue-100={tab.id === activeTab}
        class:text-gray-700={tab.id !== activeTab}
        class:text-blue-600={tab.id === activeTab}
-       class="tab-button-full focus:outline-none focus:ring-0  focus:ring-blue-300 rounded-lg p-4">
+       class="tab-button-full focus:outline-none focus:ring-0  focus:ring-blue-300 rounded-lg p-4 w-full">
        {tab.title}
      </button>
    </li>
@@ -39,5 +39,5 @@ function switchTab(tabId) {
 
 <style>
  /* Ensure the button fills the tab space */
- .tab-button-full { width: 100%;   }
+ .tab-button-full { width: 100%; color: pink;  }
 </style>
