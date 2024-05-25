@@ -794,10 +794,10 @@ export const uploadS3 = async (base64Data, Key, ContentType='', Bucket='') => {
   const params = {  Bucket, Key, Body, ContentType };
   try {
     const data = await s3.upload(params).promise();
-    //console.log(`File uploaded successfully at ${data.Location}`);
+    console.log(`File uploaded successfully at ${data.Location}`);
     return data.Location;
   } catch (err) {
-   // console.error('Error uploading file:', err);
+   console.error('Error uploading file:', err);
     throw err;
   }
 }
