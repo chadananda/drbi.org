@@ -778,9 +778,20 @@ export const uploadS3 = async (base64Data, Key, ContentType='', Bucket='') => {
   const region = process.env.AWS_BUCKET_REGION; // 'us-east-1'
   const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
   const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-  AWS.config.update({ region, accessKeyId, secretAccessKey });
   ContentType = ContentType || guessContentType(Key)
   Bucket = process.env.AWS_BUCKET_NAME;
+
+
+  if (!region) throw new Error('AWS_BUCKET_REGION not set');
+  if (!accessKeyId) throw new Error('AWS_ACCESS_KEY_ID not set');
+  if (!secretAccessKey) throw new Error('AWS_SECRET_ACCESS_KEY not set');
+  if (!Bucket) throw new Error('AWS_BUCKET_NAME not set');
+  if (!Key) throw new Error('Key not set');
+  if (!ContentType) throw new Error('ContentType could not be determined');
+
+
+  AWS.config.update({ region, accessKeyId, secretAccessKey });
+
 
 // console.log('uploadS3 process.env.AWS_BUCKET_REGION', process.env.AWS_BUCKET_REGION);
 // console.log('uploadS3 process.env.AWS_ACCESS_KEY_ID', process.env.AWS_ACCESS_KEY_ID);
