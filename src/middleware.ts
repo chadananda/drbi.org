@@ -45,5 +45,5 @@ export const onRequest = async (context, next) => {
 };
 
 export const config = {
-    matcher: '/admin/*' // Apply this middleware only to paths under '/admin'
+  matcher: ['/admin/*', '/login'] // Apply this middleware to '/admin/*' and '/login'
 };

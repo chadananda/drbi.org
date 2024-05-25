@@ -50,6 +50,7 @@ if (Astro.request.method === "POST") {
       // console.log(password);
       // if valid user found, create session and redirect to admin
       if (isValidUser) {
+        await logoutUser(Astro);
         const session = await lucia.createSession(user.id, {role: 'visitor'});
         // console.log('Session', !!session ? "session created" : "session not created");
         const sessionCookie = lucia.createSessionCookie(session.id);

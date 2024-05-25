@@ -1023,6 +1023,9 @@ export const toIsoStringWithTimezone = (d) => {
 }
 
 export const logoutUser = async (Astro) => {
+  // how to delete Lucia session cookie?
+
+
   Astro.cookies.delete('session');
 }
 
