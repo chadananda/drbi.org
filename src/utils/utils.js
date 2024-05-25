@@ -848,7 +848,6 @@ export const baseURL = (Astro) => {
   return url?.split('/').slice(0,3)?.join('/');
 }
 export const seedSuperUser = async () => {
-
   const email = import.meta.env.SITE_ADMIN_EMAIL.trim().toLowerCase();
   const userFound = (await db.select().from(Users).where(eq(Users.email, email))).length > 0;
   const name = site.author;
@@ -943,7 +942,6 @@ export const siteLanguages = () => {
   });
   return result;
 }
-
 export const slugify = (text) => {
   return slugifier(text,  {
     lower: true, // convert to lower case
@@ -1022,6 +1020,10 @@ export const toIsoStringWithTimezone = (d) => {
   return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) +
          'T' + z(d.getHours()) + ':' + z(d.getMinutes()) + ':' + z(d.getSeconds()) +
          sign + padHours + ':' + padMinutes;
+}
+
+export const logoutUser = async (Astro) => {
+  Astro.cookies.delete('session');
 }
 
 // server only

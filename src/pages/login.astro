@@ -5,13 +5,15 @@ import { lucia } from '@lib/auth';
 import { Argon2id } from "oslo/password";
 import Layout from "@layouts/Layout.astro";
 import { db, Users, eq } from 'astro:db';
-import { seedSuperUser } from '@utils/utils';
-// import Container from "@components/container.astro";
+import { seedSuperUser, logoutUser } from '@utils/utils';
 
 // Setup for error messaging
 let errorMsg = '';
 
 await seedSuperUser();
+
+// always log out user by clearing the session cookie
+await logoutUser(Astro);
 
 if (Astro.request.method === "POST") {
   // this will fail if not SSR
