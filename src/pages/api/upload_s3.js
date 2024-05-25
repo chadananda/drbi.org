@@ -1,7 +1,7 @@
 // post /api/upload_s3
 export const prerender = false;
 
-import { uploadS3, getTeamMemberBySlug } from '@utils/utils.js';
+import { uploadS3, getTeamMemberBySlug, guessContentType } from '@utils/utils.js';
 import { lucia } from "../../lib/auth";
 
 // console.log('Just entered /api/upload_s3')
@@ -41,7 +41,8 @@ export const POST = async ({ request }) => {
   if (request.headers.get("Content-Type").includes("application/json")) {
     try {
       const body = await request.json();
-      const {filedata, mimeType, s3key, sessionid} = body;
+      let {filedata, mimeType, s3key, sessionid} = body;
+      mimeType = mimeType || guessContentType(s3key);
 
       //console.log('Attempting to upload: ', s3key, sessionid, filedata.length);
       // verify session and role

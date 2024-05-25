@@ -1,6 +1,8 @@
 {
   "site": "drbi.org",
   "siteName": "DRBI",
+  "url": "https://drbi.org",
+
   "title": "Desert Rose Bahá’í Institute",
   "subtitle": "A center for learning and community",
   "description": "Desert Rose is a Bahá’í Educational Institute located in Eloy, Arizona.",
@@ -10,7 +12,6 @@
   "author_image": "",
   "author_bio": "",
 
-  "url": "https://drbi.org",
   "logo": "/logo.svg",
 
   "podcast": {
