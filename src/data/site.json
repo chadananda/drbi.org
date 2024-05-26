@@ -25,24 +25,13 @@
   "phone": "(520) 466-7961",
   "logo": "/logo.svg",
 
-  "youtube": {
-    "channel": "UCJ5h9jIq6xv6T9XwzZX3qWQ",
-    "channel_name": "drbi"
-  },
-  "twitter": {
-    "creator": "@chadananda",
-    "site": "@drbi"
-  },
-  "facebook": {
-    "author": "chadananda",
-    "publisher": "drbi"
-  },
-  "linkedin": {
-    "author": "chadananda",
-    "publisher": "drbi"
-  },
+  "youtube": { "channel": "UCJ5h9jIq6xv6T9XwzZX3qWQ", "channel_name": "drbi" },
+  "twitter": { "creator": "@chadananda", "site": "@drbi" },
+  "facebook": { "author": "chadananda", "publisher": "drbi" },
+  "linkedin": { "author": "chadananda", "publisher": "drbi" },
 
   "languages": ["en", "zh", "es", "ar", "fa"],
+  "post_types": ["News", "Event", "Memorial", "Article", "Fundraiser", "Agriculture Project", "Radio"],
 
   "vercel_project_id": "drbi",
   "vercel_project_name": "drbi",

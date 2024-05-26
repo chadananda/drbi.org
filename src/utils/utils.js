@@ -7,7 +7,7 @@ import fs from 'fs';
 import matter from 'gray-matter';
 import site from '@data/site.json'
 import { getImage } from "astro:assets";
-import { db, Categories, eq, Team, Users, Topics, Comments, inArray, NOW, Cron, Posts, count } from 'astro:db';
+import { db, Categories, eq, Team, Users, Topics, Comments, inArray, NOW, Cron, Posts, count, lte, and } from 'astro:db';
 import * as argon2 from 'argon2';
 import AWS from 'aws-sdk';
 import { Buffer } from 'buffer';
@@ -252,6 +252,30 @@ export const getPublishedArticles = async (lang='', filter=()=>true) => {
   // result.map(({data}) => console.log(`>>> article image loaded: `, JSON.stringify(data.image)));
   return result;
 }
+// filter in query for speed, default to english
+export const getPublishedPostsByType = async (type, lang='en') => {
+  // we want to modify **the database query** to limit by type, language and published state (draft=false && datePublished<=NOW)
+  // also, order by datePublished
+  let posts = await db.select().from(Posts).where(and(
+    eq(Posts.post_type, type),
+    eq(Posts.language, lang),
+    eq(Posts.draft, false),
+    lte(Posts.datePublished, NOW),
+  )).orderBy(Posts.datePublished, 'desc');
+  //console.log('getPublishedArticlesByType found', posts.length, 'posts of type: ', type);
+  const result = posts.map(normalizePost_DB)
+  return result;
+}
+
+export const getAllPostsByAuthor = async (authorid, lang='en') => {
+  let posts = await db.select().from(Posts).where(and(
+    eq(Posts.language, lang),
+    eq(Posts.author, authorid),
+  )).orderBy(Posts.datePublished, 'desc');
+  const result = posts.map(normalizePost_DB)
+  return result;
+}
+
 export const getPostFromSlug = async (slug) => {
   // return null;
   if (!slug) return null;

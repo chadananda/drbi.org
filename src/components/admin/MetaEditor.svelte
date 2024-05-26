@@ -4,6 +4,7 @@
   const dispatch = createEventDispatcher();
   // import { transformS3Url } from "@utils/utils.js";
 
+
 const transformS3Url = (url = '', width = null, height = null, format = 'webp', quality=0) => {
   url = url || '';
   if (!url.includes('.s3.')) return url;
@@ -21,11 +22,11 @@ const transformS3Url = (url = '', width = null, height = null, format = 'webp', 
   return newURL
 }
 
-  const slugify = (text) => slugger(text, { lower: true, strict: true });
+const slugify = (text) => slugger(text, { lower: true, strict: true });
 
-  export let post, sessionid, authors, site, categories, topics, classes, visible;
+export let post, sessionid, authors, site, categories, topics, classes, visible;
 
-  export const POST_TYPES = [
+const POST_TYPES = site.post_types || [
     "Article", "WebPage", "Event", "Organization", "Person", "LocalBusiness",
     "Product", "Recipe", "Review", "BreadcrumbList", "Course", "JobPosting",
     "Movie", "MusicAlbum", "QAPage", "SearchResultsPage", "SoftwareApplication",

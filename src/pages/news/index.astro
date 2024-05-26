@@ -1,32 +1,32 @@
 ---
 export const prerender = true;
 
-import NewsLayout from "@layouts/Layout.astro";
+import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import Sectionhead from "@components/sectionhead.astro";
 import PostThumb from "@components/article/postThumb.astro";
-import { getPublishedArticles } from "@utils/utils.js";
+import { getPublishedPostsByType } from "@utils/utils.js";
+import { Posts } from "astro:db";
 // import Pagination from "@components/pagination.astro";
 
 /**
  * @type {any}
  */
 
-const news = (await getPublishedArticles()).filter((post)=>post.data.post_type==='Newsletter');
-// console.log(news);
+const posts = await getPublishedPostsByType('News');
 ---
 
-<NewsLayout title="Article">
+<Layout title="Article">
   <Container>
     <Sectionhead>
-      <Fragment slot="title"> NewsLetters </Fragment>
+      <Fragment slot="title"> Desert Rose News </Fragment>
       <Fragment slot="desc">
       </Fragment>
     </Sectionhead>
 
     <main class="mt-16">
       <div class="flex flex-wrap justify-center gap-20">
-        {Array.isArray(news) && news.map((post) => (
+        {Array.isArray(posts) && posts.map((post) => (
           <div class="flex-none" style={{ width: '300px' }}>
             <PostThumb post={post} />
           </div>
@@ -35,4 +35,4 @@ const news = (await getPublishedArticles()).filter((post)=>post.data.post_type==
     </main>
 
   </Container>
-</NewsLayout>
+</Layout>

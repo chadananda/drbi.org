@@ -12,7 +12,7 @@ import { seedSuperUser, logoutUser } from '@utils/utils';
 // console.log('/login: user:', thisUser);
 // if user has a session, clear it (log out) and redirect here
 if (Astro.locals?.user) {
-  console.log('Cleared user session', Astro.locals?.user);
+  console.log('User found, logging out. ', Astro.locals?.user);
   await logoutUser(Astro);
   return Astro.redirect('/login', 303);
 } else console.log('No user session found', Astro.locals);

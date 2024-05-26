@@ -4,6 +4,8 @@ import tailwind from "@astrojs/tailwind";
 // import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import vercel from '@astrojs/vercel/serverless';
+
+// import { onRequest as authMiddleware } from './src/middleware.ts';
 // import vercel from '@astrojs/vercel/static';
 // import { getSitemapArticles } from './src/utils/utils.js';
 
@@ -64,19 +66,22 @@ export default defineConfig({
     // },
   }),
   integrations: [tailwind(),
+    // { hooks: { 'astro:server:setup': ({ app }) => {  app.use(authMiddleware);  },}, },
   //mdx(),
-  sitemap(siteMapConfig), svelte(), markdoc({
-    allowHTML: true
-  }),
+  sitemap(siteMapConfig),
+  svelte(),
+  markdoc({  allowHTML: true }),
   //  icon(),
   //  compress(),
   // minify(minifyConfig),
   // partytown()
   // react(),
   db()],
+
   experimental: {
     contentCollectionCache: true,
   },
+
   prefetch: {
     defaultStrategy: 'viewport',
     prefetchAll: !isDev,

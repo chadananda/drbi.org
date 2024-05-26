@@ -1,0 +1,54 @@
+---
+export const prerender = true;
+
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro"; // some padding
+import Sectionhead from "@components/sectionhead.astro";
+import PostThumb from "@components/article/postThumb.astro";
+import { getPublishedPostsByType } from "@utils/utils.js";
+import cemeteryImage from "./memorial-garden-front.jpg";
+import divider from "./divider.svg";
+import { Image } from 'astro:assets';
+
+
+/**
+ * @type {any}
+ */
+
+const posts = await getPublishedPostsByType('Memorial');
+// console.log('Memorial Posts:', posts.length);
+---
+
+<Layout title="Permanent Residents: Our Guardian Angels" description="The Desert Rose Memorial Cemetery is a place of rest for the bodies of our loved ones who have passed on. It is a place of peace and tranquility, where the living can come to remember and honor the dead.">
+
+<Container>
+
+
+ <h1 class="text-center w-full text-5xl py-6"> The Desert Rose Memorial Cemetery </h1>
+
+ <Image src={cemeteryImage} alt="The Desert Rose Memorial Cemetery"
+        class="w-full h-auto rounded-lg shadow-lg" />
+
+ <!-- todo  -->
+ <h3 class="text-center w-full text-3xl pt-10 text-blue-800 hover:underline"><a href="/bahai-beliefs-burial-death">Bahá’í Beliefs on Death and Burial</a></h3>
+
+ <!-- todo  -->
+ <h3 class="text-center w-full text-3xl pt-8 text-blue-800 hover:underline"><a href="/purchase-memorial-plot">How to Purchase a Plot</a></h3>
+
+ <!-- hr  -->
+ <div class="flex justify-center mt-10">
+   <Image src={divider} alt="Divider" class="h-4 mx-auto opacity-50" />
+ </div>
+
+ <h2 class="text-center w-full text-4xl pt-10">Permanent Residents: <i>Our Guardian Angels</i></h2>
+ <main class="mt-16">
+   <div class="flex flex-wrap justify-center gap-20">
+     {Array.isArray(posts) && posts.map((post) => (
+       <PostThumb post={post} size="wide" />
+     ))}
+   </div>
+ </main>
+
+
+</Container>
+</Layout>

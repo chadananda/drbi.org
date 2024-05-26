@@ -10,7 +10,7 @@
     {"title": "About", "path": "/about", "children": null},
     {"title": "Privacy", "path": "/privacy", "children": null},
     {"title": "Terms", "path": "/terms", "children": null},
-    {"title": "Sitemap", "path": "/sitemap", "children": null},
+    {"title": "Sitemap", "path": "/sitemap-index.xml", "children": null},
     {"title": "Contact", "path": "/contact-us", "children": null}
  ],
  "productLinks": [

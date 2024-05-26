@@ -8,6 +8,9 @@ description: ""
 ### Todo:
 
 - [ ] Quotes about agriculture
-- [ ] Calendar with Regular workshops & Special Events 
-- [ ] Farm articles 
-- [ ] Fundraising victories 
+- [ ] Calendar with Regular workshops & Special Events
+- [ ] Farm articles
+- [ ] Fundraising victories
+
+
+
