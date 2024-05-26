@@ -12,7 +12,7 @@ export const POST = async ({ request }) => {
   if (!sessionid) return new Response('User session required', { status: 400 });
   // verify session and role
   const { user } = await lucia.validateSession(sessionid);
-  if (!user || !['superadmin', 'admin', 'editor', 'writer'].includes(user.role)) {
+  if (!user || !['superadmin', 'admin', 'editor', 'author'].includes(user.role)) {
     return new Response('User authentication failed', { status: 403 });
   }
   // verify is team member
@@ -21,7 +21,7 @@ export const POST = async ({ request }) => {
   if (!post.id) { // assign
     const slug = slugify(post.title);
     post.data.url = slug
-    const date = new Date().toISOString().split('T')[0];
+    const date = (new Date()).toISOString().split('T')[0];
     const lang = post.data.language || 'en'
     post.id = `${date}-${slug}/${lang === 'en' ? 'index' : lang}.md`
   }
