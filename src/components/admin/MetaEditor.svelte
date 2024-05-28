@@ -16,10 +16,13 @@
   const wordCount = (text) => !!text ? `Words: ${text?.trim().split(/\s+/).filter(Boolean).length} | Characters: ${text?.length}` : '';
   const unSlugify = (slug) => slug.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
   const generateS3Key = (filename) => `uploads/${post.id.split('/')[0] || slugify(post.title)}/${slugify(filename)}`;
-  const transformS3Url = (url = '', width = 300, height = 200, format = 'webp', quality = 80) => {
+  const transformS3Url = (url='', width=300, height=200, format='webp', quality=90) => {
     if (!url.includes('.s3.')) return url;
+    let params = [];
     const imagePath = new URL(url).pathname;
-    return `${site.img_base_url}${imagePath}?w=${width}&h=${height}&fm=${format}&q=${quality}&fit=crop&crop=faces`;
+    params.push(`fm=${format}`,`q=${quality}`,`fit=crop`,`crop=faces`);
+    if (width<400) params.push('usm=20&usmrad=20'); else params.push('sharp=20')
+    return `${site.img_base_url}${imagePath}?${params.join('&')}`;
   };
 
   $: isSimplified = post.language != 'en';
@@ -88,9 +91,7 @@
     reader.onload = async e => {
       try {
         const s3URL = await uploadS3_API(e.target.result, generateS3Key(file.name));
-        // post[key] = s3URL; dirty = true;
-        handleChange(key, s3URL);
-        imagePreviewUrl = key === 'image' ? transformS3Url(s3URL) : imagePreviewUrl;
+        if (s3URL) handleChange(key, s3URL);
       } catch (error) {
         console.error('Failed to upload media:', error);
       }
@@ -100,6 +101,7 @@
 
   const handleChange = (field, value) => {
     post[field] = value;
+    if (field==='image') imagePreviewUrl = transformS3Url(value);
     dirty = true;
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => { if (dirty) savePost(); dirty = false; }, 10000);
@@ -170,7 +172,9 @@
       {#if !isSimplified}
         <div class="input-group">
           <label for="image">Main Image</label>
-          {#if imagePreviewUrl}<img src={imagePreviewUrl} alt="Main image" style="width: 100%; height: auto; max-height: 300px; margin-bottom: 10px;">{/if}
+          {#if imagePreviewUrl}
+           <img src={imagePreviewUrl} alt="Main image" class="w-full h-auto max-h-[300px] mb-2 object-cover">
+          {/if}
           <div style="display: flex; align-items: center;">
             <input type="text" id="image" value={post.image} on:input={(e) => post.image = e.target.value} placeholder="Paste or upload an image URL" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-blue-500" style="margin-right: 10px;">
             <label for="image-upload" class="cursor-pointer">
