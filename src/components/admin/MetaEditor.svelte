@@ -63,6 +63,11 @@
     }
   };
 
+  const handleSaveShortcut = (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 's')
+      {event.preventDefault(); if (dirty) savePost(); dirty = false;}
+  };
+
   const uploadS3_API = async (dataURL, s3key) => {
     const base64Data = dataURL.split(',')[1];
     const mimeType = dataURL.substring(5, dataURL.indexOf(';base64'));
@@ -92,12 +97,12 @@
     reader.readAsDataURL(file);
   };
 
-const handleChange = (field, value) => {
-  post[field] = value;
-  dirty = true;
-  if (timeoutId) clearTimeout(timeoutId);
-  timeoutId = setTimeout(() => { if (dirty) savePost(); dirty = false; }, 10000);
-};
+  const handleChange = (field, value) => {
+    post[field] = value;
+    dirty = true;
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => { if (dirty) savePost(); dirty = false; }, 10000);
+  };
 
 
   const addKeyword = (keyword) => {
@@ -134,8 +139,15 @@ const handleChange = (field, value) => {
   $: formattedDate = post.datePublished ? new Date(post.datePublished).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
 
 
-  onMount(() => loadPost());
-  onDestroy(() => { if (timeoutId) clearTimeout(timeoutId); });
+
+  onMount(() => {
+    loadPost();
+    window.addEventListener('keydown', handleSaveShortcut);
+  });
+  onDestroy(() => {
+     if (timeoutId) clearTimeout(timeoutId);
+     window.removeEventListener('keydown', handleSaveShortcut);
+  });
 
 </script>
 
