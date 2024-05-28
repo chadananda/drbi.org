@@ -74,7 +74,8 @@ class="z-40 bg-white border border-gray-300 rounded-full shadow-lg p-2 absolute 
 
 
 {isAuthor && (
-  <li><h3><a href="/admin/articles/">Edit content</a></h3>
+  <li><h3><a href="/admin/articles/">Edit content</a>
+      <a href="https://drbi-org.vercel.app/admin/articles/add" class="float-right p-0 px-2 text-sm bg-gray-400 text-white rounded-full hover:bg-blue-500 !no-underline">+</a></h3>
     <ul>
       {Array.isArray(articles) && articles.map((ar) => (
         <li class={`${ar.data.draft?'draft':'published'}`}>
