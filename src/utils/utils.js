@@ -63,7 +63,7 @@ export const updatePostData_DB = async (id, newData) => {
   // set modified field
   newData.dateModified = new Date();
   // only update url if post is published
-  if (!data.draft || data.datePublished<new Date()) delete newData.url;
+  if ((!data.draft || data.datePublished<new Date()) && data.url) delete newData.url;
     else newData.url = slugify(newData.title || data.title);
   // don't let the newData override baseid for any reason
   if (newData.baseid) delete newData.baseid;
@@ -127,6 +127,7 @@ export const updatePost_DB = async (entry) => {
   if (id.endsWith('.mdoc')) id = id.replace('.mdoc', '.md');
   if (id.endsWith('index.md')) id = id.replace('index.md', 'en.md');
   let baseid = id.split('/')[0];
+  if (!url) url = slugify(title);
 
   const post = {
     id, baseid, url, title, post_type, description, desc_125, abstract, language,
@@ -197,6 +198,7 @@ export const importAllPosts2DB = async () => {
 }
 export const normalizePost_DB = (dbpost) =>  {
   const { id, url, title, post_type, description, desc_125, abstract, language, audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics, tags, keywords, datePublished, dateModified, image, body, baseid } = dbpost;
+  if (!url) url = slugify(title);
   // console.log('normalizePost_DB check 1', { image } );
 // console.log('normalizePost_DB check 2', { audio, audio_image, audio_duration } );
   const entry = {
