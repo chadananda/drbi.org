@@ -46,7 +46,7 @@ const posts = await getPublishedPostsByType('Memorial');
  <main class="mt-16">
    <div class="flex flex-wrap justify-center gap-20">
      {Array.isArray(posts) && posts.map((post) => (
-       <PostThumb post={post} size="wide" />
+       <PostThumb post={post} hideDetails />
      ))}
    </div>
  </main>

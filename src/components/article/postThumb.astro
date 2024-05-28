@@ -2,7 +2,7 @@
 // import { Picture } from 'astro:assets';
 import { generateArticleImage, baseURL, hashstr } from '@utils/utils.js';
 
-const { post, small, class: customClasses } = Astro.props
+const { post, small, class: customClasses, hideDetails } = Astro.props
 const articleLink = `/${post.data?.url}`;
 
 const authorid = post.data.author || '';
@@ -55,8 +55,11 @@ const isPublished = pubdate <= new Date() && !post.data.draft;
       )}
       {!small && (
         <div class="text-sm mt-3 flex gap-2">
-          <span class="text-gray-600"><a href={authorURL} aria-label={author_name}>{author_name} </a></span><span class="text-gray-600">• </span>
-          <time class="text-gray-600" datetime={datePublished}> {datePublished} </time>
+          <span class="text-gray-600"><a href={authorURL} aria-label={author_name}>{author_name} </a></span>
+          {!hideDetails && (
+            <span class="text-gray-600">• </span>
+            <time class="text-gray-600" datetime={datePublished}> {datePublished} </time>
+          )}
         </div>
       )}
     </div>

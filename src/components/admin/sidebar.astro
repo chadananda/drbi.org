@@ -80,14 +80,13 @@ class="z-40 bg-white border border-gray-300 rounded-full shadow-lg p-2 absolute 
       {Array.isArray(articles) && articles.map((ar) => (
         <li class={`${ar.data.draft?'draft':'published'}`}>
           {ar.data.post_type && contentIcons[ar.data.post_type] && (
-            <span class="h-6"> {contentIcons[ar.data.post_type]} </span>
+             <span class="h-6"> {contentIcons[ar.data.post_type]} </span>
           )}
           <a href={ar.editLink}>{ar.data.title}</a>
         </li>
       ))}
     </ul>
   </li> )}
-
 
 
  </ul>
