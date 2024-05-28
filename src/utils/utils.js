@@ -37,15 +37,15 @@ export const createPost_DB = async (id) => {
   if (id.endsWith('index.md')) id = id.replace('index.md', 'en.md');
   let baseid = id.split('/')[0];
   // create post with id and baseid
-  // const exists = (await db.select().from(Posts).where(eq(Posts.id, id))).length > 0;
-  await db.insert(Posts).values({id, baseid});
+  const exists = (await db.select().from(Posts).where(eq(Posts.id, id))).length > 0;
+  if (!exists) await db.insert(Posts).values({id, baseid});
 }
 export const updatePostData_DB = async (id, newData) => {
   // clean up post id
   if (id.endsWith('.mdoc')) id = id.replace('.mdoc', '.md');
   if (id.endsWith('index.md')) id = id.replace('index.md', 'en.md');
   // update post data only, but not url
-  const exists = await postExists(id); if (!exists) await createPost_DB(id);
+  await createPost_DB(id);
   // get existing fields, if any
   let data = (await db.select().from(Posts).where(eq(Posts.id, id)))[0];
   // clean up some fields
@@ -62,9 +62,11 @@ export const updatePostData_DB = async (id, newData) => {
   }
   // set modified field
   newData.dateModified = new Date();
-  // only update url if post is published
-  if ((!data.draft || data.datePublished<new Date()) && data.url) delete newData.url;
-    else newData.url = slugify(newData.title || data.title);
+  // update url if post is not published or it does not have a url
+  const isPublished = !data.draft || data.datePublished<=new Date()
+  newData.url = slugify(newData.title || data.title);
+  if (isPublished && data.url) delete newData.url; // don't let it change if already published
+
   // don't let the newData override baseid for any reason
   if (newData.baseid) delete newData.baseid;
   // update modified fields
@@ -86,14 +88,16 @@ export const updatePostData_DB = async (id, newData) => {
   }
 }
 export const updatePostBody_DB = async (id, body) => {
+  body = body.trim();
+  if (!body) return;
   // clean up post id
   if (id.endsWith('.mdoc')) id = id.replace('.mdoc', '.md');
   if (id.endsWith('index.md')) id = id.replace('index.md', 'en.md');
   // update post body only
-  const exists = await postExists(id); if (!exists) await createPost_DB(id);
+  await createPost_DB(id);
   // save
   const dateModified = new Date();
-  body = `\n${body.trim()}\n\n`;
+  body = `${body}\n\n`;
   await db.update(Posts).set({body, dateModified}).where(eq(Posts.id, id));
 }
 export const savePost_DB = async (id, data, body) => {
@@ -138,7 +142,7 @@ export const updatePost_DB = async (entry) => {
     dateModified: new Date(), // Set the dateModified to NOW
     image, // Assume image field only needs the src as a string
     // post content
-    body: `\n${body.trim()}\n\n`
+    body: `${body.trim()}\n\n`
   };
 
   try {
