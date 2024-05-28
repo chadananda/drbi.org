@@ -71,7 +71,7 @@
   const uploadS3_API = async (dataURL, s3key) => {
     const base64Data = dataURL.split(',')[1];
     const mimeType = dataURL.substring(5, dataURL.indexOf(';base64'));
-    const res = await fetch('/api/uploadS3_API', {
+    const res = await fetch('/api/upload_s3', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionid}` },
       body: JSON.stringify({ filedata: base64Data, mimeType, s3key, sessionid })
@@ -88,7 +88,8 @@
     reader.onload = async e => {
       try {
         const s3URL = await uploadS3_API(e.target.result, generateS3Key(file.name));
-        post[key] = s3URL;
+        // post[key] = s3URL; dirty = true;
+        handleChange(key, s3URL);
         imagePreviewUrl = key === 'image' ? transformS3Url(s3URL) : imagePreviewUrl;
       } catch (error) {
         console.error('Failed to upload media:', error);
