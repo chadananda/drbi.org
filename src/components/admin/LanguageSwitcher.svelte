@@ -8,6 +8,8 @@
    language = lang;
    dispatch('language', lang);
  }
+
+//  $: console.log({language, languages});
 </script>
 
 

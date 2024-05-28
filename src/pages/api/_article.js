@@ -7,7 +7,8 @@ import { lucia } from "../../lib/auth";
 
 export const POST = async ({ request }) => {
   console.log('POST request to /api/article');
-  const {post, sessionid} = await request.json();
+  let {post, sessionid, type} = await request.json();
+  type = type || 'all';
   if (!post) return new Response('Slug, content or meta required', { status: 400 });
   if (!sessionid) return new Response('User session required', { status: 400 });
   // verify session and role
@@ -17,6 +18,7 @@ export const POST = async ({ request }) => {
   }
   // verify is team member
   if (!(await getTeamMemberBySlug(user.id))) return new Response('User not found', { status: 404 });
+
   // new articles need a slug and id
   if (!post.id) { // assign
     const slug = slugify(post.title);
@@ -27,7 +29,7 @@ export const POST = async ({ request }) => {
   }
 
   try {
-    await updatePost_DB(post);
+    await updatePost_DB(post, type);
     return new Response(JSON.stringify(post), {
       status: 200, headers: { 'Content-Type': 'application/json' }
     });

@@ -1,9 +1,11 @@
 <script>
-  import { onMount, tick, createEventDispatcher } from 'svelte';
+  import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  export let post, sessionid, visible;
+  export let postid, sessionid, visible;
+  let post = {};
   let EasyMDE, easyMDEInstance, textArea, hasUnsavedChanges = false, content = '';
+  let timeoutId = null;
 
   // export let visible = true;
   // export let fullScreenMode = false; // Update this line
@@ -43,7 +45,7 @@
     easyMDEInstance = new EasyMDE({
       element: textArea,
       spellChecker: false,
-      initialValue: post.body,
+      initialValue: post?.body,
       toolbar: [
         'bold', 'italic', 'heading', '|', 'code', 'quote', 'unordered-list', 'ordered-list', '|',
         'link', 'image', 'table', '|', 'preview', 'side-by-side', 'fullscreen',
@@ -111,14 +113,6 @@
   }
 });
 
-
-
-
-
-
-
-
-
   const uploadImage = async (file, editor) => {
   const reader = new FileReader();
   reader.onload = async (e) => {
@@ -164,26 +158,23 @@ const upload_s3 = async (dataURL, s3key) => {
 };
 
 
-
-
-
   const saveArticle = async () => {
     const saveButton = document.querySelector('.fa-save');
     if (saveButton) {
       saveButton.style.color = 'gray';
       saveButton.style.fontSize = '14px';
     }
-    content = easyMDEInstance.value().trim();
+    content = easyMDEInstance.value();
     try {
-      post.body = content;
-      const response = await fetch(`/api/article`, {
+      // post.body = content;
+      const response = await fetch(`/api/post_db`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ post, sessionid }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionid}` },
+        body: JSON.stringify({id:postid, body:content }),
       });
       if (!response.ok) throw new Error('Failed to save article');
-      const data = await response.json();
-      console.log("Article saved successfully: ", data);
+      //await response.json();
+      // console.log("Article saved successfully: ");
       hasUnsavedChanges = false;
     } catch (error) {
       console.error("Error saving article:", error);
@@ -192,8 +183,35 @@ const upload_s3 = async (dataURL, s3key) => {
     }
   };
 
+  // API Functions
+  const loadPost = async () => {
+    if (!postid) return;
+    const url = `/api/post_db?id=${encodeURIComponent(btoa(postid))}`; // regular encoding does not work with Astro
+    // console.log('Loading post from:', url);
+    try {
+      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${sessionid}` } });
+      if (response.ok) {
+        post.body = (await response.json()).body
+        // console.log('Loaded post body:', post.body);
+      } else {
+        throw new Error('Failed to load post');
+      }
+    } catch (error) {
+      console.error('Error loading post:', error);
+    }
+  };
 
-  </script>
+
+  // const handleChange = (field, value) => {
+  //   post[field] = value;
+  //   dirty = true;
+  //   if (timeoutId) clearTimeout(timeoutId);
+  //   timeoutId = setTimeout(() => { if (dirty) savePost(); dirty = false; }, 10000);
+  // };
+
+  onMount(() => loadPost());
+  onDestroy(() => { if (timeoutId) clearTimeout(timeoutId); });
+</script>
 
 
   <div class={`w-full relative p-2 ${visible ? 'block' : 'hidden'}`}>

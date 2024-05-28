@@ -16,48 +16,118 @@ import { moderateComments } from './openai_request';
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { marked } from 'marked';
+import { create } from "domain";
 // import { date } from "zod";
 // import { code } from "@markdoc/markdoc/dist/src/schema";
 
 
-// ***************** POSTS
 
-export const genPostID = (title, datePublished) => {
+// ***************** RAW DB Posts
+
+export const genPostID = (title, datePublished, lang='en') => {
   const stopWords = 'a the and or of in on at to for with by'.split(' '); // add common words to exclude from slug
   // if (language!='en') return console.error('updatePost_DB: completely new post must be in English');
   let namePart = slugify(title).split('-').filter(w => !stopWords.includes(w)).slice(0, 4).join('-');
   let datePart = (new Date(datePublished)).toLocaleDateString('en-CA'); // YYYY-MM-DD
-  return `${datePart}-${namePart}/en.md`;
+  return `${datePart}-${namePart}/${lang}.md`;
 }
+export const createPost_DB = async (id) => {
+  // make sure to clean up
+  if (id.endsWith('.mdoc')) id = id.replace('.mdoc', '.md');
+  if (id.endsWith('index.md')) id = id.replace('index.md', 'en.md');
+  let baseid = id.split('/')[0];
+  // create post with id and baseid
+  // const exists = (await db.select().from(Posts).where(eq(Posts.id, id))).length > 0;
+  await db.insert(Posts).values({id, baseid});
+}
+export const updatePostData_DB = async (id, newData) => {
+  // clean up post id
+  if (id.endsWith('.mdoc')) id = id.replace('.mdoc', '.md');
+  if (id.endsWith('index.md')) id = id.replace('index.md', 'en.md');
+  // update post data only, but not url
+  const exists = await postExists(id); if (!exists) await createPost_DB(id);
+  // get existing fields, if any
+  let data = (await db.select().from(Posts).where(eq(Posts.id, id)))[0];
+  // clean up some fields
+  if (newData.image && typeof newData.image === 'object') newData.image = newData.image.src;
+  // sluggify keywords and topics
+  if (newData.keywords) {
+     newData.keywords = newData.keywords.map(kw => slugify(kw.trim())).filter(Boolean)
+     newData.keywords = [...new Set(newData.keywords)];
+  }
+  // topics, slugify, clean and remove duplicates
+  if (newData.topics) {
+    newData.topics = newData.topics.map(topic => slugify(topic.trim())).filter(Boolean);
+    newData.topics = [...new Set(newData.topics)];
+  }
+  // set modified field
+  newData.dateModified = new Date();
+  // only update url if post is published
+  if (!data.draft || data.datePublished<new Date()) delete newData.url;
+    else newData.url = slugify(newData.title || data.title);
+  // don't let the newData override baseid for any reason
+  if (newData.baseid) delete newData.baseid;
+  // update modified fields
+  data = {...data, ...newData}
+  data.post_type = data.post_type || 'Article';
+  data.datePublished = data.datePublished ? new Date(`${data.datePublished}`) : new Date();
+  delete data.body; // we are not updating the body here
+  // any more validation rules??
+
+  // update record
+  // console.log('Saving fields:', data);
+  await db.update(Posts).set(data).where(eq(Posts.id, id));
+
+  // if language === 'en' update fixed fields in all translations as well
+  if (data.language==='en') {
+    let {image, post_type, author, editor, category, topics, keywords, draft, audio_image, datePublished} = data
+    let update = {image, post_type, author, editor, category, topics, keywords, draft, audio_image, datePublished};
+    await db.update(Posts).set(update).where(eq(Posts.baseid, data.baseid));
+  }
+}
+export const updatePostBody_DB = async (id, body) => {
+  // clean up post id
+  if (id.endsWith('.mdoc')) id = id.replace('.mdoc', '.md');
+  if (id.endsWith('index.md')) id = id.replace('index.md', 'en.md');
+  // update post body only
+  const exists = await postExists(id); if (!exists) await createPost_DB(id);
+  // save
+  const dateModified = new Date();
+  body = `\n${body.trim()}\n\n`;
+  await db.update(Posts).set({body, dateModified}).where(eq(Posts.id, id));
+}
+export const savePost_DB = async (id, data, body) => {
+  if (data) await updatePostData_DB(id, data);
+  if (body) await updatePostBody_DB(id, body);
+}
+export const getPost_DB = async (id) => {
+  return (await db.select().from(Posts).where(eq(Posts.id, id)))[0]
+}
+export const translationIDs_DB = async (id, all=true) => {
+  let baseid = id.split('/')[0];
+  let translations = await db.select().from(Posts).where(eq(Posts.baseid, baseid));
+  if (!all) translations = translations.filter(post => post.id != id);
+  return translations.map(({id}) => id);
+}
+
+// ***************** Entries
+
 // updatePost requires a full post object with data and body, not a partial update
 export const updatePost_DB = async (entry) => {
   // console.log('>>>> updatePost_DB', {  image: entry.data.image, id: entry.id });
-
   let { id, data, body } = entry;
-  let { title, post_type, url, description, desc_125, abstract,  audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics,  keywords, datePublished, image, language } = data;
+  let { title, language, datePublished } = data; // required, even for body updates
+  // if (type==='body') data = {}; else if (type==='body') data = {};
+  let { post_type, url, description, desc_125, abstract,  audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics,  keywords, image } = data;
   language = language || 'en';
-
-  // basic validation
-  if (!title || !description  ) {
-    console.error('updatePost_DB: missing some required fields', {title, description});
-    return false;
-  }
-
   // if image is an object, make it a string
-  if (typeof image === 'object') image = `${image.src}`;
-  // console.log('>>> updatePost_DB', {  image });
-
+  if (typeof image === 'object') image = image.src;
   // replace index.mdoc with en.id  and  *.mdoc with *.md
   id = id || genPostID(title, datePublished);
   if (id.endsWith('.mdoc')) id = id.replace('.mdoc', '.md');
   if (id.endsWith('index.md')) id = id.replace('index.md', 'en.md');
   let baseid = id.split('/')[0];
 
-  // console.log({ title, post_type, url, description, desc_125, abstract, language, audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics, tags, keywords, datePublished, image })
-
-  // console.log('>> updatePost_DB', {  image });
-
-  // Prepare the post object for insertion or update
   const post = {
     id, baseid, url, title, post_type, description, desc_125, abstract, language,
     audio, audio_duration, audio_image, narrator, draft, author, editor, category,
@@ -69,13 +139,7 @@ export const updatePost_DB = async (entry) => {
     // post content
     body: `\n${body.trim()}\n\n`
   };
-  // console.log({
-  //   id, url, title, post_type, description, desc_125, abstract, language,
-  //   audio, audio_duration, audio_image, narrator, draft, author, editor, category,
-  //   topics, tags, keywords,
-  //   datePublished,
-  //   image
-  // })
+
   try {
     // Check if the post already exists
     if (id && (await db.select().from(Posts).where(eq(Posts.id, id))).length > 0) {

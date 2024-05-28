@@ -31,7 +31,7 @@
   "linkedin": { "author": "chadananda", "publisher": "drbi" },
 
   "languages": ["en", "zh", "es", "ar", "fa"],
-  "post_types": ["News", "Event", "Memorial", "Article", "Fundraiser", "Agriculture Project", "Radio"],
+  "post_types": ["News", "Event", "Memorial", "Article", "Fundraiser", "Agriculture Project", "Radio", "Page"],
 
   "vercel_project_id": "drbi",
   "vercel_project_name": "drbi",
