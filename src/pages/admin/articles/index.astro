@@ -8,6 +8,7 @@ const user  = Astro.locals?.user  // this page is only for admins
 if (!['admin','superadmin', 'editor', 'author'].includes(user?.role)) return Astro.redirect('/admin');
 
 const isAdmin = ['admin','superadmin'].includes(user?.role);
+const isEditor = ['editor'].includes(user?.role);
 
 // Check for the 'importkey' parameter in the query
 const importkey = (new URL(Astro.request.url)).searchParams.get('importkey');
@@ -30,15 +31,25 @@ if (deletekey) {
 
 
 
-const articles  = await getAllArticles('en');
+let articles  = await getAllArticles('en');
+ // authors can see only article which are their own or unowned
+ if (!isEditor && !isAdmin) {
+    articles = articles.filter(a => a.data.author === user?.name || !a.data.author);
+  }
+
 // sort articles by draft first and then by datePublished
-articles.sort((a,b) => {
-  if (a.data.draft && !b.data.draft) return -1;
-  if (!a.data.draft && b.data.draft) return 1;
-  if (a.data.datePublished > b.data.dateModified) return -1;
-  if (a.data.datePublished < b.data.dateModified) return 1;
-  return 0;
-});
+// articles.sort((a,b) => {
+//   if (a.data.draft && !b.data.draft) return -1;
+//   if (!a.data.draft && b.data.draft) return 1;
+//   if (a.data.datePublished > b.data.dateModified) return -1;
+//   if (a.data.datePublished < b.data.dateModified) return 1;
+//   return 0;
+// });
+
+articles.sort((a, b) => {
+   if (a.data.draft && !b.data.draft) return 1;
+    else return new Date(a.data.dateModified) > new Date(b.data.dateModified) ? -1 : 1;
+ });
 
 ---
 <Layout user={user} >
@@ -78,7 +89,7 @@ articles.sort((a,b) => {
         <div class="flex-grow">
           <h2 class="text-md font-semibold">{title}</h2>
           <p class="text-xs text-gray-400 font-bold font-mono ml-1">{url}</p>
-          {isPublished && (<p class="text-xs text-gray-400 font-mono ml-1"> {datePublishedStr} </p> )}
+          {isPublished && (<p class="text-xs text-gray-400 font-mono ml-1"> {datePublishedStr}  </p> )}
           {id && (<p class="text-xs text-gray-400 font-mono ml-1"> {id} </p> )}
           {authorName && ( <p class="text-sm text-gray-400 font-mono ml-1 mb-1">by {authorName}</p>  )}
 
