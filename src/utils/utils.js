@@ -197,7 +197,7 @@ export const importAllPosts2DB = async () => {
   }
 }
 export const normalizePost_DB = (dbpost) =>  {
-  const { id, url, title, post_type, description, desc_125, abstract, language, audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics, tags, keywords, datePublished, dateModified, image, body, baseid } = dbpost;
+  let { id, url, title, post_type, description, desc_125, abstract, language, audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics, tags, keywords, datePublished, dateModified, image, body, baseid } = dbpost;
   if (!url) url = slugify(title);
   // console.log('normalizePost_DB check 1', { image } );
 // console.log('normalizePost_DB check 2', { audio, audio_image, audio_duration } );
