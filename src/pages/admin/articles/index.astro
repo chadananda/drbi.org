@@ -35,8 +35,8 @@ const articles  = await getAllArticles('en');
 articles.sort((a,b) => {
   if (a.data.draft && !b.data.draft) return -1;
   if (!a.data.draft && b.data.draft) return 1;
-  if (a.data.datePublished > b.data.datePublished) return -1;
-  if (a.data.datePublished < b.data.datePublished) return 1;
+  if (a.data.datePublished > b.data.dateModified) return -1;
+  if (a.data.datePublished < b.data.dateModified) return 1;
   return 0;
 });
 
