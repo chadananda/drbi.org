@@ -104,7 +104,7 @@
     if (field==='image') imagePreviewUrl = transformS3Url(value);
     dirty = true;
     if (timeoutId) clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => { if (dirty) savePost(); dirty = false; }, 10000);
+    timeoutId = setTimeout(() => { if (dirty) savePost(); dirty = false; }, 5000);
   };
 
 
