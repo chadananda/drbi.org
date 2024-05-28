@@ -11,7 +11,9 @@
   // export let fullScreenMode = false; // Update this line
 
   $: if (easyMDEInstance) updateSaveButton(hasUnsavedChanges);
-  $: if (visible && easyMDEInstance && post) tick().then(() => easyMDEInstance.value(post.body));
+  // $: if (visible && easyMDEInstance && post) tick().then(() => easyMDEInstance.value(post.body));
+
+  $: if (visible) tick().then(()=> loadPost());
 
   const updateSaveButton = (unsavedChanges) => {
     const saveButton = document.querySelector('.fa-save');
