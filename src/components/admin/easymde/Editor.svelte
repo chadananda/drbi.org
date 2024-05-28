@@ -194,7 +194,8 @@ const upload_s3 = async (dataURL, s3key) => {
       const response = await fetch(url, { headers: { 'Authorization': `Bearer ${sessionid}` } });
       if (response.ok) {
         post.body = (await response.json()).body
-        // console.log('Loaded post body:', post.body);
+        easyMDEInstance.value(post.body);
+        hasUnsavedChanges = false;
       } else {
         throw new Error('Failed to load post');
       }
