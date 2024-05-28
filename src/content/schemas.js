@@ -9,7 +9,7 @@ export const ORG_TYPE = [
 ];
 
 export const POST_TYPES = [
-  "Article","WebPage","Event","Organization","Person","LocalBusiness","Product","Recipe","Review","BreadcrumbList","Course","JobPosting","Movie","MusicAlbum","QAPage","SearchResultsPage","SoftwareApplication","VideoObject","BookReview","VideoReview","Newsletter"
+  "Article","WebPage","Event","Organization","Person","LocalBusiness","Product","Recipe","Review","BreadcrumbList","Course","JobPosting","Movie","MusicAlbum","QAPage","SearchResultsPage","SoftwareApplication","VideoObject","BookReview","VideoReview","News"
 ];
 
 export const post_schema = ({ image }) =>
