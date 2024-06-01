@@ -320,6 +320,7 @@ export const getPublishedArticles = async (lang='', filter=()=>true) => {
     .filter((post) => !!post.data?.url) // make sure post is ready for publication
     .filter(filter);
   // result.map(({data}) => console.log(`>>> article image loaded: `, JSON.stringify(data.image)));
+  // console.log('getPublishedArticles found', result.length, 'posts');
   return result;
 }
 // filter in query for speed, default to english

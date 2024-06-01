@@ -14,15 +14,22 @@ function processImageUrls(htmlContent) {
   });
 }
 
-let slotHTML = renderMarkdown((await Astro.slots.render("default")).toString());
-slotHTML = processImageUrls(slotHTML);
-// console.log('Aside Content: ',slotHTML);
+let slotMD = (await Astro.slots.render("default")).toString().trim()
+// console.log('MD raw: ', slotMD);
+let slotHTML = renderMarkdown(slotMD);
+// console.log('HTML raw: ',slotHTML);
+let renderedSlotHTML = processImageUrls(slotHTML);
+// console.log('Processed: ',renderedSlotHTML);
+
+
+// let testMd = '  ![](https://drbi.s3.amazonaws.com/uploads/2024-05-31-default-slug-sepideh.webp)'
+// console.log('Why is rendering failing?', renderMarkdown(testMd));
 ---
 
 <div class="articleAside text-gray-600 italic float-right pl-4 pr-0 mr-0 ml-4 border-0 border-l-4 border-blue-300 text-left w-1/3 rtl:float-left rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4 rtl:ml-0 rtl:mr-1.5 rtl:text-right">
    <center>
    <!-- <slot /> -->
-   <div class="asideContent" set:html={slotHTML}></div>
+   <div class="asideContent" set:html={renderedSlotHTML}></div>
    {asideLink && (<a class="asideLink" target="_blank" href={asideLink}>{asideLinkText}</a>)}
    </center>
 </div>
