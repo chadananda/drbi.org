@@ -7,7 +7,7 @@
    {"title": "Contact", "path": "/contact-us", "children": null}
  ],
   "companyLinks": [
-    {"title": "About", "path": "/about", "children": null},
+    {"title": "About", "path": "/about-us", "children": null},
     {"title": "Privacy", "path": "/privacy", "children": null},
     {"title": "Terms", "path": "/terms", "children": null},
     {"title": "Sitemap", "path": "/sitemap-index.xml", "children": null},
