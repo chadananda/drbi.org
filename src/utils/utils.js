@@ -252,8 +252,8 @@ export const newPostObj = (title, description, abstract='', desc_125='', body=''
 export const deletePost = async (postid) => {
   // we should not actually delete but turn the post into a redirect
   // but for now we will delete
-   await db.delete(Posts).where(eq(Posts.id, postid));
-   console.log('deleted post', postid);
+   console.log('deleteing post', postid);
+  // await db.delete(Posts).where(eq(Posts.id, postid));
 }
 export const getPosts_DB = async (lang = '', filter = () => true) => {
   // const isLangMatch = (p) => !!lang ? p.data.language === lang : true;

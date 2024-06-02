@@ -1,0 +1,123 @@
+---
+export const prerender = true;
+// import { Icon } from 'astro-icon/components'
+import Layout from "@layouts/Layout.astro";
+import Container from "src/components/container.astro";
+import Sectionhead from "src/components/sectionhead.astro";
+import Contactform from "src/components/contactform.astro";
+import site from "@data/site.json";
+import { transformS3Url } from "@utils/utils";
+import aboutusimg from "./_about_us.webp"
+import { Image } from "astro:assets";
+
+const profile = (src, alt) => {
+  return {
+    src: transformS3Url(src, { w: 200, h: 200, fit: "fill" }),
+    width: 200, height: 200, alt,
+    class: "rounded-full w-32 h-32 object-cover object-center border-4 border-gray-200 float-right -mt-4"
+  }
+}
+
+---
+
+<Layout title="About Us" description="">
+  <Container>
+    <Sectionhead>
+      <Fragment slot="title">About Us</Fragment>
+      <Fragment slot="desc">Our Board, Our Team, Our Volunteers</Fragment>
+    </Sectionhead>
+
+    <br>
+
+<Image src={aboutusimg} alt="Desert Rose Institute"
+       class="h-auto max-h-128 w-full md:w-4/5 mx-auto object-cover object-center rounded-lg mb-8" />
+
+
+    <div class="prose mx-auto">
+
+
+<h2> Our Vision & Mission </h2>
+
+<p>Desert Rose is a community-based center of learning, guided by Bahá’í principles, that creates an atmosphere of spirituality which inspires positive human development.
+
+<p>The Mission of Desert Rose is to serve the community at large through phased development of activities and institutions that promote spiritual, artistic, intellectual, agricultural, and other practical education for people of all ages and backgrounds.
+
+
+<h2> Governance  </h2>
+
+<p> The Board of Directors is appointed by the Corporate membership of the Institute, the Local Spiritual Assembly of the Bahá’ís of Scottsdale Arizona, and consists of the following members.
+
+
+<h3> Taj Sabet:   </h3>
+<img {...profile('https://drbi.s3.amazonaws.com/uploads/2024-05-31-default-slug-taj_profile.webp', 'Taj Sabet')} />
+<p> Chairman.  Taj is a trilingual businessman /entrepreneur who is currently focused in real estate investment. Taj has served as Chairman of the  Board for the past six years, has lived and worked around the world and is also the great-grandson of Shu’a’u’llah ‘A’la’i, one of the two Hands of the Cause to whom the institute is dedicated.</p>
+
+
+<h3> Marguerite Sears:  </h3>
+<img {...profile('https://drbi.s3.amazonaws.com/uploads/2024-05-31-default-slug-marguerite_profile.webp', 'Marguerite Sears')} />
+<p> Board member.  As the namesake and grand daughter of the founder of DRBI, Marguerite has a unique connection to the Institute. She specializes in envisioning events and activities that will inform even more people about Desert Rose.</p>
+
+
+<h3> Dwight Cox:  </h3>
+<img {...profile('https://drbi.s3.amazonaws.com/uploads/2024-05-31-default-slug-dwight_profile.webp', 'Dwight Cox')} />
+<p> Vice-Chair and interim Treasurer.  Dwight joined the DRBI Board in 2015 after he moved his Aviation business into the Eloy Sky Dive property just down the road.  Dwight’s degree in Aviation Mechanics belies his passion for reclaiming the desert as viable land.
+
+
+<h3> Chad Jones </h3>
+<img {...profile('https://drbi.s3.amazonaws.com/uploads/2024-06-02-default-slug-IMG_4876.JPG', 'Chad Jones')} />
+<p> Executive Director. Chad is an Alaskan fisherman and software developer with a particular interest in Bahá’í education. He is of the opinion that guidance of the Guardian is not just about our past, but our future.
+
+
+<h3> Pete Smith </h3>
+<img {...profile('https://drbi.s3.amazonaws.com/uploads/2024-05-31-default-slug-pete_smith.webp', 'Pete Smith')} />
+<br><br>
+
+
+<h3> Vafa Aflatooni </h3>
+<br><br>
+
+
+<h3> Sepideh Hockley  </h3>
+<img {...profile('https://drbi.s3.amazonaws.com/uploads/2024-05-31-default-slug-sepideh.webp', 'Sepideh Hockley')} />
+<br><br><br>
+
+
+
+<h3> Our Team </h3>
+<p> As a Not-for-Profit 501c (3) DRBI has long relied on the generosity of skilled  individuals within the community to administer the day-to-day activities of Desert Rose.
+
+<ul>
+<li> Tim McKenna – Facilities Manager
+<li> Robin Springfield – Facilities Assistant
+<li> Telahoun Molla - Operations Manager
+<li> Brooke Molla - Landscape redesign
+<li> Chris Ruhe - Radio Station Manager
+</ul>
+
+
+<h3> Volunteers </h3>
+
+<p>You may call them Volunteers; we call them EXTRAORDINARY!
+
+<p> DRBI’S EXTRAORDINARY CURRENT AND PAST TEAM:
+
+<p>BONNIE TOZER, NANCY SLOMAN, DORIS AND ROGER RASMUSSEN, SANDRA PARM, DEEPALI JONES, MARYLOU STRAWWAY, JANN AND DUFFY SHERIDAN, LADJAMAYA GREN, GLENN AND NANCY DARLING, CHRIS RUHE AND JANET RUHE-SCHOEN, KITTY AND MARK LUTNESS, MOOI YONG NG KHOSRAVIANI, KELLY HADDEN
+
+<p>Our core team keeps the Institute running like a charm, assisted by other on-site and off volunteers who are happy to serve DRBI in any way they can.
+
+<p>Volunteers are the lifeblood of any non-profit operation. Volunteer service allows DRBI to offer exceptional programs to our local, national, and international audiences. And what’s in it for you? Volunteering can help you make friends, learn new skills, advance your career, and even feel happier and healthier.
+
+<p>Service opportunities exist in the areas of farming, landscaping, food service, housekeeping, maintenance, programming, events coordination, bookstore, library, and more.
+
+<p>DRBI could not exist if it were not for the generous, skilled involvement of our many volunteers.
+
+
+<h3> Job Postings </h3>
+
+<p>As a not-for-profit organization DRBI relies primarily on Volunteers for the day-to-day operations of the Institute  That said there are occasional opportunities for full or part-time, Regular or Contract positions, but none currently.
+
+
+
+    </div>
+  </Container>
+</Layout>
