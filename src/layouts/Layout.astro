@@ -30,7 +30,7 @@ const pageURL = currentURL(Astro);
 const resolvedImageWithDomain = new URL( "/favicon.svg", Astro.site, ).toString();
 
 // console.log ('resolvedImageWithDomain', resolvedImageWithDomain);
-const { title, footerMargin = true, description } = Astro.props;
+const { title, footerMargin = true, description, image } = Astro.props;
 
 const makeTitle = title +' | '+ site.site;
 const makeDesc = description || site.description;
@@ -90,6 +90,7 @@ const { title, footerMargin = true } = Astro.props;
           image: resolvedImageWithDomain,
         },
         image: {
+          src: image,
           alt: "Homepage Screenshot",
         },
       }}

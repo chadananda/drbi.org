@@ -2,7 +2,7 @@
 layout: "@layouts/MDLayout.astro"
 title: "KURE FM, media and radio outreach service"
 description: ""
-
+image: "kure"
 ---
 
 ### Todo:
@@ -13,4 +13,4 @@ description: ""
 - [ ] Posts about each of the regular radio personalities
 - [ ] Photographic walk-through of our radio station
 - [ ] Contact information for Chris
-- [ ] Fundraising victories  
+- [ ] Fundraising victories

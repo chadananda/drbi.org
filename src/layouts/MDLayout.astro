@@ -3,11 +3,36 @@ export const prerender = true;
 import Container from "@components/container.astro";
 import Sectionhead from "@components/sectionhead.astro";
 import Layout from "./Layout.astro";
+// import { transformS3Url } from '@utils/utils.js';
 
 const { frontmatter } = Astro.props;
+
+import { Image } from "astro:assets";
+import artsImg from "../assets/drbi/arts.png"
+import cemeteryImg from "../assets/drbi/cemetery.png"
+import studyImg from "../assets/drbi/study.png"
+import soilImg from "../assets/drbi/soil.png"
+import kureImg from "../assets/drbi/kure.png"
+
+// const heroImage = () => {
+//   const width = 1200;
+//   const height = 900;
+//   const src = transformS3Url(frontmatter.image, width, height);
+//   const alt = frontmatter.title;
+//   return { src, width, height, alt, class: 'mx-auto mt-10 mb-10' }
+// }
+
+let heroImage = undefined;
+if (frontmatter.image === 'arts') heroImage = artsImg;
+  else if (frontmatter.image === 'cemetery')  heroImage = cemeteryImg;
+  else if (frontmatter.image === 'study')  heroImage = studyImg;
+  else if (frontmatter.image === 'soil')  heroImage = soilImg;
+  else if (frontmatter.image === 'kure')  heroImage = kureImg;
+
 ---
 
-<Layout title={frontmatter.title}>
+<Layout title={frontmatter.title} description={frontmatter.description} image={frontmatter.image}>
+
   <Container>
     <Sectionhead>
       <Fragment slot="title">{frontmatter.title}</Fragment>
@@ -18,6 +43,10 @@ const { frontmatter } = Astro.props;
         </Fragment>
       )}
     </Sectionhead>
+
+    {!!heroImage && (  <Image src={heroImage} alt={frontmatter.title} class="mx-auto max-h-[32rem] object-cover" />  )}
+
+
 
     <div class="mx-auto prose mt-10">
       <slot />

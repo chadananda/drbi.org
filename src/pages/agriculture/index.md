@@ -2,6 +2,7 @@
 layout: "@layouts/MDLayout.astro"
 title: "The Soil: Agriculture at DRBI"
 description: ""
+image: "soil"
 
 ---
 
