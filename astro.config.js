@@ -5,6 +5,8 @@ import tailwind from "@astrojs/tailwind";
 import sitemap from "@astrojs/sitemap";
 import vercel from '@astrojs/vercel/serverless';
 
+import remarkAttr from 'remark-attr';
+
 // import { onRequest as authMiddleware } from './src/middleware.ts';
 // import vercel from '@astrojs/vercel/static';
 // import { getSitemapArticles } from './src/utils/utils.js';
@@ -48,16 +50,24 @@ const minifyConfig = {
 };
 
 
+// debug test
+// this works correctly
+// console.log(md.render('![Test Image](/path/to/image.jpg){.test-class}'));  // Debug line
+
+
+
 // https://astro.build/config
 export default defineConfig({
-  site: site.url,
+  // this does not seem to apply markdownId attrs to our .md files
+  // markdown: {
+  //   remarkPlugins: [remarkAttr],
+  // },
   output: 'hybrid',
+  site: site.url,
   // output: 'server',
   adapter: vercel({
     imageService: false,
-    webAnalytics: {
-      enabled: true
-    }
+    webAnalytics: { enabled: true }
     // functionPerRoute: true, // does not work with hobby version of vercel
     // serviceEntryPoint: '@astrojs/image/sharp',
     // imagesConfig: {
