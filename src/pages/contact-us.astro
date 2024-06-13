@@ -31,7 +31,7 @@ import site from "@data/site.json";
             <a href={`mailto:${site.email}`}>{site.email}</a>
           </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
             <!-- <Icon class="text-gray-400 w-4 h-4" name="uil:phone" /> -->
-            <a href="tel:+1 (987) 4587 899">{site.phone}</a>
+            <a href={`tel:${site.phone}`}>{site.phone}</a>
           </div>
         </div>
       </div>
@@ -41,3 +41,4 @@ import site from "@data/site.json";
     </div>
   </Container>
 </Layout>
+

@@ -9,12 +9,16 @@ import site from "@data/site.json";
 import { transformS3Url } from "@utils/utils";
 import aboutusimg from "./_about_us.webp"
 import { Image } from "astro:assets";
+import { Pexels } from "simple-icons-astro";
 
-const profile = (src, alt) => {
+const profile = (src, alt, size='lg') => {
+  const px = (size==='lg') ? 200 : 150
+  // translate px to rem
+  const rem = px / 16
   return {
-    src: transformS3Url(src, { w: 200, h: 200, fit: "fill" }),
-    width: 200, height: 200, alt,
-    class: "rounded-full w-32 h-32 object-cover object-center border-4 border-gray-200 float-right -mt-4"
+    src: transformS3Url(src, { w: px, h: px, fit: "fill" }) ,
+    width: Pexels, height: Pexels, alt,
+    class: `rounded-full w-[${rem}] h-[${rem}] object-cover object-center border-4 border-gray-200 float-right -mt-4`
   }
 }
 
@@ -77,13 +81,8 @@ const profile = (src, alt) => {
 <br><br>
 
 
-<h3> Sepideh Hockley  </h3>
-<img {...profile('https://drbi.s3.amazonaws.com/uploads/2024-05-31-default-slug-sepideh.webp', 'Sepideh Hockley')} />
-<br><br><br>
 
-
-
-<h3> Our Team </h3>
+<h3> Our Core Team </h3>
 <p> As a Not-for-Profit 501c (3) DRBI has long relied on the generosity of skilled  individuals within the community to administer the day-to-day activities of Desert Rose.
 
 <ul>
@@ -98,20 +97,19 @@ const profile = (src, alt) => {
 <li> Chris Ruhe - Radio Station Manager
 
 <li> Janet Ruhe-Schoen - In-Residence Scholar and Author <br>
-  <img {...profile('/documents/Janet-Ruhe-Schoen.jpg', 'Janet Ruhe-Schoen')} />
+  <img {...profile('/documents/Janet-Ruhe-Schoen.jpg', 'Janet Ruhe-Schoen', 'sm')} />
   <i> Janet Ruhe-Schoen is the author of the biographies A Love Which Does Not Wait; The Nightingale, Bahá’u’lláh; Rejoice in My Gladness: The Life of Táhirih; Champions of Oneness: Louis Gregory and His Shining Circle; Son of Spirit: ‘Abdu’l-Bahá and The Hidden Words. She is a mother and grandmother; has been a Bahá’í pioneer and worked as a journalist and vocalist in South America and the U.S.; makes visual art, writes poetry and fiction, and edits a quarterly newsletter for DRBI. </i>
-
 
 </ul>
 
 
-<h3> Volunteers </h3>
+<h3> Our Community of Volunteers </h3>
 
 <p>You may call them Volunteers; we call them EXTRAORDINARY!
 
 <p> DRBI’S EXTRAORDINARY CURRENT AND PAST TEAM:
 
-<p>BONNIE TOZER, NANCY SLOMAN, DORIS AND ROGER RASMUSSEN, SANDRA PARM, DEEPALI JONES, MARYLOU STRAWWAY, JANN AND DUFFY SHERIDAN, LADJAMAYA GREN, GLENN AND NANCY DARLING, CHRIS RUHE AND JANET RUHE-SCHOEN, KITTY AND MARK LUTNESS, MOOI YONG NG KHOSRAVIANI, KELLY HADDEN
+<p>BONNIE TOZER, NANCY SLOMAN, DORIS AND ROGER RASMUSSEN, SANDRA PARM, DEEPALI JONES, MARYLOU STRAWWAY, JEAN AND DUFFY SHERIDAN, LADJAMAYA GREN, GLENN AND NANCY DARLING, CHRIS RUHE AND JANET RUHE-SCHOEN, KITTY AND MARK LUTNESS, MOOI YONG NG KHOSRAVIANI, KELLY HADDEN
 
 <p>Our core team keeps the Institute running like a charm, assisted by other on-site and off volunteers who are happy to serve DRBI in any way they can.
 

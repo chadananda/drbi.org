@@ -1,0 +1,140 @@
+---
+export const prerender = true;
+// import { Icon } from 'astro-icon/components'
+import Layout from "@layouts/Layout.astro";
+import Container from "src/components/container.astro";
+import Sectionhead from "src/components/sectionhead.astro";
+import site from "@data/site.json";
+import { transformS3Url } from "@utils/utils";
+
+import { Image } from "astro:assets";
+// import { Pexels } from "simple-icons-astro";
+
+const profile = (src, alt, size='lg') => {
+  const px = (size==='lg') ? 200 : 150
+  // translate px to rem
+  const rem = px / 16
+  return {
+    src: transformS3Url(src, { w: px, h: px, fit: "fill" }),
+    width: px, height: px,
+    alt,
+    class: `rounded-full w-[${rem}] h-[${rem}] object-cover object-center border-4 border-gray-200 float-right -mt-4`
+  }
+}
+
+import aboutusimg from "./_about_us.webp"
+import rasmussen from "../assets/people/rasmussen.webp"
+// next: import all the images
+// Viva Tomlin, Bonnie Tozer and her grandchildren, Lamont Baker, Gayle Hanke, Rob Prater, John Hanke, and Bettie Johnston.
+import viva from "../assets/people/viva.webp"
+import bonnie from "../assets/people/bonnie.webp"
+import lamont from "../assets/people/lamont.webp"
+import gayle from "../assets/people/gayle.webp"
+import robprater from "../assets/people/rob-prater.webp"
+import johnhanke from "../assets/people/john-hanke.webp"
+import bettie from "../assets/people/bettie-johnston.webp"
+
+
+
+
+
+---
+
+<Layout title="About Us" description="">
+  <Container>
+    <Sectionhead>
+      <Fragment slot="title">Working with US</Fragment>
+      <Fragment slot="desc">Come join the family</Fragment>
+    </Sectionhead>
+
+    <br>
+
+<Image src={aboutusimg} alt="Desert Rose Institute"
+       class="h-auto max-h-128 w-full md:w-4/5 mx-auto object-cover object-center rounded-lg mb-8" />
+
+
+<div class="prose mx-auto">
+
+
+<h2> Desert Rose Bahá’í Institute </h2>
+
+<p>DRBI is found in the middle of a rural oasis in the Arizona Sonoran Desert outside Eloy, midway between Phoenix and Tucson. It is comprised of meeting spaces, a large professional kitchen, dormitories, a bookstore, a library, an art gallery, a swimming pool, and rental units. DRBI is a charitable, not-for-profit 501(c)3 organization that is inspired by the peaceful and unifying teachings of the Bahá’í Faith.
+
+
+<h2> Volunteering at DRBI  </h2>
+
+<aside>
+  “This is worship, to serve mankind and to minister to the needs of the people”. –‘Abdu’l- Bahá
+</aside>
+
+<p> In the Bahá’í Faith, being of service is an extremely important and blessed gift, but you don’t have to be a Bahá’í to offer it.  At DRBI you can assist the Institute through a variety of volunteer positions:
+
+<ul>
+  <li> Event planning and coordination</li>
+  <li> Cooking, cleaning and kitchen</li>
+  <li> Online sharing </li>
+  <li> Maintenance </li>
+  <li> Landscaping and gardens </li>
+  <li> Office Administration (Must have MBA) </li>
+</ul>
+
+<h3> A few of the wonderful volunteers at DRBI, past and present: </h3>
+
+<!-- <p>  Top Row, l-r:  Roger and Doris Rasmussen, Viva Tomlin, Bonnie Tozer and her grandchildren, Lamont Baker
+
+<p>  Bottom Row, l-r: Gayle Hanke, Rob Prater, John Hanke, and Bettie Johnston. -->
+
+  <div class="flex flex-wrap w-full justify-evenly">
+
+    <div class="card w-64 text-center mx-2">
+        <img {...rasmussen} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" /> <h3 class="name mb-0 mt-0">Roger and Doris Rasmussen</h3>
+    </div>
+
+<!-- import viva from "../assets/people/viva.webp"
+import bonnie from "../assets/people/bonnie.webp"
+import lamont from "../assets/people/lamont.webp"
+import gayle from "../assets/people/gayle.webp"
+import robprater from "../assets/people/rob-prater.webp"
+import johnhanke from "../assets/people/john-hanke.webp"
+import bettie from "../assets/people/bettie.webp" -->
+
+      <div class="card w-64 text-center  px-2 ">
+        <img {...viva} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />  <h3 class="name mb-0 mt-0"> The late Viva Tomlin </h3>
+      </div>
+
+      <div class="card w-64 text-center  px-2 ">
+        <img {...bonnie} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Bonnie Tozer and grandchildren </h3>
+      </div>
+
+      <div class="card w-64 text-center  mx-2 ">
+        <img {...lamont} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Lamont Baker </h3>
+      </div>
+
+      <div class="card w-64 text-center  mx-2 ">
+        <img {...gayle} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Gayle Hanke </h3>
+      </div>
+
+      <div class="card w-64 text-center  mx-2 ">
+        <img {...robprater} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Rob Prater </h3>
+      </div>
+
+      <div class="card w-64 text-center  mx-2 ">
+        <img {...johnhanke} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> John Hanke </h3>
+      </div>
+
+      <div class="card w-64 text-center  mx-2 ">
+        <img {...bettie} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Bettie Johnston </h3>
+      </div>
+
+    </div>
+
+
+<p>Through Volunteering you acquire new skills, help build the skills of those around you, and participate in delivering services and programs to the broader community.
+
+<p>If you have questions or are interested in providing Volunteer service, please visit the <a href="/contribute">Contribute</a> page.
+
+</div>
+
+
+  </Container>
+</Layout>
