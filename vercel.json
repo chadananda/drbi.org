@@ -1,12 +1,13 @@
 {
- "trailingSlash": false,
- "crons": [
-   {"path": "/api/process_posts", "schedule": "0 0 * * *"}
-  ],
- "redirects": [
+  "trailingSlash": false,
+  "crons": [
+    {"path": "/api/process_posts", "schedule": "0 0 * * *"}
+   ],
+  "redirects": [
+    {"source": "/kure-lp-fm", "destination": "https://drbi.org/radio", "permanent": true}
 
- ]
-}
+  ]
+ }
 
 
 

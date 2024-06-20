@@ -7,9 +7,27 @@ description: "Join out educational mission, there are many ways to contribute"
 import { Image } from "astro:assets";
 
 import drbiimg from "@assets/drbi/drbi-landscape.webp"
+import amazonimg from "@assets/fundraising/Amazon-wishlist-DRBI.webp"
+import treeplanting from "@assets/fundraising/tree-planting.jpg"
+import ffastudy from "@assets/fundraising/ffa-study-1.jpg"
+import campsite from "@assets/fundraising/campsite-tent.png"
+import dbkitchen from "@assets/fundraising/db-kitchen.jpg"
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Zeyada&display=swap" rel="stylesheet" />
+
+
+
+
 
  <Image src={drbiimg} alt="Desert Rose Institute"
        class="h-auto max-h-64 w-full md:w-4/5 mx-auto object-cover object-center rounded-lg mb-8" />
+
+
+<script async src="https://widgets.givebutter.com/latest.umd.cjs?acct=1qYQLHeWtFc20ZMq&p=other"></script>
+
 
 
  ## There are so many ways to contribute to DRBI and we thank you!
@@ -17,6 +35,128 @@ import drbiimg from "@assets/drbi/drbi-landscape.webp"
  Dear Community, providing you the freedom to explore, learn, collaborate and inspire is – and will continue to be – at the heart of our mission.
 
 
+{/*
+ create a flex contriubtion section with a description on one side and an image on the other
+ each contribution section will switch sides and some images will be replaced with donation widgets
+*/}
 
+
+{/*  Start with Amazon Wishlist Instructions (amazonimg)
+
+Instructions are like: "Help us gear up for a busy next season. We have a dozen study retreats planned, but need help gearing up our dorms with pillows, sheets and blankets -- for all 40 dormiotry beds. Plus shower curtains, a bread mixer, a couple large instant-pots for making lunch, a hotel-style waffle iron, a constant-flow reverse-osmosis filter, an ice machine and a few other items. We have an Amazon Wishlist with items that we need for our programs. You can purchase items from the list and have them shipped directly to us. Click the button below to view our wishlist."
+*/}
+
+
+<h2 class="text-6xl mb-0 -ml-4 mt-16 pt-16" style="font-family: Zeyada, cursive;">Our Amazon Wishlist</h2>
+<hr class="mb-0" />
+<div class="flex flex-col md:flex-row items-start justify-center md:justify-between gap-x-4 rounded-lg mb-8 mt-0">
+  <div class="w-full">
+    <p class="mb-4 italic">Help us gear up for a busy next season. We've got a dozen study retreats planned, but need help gearing up our dorms with pillows, sheets and blankets, shower curtains, a couple instant-pots, a reverse-osmosis filter and a few other items. You can help by purchasing an item form the list and have it shipped directly to us.</p>
+        <a href="https://www.amazon.com/hz/wishlist/ls/K3TB7OCO64UF/ref=nav_wishlist_lists_1" target="_blank" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">View Wishlist</a>
+  </div>
+  <div class="w-full text-center">
+    <a href="https://www.amazon.com/hz/wishlist/ls/K3TB7OCO64UF/ref=nav_wishlist_lists_1" target="_blank">
+      <Image src={amazonimg} alt="Amazon Wishlist for DRBI" class="h-auto w-full object-cover object-center" />
+    </a>
+  </div>
+</div>
+
+{/*  Next, let's add our giveButter donation widget for the the beautification goal
+
+ "Help us green the campus: Brooke and Telahoun Molla are working tirelessly to plant hundreds of trees and and desert shrubs to give us shady areas to sit and study. Help fund hundreds of trees and dozens of concrete benches to make our campus a beautiful place to learn and grow."
+
+Donation widget: <givebutter-widget id="prMRQg"></givebutter-widget> <br />
+    <givebutter-widget class="rounded-lg text-center" id="g8AYAp"></givebutter-widget>
+
+Picture: treeplanting
+
+*/}
+
+<h2 class="text-6xl mb-0 -ml-4 mt-16 pt-16" style="font-family: Zeyada, cursive;">Making the Desert Bloom</h2>
+<hr class="mb-0" />
+<div class="flex flex-col md:flex-row items-start justify-center md:justify-between gap-x-4 rounded-lg mb-8 mt-0">
+  <div class="w-full">
+    <p class="mb-4 italic">Help us green the campus: Brooke and Telahoun Molla are working tirelessly to plant hundreds of trees and and desert shrubs to give us shady areas to sit and study. Help fund hundreds of trees and dozens of concrete benches to make our campus a beautiful place to learn and grow.</p>
+    <givebutter-widget id="prMRQg"></givebutter-widget> <br />
+    <givebutter-widget class="rounded-lg text-center" id="g8AYAp"></givebutter-widget>
+  </div>
+  <div class="w-full text-center">
+    <Image src={treeplanting} alt="Tree planting at DRBI" class="h-auto w-full object-cover object-center rounded-lg" />
+  </div>
+</div>
+
+{/*  Next, let's add our giveButter donation widget for the the Firm Foundation Program
+
+ Help us create Baha'i education programs. Desert Rose is the perfect winter retreat for study and reflection. Every year we host church groups for Bible study retreats and it is an epic shame if we cannot do the same for our own community. Where else can Baha'is go to study the Íqán, Gleanings, God Passes By and the Dawn-Breakers? Let's become better teachers together by first teaching ourselves. This is our “firm foundation” program.
+
+Donation widget: <givebutter-widget id="gBA2OL"></givebutter-widget> <br /> <givebutter-widget id="gJBA8g"></givebutter-widget>
+
+Picture: ffastudy
+
+*/}
+
+<h2 class="text-6xl mb-0 -ml-4 mt-16 pt-16" style="font-family: Zeyada, cursive;">Firm Foundation Winter School</h2>
+<hr class="mb-0" />
+<div class="flex flex-col md:flex-row items-start justify-center md:justify-between gap-x-4 rounded-lg mb-8 mt-0">
+  <div class="w-full">
+    <p class="mb-4 italic">Desert Rose is the perfect winter retreat for study and reflection. Every year we host church groups for Bible studies -- and it would be a shame if we didn't have this for our own community. Where else can Baha'is go to study the Íqán, Gleanings, God Passes By and the Dawn-Breakers? Let's become better teachers together by teaching ourselves first. This is the “firm foundation” program.</p>
+    <givebutter-widget id="gBA2OL"></givebutter-widget> <br />
+    <givebutter-widget id="gJBA8g"></givebutter-widget>
+  </div>
+  <div class="w-full text-center">
+    <Image src={ffastudy} alt="FFA Study at DRBI" class="h-auto w-full object-cover object-center rounded-lg" />
+  </div>
+</div>
+
+
+{/*  Next, let's add a general funds contribution section
+
+ title: "Help DRBI Grow!"
+
+Description: Desert Rose is presently 100% volunteer and we are struggling to be a model of self-sufficiency. Sometimes this means that our facilities are not as gold-plated as people are used to with heavily-subsidized schools run by the Baha'i adminstrative institutions. And that is OK with us! We want to be a model of adding value to the community rather than being a burden to the fund. Our revenue is derived from our hosting and accomodations, between our own programs. Help us grow!
+
+Donation widget: <givebutter-widget id="g6dwxj"></givebutter-widget>
+
+Picture: campsite
+
+*/}
+
+<h2 class="text-6xl mb-0 -ml-4 mt-16 pt-16" style="font-family: Zeyada, cursive;">Help DRBI Grow!</h2>
+<hr class="mb-0" />
+<div class="flex flex-col md:flex-row items-start justify-center md:justify-between gap-x-4 rounded-lg mb-8 mt-0">
+  <div class="w-full">
+    <p class="mb-4 italic">Desert Rose is presently 100% volunteer and we are struggling to be a model of self-sufficiency. Sometimes this means that our facilities are not as gold-plated as other heavily-subsidized schools. But that is OK with us! We want to be a model of adding value to the community rather than being a burden to the fund. Our revenue is derived from our hosting and accomodations, between our own programs. Help us grow those accomodations!</p>
+    <givebutter-widget id="g6dwxj"></givebutter-widget>
+  </div>
+  <div class="w-full text-center">
+    <Image src={campsite} alt="Campsite at DRBI" class="h-auto w-full object-cover object-center rounded-lg" />
+  </div>
+</div>
+
+
+{/*  Next, let's add a volunteers section
+
+ title: "Seeking Work-Study Volunteers!"
+
+Description: We really want to deliver a solid schedule of programs and events, but we need your help. We especially need help in the kitchen and cleaning. However, we don't want our volunteers to miss out on great educational content, so we've created a schedule that allows for both. Our work-study volunteers will be able to attend all of the programs and events that they want to, and will be able to work in the kitchen in the morning and during the long breaks after each meal.
+
+If you would be interested in work-study volunteering beginning in October of 2024, please contact us at info@drbi.org.
+
+Picture: dbkitchen
+
+
+*/}
+
+<h2 class="text-6xl mb-0 -ml-4 mt-16 pt-16" style="font-family: Zeyada, cursive;">Seeking Work-Study Volunteers!</h2>
+<hr class="mb-0" />
+<div class="flex flex-col md:flex-row items-start justify-center md:justify-between gap-x-4 rounded-lg mb-8 mt-0">
+  <div class="w-full">
+    <p class="mb-4 italic"> We need your help to deliver a solid educational experience, particularly with kitchen and cleaning tasks. To ensure volunteers don't miss out on educational content, we've created a schedule allowing for both. Work-study volunteers can attend all programs and events, working in the kitchen in the mornings and during long breaks after each meal. If interested in work-study volunteering starting in October 2024, please contact us at <a href="mailto:info@drbi.org" class="text-blue-500">info@drbi.org</a>. </p>
+
+  </div>
+  <div class="w-full text-center">
+    <Image src={dbkitchen} alt="Kitchen at DRBI" class="h-auto w-full object-cover object-center rounded-lg" />
+  </div>
+</div>
 
 
