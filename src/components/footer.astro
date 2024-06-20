@@ -16,6 +16,13 @@ import {companyLinks, productLinks, resourceLinks} from "@data/siteLinks.json";
       <div class="sm:col-span-1 md:col-span-3 lg:col-span-3 ">
         <SiteLogo />
         <p class="mt-2 text-sm text-slate-700 max-w-xs"> {brand.description_long} </p>
+
+        <p class="mt-2 text-sm text-slate-700 max-w-xs"> {brand.address} <br>
+          <a href={`tel:${brand.phone}`} target="_blank">{brand.phone}</a>,
+          <a href={`mailto:${brand.email}`} target="_blank">{brand.email}</a>
+        </p>
+
+
         <div class="flex gap-3 mt-4 items-center">
 
           <a href="https://twitter.com/" name="Twitter link"
@@ -43,10 +50,14 @@ import {companyLinks, productLinks, resourceLinks} from "@data/siteLinks.json";
 
         </div>
       </div>
+
+
+
+
     { !!companyLinks.length && (
 
       <div>
-        <h3 class="font-medium text-sm text-slate-800 underline">Company</h3>
+        <h3 class="font-medium text-sm text-slate-800 underline">DRBI</h3>
         <div class="flex flex-col mt-1">
           {companyLinks.map((item) => (
               <a href={item.path || "#"} aria-label="Company link"
