@@ -13,6 +13,7 @@
      "@api/*": ["./src/pages/api/*"],
      "@db/*": ["./db/*"],
      "@lib/*": ["./src/lib/*"],
+     "@node_modules/*": ["./node_modules/*"],
    }
  },
  "include": ["src/**/*.astro", "src/**/*.js", "src/**/*.ts", "src/**/*.d.ts", "public/article_assets/initializePlyr.js", "public/js/updatePostVisibility.js.js"]

@@ -56,6 +56,7 @@
     "gray-matter": "^4.0.3",
     "jsdom": "^24.0.0",
     "jsonwebtoken": "^9.0.2",
+    "lightbox2": "^2.11.4",
     "lucia": "^3.2.0",
     "lucia-adapter-astrodb": "^0.0.8",
     "markdown-it": "^14.1.0",
