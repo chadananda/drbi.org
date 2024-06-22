@@ -1,0 +1,30 @@
+---
+// img_block.astro
+import { Image } from "astro:assets";
+import Gallery from "@components/image_gallery.astro";
+import Header from "@components/fancy_header.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  image: ImageMetadata;
+  images: ImageMetadata[];
+}
+
+const { title='', description='', image='', images=[] } = Astro.props;
+---
+
+<Header>{title}</Header>
+<div class="flex flex-col md:flex-row items-start justify-center md:justify-between gap-x-4 rounded-lg mb-8 mt-0">
+  <div class="w-full">
+    <p class="mb-4 italic">{description}</p>
+  </div>
+  <div class="w-full text-center">
+   {image &&
+    <Image src={image} alt={title} class="h-auto w-full object-cover object-center rounded-lg" />
+   }
+  </div>
+</div>
+{images.length > 0 &&
+  <Gallery {images} />
+}

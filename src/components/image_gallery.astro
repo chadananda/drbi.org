@@ -1,0 +1,80 @@
+---
+import { Image } from 'astro:assets';
+
+interface Props {
+  images: ImageMetadata[];
+  classes?: {
+    container?: string;
+    thumbnailWrapper?: string;
+    thumbnail?: string;
+    lightbox?: string;
+  };
+}
+
+const { images, classes = {} } = Astro.props;
+
+// Generate a unique ID for this gallery instance
+const galleryId = 'gallery_' + Math.random().toString(36).substr(2, 9);
+
+// Function to determine the grid columns based on image count
+const getGridCols = (count: number) => {
+  if (count <= 3) return 'grid-cols-3';
+  if (count <= 8) return 'grid-cols-4';
+  if (count <= 15) return 'grid-cols-5';
+  return 'grid-cols-6';
+};
+
+const gridCols = getGridCols(images.length);
+
+const defaultClasses = {
+  container: `grid ${gridCols} gap-2 max-h-96 overflow-y-auto`,
+  thumbnailWrapper: "aspect-square grid place-items-center cursor-pointer",
+  thumbnail: "w-full h-full object-cover rounded-lg shadow-md transition-transform transform hover:scale-105",
+  lightbox: "fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center z-50"
+};
+---
+
+<div id={galleryId}>
+  <div class:list={[defaultClasses.container, classes.container]}>
+    {images.map((image, index) => (
+      <div
+        class:list={[defaultClasses.thumbnailWrapper, classes.thumbnailWrapper]}
+        data-lightbox-trigger
+        data-image-index={index}
+      >
+        <Image
+          src={image}
+          alt={`thumbnail ${index}`}
+          class:list={[defaultClasses.thumbnail, classes.thumbnail]}
+        />
+      </div>
+    ))}
+  </div>
+
+  <div id={`lightbox-${galleryId}`} class:list={[defaultClasses.lightbox, classes.lightbox]}>
+    <div class="max-w-4xl max-h-full p-4">
+      <Image id={`lightbox-image-${galleryId}`} src={images[0]} alt="Lightbox image" class="max-w-full max-h-full object-contain rounded-lg" />
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ images, galleryId }}>
+  const galleryContainer = document.getElementById(galleryId);
+  const lightbox = galleryContainer.querySelector(`#lightbox-${galleryId}`);
+  const lightboxImage = galleryContainer.querySelector(`#lightbox-image-${galleryId}`);
+  const triggers = galleryContainer.querySelectorAll('[data-lightbox-trigger]');
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const index = parseInt(trigger.getAttribute('data-image-index'), 10);
+      lightboxImage.src = images[index].src;
+      lightbox.classList.remove('hidden');
+      lightbox.classList.add('flex');
+    });
+  });
+
+  lightbox.addEventListener('click', () => {
+    lightbox.classList.remove('flex');
+    lightbox.classList.add('hidden');
+  });
+</script>

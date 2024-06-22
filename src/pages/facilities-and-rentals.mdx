@@ -1,0 +1,161 @@
+---
+layout: "@layouts/MDLayout.astro"
+title: "DRBI Facilities and Rental"
+description: "Desert Rose Institute facilities and rental information"
+---
+
+import { Image } from "astro:assets";
+import Gallery from "@components/image_gallery.astro";
+import Header from "@components/fancy_header.astro";
+import ImgBlock from "@components/img_block.astro";
+
+import drbiimg from "@assets/drbi/sunset1.webp"
+import hallbell from "@assets/drbi/hall-bell.webp"
+import roundhouse from "@assets/drbi/roundhouse.jpg"
+import pavilion from "@assets/drbi/pavilion.jpg"
+import guffy1 from "@assets/drbi/dorm-beds.webp"
+import poolwide from "@assets/drbi/pool-wide-2.jpeg"
+import casas from "@assets/drbi/casa-outdoor.jpeg"
+
+{/* casa pictures */}
+import casa1 from "@assets/drbi/casa-bathroom.jpeg";
+import casa2 from "@assets/drbi/casa-kitchen-2.webp";
+import casa3 from "@assets/drbi/casa-bedroom.jpeg";
+import casa4 from "@assets/drbi/casa-kitchen.webp";
+import casa5 from "@assets/drbi/casa-bedroom3.jpeg";
+import casa6 from "@assets/drbi/casa-livingroom-3.jpeg";
+import casa7 from "@assets/drbi/casa-courtyard-view.jpeg";
+import casa8 from "@assets/drbi/casa-livingroom.jpeg";
+import casa9 from "@assets/drbi/casa-courtyard.jpeg";
+import casa10 from "@assets/drbi/casa-livingroom2.jpeg";
+import casa11 from "@assets/drbi/casa-courtyard2.jpeg";
+import casa12 from "@assets/drbi/casa-indoor.webp";
+import casa13 from "@assets/drbi/casa-parking.jpeg";
+import casa14 from "@assets/drbi/casa-interior-washer.webp";
+import casa15 from "@assets/drbi/casa-parking2.jpeg";
+
+{/* EHH pictures */}
+import ehh1 from "@assets/drbi/av-room.webp";
+import ehh2 from "@assets/drbi/coffee-pot.webp";
+import ehh3 from "@assets/drbi/hall-bell.webp";
+import ehh4 from "@assets/drbi/hall-distance.webp";
+import ehh5 from "@assets/drbi/hall-outside.webp";
+import ehh6 from "@assets/drbi/hall-wide-2.webp";
+import ehh7 from "@assets/drbi/hall-wide.webp";
+import ehh8 from "@assets/drbi/kitchen-2.webp";
+import ehh9 from "@assets/drbi/kitchen-hall.webp";
+import ehh10 from "@assets/drbi/kitchen-food.jpg";
+import ehh11 from "@assets/drbi/dinner-hall.jpg";
+
+{/* Round house pictures */}
+import rh1 from "@assets/drbi/rh1.jpg";
+import rh2 from "@assets/drbi/rh2.jpg";
+import rh3 from "@assets/drbi/rh3.jpg";
+import rh4 from "@assets/drbi/rh4.jpg";
+import rh5 from "@assets/drbi/rh6.jpg";
+import rh6 from "@assets/drbi/roundhouse.jpg";
+import rh7 from "@assets/drbi/rh-study1.jpg";
+import rh8 from "@assets/drbi/rh-study2.jpg";
+import rh9 from "@assets/drbi/rh-study3.jpg";
+import rh10 from "@assets/drbi/rh-study4.jpg";
+import rh11 from "@assets/drbi/rh-study-deepali.jpg";
+
+{/* Pavilion pictures */}
+import pp1 from "@assets/drbi/sunset1.webp";
+import pp2 from "@assets/drbi/pavilion.jpg";
+import pp3 from "@assets/drbi/pp-large.jpg";
+import pp4 from "@assets/drbi/drbi-landscape.webp";
+
+{/* Pool pictures */}
+import pl1 from "@assets/drbi/pool-lg.jpeg";
+import pl2 from "@assets/drbi/pool-wide-2.jpeg";
+import pl3 from "@assets/drbi/pool.webp";
+import pl4 from "@assets/drbi/pool2.webp";
+
+{/* Campsite */}
+import camp1 from "@assets/drbi/campsite.png";
+
+
+<Image src={drbiimg} alt="Desert Rose Institute"
+       class="h-auto max-h-64 w-full md:w-4/5 mx-auto object-cover object-center rounded-lg mb-8" />
+
+
+## Desert Rose is a great Venue for Retreats and Events
+
+Conveniently located between Tucson and Phoenix, Desert Rose is a great venue for retreats, workshops, and events. Our facilities include a large meeting hall, a commercial kitchen, a dormitory which sleeps 40, a boondocking RV park, a campground and a dozen apartments.
+
+We rent both our facilities and our apartments for retreats, workshops, and events. This provides us with necesary insurance and scheduling.
+
+
+## Desert Rose Retreat Center (~ $900/night), __Includes the Hall, the Roundhouse, the Dorms and use of the Pool__
+
+Groups wanting a retreat center can book this complete package. Note: we do not yet provide cooking and cleaning services during events. You will be responsible for running the kitchen or catering in meals.
+
+<a class="text-lg text-white bg-green-700 rounded-md p-3 hover:text-white hover:bold no-underline hover:underline ml-12 float-right" href="https://www.airbnb.com/rooms/784712974810930244?guests=1&adults=1&s=67&unique_share_id=4ec9c928-c71c-4db1-969d-761dc1003bc3" target="_blank"> Check Facilities Availability &nbsp; 📅 </a>
+
+<br /><br />
+
+## Casa Rentals (~ $120/night),  __Individual apartments rented directly__
+
+Some participants will not want to sleep in a dormitory and they can book a private apartment individually. We have one and two-bedroom apartments. Note: these are on a first-come first-serve basis and they fill quickly, so tell participants to book well in advance.
+
+<a class="text-lg text-white bg-green-700 rounded-md p-3 hover:text-white hover:bold no-underline hover:underline ml-12 float-right" href="https://bit.ly/drbi-rentals" target="_blank"> Check Casa Availability &nbsp; 📅 </a>
+
+
+
+<ImgBlock title="Eleanor Hadden Hall"
+  description="Eleanor Hadden Hall was the first structure to be built at Desert Rose and is named after the mother of David Hadden, one of DRBI’s founding members.  It is fully air-conditioned with a large meeting area with 20' projection screen, two breakout rooms, a full commercial kitchen, bathrooms, showers, and two covered patios. Seating for meals: 125, for presentations: 200."
+  image={hallbell}
+  images={ [ehh1,ehh2,ehh4,ehh5,ehh6,ehh7,ehh8,ehh9,ehh10,ehh11] } />
+
+
+<ImgBlock title="Our Casa Suites"
+  description="Not every participant will be excited to sleep in a dormitory. For such cases, we have a dozen comfortable little apartment units which can be rented independently. These units each share a green central courtyard with gurgling fountains and a complimentary laundry facility."
+  image={casas}
+  images={ [casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9,casa10,casa11,casa12,casa13,casa14] } />
+
+
+<ImgBlock title="The Round House"
+  description="The Round House is a 4,000 square foot space with a kitchen and expansive seating area. Originally built as a private home, this unique and wonderful building is a favorite meeting place. A cupola crowning the building floods the rooms with light."
+  image={roundhouse}
+  images={ [rh1,rh2,rh3,rh4,rh5,rh6,rh7,rh8,rh9,rh10,rh11] } />
+
+
+
+<ImgBlock title="William Sears Pavilion"
+  description="The William Sears Pavilion, framed by Italian Cyprus and backed by mountains is a beautiful venue for any outdoor occasion. The landscaped gardens are accessed through a gated wall and the Pavilion has both gentle steps and a ramp to accommodate all users. Think of the Pavilion for your next wedding, memorial or devotional gathering."
+  image={pavilion}
+  images={ [pp1,pp2,pp3,pp4] }/>
+
+
+
+<ImgBlock title="Our Dormitory"
+  description="Our dormitory bulding (Guffy Center) has two wings, each with 20-beds and an attached studio apartment. Each dormitory wing sleeps 20 and includes a commercial bathroom with showers. The dormitory is rustic, but comfortable."
+  image={guffy1}  />
+
+
+
+<ImgBlock title="Take a Dip in our Pool"
+  description="Every oasis in the desert needs a watering hole. In our case we were required to have a large fire suppression reservoir onsite, so the creative architects decided to fulfill the requirement with a large beautiful swimming pool (connected, of course, to the fire suppression system). Our pool is wheelchair accessible and a fun additional activity for any event."
+  image={poolwide}
+  images={ [pl1,pl2,pl3,pl4] } />
+
+
+
+<ImgBlock title="Campsite"
+  description="This year we will be developing an experimental campsite to provide overflow housing for appropriate events. Our initial camp will have a dozen sites spread out in a Mesquite grove near the guffy center."
+  image={camp1}
+/>
+
+
+<ImgBlock title="RV Park"
+  description="Our new 5-acre RV Park is in the early stages, with only boondocking capabilities (which means parking, water and dump-station only). We hope to expand this in the future to provide a destination for snowbirding winter participants and volunteers."  />
+<hr/>
+
+
+
+
+
+
+
+
