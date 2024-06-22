@@ -9,17 +9,17 @@ import site from "@data/site.json";
 import { transformS3Url } from "@utils/utils";
 import aboutusimg from "./_about_us.webp"
 import { Image } from "astro:assets";
-import { Pexels } from "simple-icons-astro";
+// import { Pexels } from "simple-icons-astro";
 
 const profile = (src, alt, size='lg') => {
-  const px = (size==='lg') ? 200 : 150
-  // translate px to rem
-  const rem = px / 16
-  return {
-    src: transformS3Url(src, { w: px, h: px, fit: "fill" }) ,
-    width: Pexels, height: Pexels, alt,
+  const px = (size==='lg') ? 200 : 150;
+  const rem = Math.round(px / 16);   // translate px to rem
+  let result = {
+    src: transformS3Url(src, { w: px, h: px, fit: "fill" }),
+    width: px, height: px, alt,
     class: `rounded-full w-[${rem}] h-[${rem}] object-cover object-center border-4 border-gray-200 float-right -mt-4`
   }
+  return result;
 }
 
 ---
