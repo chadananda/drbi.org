@@ -6,25 +6,70 @@ import Header from "@components/fancy_header.astro";
 
 interface Props {
   title: string;
-  description: string;
+  description?: string;
   image: ImageMetadata;
   images: ImageMetadata[];
+  id?: string;
+  flip?: boolean;
 }
 
-const { title='', description='', image='', images=[] } = Astro.props;
+const { title = '', description = '', image = '', images = [], id = '', flip = false } = Astro.props;
 ---
 
-<Header>{title}</Header>
-<div class="flex flex-col md:flex-row items-start justify-center md:justify-between gap-x-4 rounded-lg mb-8 mt-0">
-  <div class="w-full">
-    <p class="mb-4 italic">{description}</p>
+<div id={id} class="relative">
+  <div class="flex items-start justify-between mb-4">
+    <div class="flex-grow relative w-full">
+      <Header>
+        {title}
+        <button class="share-button text-blue-500 hover:text-blue-700 focus:outline-none float-right" data-id={id} aria-label="Share this section">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+          </svg>
+        </button>
+      </Header>
+    </div>
   </div>
-  <div class="w-full text-center">
-   {image &&
-    <Image src={image} alt={title} class="h-auto w-full object-cover object-center rounded-lg" />
-   }
+  <div class={`flex flex-col md:flex-row items-start justify-center md:justify-between gap-x-4 rounded-lg mb-8 ${flip ? 'md:flex-row-reverse' : ''}`}>
+    <div class="w-full md:w-1/2">
+      {description && <p class="mb-4 italic">{description}</p>}
+      <slot />
+    </div>
+    <div class="w-full md:w-1/2 text-center">
+      {image &&
+        <Image src={image} alt={title} class="h-auto w-full object-cover object-center rounded-lg" />
+      }
+    </div>
   </div>
+  {images.length > 0 &&
+    <Gallery images={images} />
+  }
 </div>
-{images.length > 0 &&
-  <Gallery {images} />
-}
+
+<style>
+  .share-button {
+    transform: translateY(25%); /* Adjust this value to fine-tune vertical alignment */
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const shareButtons = document.querySelectorAll('.share-button');
+    shareButtons.forEach(button => {
+      button.addEventListener('click', async () => {
+        const id = button.getAttribute('data-id');
+        const url = `${window.location.origin}${window.location.pathname}#${id}`;
+        try {
+          await navigator.clipboard.writeText(url);
+          const originalHTML = button.innerHTML;
+          button.innerHTML = '<span class="text-green-500">Copied!</span>';
+          setTimeout(() => { button.innerHTML = originalHTML; }, 2000);
+        } catch (err) {
+          console.error('Failed to copy: ', err);
+          const originalHTML = button.innerHTML;
+          button.innerHTML = '<span class="text-red-500">Failed to copy</span>';
+          setTimeout(() => { button.innerHTML = originalHTML; }, 2000);
+        }
+      });
+    });
+  });
+</script>

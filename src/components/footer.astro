@@ -7,9 +7,13 @@ import brand from "@data/site.json";
 import SiteLogo from "@components/siteLogo.astro";
 
 import {companyLinks, productLinks, resourceLinks} from "@data/siteLinks.json";
+import Donate from "@components/donate-button.astro";
 ---
 
-<footer class:list={[ "py-8 bg-slate-100 border-t border-slate-100 noprint", margin && "mt-10" ]}>
+<footer class:list={[ "py-8 bg-slate-100 border-t border-slate-100 noprint relative", margin && "mt-10" ]}>
+
+  <Donate />
+
   <Container>
     <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 gap-8">
 
@@ -119,3 +123,6 @@ import {companyLinks, productLinks, resourceLinks} from "@data/siteLinks.json";
   </div>
 
 </footer>
+
+
+
