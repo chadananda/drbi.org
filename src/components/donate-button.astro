@@ -1,20 +1,61 @@
 ---
-
-
 ---
 
-<a id="give" href="/contribute" target="_blank" class="fixed bottom-4 right-4 z-50 transition-all duration-300 ease-in-out">
- <img src="/donateicon.gif" alt="drbi donation" class="w-16 rounded-full border-4 border-yellow-500 shadow-xl transition-all duration-300 ease-in-out hover:w-24" /> </a>
+<div id="give-container" class="fixed bottom-4 right-4 z-50">
+  <a id="give" href="/contribute" target="_blank" class="block transition-all duration-300 ease-in-out">
+    <img src="/donateicon.gif" alt="drbi donation" class="w-16 rounded-full border-4 border-yellow-500 shadow-xl transition-all duration-300 ease-in-out hover:w-24" />
+    <div id="notification" class="absolute top-0 right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 transition-opacity duration-300">1</div>
+  </a>
+</div>
 
-
- <style>
+<style>
   @keyframes bounce-horizontal {
     0%, 100% { transform: translateX(0); }
     50% { transform: translateX(5px); }
   }
-  #give {
+  #give-container {
     animation: bounce-horizontal 2s ease-in-out infinite;
-    transition: width 0.3s ease;
   }
-  #give:hover { animation-play-state: paused; }
+  #give-container:hover { animation-play-state: paused; }
+
+  @keyframes scale-up {
+    0% { transform: scale(1); }
+    50% { transform: scale(2); }
+    100% { transform: scale(1); }
+  }
+  .scale-animation {
+    animation: scale-up 1s ease-in-out;
+  }
 </style>
+
+<script>
+  const showDelay = 30000; // show around 30 seconds
+  const hideDelay = 10000; // hide after 10 seconds
+
+  function showNotification() {
+    const notification = document.getElementById('notification');
+    const giveButton = document.getElementById('give');
+
+    if (notification && giveButton) {
+      notification.style.opacity = '1';
+      giveButton.style.transform = 'scale(2)';
+
+      setTimeout(() => {
+        giveButton.style.transform = 'scale(1)';
+      }, 1000); // Return to normal scale after 1 second
+
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        scheduleNotification(); // Schedule the next notification
+      }, hideDelay); // Hide after 10 seconds
+    }
+  }
+
+  function scheduleNotification() {
+    const delay = Math.floor(Math.random() * (showDelay - 10000 + 1) + 10000); // Random delay between 10-30 seconds
+    setTimeout(showNotification, delay);
+  }
+
+  // Start the notification cycle
+  scheduleNotification();
+</script>
