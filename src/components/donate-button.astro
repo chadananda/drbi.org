@@ -1,10 +1,13 @@
 ---
-import { normalize } from 'path';
-import { URL } from 'url';
-
 const contributePage = '/contribute';
-const currentPath = normalize(new URL(Astro.url).pathname);
-const showButton = currentPath !== normalize(contributePage);
+const currentPath = Astro.url.pathname;
+
+// Function to normalize paths
+function normalizePath(path: string): string {
+  return '/' + path.split('/').filter(Boolean).join('/');
+}
+
+const showButton = normalizePath(currentPath) !== normalizePath(contributePage);
 
 const donateIcon = '/donateicon.gif';
 ---
