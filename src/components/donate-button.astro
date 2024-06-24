@@ -1,9 +1,12 @@
 ---
-const contributePage = '/contribute';
-const donateIcon = '/donateicon.gif';
+import { normalize } from 'path';
+import { URL } from 'url';
 
-// check to see if this page is the contribute page
-const showButton = Astro.url.pathname != contributePage;
+const contributePage = '/contribute';
+const currentPath = normalize(new URL(Astro.url).pathname);
+const showButton = currentPath !== normalize(contributePage);
+
+const donateIcon = '/donateicon.gif';
 ---
 
 <div id="give-container" class="fixed bottom-4 right-4 z-50">
