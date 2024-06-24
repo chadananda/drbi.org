@@ -1,0 +1,17 @@
+---
+layout: "@layouts/MDLayout.astro"
+title: "Upcoming Events at DRBI"
+description: ""
+---
+
+import { Image } from "astro:assets";
+import Tockify from "@components/tockify.astro";
+import image from "@assets/drbi/rh-study1-narrow.jpg"
+
+<Image src={image} alt="Desert Rose Institute"
+       class="h-auto max-h-64 w-full   mx-auto object-cover object-center rounded-lg mb-8" />
+
+<Tockify type="agenda" />
+
+<Tockify type="monthly" />
+
