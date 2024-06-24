@@ -1,11 +1,18 @@
 ---
+const contributePage = '/contribute';
+const donateIcon = '/donateicon.gif';
+
+// check to see if this page is the contribute page
+const showButton = Astro.url.pathname != contributePage;
 ---
 
 <div id="give-container" class="fixed bottom-4 right-4 z-50">
-  <a id="give" href="/contribute" target="_blank" class="block transition-all duration-300 ease-in-out">
-    <img src="/donateicon.gif" alt="drbi donation" class="w-16 rounded-full border-4 border-yellow-500 shadow-xl transition-all duration-300 ease-in-out hover:w-24" />
+  {showButton && (
+  <a id="give" href={contributePage} target="_blank" class="block transition-all duration-300 ease-in-out">
+    <img src={donateIcon} alt="drbi donation" class="w-16 rounded-full border-4 border-yellow-500 shadow-xl transition-all duration-300 ease-in-out hover:w-24" />
     <div id="notification" class="absolute top-0 right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center opacity-0 transition-opacity duration-300">1</div>
   </a>
+  )}
 </div>
 
 <style>
@@ -28,6 +35,7 @@
   }
 </style>
 
+{showButton && (
 <script>
   const showDelay = 30000; // show around 30 seconds
   const hideDelay = 10000; // hide after 10 seconds
@@ -59,3 +67,4 @@
   // Start the notification cycle
   scheduleNotification();
 </script>
+)}
