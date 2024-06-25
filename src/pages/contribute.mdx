@@ -14,6 +14,22 @@ import ffastudy from "@assets/fundraising/ffa-study-1.jpg"
 import campsite from "@assets/fundraising/campsite-tent.png"
 import dbkitchen from "@assets/fundraising/db-kitchen.jpg"
 
+{/* tree planting images */}
+import trees1 from "@assets/people/ben1.jpg"
+import trees2 from "@assets/people/ben-telahoun1.jpg"
+import trees3 from "@assets/people/ben-brooke.jpg"
+import trees4 from "@assets/people/brooke.jpg"
+
+{/* FFA Classes */}
+import ffa1 from "@assets/drbi/rh-study1.jpg"
+import ffa2 from "@assets/drbi/rh-study-deepali.jpg"
+import ffa3 from "@assets/drbi/rh-study2.jpg"
+import ffa4 from "@assets/drbi/rh-study3.jpg"
+import ffa5 from "@assets/drbi/rh-study4.jpg"
+import ffa6 from "@assets/drbi/rh4.jpg"
+import ffa7 from "@assets/drbi/rh2.jpg"
+import ffa8 from "@assets/drbi/rh1.jpg"
+
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -45,7 +61,10 @@ import dbkitchen from "@assets/fundraising/db-kitchen.jpg"
 
 <ImgBlock title="Making the Desert Bloom" id="bloom"
   description="Help us green the entire campus: Brooke and Telahoun Molla are working tirelessly to plant hundreds of trees and and desert shrubs to give us shady areas to sit and study. Help fund hundreds of trees and dozens of concrete benches to make our campus a beautiful place to learn and grow."
-  image={treeplanting}>
+  flip
+  image={treeplanting}
+  images={[trees1,trees2,trees3,trees4]}
+  >
     <givebutter-widget id="prMRQg"></givebutter-widget> <br />
     <givebutter-widget class="rounded-lg text-center" id="g8AYAp"></givebutter-widget>
 </ImgBlock>
@@ -56,6 +75,7 @@ import dbkitchen from "@assets/fundraising/db-kitchen.jpg"
 
 <ImgBlock title="Firm Foundation Winter School" id="ffa"
   description="Desert Rose is the perfect winter retreat for study and reflection. Every year we host church groups for Bible studies -- and it would be a shame if we didn't have this for our own community. Where else can Baha'is go to study the Íqán, Gleanings, God Passes By and the Dawn-Breakers? Let's become better teachers together by teaching ourselves first. This is the “firm foundation” program."
+  images={[ffa1,ffa2,ffa3,ffa4,ffa5,ffa6,ffa7,ffa8]}
   image={ffastudy}>
     <givebutter-widget id="gBA2OL"></givebutter-widget> <br />
     <givebutter-widget id="gJBA8g"></givebutter-widget>
@@ -66,6 +86,7 @@ import dbkitchen from "@assets/fundraising/db-kitchen.jpg"
 
 <ImgBlock title="Help DRBI Grow!" id="growth"
   description="Desert Rose is presently 100% volunteer and we are struggling to be a model of self-sufficiency. Sometimes this means that our facilities are not as gold-plated as other heavily-subsidized schools. But that is OK with us! We want to be a model of adding value to the community rather than being a burden to the fund. Our revenue is derived from our hosting and accomodations, between our own programs. Help us grow those accomodations!"
+  flip
   image={campsite}>
      <givebutter-widget id="g6dwxj"></givebutter-widget>
 </ImgBlock>
