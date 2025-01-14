@@ -3,7 +3,7 @@ import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
-import vercel from '@astrojs/vercel/serverless';
+import vercel from '@astrojs/vercel';
 
 import remarkAttr from 'remark-attr';
 
@@ -14,12 +14,12 @@ import remarkAttr from 'remark-attr';
 import svelte from '@astrojs/svelte';
 import markdoc from "@astrojs/markdoc";
 import site from './src/data/site.json'; // for branding
+import db from "@astrojs/db";
 // import icon from "astro-icon";
 // import minify from 'astro-min';
 // import compress from "astro-compress";
 // import partytown from '@astrojs/partytown';
 // import react from "@astrojs/react";
-import db from "@astrojs/db";
 const isDev = process.env.NODE_ENV === 'development';
 const siteMapConfig = {
   filter: url => {
@@ -62,18 +62,11 @@ export default defineConfig({
   // markdown: {
   //   remarkPlugins: [remarkAttr],
   // },
-  output: 'hybrid',
+  output: 'static',
   site: site.url,
-  // output: 'server',
   adapter: vercel({
     imageService: false,
     webAnalytics: { enabled: true }
-    // functionPerRoute: true, // does not work with hobby version of vercel
-    // serviceEntryPoint: '@astrojs/image/sharp',
-    // imagesConfig: {
-    //   sizes: [120, 188, 300, 372, 788, 1000, 1280],
-    //   formats: ["image/webp", "image/jpg"],
-    // },
   }),
   integrations: [tailwind(),
     // { hooks: { 'astro:server:setup': ({ app }) => {  app.use(authMiddleware);  },}, },
@@ -81,17 +74,21 @@ export default defineConfig({
   sitemap(siteMapConfig),
   svelte(),
   markdoc({  allowHTML: true }),
+  db(),
   //  icon(),
   //  compress(),
   // minify(minifyConfig),
   // partytown()
   // react(),
-  db()],
+  // db()
+  ],
 
-  experimental: {
-    contentCollectionCache: true,
-  },
-
+  routes: [
+    {
+      src: '/(.*)',
+      dest: '/index.html',
+    },
+  ],
   prefetch: {
     defaultStrategy: 'viewport',
     prefetchAll: !isDev,

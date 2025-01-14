@@ -46,7 +46,9 @@ export const Team = defineTable({
     description_250: column.text({ optional: true }),
     biography: column.text({ optional: true }),
   },
-  indexes: [ { on: ["id", "email"], unique: true } ]
+  indexes: {
+    teamIndex: { on: ["id", "email"], unique: true }
+  }
 });
 
 export const Users = defineTable({
@@ -57,7 +59,9 @@ export const Users = defineTable({
    hashed_password: column.text({ optional: true }),
    role: column.text({ optional: true }),
  },
- indexes: [ { on: ["id", "email"], unique: true } ]
+ indexes: {
+   userIndex: { on: ["id", "email"], unique: true }
+ }
 })
 
 export const Sessions = defineTable({
@@ -67,7 +71,9 @@ export const Sessions = defineTable({
    expiresAt: column.date({ optional: true }),
    fresh: column.boolean({ optional: true }),
  },
- indexes: [ { on: ["id"], unique: true } ]
+ indexes: {
+   sessionId: { on: ["id"], unique: true }
+ }
 })
 
 export const Comments = defineTable({
@@ -83,7 +89,9 @@ export const Comments = defineTable({
     date: column.date({ default: NOW }),           // comment date
     starred: column.boolean({ default: false }),   //  starred
   },
-  indexes: [ { on: ["id", "postid", "moderated", "date"], unique: false } ]
+  indexes: {
+    commentIndex: { on: ["id", "postid", "moderated", "date"], unique: false }
+  }
 })
 
 export const Cron = defineTable({
@@ -126,8 +134,8 @@ export const Posts = defineTable({
     /// oops, forgot the meat
     body: column.text({ default: '' }),
   },
-  indexes: [
-    { on: ["id", "url"], unique: true }, // unique index
-    { on: "baseid" } // non-unique index
-  ]
+  indexes: {
+    postIdUrl: { on: ["id", "url"], unique: true }, // unique index
+    postBaseid: { on: ["baseid"], unique: false } // non-unique index
+  }
 });
