@@ -1,7 +1,7 @@
 ---
 layout: "@layouts/MDLayout.astro"
 title: "The Arts: Fine Arts at DRBI"
-description: ""
+description: "Discover the vibrant arts programs at Desert Rose Bahá'í Institute, where creativity meets spirituality. Experience our diverse offerings in visual arts, music, dance, and creative expression, fostering cultural enrichment in our Arizona community."
 image: 'arts'
 ---
 

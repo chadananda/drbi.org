@@ -17,6 +17,7 @@
  "productLinks": [
  ],
  "resourceLinks": [
+  {"title": "Email Newsletter", "path": "http://eepurl.com/gTGwNH", "children": null},
   {"title": "Events", "path": "/events", "children": null},
   {"title": "Facility", "path": "/facilities-and-rentals", "children": null},
   {"title": "Contributions", "path": "/contribute", "children": null},

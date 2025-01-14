@@ -1,7 +1,7 @@
 ---
 layout: "@layouts/MDLayout.astro"
 title: "Write Life"
-description: ""
+description: "Join our annual writers' retreat at Desert Rose Bahá'í Institute, where writers gather to explore creativity, share their work, and develop their craft. Founded by Anne Perry, Write Life offers a supportive environment for writers of all levels in the inspiring Arizona desert setting."
 author: "Anne Perry"
 ---
 
@@ -371,7 +371,7 @@ Her current book-in-progress grew out of one of her arts-related workshops: The 
 
 Jaine is also busy creating Reader’s Theater scripts for her performing group, ReGeneration.
 As much as Jaine loves to write, there’s another art form that holds a special place in her heart. Her
-vehicle’s license plate frame says it all: “I’d Rather Be Acting.”
+vehicle’s license plate frame says it all: “I’d Rather Be Acting."
 
 
 
@@ -417,5 +417,3 @@ is plein air painting which she has great opportunities for in the wilds of Alas
    float: right;
   }
 </style>
-
-
