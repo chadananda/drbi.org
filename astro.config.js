@@ -68,19 +68,17 @@ export default defineConfig({
     imageService: false,
     webAnalytics: { enabled: true }
   }),
-  integrations: [tailwind(),
+  integrations: [
+    tailwind(),
     // { hooks: { 'astro:server:setup': ({ app }) => {  app.use(authMiddleware);  },}, },
-  mdx(),
-  sitemap(siteMapConfig),
-  svelte(),
-  markdoc({  allowHTML: true }),
-  db(),
-  //  icon(),
-  //  compress(),
-  // minify(minifyConfig),
-  // partytown()
-  // react(),
-  // db()
+    mdx(),
+    sitemap(siteMapConfig),
+    svelte(),
+    markdoc({  allowHTML: true }),
+    db({
+      client: isDev ? 'sqlite' : 'remote',
+      reset: isDev // Reset and reseed local db on dev server start
+    }),
   ],
 
   routes: [

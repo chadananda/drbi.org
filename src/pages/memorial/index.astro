@@ -3,7 +3,7 @@ export const prerender = true;
 
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro"; // some padding
-import Sectionhead from "@components/sectionhead.astro";
+// import Sectionhead from "@components/sectionhead.astro";
 import PostThumb from "@components/article/postThumb.astro";
 import { getPublishedPostsByType } from "@utils/utils.js";
 import cemeteryImage from "./_memorial-garden-front.jpg";
@@ -16,7 +16,7 @@ import { Image } from 'astro:assets';
  */
 
 const posts = await getPublishedPostsByType('Memorial');
-// console.log('Memorial Posts:', posts.length);
+console.log('Memorial Posts:', posts.length);
 ---
 
 <Layout title="Permanent Residents: Our Guardian Angels" description="The Desert Rose Memorial Cemetery is a place of rest for the bodies of our loved ones who have passed on. It is a place of peace and tranquility, where the living can come to remember and honor the dead.">

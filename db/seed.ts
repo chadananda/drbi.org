@@ -12,6 +12,7 @@ const slugify = (text) => {
 }
 
 export default async function() {
+	console.log('Seeding non-post data...');
 	// Seed initial admin user
 	await db.insert(Users).values([{
 		id: slugify(site.author),

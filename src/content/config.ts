@@ -1,60 +1,113 @@
 // 1. Import utilities from `astro:content`
 // import { string } from 'astro/zod';
 import { z, defineCollection } from 'astro:content';
-import { ORG_TYPE, post_schema } from './schemas.js'
+
+
+export const LANG_CODES = ["ab","aa","af","ak","sq","am","ar","an","hy","as","av","ae","ay","az","bm","ba","eu","be","bn","bh","bi","bs","br","bg","my","ca","km","ch","ce","ny","zh","cu","cv","kw","co","cr","hr","cs","da","dv","nl","dz","en","eo","et","ee","fo","fj","fi","fr","fy","ff","gd","gl","lg","ka","de","ki","el","kl","gn","gu","ht","ha","he","hz","hi","ho","hu","is","io","ig","id","ia","ie","iu","ik","ga","it","ja","jv","kn","kr","ks","kk","rw","kv","kg","ko","kj","ku","ky","lo","la","lv","lb","li","ln","lt","lu","mk","mg","ms","ml","mt","mi","mr","mh","mn","na","nv","nd","ne","ng","nb","nn","no","ii","oc","oj","or","om","os","pa","pi","fa","pl","ps","pt","qu","rm","rn","ro","ru","sa","sc","sd","se","sm","sg","sr","gd","sn","si","sk","sl","so","st","es","su","sw","ss","sv","tl","ty","tg","ta","tt","te","th","bo","ti","to","ts","tn","tr","tk","tw","ug","uk","ur","uz","ve","vi","vo","wa","cy","wo","fy","xh","yi","yo","za","zu"] as const;
+
+export type LanguageCode = typeof LANG_CODES[number];
+
+export const POST_TYPES = ["Article","WebPage","Event","Organization","Person","LocalBusiness","Product","Recipe","Review","BreadcrumbList","Course","JobPosting","Movie","MusicAlbum","QAPage","SearchResultsPage","SoftwareApplication","VideoObject","BookReview","VideoReview","News"] as const;
+
+export type PostType = typeof POST_TYPES[number];
 
 
 
-// Main 'post' collection, for all article types
-const posts = defineCollection({
-  type: 'content', schema: post_schema,
+
+
+
+// New schema with transformation
+export const postdb_schema = z.object({
+  title: z.string().max(100).default(""),
+  url: z.string().max(100).default(""),
+  post_type: z.enum(POST_TYPES).default("Article"),
+  description: z.string().max(160).default(""),
+  desc_125: z.string().default(""),
+  abstract: z.string().default(""),
+  language: z.enum(LANG_CODES).default("en"),
+  audio: z.string().optional().nullable(),
+  audio_duration: z.string().nullable().default(""),
+  audio_image: z.string().optional().nullable(),
+  narrator: z.string().nullable().default("auto"),
+  draft: z.boolean().default(true),
+  author: z.string().nullable().optional(),
+  editor: z.string().nullable().optional(),
+  category: z.string().nullable().optional(),
+  topics: z.string().optional(),
+  tags: z.string().optional(),
+  keywords: z.string().optional(),
+  datePublished: z.coerce.date(),
+  dateModified: z.coerce.date(),
+  image: z.string().optional()
+});
+
+export type Post = z.infer<typeof postdb_schema>;
+
+// Parallel implementation with normalized data
+export const postdb = defineCollection({
+  type: 'content',
+  schema: postdb_schema.transform((data) => ({
+    ...data,
+    topics: tryParseJSON(data.topics, []),
+    tags: tryParseJSON(data.tags, []),
+    keywords: tryParseJSON(data.keywords, []),
+    image: {
+      src: data.image || '',
+      alt: data.description || ''
+    }
+  }))
 });
 
 
-// const team = defineCollection({
-//   type: 'data',
-//   schema: ({ image }) => z.object({
-//     name: z.string(), // full name
-//     name_slug: z.string().default(''), // slugified version
-//     title: z.string(),
-//     image: z.object({
-//       src: z.string().nullable().default(''),
-//       alt: z.string().nullable().default(''),
-//     }),
-//     external: z.boolean().nullable().default(false), // internal or external writer
-//     contact: z.string().nullable().default(''), // email or url if available
-//     isFictitious: z.boolean().nullable().default(false), // pen name or real person?
-//     draft: z.boolean().nullable().default(false),
-//     jobTitle: z.string().nullable().default(''),
-//     type: z.string().nullable().default('Person'),
-//     url: z.string().nullable().default(''),
-//     worksFor: z.object({
-//       '@type': z.enum(ORG_TYPE).default('Organization'),
-//       name: z.string().default(''),
-//     }).default({}),
-//     description: z.string().nullable().default(''),
-//     sameAs: z.array(z.string()).nullable().default([]),
-//     description_125: z.string().nullable().default(''),
-//     description_250: z.string().nullable().default(''),
-//     biography: z.string().nullable().default(''),
-//   }),
-// });
 
+// old schema which required normalization
+export const post_schema = ({ image }) =>
+  z.object({
+    title: z.string().max(100).default(""),
+    url: z.string().max(100).default(""),
+    post_type: z.enum(POST_TYPES).default("Article"),
 
-// collection: category:
-// const categories = defineCollection({
-//   type: 'data',
-//   schema: ({ image }) => z.object({
-//     category: z.string(),
-//     category_slug: z.string().default(''),
-//     image: z.string().default(''),
-//     description: z.string(),
-//   }),
-// });
+    description: z.string().max(160).default(""), // 160 char limit
+    desc_125: z.string().default(""), // short description for RSS feed
+    abstract: z.string().default(""), // longer, like 500 chars min
 
+    language: z.enum(LANG_CODES).default("en"),
+    audio: z.string().optional().nullable(),// url to audio file
+    audio_duration: z.string().nullable().default(""), // duration of audio in ISO 8601 format
+    audio_image: z.string().optional().nullable(),// image for audio
+    narrator: z.string().nullable().default("auto"), // auto generated or name of narrator
+    draft: z.boolean().default(true),
+
+    author: z.string().nullable().optional(), //reference("team").nullable().optional(),
+    editor: z.string().nullable().optional(), //reference("team").nullable().optional(),
+    category: z.string().nullable().optional(),
+    topics: z.array(z.string()).default([]),
+    tags: z.array(z.string()).default([]),
+    keywords: z.array(z.string()).default([]), // will be an array of references soon!
+
+    datePublished: z
+      .string()
+      .transform((str) => new Date(str))
+      .default(""),
+    dateModified: z
+      .string()
+      .transform((str) => new Date(str))
+      .default(""), // do we need?
+
+    // image: z.string().nullable().default("")
+    image: z.object({
+      src: z.string().optional().nullable(), // Validate as URL or any string
+      alt: z.string().default('')
+    }).optional(),
+
+  });
+// Main 'post' collection, for all article types
+export const posts = defineCollection({
+  type: 'content', schema: post_schema,
+});
 
 // collection: topics:
-const topics = defineCollection({
+export const topics = defineCollection({
   type: 'data',
   schema: z.object({
     topic: z.string(),
@@ -62,35 +115,11 @@ const topics = defineCollection({
     category: z.string().nullable().default(''),
     traffic: z.number().default(0),
     description: z.string().nullable().default(''),
-    // subtopics: z.array(z.object({
-    //   name: z.string(),
-    //   slug: z.string(),
-    //   description: z.string(),
-    // })),
   }),
 });
 
-
-
-// define collection for subtopics:
-// const subtopics = defineCollection({
-//   type: 'data',
-//   schema: z.object({
-//     topic: z.string(),
-//     topic_slug: z.string(),
-//     category: reference('categories'),
-//     subtopics: z.array(z.object({
-//       subtopic: z.string(),
-//       subtopic_slug: z.string(),
-//       keywords: z.array(z.string()),
-//       questions: z.array(z.string()),
-//    }))
-//   }),
-// });
-
-
 // define collection for faqs:
-const faqs = defineCollection({
+export const faqs = defineCollection({
   type: 'data',
   schema: z.object({
     topic: z.string(),
@@ -106,22 +135,7 @@ const faqs = defineCollection({
   }),
 });
 
-// lastPostDate: 2024-02-02T02:55:32.911362
-// comments:
-//   - id: BBt7SDkwPV
-//     parentId: null
-//     name: Chad Jones
-//     email: user0@example.com
-//     date: 2024-02-01T23:50:38.198897
-//     content: Really enjoyed this piece, especially the part about the hospitality in Mongolia!
-//   - id: tPydWoRMAk
-//     parentId: BBt7SDkwPV
-//     name: Alex Smith
-//     email: null
-//     date: 2024-01-31T08:50:38.198951
-//     content: How has this adventure changed your perspective on travel and spirituality?
-
-const comments = defineCollection({
+export const comments = defineCollection({
   type: 'data',
   schema: z.object({
     lastPostDate:  z.string().transform(str => new Date(str)).default(''),
@@ -137,9 +151,13 @@ const comments = defineCollection({
   })
 });
 
-
-
-//    This key should match your collection directory name in "src/content"
-export const collections = { comments, posts, topics, faqs };
-
+// Helper function for safe JSON parsing
+function tryParseJSON(str: string | undefined | null, defaultValue: any[] = []) {
+  if (!str) return defaultValue;
+  try {
+    return JSON.parse(str);
+  } catch {
+    return defaultValue;
+  }
+}
 

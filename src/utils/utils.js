@@ -327,15 +327,61 @@ export const getPublishedArticles = async (lang='', filter=()=>true) => {
 export const getPublishedPostsByType = async (type, lang='en') => {
   // we want to modify **the database query** to limit by type, language and published state (draft=false && datePublished<=NOW)
   // also, order by datePublished
-  let posts = await db.select().from(Posts).where(and(
-    eq(Posts.post_type, type),
-    eq(Posts.language, lang),
-    eq(Posts.draft, false),
-    lte(Posts.datePublished, NOW),
-  )).orderBy(Posts.datePublished, 'desc');
-  //console.log('getPublishedArticlesByType found', posts.length, 'posts of type: ', type);
-  const result = posts.map(normalizePost_DB)
-  return result;
+  // let posts = await db.select().from(Posts).where(and(
+  //   eq(Posts.post_type, type),
+  //   eq(Posts.language, lang),
+  //   eq(Posts.draft, false),
+  //   lte(Posts.datePublished, NOW),
+  // )).orderBy(Posts.datePublished, 'desc');
+  // // console.log('getPublishedArticlesByType found', posts.length, 'posts of type: ', type);
+  // const result = posts.map(normalizePost_DB)
+  // return result;
+
+  try {
+    console.log('Querying posts of type:', type);
+
+    // First try to get all posts
+    const allPosts = await db.select().from(Posts);
+    console.log('All posts in database:', allPosts.length);
+
+    if (allPosts.length > 0) {
+      console.log('Sample post:', allPosts[0]);
+    }
+
+    // Then try each filter one by one
+    const typeFiltered = await db.select().from(Posts).where(eq(Posts.post_type, type));
+    console.log('Posts after type filter:', typeFiltered.length);
+
+    const langFiltered = await db.select().from(Posts).where(and(
+      eq(Posts.post_type, type),
+      eq(Posts.language, lang)
+    ));
+    console.log('Posts after language filter:', langFiltered.length);
+
+    const draftFiltered = await db.select().from(Posts).where(and(
+      eq(Posts.post_type, type),
+      eq(Posts.language, lang),
+      eq(Posts.draft, false)
+    ));
+    console.log('Posts after draft filter:', draftFiltered.length);
+
+    // Finally, add the date filter
+    const query = await db.select().from(Posts).where(and(
+      eq(Posts.post_type, type),
+      eq(Posts.language, lang),
+      eq(Posts.draft, false),
+      lte(Posts.datePublished, NOW),
+    )).orderBy(Posts.datePublished, 'desc');
+
+    console.log('Posts after all filters:', query.length);
+    const result = query.map(normalizePost_DB);
+    return result;
+  } catch (error) {
+    console.error('Error in getPublishedPostsByType:', error);
+    return [];
+  }
+
+
 }
 
 export const getAllPostsByAuthor = async (authorid, lang='en') => {
