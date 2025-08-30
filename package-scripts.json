@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test:assets": "node test-assets.js",
+    "test:build": "node test-build-integrity.js",
+    "test:quick": "node test-assets.js && echo '✅ Quick test passed!'",
+    "test:full": "node test-build-integrity.js && echo '🎉 Full test suite passed!'",
+    "verify": "npm run test:assets && npm run build && echo '🚀 Build verification complete!'"
+  }
+}

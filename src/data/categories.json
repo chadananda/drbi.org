@@ -1,0 +1,26 @@
+[
+  {
+    "id": "drbi-newsletter",
+    "category": "drbi-newsletter",
+    "image": "https://drbi.s3.amazonaws.com/uploads/categories/pastel-news.webp",
+    "description": "Desert rose news and events"
+  },
+  {
+    "id": "bahai-faith",
+    "category": "bahai-faith",
+    "image": "https://drbi.s3.amazonaws.com/uploads/categories/bahai-faith.png",
+    "description": "The Bahá''í Faith is a monotheistic religion emphasizing the spiritual unity of\nall humankind. Originating with the teachings of Bahá''u''lláh in 19th-century\nPersia, it advocates universal peace, elimination of prejudice, and unity\namong religions. With its global scope, the Faith espouses principles of\nindividual search for truth, equality of men and women, and harmonious\ndevelopment of science and religion."
+  },
+  {
+    "id": "bahai-education",
+    "category": "bahai-education",
+    "image": "https://drbi.s3.amazonaws.com/uploads/categories/bahai-education.png",
+    "description": "Bahá''í education encompasses the pedagogical principles and practices derived\nfrom the teachings of the Bahá''í Faith, aimed at personal development and\nsocietal transformation. It emphasizes the unity of humankind, the acquisition\nof virtues, the importance of service, and the harmony of science and\nreligion, within formal and informal educational settings."
+  },
+  {
+    "id": "bahai-literature",
+    "category": "bahai-literature",
+    "image": "https://drbi.s3.amazonaws.com/uploads/categories/bahai-literature+(2).png",
+    "description": "Doctrinal Bahá’í Literature includes scripture and authoritative interpretation.\nThis includes teachings, laws, and principles in hundreds of books and letters revealed by the\nfaith’s central figures — Bahá’u’lláh, the Báb, and\n‘Abdu’l-Bahá — as well as interpretative guidance by Shoghi Effendi, the\nGuardian of the Bahá’í Faith. This literature forms the doctrinal\nfoundation of the Bahá’í Faith, guiding individual spiritual life and the\nadministrative functioning of the Bahá’í community. The\tBahá’í Faith also has a unique and\nflexible legislative system that allows for the application of supplemental laws to meet the\nneeds of a changing society. Such supplemental laws are flexible and can be modified according\nto changing needs because they are not part of the ‘Divine Explicit Text"
+  }
+]

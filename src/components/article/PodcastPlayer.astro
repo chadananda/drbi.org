@@ -1,7 +1,8 @@
 ---
 // Import Simple Icons
-import { Twitter, Facebook, Linkedin } from 'simple-icons-astro';
-import { getArticleAudioPath, currentURL, getTeamMember, getPostFromSlug, baseURL, generateArticleImage } from '@utils/utils.js';
+// import { X, Facebook, Linkedin } from 'simple-icons-astro';
+import { getArticleAudioPath, currentURL, getTeamMember, baseURL, generateArticleImage } from '@utils/utils.js';
+import { getPostFromSlug_Content } from '@utils/content-utils.js';
 import site from '@data/site.json';
 
 const post = Astro.props.post;
@@ -151,11 +152,11 @@ border-4 border-gray-300 p-1 noprint
       <!-- Share icons at the bottom right -->
       <div class="share flex justify-end items-end space-x-2">
         <!-- Twitter -->
-        <a href={twitterLink} aria-label="Twitter" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on Twitter"><Twitter /></a>
+        <a href={twitterLink} aria-label="Twitter" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on Twitter">🐦</a>
         <!-- Facebook -->
-        <a href={facebookLink} aria-label="Facebook" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on Facebook"><Facebook /></a>
+        <a href={facebookLink} aria-label="Facebook" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on Facebook">📘</a>
         <!-- LinkedIn -->
-        <a href={linkedinLink} aria-label="LinkedIn" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on LinkedIn"><Linkedin /></a>
+        <a href={linkedinLink} aria-label="LinkedIn" class="block text-gray-600 hover:text-blue-800" target="_blank" title="Share on LinkedIn">💼</a>
         <!-- Share by email link -->
         <a href={emailLink} aria-label="Email" class="block text-gray-600 hover:text-blue-800 no-underline"
         title="Share by Email"><span class="text-lg">

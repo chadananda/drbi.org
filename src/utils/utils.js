@@ -7,7 +7,8 @@ import fs from 'fs';
 import matter from 'gray-matter';
 import site from '@data/site.json'
 import { getImage } from "astro:assets";
-import { db, Categories, eq, Team, Users, Topics, Comments, inArray, NOW, Cron, Posts, count, lte, and } from 'astro:db';
+// Legacy Astro DB import - temporarily disabled during migration
+// import { db, Categories, eq, Team, Users, Topics, Comments, inArray, NOW, Cron, Posts, count, lte, and } from 'astro:db';
 import * as argon2 from 'argon2';
 import AWS from 'aws-sdk';
 import { Buffer } from 'buffer';
@@ -394,26 +395,14 @@ export const getAllPostsByAuthor = async (authorid, lang='en') => {
 }
 
 export const getPostFromSlug = async (slug) => {
-  // return null;
-  if (!slug) return null;
-  // console.log('getPostFromSlug - looking for post with slug:', slug);
-  // let post = (await getCollection('posts', (post)=>post.data?.url===slug))?.pop();
-  // if (!post) await getPostFromSlug_DB(slug);
-  const post = await getPostFromSlug_DB(slug);
-  // console.log('getPostFromSlug - post found:', post);
-  if (!post) console.error('getPostFromSlug - post not found:', slug);
-  return post;
+  // Redirect to Content Layer version during migration
+  const { getPostFromSlug_Content } = await import('./content-utils.js');
+  return await getPostFromSlug_Content(slug);
 }
 export const getPostFromID = async (id) => {
-  // return null;
-  // console.log('getPostFromSlug - looking for post with slug:', slug);
-  // let post = (await getCollection('posts', (post)=>post.id===id))?.pop();
-  // if (!post) await getPostFromID_DB(id);
-  const post = await getPostFromID_DB(id);
-
-  // console.log('getPostFromSlug - post found:', post);
-  if (!post) console.error('getPostFromID - post not found:', id);
-  return post;
+  // Redirect to Content Layer version during migration
+  const { getPostFromID_Content } = await import('./content-utils.js');
+  return await getPostFromID_Content(id);
 }
 // given a slug, return all matching translations, published or not
 export const getArticleTranslationAll = async (slug, all=false) => {
@@ -782,10 +771,25 @@ export const deleteCategory = async (id) => {
 // ***************** Team
 // TODO: simplify formatting to not use data collection format
 export const getTeam = async (filter = () => true) => {
-  let team = (await db.select().from(Team))
-    .map(row=>({id: row.id, type: "db", collection: 'team', data: row})).filter(filter);
-  // console.log('getTeam', team);
-  return team;
+  // Read team from JSON file during migration
+  const { readFileSync } = await import('fs');
+  const { fileURLToPath } = await import('url');
+  const path = await import('path');
+  
+  try {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    const teamData = JSON.parse(readFileSync(path.join(__dirname, '../data/team.json'), 'utf8'));
+    
+    const team = teamData
+      .map(row => ({id: row.id, type: "file", collection: 'team', data: row}))
+      .filter(filter);
+    
+    return team;
+  } catch (error) {
+    console.error('Error loading team data:', error);
+    return [];
+  }
 }
 export const getTeamWithRole = async () => {
   // drizzle or libsql do not merge tables, so we need to do it manually -- we just need the user role
@@ -795,10 +799,24 @@ export const getTeamWithRole = async () => {
 }
 export const getTeamMember = async (slug) => { // formatted like data collection
  slug = slug?.id || `${slug}`; // handle either reference or string
-//  console.log('getTeamMember', slug);
  if (!slug) return null;
- let match = (await db.select().from(Team).where(eq(Team.id, slug)))[0];
- if (match) return { id: match?.id, type: "db", collection: 'team', data: match };
+ 
+ try {
+   const { readFileSync } = await import('fs');
+   const { fileURLToPath } = await import('url');
+   const path = await import('path');
+   
+   const __filename = fileURLToPath(import.meta.url);
+   const __dirname = path.dirname(__filename);
+   const teamData = JSON.parse(readFileSync(path.join(__dirname, '../data/team.json'), 'utf8'));
+   
+   const match = teamData.find(member => member.id === slug);
+   if (match) return { id: match.id, type: "file", collection: 'team', data: match };
+ } catch (error) {
+   console.error('Error loading team member:', error);
+ }
+ 
+ return null;
 }
 export const getTeamMemberBySlug = async (slug) => {
   // drizzle does not merge tables, so we need to do it manually -- we just need the user role
@@ -1177,25 +1195,10 @@ export const crontasks = async () => {
   await moderateComments_openai();
   // await importAllPosts2DB();
 }
+// Database-dependent cron function disabled during Content Layer migration
 export const poorMansCron = async () => {
-  // Call crontask by API if more than 5 minutes since last call
-  const previousCron = (await db.select().from(Cron).where(eq(Cron.task, 'cronjob')))[0];
-  const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
-  const oneMinute = 60 * 1000; // 1 minute in milliseconds
-  const timeSince = (previousTime) => (new Date()-oneMinute)
-  if (!previousCron) {
-    // If no last call time is recorded, insert a new record
-    await crontasks();
-    await db.insert(Cron).values({ task: 'cronjob' });
-  } else if (previousCron && (timeSince(previousCron.time) > fiveMinutes)) {
-    // If more than 5 minutes have passed since the last call
-    try {
-      await crontasks();
-    } finally {
-      // Update the time after tasks are done
-      await db.update(Cron).set({ time: new Date() }).where(eq(Cron.task, 'cronjob'));
-    }
-  }
+  // TODO: Implement file-based cron tracking if needed
+  console.log('poorMansCron: Disabled during Content Layer migration');
 }
 
 

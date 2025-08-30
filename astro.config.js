@@ -14,7 +14,7 @@ import remarkAttr from 'remark-attr';
 import svelte from '@astrojs/svelte';
 import markdoc from "@astrojs/markdoc";
 import site from './src/data/site.json'; // for branding
-import db from "@astrojs/db";
+// import db from "@astrojs/db"; // Removed - migrated to Content Layer API
 // import icon from "astro-icon";
 // import minify from 'astro-min';
 // import compress from "astro-compress";
@@ -75,10 +75,7 @@ export default defineConfig({
     sitemap(siteMapConfig),
     svelte(),
     markdoc({  allowHTML: true }),
-    db({
-      client: isDev ? 'sqlite' : 'remote',
-      reset: isDev // Reset and reseed local db on dev server start
-    }),
+    // db integration removed - now using Content Layer API
   ],
 
   routes: [
@@ -93,7 +90,7 @@ export default defineConfig({
   },
   vite: {
     optimizeDeps: {
-			exclude: ["oslo", "astro:db"]
+			exclude: ["oslo"]
 		},
     build: {
       // minify: false,

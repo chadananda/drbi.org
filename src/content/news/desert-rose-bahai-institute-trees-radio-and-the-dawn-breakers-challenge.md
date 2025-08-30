@@ -1,0 +1,138 @@
+---
+title: "Desert Rose Baháí Institute: Trees, Radio, and the Dawn-Breakers Challenge"
+description: "An update from the Desert Rose Baháí Institute covering new tree plantings, radio station achievements, and the Dawn-Breakers Challenge program."
+desc_125: "Desert Rose Baháí Institutes latest updates on environmental initiatives, radio programming, and educational retreats."
+abstract: "The first edition of Desert Rose Baháí Institutes newsletter of the year brings you the heartwarming stories of new tree plantings, KURE-LP radios community reach, and the enriching Dawn-Breakers Challenge. Dive into the details of how the institute is blending spiritual growth with ecological consciousness and community service."
+post_type: "News"
+url: "desert-rose-bahai-institute-trees-radio-and-the-dawn-breakers-challenge"
+language: "en"
+draft: false
+author: "janet-ruhe-schoen"
+topics: []
+keywords: []
+datePublished: "2024-01-15T00:00:00.000Z"
+dateModified: "2025-01-14T21:07:12.082Z"
+image:
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-01-desert-rose-bahai-institute-news/desert-rose-institute-newsletterpng"
+  alt: "An update from the Desert Rose Baháí Institute covering new tree plantings, radio station achievements, and the Dawn-Breakers Challenge program."
+narrator: "auto"
+---
+
+### Jan., 2024, The Latest from Desert Rose Bahá''í Institute, 1950 W. William Sears Dr., Eloy, AZ 85131,  info@drbi.org
+
+Dear Folks,
+
+This is the first edition of The Latest from Desert Rose Bahá''í Institute, an informal newsletter to bring interested people up to date on what''s new at DRBI. So, let''s go!
+
+
+### TREES
+
+
+Brooke Molla, with her husband, Telahoun, is here from Tucson to plant trees. "The right tree in the right place is the foundation of a sustainable landscape," Brooke says. Brooke grew up in desertlands and as an expert drylands gardener with years of experience, she''s rejuvenating the landscape at Desert Rose, planting trees and shrubs that will create more shade, shelter and beauty to nurture the spirit, provide food and shelter for birds and other creatures, attract visitors, and foster education about the Sonoran ecosystem.
+
+She likes to remember Bahá''u''lláh''s joy in gardens, as He expressed it in the Tablet of the Garden of Ridván, "Every tree uttered a word, and every leaf sang a melody. The trees proclaimed: ‘Behold the evidences of God’s Mercy’ and the twin streams recited in the eloquent tongue the sacred verse ‘From us all things were made alive’."
+
+Brooke is a fine artist whose multimedia works are inspired by the forms, colors and spirit of nature and gardening. Since arriving at DRBI last autumn, she and Telahoun have planted, she says, "a lot of native mesquites, acacias, desert hackberrry, and bee bush, which is an innocuous plant, you don''t see it or notice but when it blooms its so fragrant you wonder, ''Where is that coming from?'' Also, velvet mimosas that will have beautiful, seductive flowers, and fruit trees."
+
+With the help of Tim McKenna, DRBI''s facilities manager, Brooke has identified areas where plants can get relatively more water (near Hadden Hall and the Rounhouse) and planted "two plum trees and pistache, which are very beautiful, tough trees that can withstand heat and turn bright red in the fall; and honey locust, that''s drought tolerant and turns crimson yellow in the fall.
+
+"Here in this enivronment with extreme heat and almost no water," she adds, "we have to be responsible and not use all the groundwater. We have to realize that we''re in a real serious drought. We''ve transplanted trees and put them in appropriate areas."
+
+DRBI has low water (and no water) zones, but Brooke says, "Even in these areas there are plants that can thrive, though they need to be watered the first few years. Acacias are plants from Mexico that fit in the Sonoran Desert. Ironwood is a keystone species for the Sonora. It''s a nurse plant for saguaros -- they start under ironwoods, and ironwoods also attract birds.
+
+"Shrubs like desert hackberry create a strong foundation for food for birds so we can get all kinds of birds as they migrate through. Of course, almost every plant is thorny, can''t avoid that if your planting desert plants, like the alamos tree with its catclaw thorns. And we have to remember that desert plants to produce large-scale leaves and blooms; they have tinier leaves and flowers. They''re smart! They have to survive in the desert!"
+
+Brooke also plans to put some new trees into the Prayer Pavilion, consulting with Nancy Sloman, who has devotedly maintained much of Desert Rose''s landscaping for years.
+
+There is a tree committee:  Brooke, Telahoon, their son Benjamin, and Tim McKenna. They''re excited by the idea of making an arboretum at Desert Rose, a botanical garden of trees, with identifying, informative placques for plants, that would be open to all for ecological and spiritual education and refreshment. That will take a few years! Right now, Brooke says, most of the new trees are "just twigs."
+
+### THE LATEST AT KURE-LP RADIO
+
+Chris Ruhe, station manager for KURE-LP is gratified that the station will be going into its 8th year in 2024. It went on the air on July 7, 2017 and has broadcast music, news and a variety of shows continually at 106.1 fm, Eloy, ever since. As a low power station, its reach is about a 15-20 mile radius around Desert Rose. So, in 2018, the station started simultaneous broadcasts via the internet, making its programming available all over Arizona and worldwide.
+
+You can listen on phone or computer: KURE-LP StationPlaylist and/or RADIO.GARDEN (download the Radio Garden app for free and get a multitude of stations all around the world).
+
+Hands-on technical know-how to keep the station going is all-important and comes from various volunteers, most recently and steadily, John Healy. John, along with Chris, deals with balky computers; the functioning of the 24-hour continuity of music and station i.d''s; and other all-important details.
+
+When people aren''t doing programs, the station airs an eclectic music mix (classic rock, country, jazz, blues, Bahá''í inspired tunes in all styles, and more) with enough surprises to keep listeners consistently interested day and night.
+
+Chris is the station''s steady on-air presence, and he enlivens broadcasts with a constant flow of spontaneous live interviews with guests at DRBI including Linda and Dan Popov, Van Gilmer, Hooper Dunbar, local Chamber of Commerce members and Eloy''s Mayor, local activists serving the homeless and other needy populations, and various artists, authors, musicians and just plain interesting people from all over the globe who happen by.
+
+Volunteers are crucial to the station''s functioning and development. Nancy Sloman has supported the station vigorously from the start. She assists Chris with many logistics and hosts the Desert Rose Spiritual Hour, Sundays 6-7 pm. She''s also one of the tias (aunties) reading stories on the children''s half-hour, Love is the Secret, Mon.-Fri. 3:30 -4:00 p.m. Sister tias are Doris Rasmussen, Suzanne Williams and Anna Resendiz. Pete Smith, a tio (uncle) reads on the show, too.
+
+Roger Rasmussen has also supported the station devotedly from the beginning, and hosts Roger''s News You Can Use  (KURE''s longest running program), weekdays 10-11 a.m.
+
+Chris does the station''s other news show, Ruhe-s Half-Full of News, weekdays, 3-3:30 pm.
+
+Stella Cruz is a super volunteer from Stanfield who was stirred to come to the station in its early days when she heard it on her car radio. She''d always wanted to be a dj, so she began an evening program of oldies with a lot of du-wop, Magic''s Moments, dedicated to the memory of her son. She now presents Magic''s Moments on Fri., Sat., Sun. 8pm-Midnight, and Magic''s Reggae, Tues. 8 pm.-Midnight. Stella has active listeners all around this area and the world who love dedications and shout-outs.
+
+The station features jazz with Compadre Chris on Black Gold of the Sun, Mon.,Weds., Thurs. 7-9 pm. Chris also does a half hour of live music every weekday,  Prickley Pear Pickings, Mon-Fri, Noon-12:30, with guitar & vocals. Musicians who wash up on the shores of Desert Rose, so to speak, perform with him on a spontaneous basis.
+
+Robin Springfield does Rockin Robin''s Hour, Tues., 2 pm, with folk rock and do-wop. DJ Cheryl started her Cosmic Blues, Thurs., 4 pm, when she lived in Arizona City and now that she''s moved back to California she faithfully sends it in.
+
+Desert Rose itself is represented with the DRBI Weekly Program, Fri,. 1-3 pm, of directly Baha''i inspired music and talks, and recorded Baha''i books.
+
+Janey Skye presents the poetry show A Wave in the Mind, Thurs. 11-11:30 a.m., and Roman Orona''s Indigenous Cafe airs Mon. 11 a.m.-Noon and Thurs. 2-3 pm.
+
+LOOK FOR a new edition of Island Music, Mon. 8 pm - Midnight presented by returning DJ Elena Eseloma, Mon. 8 pm - Midnight; a new edition of A Wave in the Mind with special features TBA; and Classical Music Morning, Sundays, 10 a.m.-noon.
+
+
+INQUIRIES about possible programs and human interest interviews are welcome.
+	Contact info: 520-233-1257 phone & text; kure.lp.eloy@gmail.com
+
+
+###		THE DAWN-BREAKERS CHALLENGE
+
+####		from our Executive Director, Chad Jones
+
+Last summer, Chad, with his wife Deepali and son Bayan, took, he reports, "an epic 12,000-mile cross-country Dawn-Breakers Challenge road trip." Across the U.S., in diverse spots, groups gathered to partake of the program, an intensive study of The Dawn-Breakers: Nabíl''s Narrative of the Early Days of the Baháʼí Revelation, which is the immortal translation by the Guardian, Shoghi Effendi, of the foundational, classic history Nabíl''s Narrative (Táríkh-i-Nabíl), the towering work by the poet-historian Nabi''l-i-Azam, who was one of the 19 Apostles of Bahá''u''lláh.
+
+Deeply complex because of in its interwoven, layered stories; Persian and Arabic protaganists'' names, place-names and etc. that are confusing to the English-speaking reader; the mystic and emotional tenor of protaganists'' motivations and of many historical events with roots in Islamic tradition and prophecies; daunting and rather spiral chronologies; and other factors, the Dawn-Breakers is known as an overwhelming, though awe-inspiring, read for most of us. So, people respond to Chad''s invitation to an intensive, guided study of the book.
+
+Chad says the trip and the deepenings were, "delightful but exhausting. Our purpose was to build enough enthusiasm to kick off what I hope will be a permanent annual program at Desert Rose -- a  kind of a ''winter summer school.'' And it worked! We were able to fill Desert Rose to capacity, Oct. 6-13, 2023, with our first Dawn-Breakers Challenge program!"
+
+He points out, "As you may know, the Guardian viewed the Dawn-Breakers as one of our greatest weapons to develop Baha’i identity and fight against the false materialistic identities that rush into culture in the absence of true religion. The “Dawn-Breakers Challenge” program is a full and deep dive into that book, with introductions and reminders about the hundreds of characters, reviews and previews to keep the timeline straight and historic, and geographic explanations to clarify the story. We try to accomplish in one week as much learning as might be expected from several complete passes through the book. Regarding The Dawn-Breakers and The Kitab-i-Iqan the Guardian stressed that “every Baha’i should master these books and be able to explain their contents to others.” And that is what we are setting out to do. The Guardian’s standard is the challenge.
+
+The retreat was graced by some 51 participants, a vibrant mix of individuals from various backgrounds, contributing to a rich, diverse learning environment. They gathered in the Roundhouse and stayed in newly redone DRBI Casita de Rosas apartments, the Casita''s motel rooms, and the dormitories, filling them to capacity. Chef Peyjman Vafadari prepared much-praised meals, and many retreat participants assisted in the kitchen and dining area.
+
+Chad reports,  "We believe we can expand housing capacity further by April to accommodate another 10-15 participants. Participants have expressed interest in a number of similar programs such as a Kitab-i-Iqan-based introduction to the Bible and Qur’an, a Qur’anic Arabic program for beginners and a reading of Taherzadeh’s The Revelation of Baha’u’llah with maps and clarifications of names, chronology, etc., similar to what we do with The Dawn-Breakers.
+
+### VISUAL ARTS AND MUSIC RETREAT
+
+Coordinators Anne Perry and Michelle Goering report: "Artists who gathered for the Visual Arts & Music Retreat at Desert Rose, Nov. 11–19, 2023, inspired by the House of Justice’s encouragement to draw more effectively on the power of the arts, dove into devotions, movement and theatre games, music and visual arts workshops, conversation, collaborations, personal presentations, great food, and service opportunities. The newly published edition of Bahá''i News carries an article by Michelle on a wide-reaching, peace promoting project by Adrian Black, one of the participants.
+
+There were two public programs, the second one with 19 different acts including music, drama, theatre, and even a video of participants’ water ballet in Desert Rose’s outdoor pool. Anne remarks, "Sublime and comedic moments abounded!"
+
+Michelle, with Chris Ruhe, facilitated music confabs and there was plenty of ongoing, exciting live music all week. Anne facilitated the visual artists'' activities. The three facilitators hope the Visual Arts and Music Retreat will be a yearly event at DRBI.
+
+Chris conducted live interviews with most of the participants on the radio and musicians also performed on the air. Participants had a tour of Jeanne and Duffy Sheridan''s beautiful home/studio and garden, and Michelle said, "All had many opportunities to meet and interact with members of the local community, and to enjoy the beautiful grounds as a place for reflection and worship."
+
+Frank Post from Escondido, CA, and Kelly Hadden, provided wonderful meals and kept everyone nourished and humming. Everyone greatly appreciated their service; participants and local residents pitched in to help in the kitchen. "All felt the retreat could not have happened without Frank and Kelly," Michelle said.
+
+Participants went went home with fresh ideas, feeling encouraged to share and develop the arts individually and for the benefit of community life.
+
+
+We finish up with some items from DRBI''s resident Local Spiritual Assembly:
+
+THE LSA OF PINAL COUNTY SO. offers the following resources for the study of "Reflections on the First 100 years of the Formative Age", the 11-28-23 Universal House of Justice message:
+
+####	STUDY QUESTIONS
+
+https://www.bahaiblog.net/articles/bahai-life/study-guide-for-28-november-2023-message/#comment-41008
+
+####	RECORDED MESSAGE
+
+https://www.youtube.com/watch?v=2Ctimf_N2VY
+
+#### Ongoing activities:
+
+AFTERNOON MOVIE, at 1:00pm every 1st Sat. of the month at the home of Doris and Roger Rasmusssen, 480-334-8546, 2372 W William Sears Dr Eloy AZ  -- Doris''s email: dejwakh@msn.com
+
+Doris says, "The house is across the street from the radio station/Guffey Center, and down a ways -- a fenced-in property with a yellowish house. To get there by car, you pass the Guffey Center on your right, then go around several bends, passing a blue house on the left, arriving at our driveway, also on the left, with telephone poles protecting the edges. The front door is to the right side."
+
+INTERFAITH DEVOTIONAL, every 2nd Saturday at 10:30 a.m. hosted by Ladjamaya Green, on Zoom https://us02web.zoom.us/j/85073951748?pwd=QldtVERHeDhGeUR3SE5RTVhsV3F4UT09
+Meeting ID: 850 7395 1748      Passcode: 079078
+
+And that''s it for the inaugural edition of The Latest from Desert Rose Bahá''í Institute. If you have comments and/or items for a second edition, please contact Janet Ruhe-Schoen -- janetruheschoen@gmail.com -- and put "newletter" in the subject heading. There''s no deadline and no publication date; the newsletter will appear on a flow basis. So long, and happy trails to you until we meet again!
+
+

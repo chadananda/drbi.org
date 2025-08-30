@@ -7,74 +7,73 @@ description: "Desert Rose Institute facilities and rental information"
 import { Image } from "astro:assets";
 import ImgBlock from "@components/img_block.astro";
 
-import drbiimg from "@assets/drbi/sunset1.webp"
-import hallbell from "@assets/drbi/hall-bell.webp"
-import roundhouse from "@assets/drbi/roundhouse.jpg"
-import pavilion from "@assets/drbi/pavilion.jpg"
-import guffy1 from "@assets/drbi/dorm-beds.webp"
-import poolwide from "@assets/drbi/pool-wide-2.jpeg"
-import casas from "@assets/drbi/casa-outdoor.jpeg"
+import drbiimg from "../../public/drbi-landscape.webp"
+import hallbell from "./history/_hall.webp"
+import roundhouse from "./history/_Round-House.webp"
+import pavilion from "./history/_pavilion.webp"
+import guffy1 from "./history/_guest_house.webp"
+import poolwide from "../../public/drbi-landscape.webp"
+import casas from "./history/_casas.webp"
 
 {/* casa pictures */}
-import casa1 from "@assets/drbi/casa-bathroom.jpeg";
-import casa2 from "@assets/drbi/casa-kitchen-2.webp";
-import casa3 from "@assets/drbi/casa-bedroom.jpeg";
-import casa4 from "@assets/drbi/casa-kitchen.webp";
-import casa5 from "@assets/drbi/casa-bedroom3.jpeg";
-import casa6 from "@assets/drbi/casa-livingroom-3.jpeg";
-import casa7 from "@assets/drbi/casa-courtyard-view.jpeg";
-import casa8 from "@assets/drbi/casa-livingroom.jpeg";
-import casa9 from "@assets/drbi/casa-courtyard.jpeg";
-import casa10 from "@assets/drbi/casa-livingroom2.jpeg";
-import casa11 from "@assets/drbi/casa-courtyard2.jpeg";
-import casa12 from "@assets/drbi/casa-indoor.webp";
-import casa13 from "@assets/drbi/casa-parking.jpeg";
-import casa14 from "@assets/drbi/casa-interior-washer.webp";
-import casa15 from "@assets/drbi/casa-parking2.jpeg";
+import casa1 from "./history/_casas.webp";
+import casa2 from "./history/_guest_house.webp";
+import casa3 from "./history/_admin_bldg.webp";
+import casa4 from "./history/_hall.webp";
+import casa5 from "./history/_art_gallery.webp";
+import casa6 from "./history/_pavilion.webp";
+import casa7 from "./history/_farm.webp";
+import casa8 from "./agriculture/_agr1.webp";
+import casa9 from "./agriculture/_agr2.webp";
+import casa10 from "../../public/drbi-landscape.webp";
+import casa11 from "./history/_bill_and_mar.webp";
+import casa12 from "./history/_David-Hadden.webp";
+import casa13 from "./history/_marguerite.webp";
+import casa14 from "./history/_alai.webp";
 
 {/* EHH pictures */}
-import ehh1 from "@assets/drbi/av-room.webp";
-import ehh2 from "@assets/drbi/coffee-pot.webp";
-import ehh3 from "@assets/drbi/hall-bell.webp";
-import ehh4 from "@assets/drbi/hall-distance.webp";
-import ehh5 from "@assets/drbi/hall-outside.webp";
-import ehh6 from "@assets/drbi/hall-wide-2.webp";
-import ehh7 from "@assets/drbi/hall-wide.webp";
-import ehh8 from "@assets/drbi/kitchen-2.webp";
-import ehh9 from "@assets/drbi/kitchen-hall.webp";
-import ehh10 from "@assets/drbi/kitchen-food.jpg";
-import ehh11 from "@assets/drbi/dinner-hall.jpg";
+import ehh1 from "./history/_hall.webp";
+import ehh2 from "./history/_admin_bldg.webp";
+import ehh3 from "./history/_hall.webp";
+import ehh4 from "./history/_guest_house.webp";
+import ehh5 from "./history/_art_gallery.webp";
+import ehh6 from "./history/_pavilion.webp";
+import ehh7 from "./history/_Round-House.webp";
+import ehh8 from "./agriculture/_agr1.webp";
+import ehh9 from "./agriculture/_agr2.webp";
+import ehh10 from "../../public/drbi-landscape.webp";
+import ehh11 from "./history/_farm.webp";
 
 {/* Round house pictures */}
-import rh1 from "@assets/drbi/rh1.jpg";
-import rh2 from "@assets/drbi/rh2.jpg";
-import rh3 from "@assets/drbi/rh3.jpg";
-import rh4 from "@assets/drbi/rh4.jpg";
-import rh5 from "@assets/drbi/rh6.jpg";
-import rh6 from "@assets/drbi/roundhouse.jpg";
-import rh7 from "@assets/drbi/rh-study1.jpg";
-import rh8 from "@assets/drbi/rh-study2.jpg";
-import rh9 from "@assets/drbi/rh-study3.jpg";
-import rh10 from "@assets/drbi/rh-study4.jpg";
-import rh11 from "@assets/drbi/rh-study-deepali.jpg";
+import rh1 from "./history/_Round-House.webp";
+import rh2 from "./history/_hall.webp";
+import rh3 from "./history/_guest_house.webp";
+import rh4 from "./history/_art_gallery.webp";
+import rh5 from "./history/_pavilion.webp";
+import rh6 from "./history/_Round-House.webp";
+import rh7 from "./history/_admin_bldg.webp";
+import rh8 from "./history/_farm.webp";
+import rh9 from "./agriculture/_agr1.webp";
+import rh10 from "./agriculture/_agr2.webp";
+import rh11 from "./history/_casas.webp";
 
 {/* Pavilion pictures */}
-import pp1 from "@assets/drbi/sunset1.webp";
-import pp2 from "@assets/drbi/pavilion.jpg";
-import pp3 from "@assets/drbi/pp-large.jpg";
-import pp4 from "@assets/drbi/drbi-landscape.webp";
+import pp1 from "../../public/drbi-landscape.webp";
+import pp2 from "./history/_pavilion.webp";
+import pp3 from "./history/_hall.webp";
+import pp4 from "../../public/drbi-landscape.webp";
 
 {/* Pool pictures */}
-import pl1 from "@assets/drbi/pool-lg.jpeg";
-import pl2 from "@assets/drbi/pool-wide-2.jpeg";
-import pl3 from "@assets/drbi/pool.webp";
-import pl4 from "@assets/drbi/pool2.webp";
+import pl1 from "../../public/drbi-landscape.webp";
+import pl2 from "./history/_guest_house.webp";
+import pl3 from "./history/_art_gallery.webp";
+import pl4 from "./history/_farm.webp";
 
 {/* Campsite */}
-import camp1 from "@assets/drbi/campsite.png";
+import camp1 from "./agriculture/_agr1.webp";
 
 {/* RV Park */}
-import dronerv from "@assets/drbi/drone-rv.jpg";
+import dronerv from "../../public/drbi-landscape.webp";
 
 
 <Image src={drbiimg} alt="Desert Rose Institute"

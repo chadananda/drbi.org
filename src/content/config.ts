@@ -1,6 +1,6 @@
 // 1. Import utilities from `astro:content`
-// import { string } from 'astro/zod';
 import { z, defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
 
 
 export const LANG_CODES = ["ab","aa","af","ak","sq","am","ar","an","hy","as","av","ae","ay","az","bm","ba","eu","be","bn","bh","bi","bs","br","bg","my","ca","km","ch","ce","ny","zh","cu","cv","kw","co","cr","hr","cs","da","dv","nl","dz","en","eo","et","ee","fo","fj","fi","fr","fy","ff","gd","gl","lg","ka","de","ki","el","kl","gn","gu","ht","ha","he","hz","hi","ho","hu","is","io","ig","id","ia","ie","iu","ik","ga","it","ja","jv","kn","kr","ks","kk","rw","kv","kg","ko","kj","ku","ky","lo","la","lv","lb","li","ln","lt","lu","mk","mg","ms","ml","mt","mi","mr","mh","mn","na","nv","nd","ne","ng","nb","nn","no","ii","oc","oj","or","om","os","pa","pi","fa","pl","ps","pt","qu","rm","rn","ro","ru","sa","sc","sd","se","sm","sg","sr","gd","sn","si","sk","sl","so","st","es","su","sw","ss","sv","tl","ty","tg","ta","tt","te","th","bo","ti","to","ts","tn","tr","tk","tw","ug","uk","ur","uz","ve","vi","vo","wa","cy","wo","fy","xh","yi","yo","za","zu"] as const;
@@ -160,4 +160,76 @@ function tryParseJSON(str: string | undefined | null, defaultValue: any[] = []) 
     return defaultValue;
   }
 }
+
+// ==============================
+// NEW ASTRO 5.0 CONTENT COLLECTIONS
+// ==============================
+
+// Schema for the new file-based memorial posts
+const memorialSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  desc_125: z.string().optional(),
+  abstract: z.string().optional(),
+  post_type: z.string().default("Memorial"),
+  url: z.string(),
+  language: z.enum(LANG_CODES).default("en"),
+  draft: z.boolean().default(false),
+  author: z.string().optional(),
+  editor: z.string().optional(),
+  category: z.string().optional(),
+  topics: z.array(z.string()).default([]),
+  keywords: z.array(z.string()).default([]),
+  datePublished: z.coerce.date(),
+  dateModified: z.coerce.date(),
+  image: z.object({
+    src: z.string(),
+    alt: z.string()
+  }).optional(),
+  audio: z.string().optional(),
+  audio_duration: z.string().optional(),
+  audio_image: z.string().optional(),
+  narrator: z.string().optional()
+});
+
+// Schema for news posts
+const newsSchema = memorialSchema.extend({
+  post_type: z.string().default("News")
+});
+
+// Schema for articles
+const articlesSchema = memorialSchema.extend({
+  post_type: z.string().default("Article")
+});
+
+// Define the new file-based collections
+export const memorial = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/memorial" }),
+  schema: memorialSchema
+});
+
+export const news = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/news" }),
+  schema: newsSchema
+});
+
+export const articles = defineCollection({
+  loader: glob({ pattern: "**/*.md", base: "./src/content/articles" }),
+  schema: articlesSchema
+});
+
+// Export all collections for Astro
+export const collections = {
+  // Legacy collections (to be deprecated)
+  posts,
+  postdb,
+  topics,
+  faqs,
+  comments,
+  
+  // New file-based collections (Astro 5.0)
+  memorial,
+  news,
+  articles
+};
 

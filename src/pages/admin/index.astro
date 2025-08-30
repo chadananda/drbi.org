@@ -1,36 +1,442 @@
 ---
-export const prerender = false;
+/**
+ * Admin Dashboard - File-based CMS Interface
+ * Main dashboard for managing content
+ */
 
-import { db, eq, Team } from 'astro:db';
-import Layout from '@layouts/AdminLayout.astro';
-import { moderateComments_openai } from '@utils/utils.js';
+import Layout from '../../layouts/Layout.astro';
+import { getAllPostsByType } from '../../utils/cms-utils.js';
 
-const user = Astro.locals?.user;
-console.log('/admin: user:', user);
-const member = !!(await db.select().from(Team).where(eq(Team.email, user.email)))[0];
-console.log('/admin member:', member);
+// Get all posts for dashboard overview
+let memorial = [];
+let news = [];
+let articles = [];
+let error = null;
 
-// let's do this in the background so that we don't get delays when going to comments
-moderateComments_openai();
-
-// user must be a team member in order to use admin area
-if (!member) {
-  console.error('Unable to load team member, redirecting to login');
-  return Astro.redirect('/login');
+try {
+  [memorial, news, articles] = await Promise.all([
+    getAllPostsByType('memorial'),
+    getAllPostsByType('news'),
+    getAllPostsByType('article')
+  ]);
+} catch (e) {
+  error = e.message;
+  console.error('Error loading posts for admin dashboard:', e);
 }
+
+const totalPosts = memorial.length + news.length + articles.length;
 ---
-<Layout user={user} >
-  <div class="mx-auto text-center w-full">
 
-    <h1 class="text-xl"> Admin Dashboard: {user?.role} </h1>
+<Layout title="Admin Dashboard - DRBI CMS">
+  <div class="admin-container">
+    <header class="admin-header">
+      <h1>DRBI Content Management System</h1>
+      <p>File-based content management for drbi.org</p>
+    </header>
 
-    {user && (
-      <pre>{JSON.stringify(user, null, 2)}</pre>
+    {error && (
+      <div class="alert alert-error">
+        <h3>Error Loading Dashboard</h3>
+        <p>{error}</p>
+      </div>
     )}
-    {!user && (
-      <h2 class="text-lg"> No user object found </h2>
-    )}
- </div>
+
+    <div class="admin-stats">
+      <div class="stat-card">
+        <h3>{totalPosts}</h3>
+        <p>Total Posts</p>
+      </div>
+      <div class="stat-card">
+        <h3>{memorial.length}</h3>
+        <p>Memorial Posts</p>
+      </div>
+      <div class="stat-card">
+        <h3>{news.length}</h3>
+        <p>News Articles</p>
+      </div>
+      <div class="stat-card">
+        <h3>{articles.length}</h3>
+        <p>General Articles</p>
+      </div>
+    </div>
+
+    <div class="system-status">
+      <h2>System Status</h2>
+      <div class="status-indicator" id="github-status">
+        <span class="loading">🔄</span> Checking GitHub connection...
+      </div>
+      <div class="status-indicator" id="environment-status">
+        <span class="env-badge">{Astro.locals.env || 'unknown'}</span>
+        Environment: {import.meta.env.PROD ? 'Production' : 'Development'}
+      </div>
+    </div>
+
+    <div class="admin-actions">
+      <a href="/admin/posts/new" class="btn btn-primary">
+        <span>➕</span> New Post
+      </a>
+      <a href="/admin/posts" class="btn btn-secondary">
+        <span>📄</span> Manage Posts
+      </a>
+      <a href="/admin/media" class="btn btn-secondary">
+        <span>🖼️</span> Media Library
+      </a>
+    </div>
+
+    <div class="recent-posts">
+      <h2>Recent Posts</h2>
+      <div class="posts-grid">
+        {[...memorial, ...news, ...articles]
+          .sort((a, b) => new Date(b.frontmatter.datePublished) - new Date(a.frontmatter.datePublished))
+          .slice(0, 6)
+          .map(post => (
+            <div class="post-card">
+              <h3>{post.frontmatter.title}</h3>
+              <p class="post-meta">
+                Type: {post.id.split('/')[0]} | 
+                Published: {new Date(post.frontmatter.datePublished).toLocaleDateString()}
+                {post.frontmatter.draft && <span class="draft-badge">DRAFT</span>}
+              </p>
+              <div class="post-actions">
+                <a href={`/admin/posts/edit?id=${encodeURIComponent(post.id)}`} class="btn btn-small">
+                  Edit
+                </a>
+                <a href={post.frontmatter.url} class="btn btn-small btn-outline" target="_blank">
+                  View
+                </a>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
 </Layout>
 
+<style>
+  .admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', roboto, sans-serif;
+  }
 
+  .admin-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #e5e7eb;
+  }
+
+  .admin-header h1 {
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .admin-header p {
+    color: #6b7280;
+  }
+
+  .alert {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+  }
+
+  .alert-error {
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+  }
+
+  .admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border: 1px solid #e5e7eb;
+  }
+
+  .stat-card h3 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-card p {
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .btn-secondary {
+    background-color: #f3f4f6;
+    color: #374151;
+  }
+
+  .btn-secondary:hover {
+    background-color: #e5e7eb;
+  }
+
+  .btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    border-color: #d1d5db;
+    color: #374151;
+  }
+
+  .btn-outline:hover {
+    background-color: #f9fafb;
+  }
+
+  .recent-posts h2 {
+    margin-bottom: 1.5rem;
+    color: #1f2937;
+  }
+
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .post-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+  }
+
+  .post-card h3 {
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+  }
+
+  .post-meta {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  .draft-badge {
+    background-color: #fbbf24;
+    color: #92400e;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  .post-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .system-status {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+  }
+
+  .system-status h2 {
+    margin-bottom: 1rem;
+    color: #1f2937;
+  }
+
+  .status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .status-indicator .loading {
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .status-indicator.connected {
+    color: #059669;
+  }
+
+  .status-indicator.disconnected {
+    color: #dc2626;
+  }
+
+  .status-indicator.warning {
+    color: #d97706;
+  }
+
+  .env-badge {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .env-badge.production {
+    background-color: #dc2626;
+  }
+
+  .env-badge.development {
+    background-color: #059669;
+  }
+
+  @media (max-width: 768px) {
+    .admin-container {
+      padding: 1rem;
+    }
+    
+    .admin-stats {
+      grid-template-columns: 1fr;
+    }
+    
+    .posts-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .admin-actions {
+      flex-direction: column;
+    }
+  }
+</style>
+
+<script>
+  // Check CMS status on page load
+  async function checkCMSStatus() {
+    try {
+      const response = await fetch('/api/cms-status');
+      const data = await response.json();
+      
+      if (data.success) {
+        updateGitHubStatus(data.status);
+        updateEnvironmentStatus(data.status);
+      } else {
+        showError('Failed to load system status');
+      }
+    } catch (error) {
+      console.error('Status check failed:', error);
+      showError('Could not connect to system status API');
+    }
+  }
+
+  function updateGitHubStatus(status) {
+    const githubStatus = document.getElementById('github-status');
+    if (!githubStatus) return;
+
+    const { github, environment } = status;
+    let icon, text, className;
+
+    if (github.enabled) {
+      icon = '✅';
+      text = `GitHub connected (${github.repository})`;
+      className = 'connected';
+      
+      if (environment === 'development' && status.features.autoSync) {
+        text += ' • Auto-sync enabled';
+      }
+    } else if (github.configured) {
+      icon = '⚠️';
+      text = 'GitHub configured but not enabled';
+      className = 'warning';
+      
+      if (environment === 'development') {
+        text += ' • Set CMS_USE_GITHUB=true to enable';
+      }
+    } else {
+      icon = '❌';
+      text = 'GitHub not configured';
+      className = 'disconnected';
+    }
+
+    githubStatus.innerHTML = `<span>${icon}</span> ${text}`;
+    githubStatus.className = `status-indicator ${className}`;
+  }
+
+  function updateEnvironmentStatus(status) {
+    const envStatus = document.getElementById('environment-status');
+    if (!envStatus) return;
+
+    const { environment, validation } = status;
+    const envClass = environment === 'production' ? 'production' : 'development';
+    
+    let validationText = '';
+    if (validation.strict) {
+      validationText += ' • Strict validation';
+    }
+    if (validation.buildCheck) {
+      validationText += ' • Build checks enabled';
+    }
+
+    envStatus.innerHTML = `
+      <span class="env-badge ${envClass}">${environment}</span>
+      Environment: ${environment}${validationText}
+    `;
+  }
+
+  function showError(message) {
+    const githubStatus = document.getElementById('github-status');
+    if (githubStatus) {
+      githubStatus.innerHTML = `<span>❌</span> ${message}`;
+      githubStatus.className = 'status-indicator disconnected';
+    }
+  }
+
+  // Check status when page loads
+  document.addEventListener('DOMContentLoaded', checkCMSStatus);
+</script>
+</Layout>

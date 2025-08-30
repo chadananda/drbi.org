@@ -5,7 +5,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro"; // some padding
 // import Sectionhead from "@components/sectionhead.astro";
 import PostThumb from "@components/article/postThumb.astro";
-import { getPublishedPostsByType } from "@utils/utils.js";
+import { getPublishedPostsByType_Content } from "@utils/content-utils.js";
 import cemeteryImage from "./_memorial-garden-front.jpg";
 import divider from "./_divider.svg";
 import { Image } from 'astro:assets';
@@ -15,7 +15,7 @@ import { Image } from 'astro:assets';
  * @type {any}
  */
 
-const posts = await getPublishedPostsByType('Memorial');
+const posts = await getPublishedPostsByType_Content('Memorial');
 console.log('Memorial Posts:', posts.length);
 ---
 

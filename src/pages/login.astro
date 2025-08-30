@@ -5,7 +5,8 @@ export const ssr = true;
 import { lucia } from '@lib/auth';
 import { Argon2id } from "oslo/password";
 import Layout from "@layouts/Layout.astro";
-import { db, Users, eq } from 'astro:db';
+// Legacy Astro DB import - temporarily disabled during migration
+// import { db, Users, eq } from 'astro:db';
 import { seedSuperUser, logoutUser } from '@utils/utils';
 
 

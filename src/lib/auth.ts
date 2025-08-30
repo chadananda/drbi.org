@@ -1,3 +1,7 @@
+// Authentication temporarily disabled during migration from Astro DB to Content Layer
+// TODO: Implement authentication with SQLite or another adapter
+
+/*
 import { Lucia } from "lucia";
 import { AstroDBAdapter } from "lucia-adapter-astrodb";
 import { db, Sessions, Users  } from "astro:db";
@@ -21,6 +25,10 @@ export const lucia = new Lucia(adapter, {
 		};
 	}
 });
+*/
+
+// Temporary placeholder to avoid import errors
+export const lucia = null;
 
 declare module "lucia" {
 	 interface Register {
