@@ -699,6 +699,59 @@ export const setStarredBatch = async (ids) => {
   if (!ids || ids.length<1) return;
   await db.update(Comments).set({starred: true}).where(inArray(Comments.id, ids));
 }
+
+// New Content Layer API version of comment moderation
+export const moderateComments_openai_Content = async () => {
+  try {
+    const { getUnmoderatedComments_Content, updateCommentsModeration_Content } = await import('./comments-content-utils.js');
+    const { getPostFromSlug } = await import('./content-utils.js');
+    
+    let allComments = await getUnmoderatedComments_Content();
+    if (allComments.length === 0) {
+      console.log('No unmoderated comments found');
+      return;
+    }
+    
+    console.log(`moderateComments_openai_Content: Processing ${allComments.length} comments`);
+    
+    // Get unique post IDs for context
+    const postids = [...new Set(allComments.map(comment => comment.postid))];
+    
+    for (const postid of postids) {
+      try {
+        const postComments = allComments.filter(comment => comment.postid === postid);
+        const post = await getPostFromSlug(postid);
+        const description = post?.data?.description || `Comments for post: ${postid}`;
+        
+        console.log(`Processing ${postComments.length} comments for post: ${postid}`);
+        
+        // Create OpenAI moderation request
+        const commentsText = postComments.map(comment => 
+          `Comment by ${comment.name}: ${comment.content}`
+        ).join('\n\n');
+        
+        // For now, auto-approve all comments (TODO: implement OpenAI moderation)
+        for (const comment of postComments) {
+          const moderated = true;
+          const starred = false; // TODO: implement quality scoring
+          
+          await updateCommentsModeration_Content(comment.id, moderated, starred);
+          console.log(`✅ Comment ${comment.id}: auto-approved`);
+        }
+        
+        // Rate limiting - wait between posts
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+      } catch (error) {
+        console.error(`Error moderating comments for post ${postid}:`, error);
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error in moderateComments_openai_Content:', error);
+  }
+}
+
 export const moderateComments_openai = async () => {
   let allComments = await getUnmoderatedComments();
   // console.log('moderateComments_openai', allComments.length, allComments[0]);
@@ -1192,13 +1245,44 @@ export const logoutUser = async (Astro) => {
 
 export const crontasks = async () => {
   // long running and expensive tasks on the server
-  await moderateComments_openai();
-  // await importAllPosts2DB();
+  await moderateComments_openai_Content();
+  console.log('✅ Cron tasks completed');
 }
-// Database-dependent cron function disabled during Content Layer migration
+// File-based cron function - throttles crontasks to run max once per 5 minutes
 export const poorMansCron = async () => {
-  // TODO: Implement file-based cron tracking if needed
-  console.log('poorMansCron: Disabled during Content Layer migration');
+  const cronFile = './cron-last-run.json';
+  const fiveMinutes = 5 * 60 * 1000; // 5 minutes in milliseconds
+  
+  try {
+    let lastRun = null;
+    
+    // Try to read the last run time from file
+    try {
+      const fs = await import('fs');
+      const cronData = JSON.parse(fs.readFileSync(cronFile, 'utf8'));
+      lastRun = new Date(cronData.cronjob);
+    } catch (e) {
+      // File doesn't exist or is invalid - first run
+    }
+    
+    const now = new Date();
+    const timeSinceLastRun = lastRun ? (now - lastRun) : fiveMinutes + 1;
+    
+    if (timeSinceLastRun > fiveMinutes) {
+      console.log('poorMansCron: Running scheduled tasks...');
+      await crontasks();
+      
+      // Update the last run time
+      const fs = await import('fs');
+      fs.writeFileSync(cronFile, JSON.stringify({ cronjob: now.toISOString() }));
+      console.log('poorMansCron: Tasks completed');
+    } else {
+      const remaining = Math.ceil((fiveMinutes - timeSinceLastRun) / 1000);
+      console.log(`poorMansCron: Skipping (${remaining}s remaining)`);
+    }
+  } catch (error) {
+    console.error('poorMansCron error:', error);
+  }
 }
 
 

@@ -5,16 +5,15 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import Sectionhead from "@components/sectionhead.astro";
 import PostThumb from "@components/article/postThumb.astro";
-import { getPublishedPostsByType } from "@utils/utils.js";
-// Legacy Astro DB import - temporarily disabled during migration
-// import { Posts } from "astro:db";
+import { getPublishedPostsByType_Content } from "@utils/content-utils.js";
+// Legacy Astro DB import - removed during Content Layer migration
 // import Pagination from "@components/pagination.astro";
 
 /**
  * @type {any}
  */
 
-const posts = await getPublishedPostsByType('News');
+const posts = await getPublishedPostsByType_Content('News');
 ---
 
 <Layout title="Article">

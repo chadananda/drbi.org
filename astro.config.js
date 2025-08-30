@@ -1,6 +1,6 @@
 // astro.config.js
 import { defineConfig } from "astro/config";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import vercel from '@astrojs/vercel';
@@ -69,7 +69,6 @@ export default defineConfig({
     webAnalytics: { enabled: true }
   }),
   integrations: [
-    tailwind(),
     // { hooks: { 'astro:server:setup': ({ app }) => {  app.use(authMiddleware);  },}, },
     mdx(),
     sitemap(siteMapConfig),
@@ -89,6 +88,7 @@ export default defineConfig({
     prefetchAll: !isDev,
   },
   vite: {
+    plugins: [tailwindcss()],
     optimizeDeps: {
 			exclude: ["oslo"]
 		},

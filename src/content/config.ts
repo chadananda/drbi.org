@@ -218,6 +218,26 @@ export const articles = defineCollection({
   schema: articlesSchema
 });
 
+// New Content Layer API comments collection
+const commentsSchema = z.object({
+  id: z.string(),
+  postid: z.string(),
+  parentid: z.string().nullable().default(null),
+  name: z.string(),
+  email: z.string().optional(),
+  date: z.coerce.date(),
+  content: z.string(),
+  starred: z.boolean().default(false),
+  moderated: z.boolean().default(false),
+  website: z.string().optional(),
+  phone: z.string().optional()
+});
+
+export const commentsLayer = defineCollection({
+  loader: glob({ pattern: "**/*.json", base: "./src/content/comments" }),
+  schema: commentsSchema
+});
+
 // Export all collections for Astro
 export const collections = {
   // Legacy collections (to be deprecated)
@@ -230,6 +250,7 @@ export const collections = {
   // New file-based collections (Astro 5.0)
   memorial,
   news,
-  articles
+  articles,
+  commentsLayer
 };
 

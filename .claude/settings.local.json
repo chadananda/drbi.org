@@ -4,7 +4,8 @@
       "mcp__claude-context__index_codebase",
       "mcp__claude-context__search_code",
       "mcp__puppeteer__puppeteer_navigate",
-      "WebFetch(domain:drbi.org)"
+      "WebFetch(domain:drbi.org)",
+      "WebSearch"
     ],
     "deny": [],
     "ask": []
