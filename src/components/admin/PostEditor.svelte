@@ -16,9 +16,10 @@ export let categoryList;
 export let languages;
 export let sessionid;
 export let translations;
+export let post;
 
-// to support language switching
-$: postid = baseid + '/' + language + '.md';
+// Use the actual post ID from CMS
+$: postid = post?.id || `${baseid}/${language}`;
 
 let fullScreenMode = false; // Add this line
 const handleFullScreenModeChange = (event) => {
@@ -42,7 +43,7 @@ const tabs = [
 ];
 let activeTab = 'content'; // Default to showing the content editor
 
-let meta_props = { postid, sessionid, site, authorList, topicList, categoryList };
+let meta_props = { postid, sessionid, site, authorList, topicList, categoryList, post };
 </script>
 
 <div class="editor p-0 w-full h-auto my-4 ml-6 -mt-2">
@@ -53,7 +54,7 @@ let meta_props = { postid, sessionid, site, authorList, topicList, categoryList 
       <TabSwitcher {tabs} {activeTab} on:tabSwitch={handleTabSwitch} />
     </div>
     <div class="col-span-4 min-w-[580px]">
-      <Editor bind:postid={postid} {sessionid}
+      <Editor bind:postid={postid} {sessionid} {post}
               visible={activeTab === 'content'}
               on:fullScreenModeChanged={handleFullScreenModeChange}/>
       <MetaEditor bind:postid={postid} {...meta_props}

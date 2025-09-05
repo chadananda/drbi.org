@@ -1,0 +1,53 @@
+---
+// src/pages/admin/articles/[slug].astro
+export const prerender = false;  // Forces SSR so we can process form submission
+
+import Layout from '@layouts/AdminLayout.astro';
+import site from '@data/site.json'; // site info
+import { readPostById, getAllPostsByType } from "@utils/cms-utils";
+import { getTeam, getTopics, getCategories, mainLanguages } from "@utils/utils";
+const langs = mainLanguages;
+import PostEditor from '@components/admin/PostEditor.svelte';
+
+// Auth handled by middleware - user is guaranteed to be valid here
+const user = Astro.locals.user;
+
+const baseid = Astro.params.baseid;
+
+// Get all news posts and find the one matching this baseid
+const allNews = await getAllPostsByType('news');
+const post = allNews.find(p => {
+  // Check if the post ID matches the baseid
+  const postSlug = p.id.split('/').pop().replace('.md', '');
+  return postSlug === baseid;
+});
+
+const postId = post ? post.id : null;
+
+if (!post) return Astro.redirect('/admin/posts');
+
+// Get translations (simplified version)  
+const translations = allNews.filter(p => p.id.includes(baseid)).map(p => p.id);
+const authorList = (await getTeam()).map(({id}) => id);
+const topicList =  (await getTopics()).map(({id}) => id);
+const categoryList = (await getCategories()).map(({id}) => id);
+
+// add id field to language and then sort by id with en first
+const languages = site.languages.map(ln => ({ ...langs[ln], id:ln }))
+  .sort((a,b) => a.id === 'en' ? -1 : b.id === 'en' ? 1 : a.id.localeCompare(b.id));
+const sessionid = Astro.locals.session.id;
+const language = post.frontmatter?.language || 'en'
+
+const editorObjects = { baseid, language, site, translations, authorList, topicList, categoryList, languages, sessionid, post };
+---
+
+<Layout menu="compact">
+
+<div class="w-full mx-5 -ml-2 mr-10 no-prose">
+    <PostEditor {...editorObjects} client:only />
+</div>
+
+</Layout>
+
+
+

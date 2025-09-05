@@ -5,15 +5,22 @@ description: "Discover and participate in transformative learning events at Dese
 ---
 
 import { Image } from "astro:assets";
-import Tockify from "@components/tockify.astro";
+import EventCalendar from "@components/EventCalendar.astro";
+// import Tockify from "@components/tockify.astro";
 import image from "../history/_Round-House.webp"
 
 <Image src={image} alt="Desert Rose Institute"
        class="h-auto max-h-64 w-full   mx-auto object-cover object-center rounded-lg mb-8" />
 
+{/* Tockify calendars commented out - replaced with EventCalendar
 <Tockify type="agenda" />
 
 <Tockify type="monthly" />
+*/}
+
+
+
+<EventCalendar view="list-full" />
 
 
 

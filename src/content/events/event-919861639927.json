@@ -1,0 +1,57 @@
+{
+  "id": "919861639927",
+  "url": "https://www.eventbrite.com/e/characterized-by-an-abiding-sense-of-joy-tickets-919861639927",
+  "name": "Characterized by an Abiding Sense of Joy",
+  "shortDescription": "This workshop, focuses on living a joyful life despite daily challenges through the practical application of Bahá’í",
+  "startDate": "2024-11-15T18:00:00-0800",
+  "endDate": "2024-11-17T18:00:00-0800",
+  "location": {
+    "name": "Desert Rose Baha'i Institute",
+    "address": "1950 W William Sears Dr",
+    "city": "Eloy",
+    "state": "AZ",
+    "zip": "85131",
+    "latitude": "39.3700973",
+    "longitude": "-121.1038655"
+  },
+  "price": null,
+  "organizer": "Desert Rose Baha'i Institute",
+  "fullDescription": "",
+  "eventSchedule": [],
+  "highlights": [
+    "Virtual"
+  ],
+  "refundPolicy": "refunds\":{\"refundPolicyIsNoRefunds\":false,\"refundPolicyCode\":\"not_defined\",\"refundPolicyDescription\":null,\"isPaidEvent\":true,\"validDays\":0,\"isRefundRequestAllowed\":true,\"refundRequestOrganizer\":true},\"performers\":{\"supporters\":[],\"headliners\":[]},\"highlights\":{\"freeParking\":false,\"notAvailableParking\":false,\"paidParking\":false,\"parking\":false},\"parentEventId\":null,\"structuredContent\":{\"heroCarouselWidget\":{\"type\":\"herocarousel\",\"data\":{\"slides\":[{\"image\":{\"url\":\"https://img.",
+  "categories": [],
+  "images": [
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783248709%2F177237344149%2F1%2Foriginal.20240605-030821",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553798659%2F177237344149%2F1%2Foriginal.20230712-175546",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1070513593%2F483841929053%2F1%2Foriginal.20250710-060643",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1085928243%2F1647155739593%2F1%2Foriginal.20250801-022849",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1064556413%2F2822512277231%2F1%2Foriginal.png",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F665457209%2F336996738113%2F1%2Foriginal.20231231-232855",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1092521743%2F2861242846611%2F1%2Foriginal.png",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1095417953%2F743599139903%2F1%2Foriginal.20250814-022312",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1091649153%2F2859389030101%2F1%2Foriginal.20250808-210053",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1109596363%2F1385825987473%2F1%2Foriginal.20250830-210749",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1098727673%2F292898063203%2F1%2Foriginal.20250818-180458",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1061544813%2F336996738113%2F1%2Foriginal.20250626-220519",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783259229%2F177237344149%2F1%2Foriginal.20240605-033414",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783259399%2F177237344149%2F1%2Foriginal.20240605-033438",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783253739%2F177237344149%2F1%2Foriginal.20240605-031951"
+  ],
+  "teacherImage": "https://drbi.s3.amazonaws.com/events/919861639927-teacher.jpg",
+  "source": "external",
+  "externalId": "919861639927",
+  "registrationUrl": "https://www.eventbrite.com/e/characterized-by-an-abiding-sense-of-joy-tickets-919861639927",
+  "visible": true,
+  "featured": false,
+  "mainImage": "https://drbi.s3.amazonaws.com/events/919861639927-main.jpg",
+  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783248709%2F177237344149%2F1%2Foriginal.20240605-030821?h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&rect=0%2C334%2C1024%2C512&s=962d49c82c3896a90fb32c7c5ec4a1b7",
+  "lastModified": "a2cf94c1f018cdeaa31d8048e1a380af",
+  "lastSynced": "2025-09-02T01:05:36.291Z",
+  "scraped": {
+    "orgPageDate": "2025-09-05T20:16:05.300Z",
+    "detailPageDate": "2025-09-02T01:05:36.291Z"
+  }
+}

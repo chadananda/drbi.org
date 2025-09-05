@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Sidebar Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { font-family: sans-serif; }
+        
+        .admin-layout { display: flex; min-height: 100vh; }
+        
+        .admin-main {
+            flex: 1;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .admin-main {
+                margin-left: 288px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .admin-main.sidebar-collapsed {
+                margin-left: 70px;
+            }
+        }
+        
+        .admin-topbar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+        
+        .mobile-menu-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: #64748b;
+            margin: 3px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 100%;
+            background: #f8fafc;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-content {
+                padding: 1rem;
+            }
+        }
+        
+        /* Sidebar styles */
+        .admin-sidebar-mobile {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 288px;
+            background: white;
+            color: #374151;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-right: 1px solid #e5e7eb;
+            transform: translateX(-100%);
+        }
+        
+        @media (min-width: 768px) {
+            .admin-sidebar-mobile {
+                transform: translateX(0);
+            }
+        }
+        
+        .admin-sidebar-mobile.mobile-open {
+            transform: translateX(0) !important;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin: 0 0.5rem;
+            color: #6b7280;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .nav-icon {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="admin-sidebar-mobile" id="adminSidebar">
+            <div class="sidebar-header">
+                <h2 style="font-size: 1.25rem; font-weight: 600; color: #111827;">DRBI Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span>Content</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span>Events</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">💬</span>
+                    <span>Comments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🖼️</span>
+                    <span>Media</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main" id="adminMain">
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <h1 style="font-size: 1.5rem; font-weight: 600;">Dashboard</h1>
+                </div>
+                <div>DRBI Admin</div>
+            </header>
+            
+            <div class="admin-content">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; color: white;">
+                    <h1 style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">DRBI Content Management System</h1>
+                    <p style="opacity: 0.9;">File-based content management for drbi.org</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <h3 style="color: #6366f1; font-weight: 600; margin-bottom: 0.5rem;">Total Posts</h3>
+                        <div style="font-size: 2rem; font-weight: bold; color: #1f2937;">48</div>
+                    </div>
+                    <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <h3 style="color: #ec4899; font-weight: 600; margin-bottom: 0.5rem;">Memorial Posts</h3>
+                        <div style="font-size: 2rem; font-weight: bold; color: #1f2937;">42</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('active');
+                });
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

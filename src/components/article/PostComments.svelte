@@ -22,38 +22,82 @@ function toggleReplyForm(id) {
   activeReplyId.update(current => current === id ? null : id);
 }
 
+let submissionStatus = writable(null); // Track submission status
+
 async function submitComment(event, parentid = null) {
   event.preventDefault();
-  activeReplyId.set(null); // Close the reply form after submitting
+  
+  // Show processing status
+  submissionStatus.set({ type: 'processing', message: 'Checking comment...' });
+  
   try {
-    // let id = Math.random().toString(36).substr(2, 10); // Generate a unique ID for the comment
     const res = await fetch(commentsApi, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      // {postid, parentid, website, phone, name, content, website, phone}
       body: JSON.stringify({ postid, parentid, name, content, website, phone })
     });
+    
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    let newComment = await res.json(); // Assuming this includes all necessary fields
-
-  //  console.log('returned comment data', newComment);
-
-    if (parentid) {
-      // Find the index of the parent comment
-      const parentIndex = orderedComments.findIndex(comment => comment.id === parentid);
-      const parentComment = orderedComments[parentIndex];
-      let indentLevel =  Math.min(parentComment.indentLevel + 1, 2);
-      newComment = { ...newComment, indentLevel };
-      orderedComments.splice(parentIndex + 1, 0, newComment);
-      activeReplyId.set(null); // Close the reply form after submitting
-    } else orderedComments.push(newComment);
-    // orderedComments = [...orderedComments]; // force reactivity
-    indentedComments = indentComments(orderedComments);
-    // name = ''; email = '';
-    content = ''; // Clear the regular form fields
+    
+    const response = await res.json();
+    
+    // Handle different response types
+    if (response.success && response.comment) {
+      // Comment approved and saved
+      const newComment = response.comment;
+      
+      if (parentid) {
+        // Find the index of the parent comment
+        const parentIndex = orderedComments.findIndex(comment => comment.id === parentid);
+        const parentComment = orderedComments[parentIndex];
+        let indentLevel = Math.min(parentComment.indentLevel + 1, 2);
+        newComment.indentLevel = indentLevel;
+        orderedComments.splice(parentIndex + 1, 0, newComment);
+      } else {
+        orderedComments.push(newComment);
+      }
+      
+      // Update display
+      indentedComments = indentComments(orderedComments);
+      
+      // Clear form and close reply
+      name = '';
+      content = '';
+      activeReplyId.set(null);
+      
+      // Show success message
+      submissionStatus.set({ 
+        type: 'success', 
+        message: `Comment approved! AI confidence: ${Math.round(response.moderation.confidence * 100)}%`
+      });
+      
+    } else if (response.rejected) {
+      // Comment rejected by AI moderation
+      submissionStatus.set({ 
+        type: 'rejected', 
+        message: `Comment not approved: ${response.reason}`,
+        confidence: response.confidence
+      });
+    } else {
+      // Other error
+      submissionStatus.set({ 
+        type: 'error', 
+        message: response.error || 'Unknown error occurred'
+      });
+    }
+    
   } catch (error) {
     console.error("Failed to submit comment:", error);
+    submissionStatus.set({ 
+      type: 'error', 
+      message: 'Network error - please try again'
+    });
   }
+  
+  // Clear status after 5 seconds
+  setTimeout(() => {
+    submissionStatus.set(null);
+  }, 5000);
 }
 
 function sortComments(comments) {
@@ -193,6 +237,18 @@ const getAvatarColor = name => {
   </div>
  {/each}
 
+<!-- Submission Status Display -->
+{#if $submissionStatus}
+  <div class="status-message p-3 m-5 rounded-md" class:status-processing={$submissionStatus.type === 'processing'} 
+       class:status-success={$submissionStatus.type === 'success'} 
+       class:status-rejected={$submissionStatus.type === 'rejected'} 
+       class:status-error={$submissionStatus.type === 'error'}>
+    <p class="text-sm font-medium">
+      {$submissionStatus.message}
+    </p>
+  </div>
+{/if}
+
 <!-- Main Comment Form for new comments at the bottom -->
 <div class="new-comment-form mt-8 overflow-hidden">
 {#if $activeReplyId === null}
@@ -200,8 +256,12 @@ const getAvatarColor = name => {
   <textarea bind:value={content} rows="3" class="shadow-sm focus:ring-indigo-600 focus:border-indigo-500 mt-1 p-3 block w-full sm:text-sm border border-gray-300 rounded-md" placeholder="Write a comment..." required></textarea>
   <div class="flex gap-2 mt-0 pt-2">
     <input type="text" bind:value={name} class="shadow-sm focus:ring-indigo-600 focus:border-indigo-500 p-1 px-3 md:flex-1 sm:text-sm border border-gray-300 rounded-md" placeholder="Full Name" required />
-    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 overflow-hidden line-clamp-1">
-        Post<span class="hidden sm:inline">&nbsp;Comment</span>
+    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600 overflow-hidden line-clamp-1" disabled={$submissionStatus?.type === 'processing'}>
+        {#if $submissionStatus?.type === 'processing'}
+          Checking...
+        {:else}
+          Post<span class="hidden sm:inline">&nbsp;Comment</span>
+        {/if}
     </button>
   </div>
   <input type="text" name="website"  bind:value={website} style="display: none;">
@@ -283,4 +343,40 @@ const getAvatarColor = name => {
 
   /* If direct-reply is not showing, it could be due to the specificity or other CSS overriding it.
      Make sure .direct-reply is added to the correct element and there is no other CSS overriding it. */
+
+  /* Status message styles */
+  .status-message {
+    border: 1px solid;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  
+  .status-processing {
+    background-color: #fef3c7;
+    border-color: #f59e0b;
+    color: #92400e;
+  }
+  
+  .status-success {
+    background-color: #d1fae5;
+    border-color: #10b981;
+    color: #065f46;
+  }
+  
+  .status-rejected {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+  
+  .status-error {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+  }
+  
+  /* Disable button when processing */
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 </style>

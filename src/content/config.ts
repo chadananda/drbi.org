@@ -202,6 +202,71 @@ const articlesSchema = memorialSchema.extend({
   post_type: z.string().default("Article")
 });
 
+// Schema for events (Eventbrite scraping)
+const eventsSchema = z.object({
+  // Core identifiers
+  id: z.string(),
+  url: z.string(),
+  registrationUrl: z.string().optional(),
+  lastModified: z.string(), // For change detection
+
+  // Basic info from org page
+  name: z.string(),
+  shortDescription: z.string(),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+  mainImage: z.string().optional().default(''),
+  teacherImage: z.string().optional().default(''),
+  images: z.array(z.string()).optional(),
+
+  // Detailed info from event page
+  fullDescription: z.string().optional(),
+  eventSchedule: z.array(z.object({
+    day: z.string(),
+    items: z.array(z.string())
+  })).optional(),
+  highlights: z.array(z.string()).optional(),
+  refundPolicy: z.string().optional(),
+
+  // Location
+  location: z.object({
+    name: z.string(),
+    address: z.string(),
+    city: z.string(),
+    state: z.string(),
+    zip: z.string(),
+    latitude: z.union([z.number(), z.string()]).optional(),
+    longitude: z.union([z.number(), z.string()]).optional()
+  }),
+
+  // Pricing
+  price: z.object({
+    low: z.number(),
+    high: z.number(),
+    currency: z.string()
+  }).nullable().optional(),
+
+  // Metadata
+  organizer: z.string(),
+  categories: z.array(z.string()).optional(),
+  source: z.string().optional(), // 'manual' or 'eventbrite'
+  externalId: z.string().optional(),
+  visible: z.boolean().optional().default(true), // Show/hide event
+  featured: z.boolean().optional().default(false),
+  originalImage: z.string().optional(),
+  lastSynced: z.string().optional(),
+  title: z.string().optional(),
+  onsite: z.boolean().optional(),
+  isEventbrite: z.boolean().optional(),
+  eventbriteId: z.string().nullable().optional(),
+  manuallyEdited: z.boolean().optional(),
+  lastManualEdit: z.string().optional(),
+  scraped: z.object({
+    orgPageDate: z.string(),
+    detailPageDate: z.string().optional()
+  }).optional()
+});
+
 // Define the new file-based collections
 export const memorial = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/memorial" }),
@@ -216,6 +281,11 @@ export const news = defineCollection({
 export const articles = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./src/content/articles" }),
   schema: articlesSchema
+});
+
+export const events = defineCollection({
+  loader: glob({ pattern: "**/*.json", base: "./src/content/events" }),
+  schema: eventsSchema
 });
 
 // New Content Layer API comments collection
@@ -233,10 +303,11 @@ const commentsSchema = z.object({
   phone: z.string().optional()
 });
 
-export const commentsLayer = defineCollection({
-  loader: glob({ pattern: "**/*.json", base: "./src/content/comments" }),
-  schema: commentsSchema
-});
+// Comments layer disabled - database removed
+// export const commentsLayer = defineCollection({
+//   loader: glob({ pattern: "**/*.json", base: "./src/content/comments" }),
+//   schema: commentsSchema
+// });
 
 // Export all collections for Astro
 export const collections = {
@@ -251,6 +322,7 @@ export const collections = {
   memorial,
   news,
   articles,
-  commentsLayer
+  events
+  // commentsLayer - disabled, database removed
 };
 

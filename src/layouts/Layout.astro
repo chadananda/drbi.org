@@ -3,7 +3,7 @@ export const prerender = true;
 import "../styles/tailwind.css";
 // import "@fontsource-variable/inter/index.css";
 // import { injectSpeedInsights } from '@vercel/speed-insights';
-import  SpeedInsights  from "@vercel/speed-insights/astro"
+// import  SpeedInsights  from "@vercel/speed-insights/astro" // Disabled to prevent console errors
 // Props can be documented via comments if needed
 // Expected props:
 //   title: string (optional)
@@ -106,7 +106,7 @@ const { title, footerMargin = true } = Astro.props;
     <Navbar />
     <slot />
     <Footer margin={footerMargin} />
-    <SpeedInsights />
+    <!-- <SpeedInsights /> Disabled to prevent console errors -->
 
     <!-- <ViewTransitions /> -->
     <script type="module" src="/api/crontasks" client:idle></script>

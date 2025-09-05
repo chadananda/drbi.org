@@ -11,6 +11,13 @@ import { poorMansCron } from '@utils/utils.js';
 
 export const GET = async ({ request }) => {
   await poorMansCron();
-  return new Response('', {status: 200})
+  // Return valid JavaScript module to prevent MIME type errors
+  return new Response('// Cron tasks completed', {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/javascript',
+      'Cache-Control': 'no-cache'
+    }
+  })
 }
 

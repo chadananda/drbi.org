@@ -1,0 +1,71 @@
+---
+export const prerender = false;
+
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { Bash } from 'astro:env';
+
+// Get all media files from public directory
+const mediaFiles = [];
+const user = Astro.locals.user;
+
+try {
+  // This would need to be implemented with actual file system access
+  // For now, showing placeholder structure
+} catch (error) {
+  console.error('Error loading media files:', error);
+}
+---
+
+<AdminLayout title="Media Library" user={user}>
+  <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Media Library</h1>
+        <p class="text-gray-600">Manage uploaded images, documents, and other media files</p>
+      </div>
+      <div>
+        <a href="/admin/media/upload" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+          <span>📤</span> Upload Files
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+      <div class="flex flex-col">
+        <label class="text-sm font-medium text-gray-700 mb-2">Filter by type:</label>
+        <select class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="all">All Files</option>
+          <option value="images">Images</option>
+          <option value="documents">Documents</option>
+          <option value="videos">Videos</option>
+        </select>
+      </div>
+      
+      <div class="flex flex-col flex-1">
+        <label class="text-sm font-medium text-gray-700 mb-2">Search:</label>
+        <input type="search" placeholder="Search files..." class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
+      <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+        <div class="text-4xl mb-4">
+          <span>🖼️</span>
+        </div>
+        <div>
+          <h4 class="text-sm font-medium text-gray-900 mb-2">No media files found</h4>
+          <p class="text-xs text-gray-500">Upload some files to get started</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+      <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Previous</button>
+      <span class="text-sm text-gray-600">Page 1 of 1</span>
+      <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
+    </div>
+  </div>
+</AdminLayout>
+

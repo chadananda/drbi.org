@@ -1,0 +1,57 @@
+{
+  "id": "1000878643967",
+  "url": "https://www.eventbrite.com/e/eye-to-the-ages-a-bahai-inspired-philosophy-of-history-with-harold-rosen-tickets-1000878643967",
+  "name": "Eye to the Ages - A Baha’i-inspired Philosophy of History with Harold Rosen",
+  "shortDescription": "Ancient wisdom meets modern revelation! Discover the secret blueprint guiding humanity's",
+  "startDate": "2025-04-25T18:00:00-0700",
+  "endDate": "2025-04-27T18:00:00-0700",
+  "location": {
+    "name": "Desert Rose Baha'i Institute",
+    "address": "1950 W William Sears Dr",
+    "city": "Eloy",
+    "state": "AZ",
+    "zip": "85131",
+    "latitude": "39.3700973",
+    "longitude": "-121.1038655"
+  },
+  "price": null,
+  "organizer": "Desert Rose Baha'i Institute",
+  "fullDescription": "",
+  "eventSchedule": [],
+  "highlights": [
+    "Virtual"
+  ],
+  "refundPolicy": "refunds\":{\"refundPolicyIsNoRefunds\":false,\"refundPolicyCode\":\"custom\",\"refundPolicyDescription\":\"Refunds up to \\u003cb\\u003e7 days\\u003c/b\\u003e before event\",\"isPaidEvent\":true,\"validDays\":7,\"isRefundRequestAllowed\":false,\"refundRequestOrganizer\":false},\"performers\":{\"supporters\":[],\"headliners\":[]},\"highlights\":{\"freeParking\":false,\"notAvailableParking\":false,\"paidParking\":false,\"parking\":false},\"parentEventId\":null,\"structuredContent\":{\"heroCarouselWidget\":{\"type\":\"herocarousel\",\"data\":{\"slides\":[{\"image\":{\"url\":\"https://img.",
+  "categories": [],
+  "images": [
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F832492949%2F177237344149%2F1%2Foriginal.20240822-182217",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553798659%2F177237344149%2F1%2Foriginal.20230712-175546",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1110993873%2F2754305045531%2F1%2Foriginal.20250901-220309",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1097513473%2F1385825987473%2F1%2Foriginal.20250816-190840",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1043984453%2F1966675721823%2F1%2Foriginal.20250602-165241",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1093168703%2F475925732877%2F1%2Foriginal.20250811-193406",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1099974323%2F2739502951131%2F1%2Foriginal.20250819-201919",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1047606923%2F2599026521621%2F1%2Foriginal.20250606-174220",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1106898303%2F336996738113%2F1%2Foriginal.20250827-191621",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1101889533%2F39023848060%2F1%2Foriginal.png",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F830472639%2F203379660293%2F1%2Foriginal.20240820-110110",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783259229%2F177237344149%2F1%2Foriginal.20240605-033414",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783259399%2F177237344149%2F1%2Foriginal.20240605-033438",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F832493419%2F177237344149%2F1%2Foriginal.20240822-182245",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783253739%2F177237344149%2F1%2Foriginal.20240605-031951"
+  ],
+  "teacherImage": "https://drbi.s3.amazonaws.com/events/1000878643967-teacher.jpg",
+  "source": "external",
+  "externalId": "1000878643967",
+  "registrationUrl": "https://www.eventbrite.com/e/eye-to-the-ages-a-bahai-inspired-philosophy-of-history-with-harold-rosen-tickets-1000878643967",
+  "visible": true,
+  "featured": false,
+  "mainImage": "https://drbi.s3.amazonaws.com/events/1000878643967-main.jpg",
+  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F832492949%2F177237344149%2F1%2Foriginal.20240822-182217?h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&rect=0%2C101%2C442%2C221&s=c4984da76b8014e4713f7090eeddd682",
+  "lastModified": "531f3682831f4c402a2420cb5c75da28",
+  "lastSynced": "2025-09-02T01:12:46.805Z",
+  "scraped": {
+    "orgPageDate": "2025-09-05T20:16:05.299Z",
+    "detailPageDate": "2025-09-02T01:12:46.805Z"
+  }
+}

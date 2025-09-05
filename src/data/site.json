@@ -42,7 +42,7 @@
 
   "web3forms_access_key": "a7763c6b-35e2-4a39-9d3e-d165cec6f2e8",
   "img_base_url": "https://drbi.imgix.net",
-  "imgix_dashboard": "https://dashboard.imgix.com/sources/661ec5ae04acc066b24e664f"
-
+  "imgix_dashboard": "https://dashboard.imgix.com/sources/661ec5ae04acc066b24e664f",
+  "eventbrite_org_url": "https://www.eventbrite.com/o/desert-rose-bahai-institute-68218609793"
 
 }

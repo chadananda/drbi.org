@@ -1,0 +1,337 @@
+---
+export const prerender = false;
+
+import AdminLayout from '@layouts/AdminLayout.astro';
+import site from '@data/site.json';
+import { updateSiteSettings } from '@utils/utils.js';
+
+const user = Astro.locals.user;
+
+// Handle form submission
+let saveMessage = '';
+let saveError = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    
+    // Convert FormData to regular object
+    const settings = {};
+    for (const [key, value] of formData) {
+      settings[key] = value;
+    }
+    
+    // Save settings to site.json
+    const result = await updateSiteSettings(settings, user?.name || 'DRBI Admin', user?.email || 'admin@drbi.org');
+    
+    if (result.success) {
+      saveMessage = `Settings saved successfully! ${result.method === 'github' ? '(Committed to GitHub)' : '(Saved locally)'}`;
+    } else {
+      saveError = result.error || 'Error saving settings. Please try again.';
+    }
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    saveError = 'Error saving settings. Please try again.';
+  }
+}
+---
+
+<AdminLayout title="Site Settings" user={user}>
+  <div class="max-w-6xl mx-auto px-6 py-6">
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+          <span class="text-white text-xl">⚙️</span>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">Site Settings</h1>
+      </div>
+      <p class="text-gray-600">Configure site-wide settings and preferences</p>
+    </div>
+
+    {saveMessage && (
+      <div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 mb-6">
+        <strong>Success!</strong> {saveMessage}
+      </div>
+    )}
+
+    {saveError && (
+      <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 mb-6">
+        <strong>Error!</strong> {saveError}
+      </div>
+    )}
+
+    <form method="POST">
+    <!-- General Settings -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">General Settings</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="mb-6">
+          <label for="siteName" class="block text-sm font-medium text-gray-700 mb-2">Site Name</label>
+          <input 
+            type="text" 
+            id="siteName" 
+            name="siteName" 
+            value={site.title} 
+            required 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="siteTagline" class="block text-sm font-medium text-gray-700 mb-2">Site Tagline</label>
+          <input 
+            type="text" 
+            id="siteTagline" 
+            name="siteTagline" 
+            value={site.subtitle} 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6 md:col-span-2">
+          <label for="siteDescription" class="block text-sm font-medium text-gray-700 mb-2">Site Description</label>
+          <textarea 
+            id="siteDescription" 
+            name="siteDescription" 
+            rows="3"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-vertical"
+          >{site.description}</textarea>
+        </div>
+
+        <div class="mb-6">
+          <label for="siteUrl" class="block text-sm font-medium text-gray-700 mb-2">Site URL</label>
+          <input 
+            type="url" 
+            id="siteUrl" 
+            name="siteUrl" 
+            value={site.url} 
+            required 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="adminEmail" class="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
+          <input 
+            type="email" 
+            id="adminEmail" 
+            name="adminEmail" 
+            value={site.email} 
+            required 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="mb-6">
+          <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+          <input 
+            type="tel" 
+            id="phone" 
+            name="phone" 
+            value={site.phone} 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="address" class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+          <input 
+            type="text" 
+            id="address" 
+            name="address" 
+            value={site.address} 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="timezone" class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+          <select id="timezone" name="timezone" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
+            <option value="America/Phoenix" selected>America/Phoenix (MST)</option>
+            <option value="America/New_York">America/New_York (EST)</option>
+            <option value="America/Chicago">America/Chicago (CST)</option>
+            <option value="America/Los_Angeles">America/Los_Angeles (PST)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Media -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Social Media</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="mb-6">
+          <label for="facebook" class="block text-sm font-medium text-gray-700 mb-2">Facebook URL</label>
+          <input 
+            type="url" 
+            id="facebook" 
+            name="facebook" 
+            value={site.facebook?.publisher} 
+            placeholder="https://facebook.com/yourpage"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="instagram" class="block text-sm font-medium text-gray-700 mb-2">Instagram URL</label>
+          <input 
+            type="url" 
+            id="instagram" 
+            name="instagram" 
+            value={site.instagram} 
+            placeholder="https://instagram.com/yourhandle"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="youtube" class="block text-sm font-medium text-gray-700 mb-2">YouTube URL</label>
+          <input 
+            type="url" 
+            id="youtube" 
+            name="youtube" 
+            value={site.youtube?.channel_name} 
+            placeholder="https://youtube.com/yourchannel"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="twitter" class="block text-sm font-medium text-gray-700 mb-2">Twitter/X URL</label>
+          <input 
+            type="url" 
+            id="twitter" 
+            name="twitter" 
+            value={site.twitter?.site} 
+            placeholder="https://twitter.com/yourhandle"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Settings -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Content Settings</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="mb-6">
+          <label for="postsPerPage" class="block text-sm font-medium text-gray-700 mb-2">Posts Per Page</label>
+          <input 
+            type="number" 
+            id="postsPerPage" 
+            name="postsPerPage" 
+            value="10" 
+            min="1" 
+            max="50"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="eventsPerPage" class="block text-sm font-medium text-gray-700 mb-2">Events Per Page</label>
+          <input 
+            type="number" 
+            id="eventsPerPage" 
+            name="eventsPerPage" 
+            value="12" 
+            min="1" 
+            max="50"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6 flex items-center">
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" name="enableComments" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-2">
+            <span class="text-sm text-gray-700">Enable comments on posts</span>
+          </label>
+        </div>
+
+        <div class="mb-6 flex items-center">
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" name="moderateComments" checked class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-2">
+            <span class="text-sm text-gray-700">Moderate comments before publishing</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Settings -->
+    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Email Settings</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="mb-6">
+          <label for="smtpHost" class="block text-sm font-medium text-gray-700 mb-2">SMTP Host</label>
+          <input 
+            type="text" 
+            id="smtpHost" 
+            name="smtpHost" 
+            placeholder="smtp.example.com"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="smtpPort" class="block text-sm font-medium text-gray-700 mb-2">SMTP Port</label>
+          <input 
+            type="number" 
+            id="smtpPort" 
+            name="smtpPort" 
+            placeholder="587"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="smtpUser" class="block text-sm font-medium text-gray-700 mb-2">SMTP Username</label>
+          <input 
+            type="text" 
+            id="smtpUser" 
+            name="smtpUser"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="smtpPass" class="block text-sm font-medium text-gray-700 mb-2">SMTP Password</label>
+          <input 
+            type="password" 
+            id="smtpPass" 
+            name="smtpPass"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-6 flex items-center">
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" name="smtpSecure" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 mr-2">
+            <span class="text-sm text-gray-700">Use secure connection (TLS)</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Actions -->
+    <div class="flex gap-4 justify-end pt-6 border-t border-gray-200">
+      <button type="button" class="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+        Reset to Defaults
+      </button>
+      <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors inline-flex items-center gap-2">
+        <span>💾</span> Save Settings
+      </button>
+    </div>
+    </form>
+  </div>
+</AdminLayout>
+

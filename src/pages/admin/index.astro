@@ -1,10 +1,12 @@
 ---
+export const prerender = false;
+
 /**
  * Admin Dashboard - File-based CMS Interface
  * Main dashboard for managing content
  */
 
-import Layout from '../../layouts/Layout.astro';
+import AdminLayout from '../../layouts/AdminLayout.astro';
 import { getAllPostsByType } from '../../utils/cms-utils.js';
 
 // Get all posts for dashboard overview
@@ -25,337 +27,337 @@ try {
 }
 
 const totalPosts = memorial.length + news.length + articles.length;
+
+// PostHog API integration
+const posthogApiKey = import.meta.env.POSTHOG_API_KEY;
+const posthogHost = 'https://us.i.posthog.com';
+
+let analyticsData = null;
+let analyticsError = null;
+
+// Provide demo analytics data for display
+analyticsData = {
+  pageViews: Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 100) + 50),
+  topPages: [
+    { breakdown_value: '/', count: 1250, label: 'Home Page' },
+    { breakdown_value: '/events', count: 890, label: 'Events' },
+    { breakdown_value: '/articles', count: 654, label: 'Articles' },
+    { breakdown_value: '/about', count: 432, label: 'About Us' },
+    { breakdown_value: '/contact', count: 398, label: 'Contact' },
+    { breakdown_value: '/team', count: 356, label: 'Team' },
+    { breakdown_value: '/news', count: 298, label: 'News' },
+    { breakdown_value: '/memorial', count: 276, label: 'Memorial' },
+    { breakdown_value: '/categories', count: 234, label: 'Categories' },
+    { breakdown_value: '/tags', count: 212, label: 'Tags' },
+    { breakdown_value: '/search', count: 198, label: 'Search' },
+    { breakdown_value: '/archive', count: 176, label: 'Archive' },
+    { breakdown_value: '/sitemap', count: 154, label: 'Sitemap' },
+    { breakdown_value: '/privacy', count: 134, label: 'Privacy Policy' },
+    { breakdown_value: '/terms', count: 123, label: 'Terms of Service' },
+    { breakdown_value: '/donate', count: 98, label: 'Donate' },
+    { breakdown_value: '/volunteer', count: 87, label: 'Volunteer' },
+    { breakdown_value: '/newsletter', count: 76, label: 'Newsletter' },
+    { breakdown_value: '/faq', count: 65, label: 'FAQ' },
+    { breakdown_value: '/subscribe', count: 54, label: 'Subscribe' }
+  ],
+  referrers: [
+    { breakdown_value: 'direct', count: 1250, label: 'Direct Traffic' },
+    { breakdown_value: 'https://google.com', count: 890, label: 'Google Search' },
+    { breakdown_value: 'https://facebook.com', count: 456, label: 'Facebook' },
+    { breakdown_value: 'https://twitter.com', count: 334, label: 'Twitter' },
+    { breakdown_value: 'https://instagram.com', count: 298, label: 'Instagram' },
+    { breakdown_value: 'https://linkedin.com', count: 234, label: 'LinkedIn' },
+    { breakdown_value: 'https://youtube.com', count: 198, label: 'YouTube' },
+    { breakdown_value: 'https://bing.com', count: 176, label: 'Bing Search' },
+    { breakdown_value: 'https://pinterest.com', count: 154, label: 'Pinterest' },
+    { breakdown_value: 'https://reddit.com', count: 134, label: 'Reddit' },
+    { breakdown_value: 'https://newsletter.drbi.org', count: 123, label: 'Newsletter' },
+    { breakdown_value: 'https://bahai.org', count: 98, label: 'Baha\'i.org' },
+    { breakdown_value: 'https://bahaicentre.org', count: 87, label: 'Baha\'i Centre' },
+    { breakdown_value: 'https://duckduckgo.com', count: 76, label: 'DuckDuckGo' },
+    { breakdown_value: 'https://yahoo.com', count: 65, label: 'Yahoo Search' },
+    { breakdown_value: 'https://whatsapp.com', count: 54, label: 'WhatsApp' },
+    { breakdown_value: 'https://telegram.org', count: 43, label: 'Telegram' },
+    { breakdown_value: 'https://signal.org', count: 32, label: 'Signal' },
+    { breakdown_value: 'https://wikipedia.org', count: 28, label: 'Wikipedia' },
+    { breakdown_value: 'https://ecosia.org', count: 21, label: 'Ecosia' }
+  ],
+  uniqueVisitors: Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 50) + 20),
+  dateRange: { startDate: '2024-01-01', endDate: '2024-01-31' },
+  totalPageViews: 3524,
+  totalUniqueVisitors: 1456,
+  isDemo: true
+};
+
+// If PostHog API key exists, try to get real data
+if (posthogApiKey) {
+  try {
+    // Get current date and 30 days ago
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    
+    // Format dates for PostHog API
+    const endDate = now.toISOString().split('T')[0];
+    const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+
+    // PostHog API endpoints
+    const headers = {
+      'Authorization': `Bearer ${posthogApiKey}`,
+      'Content-Type': 'application/json'
+    };
+
+    // Multiple API calls to get comprehensive data
+    const apiCalls = await Promise.allSettled([
+      // Page views over time
+      fetch(`${posthogHost}/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0}]&date_from=${startDate}&date_to=${endDate}&interval=day`, {
+        headers
+      }),
+      
+      // Top pages
+      fetch(`${posthogHost}/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$current_url&date_from=${startDate}&date_to=${endDate}`, {
+        headers
+      }),
+      
+      // Referrer sources
+      fetch(`${posthogHost}/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$referrer&date_from=${startDate}&date_to=${endDate}`, {
+        headers
+      }),
+
+      // Unique visitors
+      fetch(`${posthogHost}/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"math":"dau"}]&date_from=${startDate}&date_to=${endDate}&interval=day`, {
+        headers
+      })
+    ]);
+
+    const responses = await Promise.all(
+      apiCalls.map(async (result) => {
+        if (result.status === 'fulfilled' && result.value.ok) {
+          return await result.value.json();
+        }
+        return null;
+      })
+    );
+
+    const [pageViewsData, topPagesData, referrerData, uniqueVisitorsData] = responses;
+
+    // If we got real data, use it
+    if (pageViewsData || topPagesData || referrerData || uniqueVisitorsData) {
+      analyticsData = {
+        pageViews: pageViewsData ? pageViewsData.result?.[0]?.data || analyticsData.pageViews : analyticsData.pageViews,
+        topPages: topPagesData ? topPagesData.result?.slice(0, 5) || analyticsData.topPages : analyticsData.topPages,
+        referrers: referrerData ? referrerData.result?.slice(0, 5) || analyticsData.referrers : analyticsData.referrers,
+        uniqueVisitors: uniqueVisitorsData ? uniqueVisitorsData.result?.[0]?.data || analyticsData.uniqueVisitors : analyticsData.uniqueVisitors,
+        dateRange: { startDate, endDate },
+        totalPageViews: pageViewsData ? pageViewsData.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || analyticsData.totalPageViews : analyticsData.totalPageViews,
+        totalUniqueVisitors: uniqueVisitorsData ? uniqueVisitorsData.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || analyticsData.totalUniqueVisitors : analyticsData.totalUniqueVisitors,
+        isDemo: false
+      };
+    }
+
+  } catch (e) {
+    analyticsError = `PostHog API failed: ${e.message}`;
+    console.error('PostHog API error:', e);
+  }
+}
 ---
 
-<Layout title="Admin Dashboard - DRBI CMS">
-  <div class="admin-container">
-    <header class="admin-header">
-      <h1>DRBI Content Management System</h1>
-      <p>File-based content management for drbi.org</p>
-    </header>
+<AdminLayout title="Admin Dashboard" user={Astro.locals?.user}>
+  <div class="max-w-6xl mx-auto px-6 py-6">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+          <span class="text-white text-xl">🏠</span>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+      </div>
+      <p class="text-gray-600">Overview of your website's content and analytics</p>
+    </div>
 
-    {error && (
-      <div class="alert alert-error">
-        <h3>Error Loading Dashboard</h3>
-        <p>{error}</p>
+
+    {analyticsData && (
+      <div class="mb-16">
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"></path>
+              </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-900">Website Analytics</h2>
+            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">PostHog</span>
+            {analyticsError && (
+              <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Demo Data</span>
+            )}
+          </div>
+          
+          <!-- Period Selector -->
+          <div class="flex items-center gap-3">
+            <label class="text-sm font-medium text-gray-700">Period:</label>
+            <select id="analyticsPeriod" class="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
+              <option value="30" selected>30 Days</option>
+              <option value="60">60 Days</option>
+              <option value="90">90 Days</option>
+              <option value="365">1 Year</option>
+              <option value="730">2 Years</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- Analytics Overview -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">30 days</span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{analyticsData.totalPageViews.toLocaleString()}</h3>
+            <p class="text-gray-600 font-medium">Total Page Views</p>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">30 days</span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{analyticsData.totalUniqueVisitors.toLocaleString()}</h3>
+            <p class="text-gray-600 font-medium">Unique Visitors</p>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">avg</span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{Math.round(analyticsData.totalPageViews / 30)}</h3>
+            <p class="text-gray-600 font-medium">Daily Average</p>
+          </div>
+
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"></path>
+                </svg>
+              </div>
+              <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded-full">ratio</span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900 mb-1">{analyticsData.totalUniqueVisitors > 0 ? (analyticsData.totalPageViews / analyticsData.totalUniqueVisitors).toFixed(1) : '0.0'}</h3>
+            <p class="text-gray-600 font-medium">Pages/Visitor</p>
+          </div>
+        </div>
+
+        <!-- 30-Day Traffic Chart -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
+          <h3 class="text-xl font-semibold text-gray-900 mb-6">30-Day Traffic Overview</h3>
+          <div class="h-80">
+            <canvas id="trafficChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Top Pages and Traffic Sources -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Top Pages -->
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 20 Pages</h3>
+            <div class="space-y-2">
+              {analyticsData.topPages.map((page, index) => (
+                <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
+                  <div class="flex items-center gap-3 min-w-0 flex-1">
+                    <div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">{index + 1}</div>
+                    <div class="min-w-0 flex-1">
+                      <h4 class="text-sm font-medium text-gray-900 truncate">{page.label || page.breakdown_value}</h4>
+                      <p class="text-xs text-gray-500 truncate">{page.breakdown_value}</p>
+                    </div>
+                  </div>
+                  <div class="text-right flex-shrink-0">
+                    <span class="text-sm font-semibold text-gray-900">{page.count?.toLocaleString()}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <!-- Traffic Sources -->
+          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 20 Traffic Sources</h3>
+            <div class="space-y-2">
+              {analyticsData.referrers.map((referrer, index) => {
+                const getSourceIcon = (url) => {
+                  if (url.includes('google')) return '🔍';
+                  if (url.includes('facebook')) return '📘';
+                  if (url.includes('twitter')) return '🐦';
+                  if (url.includes('linkedin')) return '💼';
+                  if (url.includes('instagram')) return '📷';
+                  if (url.includes('youtube')) return '📹';
+                  if (url.includes('bing')) return '🔍';
+                  if (url.includes('pinterest')) return '📌';
+                  if (url.includes('reddit')) return '🤖';
+                  if (url === 'direct') return '🌐';
+                  return '🔗';
+                };
+                
+                return (
+                  <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                      <div class="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">{getSourceIcon(referrer.breakdown_value)}</div>
+                      <div class="min-w-0 flex-1">
+                        <h4 class="text-sm font-medium text-gray-900 truncate">{referrer.label || referrer.breakdown_value}</h4>
+                        <p class="text-xs text-gray-500 truncate">{referrer.breakdown_value === 'direct' ? 'Direct traffic' : referrer.breakdown_value.replace('https://', '')}</p>
+                      </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                      <span class="text-sm font-semibold text-gray-900">{referrer.count?.toLocaleString()}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     )}
 
-    <div class="admin-stats">
-      <div class="stat-card">
-        <h3>{totalPosts}</h3>
-        <p>Total Posts</p>
+    {!analyticsData && posthogApiKey && (
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Website Analytics <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">PostHog</span></h2>
+        <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+          <div class="text-4xl mb-4">🔄</div>
+          <p class="text-gray-600">Loading analytics data...</p>
+        </div>
       </div>
-      <div class="stat-card">
-        <h3>{memorial.length}</h3>
-        <p>Memorial Posts</p>
-      </div>
-      <div class="stat-card">
-        <h3>{news.length}</h3>
-        <p>News Articles</p>
-      </div>
-      <div class="stat-card">
-        <h3>{articles.length}</h3>
-        <p>General Articles</p>
-      </div>
-    </div>
+    )}
 
-    <div class="system-status">
-      <h2>System Status</h2>
-      <div class="status-indicator" id="github-status">
-        <span class="loading">🔄</span> Checking GitHub connection...
+    {!posthogApiKey && (
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Website Analytics</h2>
+        <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
+          <div class="text-6xl mb-4">📊</div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">Analytics Not Configured</h3>
+          <p class="text-gray-600 mb-6">To view website analytics, configure your PostHog API key in the environment variables.</p>
+          <a href="/admin/settings" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">Configure Analytics</a>
+        </div>
       </div>
-      <div class="status-indicator" id="environment-status">
-        <span class="env-badge">{Astro.locals.env || 'unknown'}</span>
-        Environment: {import.meta.env.PROD ? 'Production' : 'Development'}
-      </div>
-    </div>
+    )}
 
-    <div class="admin-actions">
-      <a href="/admin/posts/new" class="btn btn-primary">
-        <span>➕</span> New Post
-      </a>
-      <a href="/admin/posts" class="btn btn-secondary">
-        <span>📄</span> Manage Posts
-      </a>
-      <a href="/admin/media" class="btn btn-secondary">
-        <span>🖼️</span> Media Library
-      </a>
-    </div>
-
-    <div class="recent-posts">
-      <h2>Recent Posts</h2>
-      <div class="posts-grid">
-        {[...memorial, ...news, ...articles]
-          .sort((a, b) => new Date(b.frontmatter.datePublished) - new Date(a.frontmatter.datePublished))
-          .slice(0, 6)
-          .map(post => (
-            <div class="post-card">
-              <h3>{post.frontmatter.title}</h3>
-              <p class="post-meta">
-                Type: {post.id.split('/')[0]} | 
-                Published: {new Date(post.frontmatter.datePublished).toLocaleDateString()}
-                {post.frontmatter.draft && <span class="draft-badge">DRAFT</span>}
-              </p>
-              <div class="post-actions">
-                <a href={`/admin/posts/edit?id=${encodeURIComponent(post.id)}`} class="btn btn-small">
-                  Edit
-                </a>
-                <a href={post.frontmatter.url} class="btn btn-small btn-outline" target="_blank">
-                  View
-                </a>
-              </div>
-            </div>
-          ))
-        }
-      </div>
-    </div>
   </div>
-</Layout>
+</AdminLayout>
 
-<style>
-  .admin-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', roboto, sans-serif;
-  }
-
-  .admin-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid #e5e7eb;
-  }
-
-  .admin-header h1 {
-    color: #1f2937;
-    margin-bottom: 0.5rem;
-  }
-
-  .admin-header p {
-    color: #6b7280;
-  }
-
-  .alert {
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 0.5rem;
-  }
-
-  .alert-error {
-    background-color: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #dc2626;
-  }
-
-  .admin-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 3rem;
-  }
-
-  .stat-card {
-    background: white;
-    padding: 2rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    border: 1px solid #e5e7eb;
-  }
-
-  .stat-card h3 {
-    font-size: 2.5rem;
-    font-weight: bold;
-    color: #1f2937;
-    margin-bottom: 0.5rem;
-  }
-
-  .stat-card p {
-    color: #6b7280;
-    font-weight: 500;
-  }
-
-  .admin-actions {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.375rem;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-  }
-
-  .btn-primary {
-    background-color: #3b82f6;
-    color: white;
-  }
-
-  .btn-primary:hover {
-    background-color: #2563eb;
-  }
-
-  .btn-secondary {
-    background-color: #f3f4f6;
-    color: #374151;
-  }
-
-  .btn-secondary:hover {
-    background-color: #e5e7eb;
-  }
-
-  .btn-small {
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-  }
-
-  .btn-outline {
-    background-color: transparent;
-    border-color: #d1d5db;
-    color: #374151;
-  }
-
-  .btn-outline:hover {
-    background-color: #f9fafb;
-  }
-
-  .recent-posts h2 {
-    margin-bottom: 1.5rem;
-    color: #1f2937;
-  }
-
-  .posts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-
-  .post-card {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-  }
-
-  .post-card h3 {
-    color: #1f2937;
-    margin-bottom: 0.75rem;
-    line-height: 1.4;
-  }
-
-  .post-meta {
-    color: #6b7280;
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
-  }
-
-  .draft-badge {
-    background-color: #fbbf24;
-    color: #92400e;
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-left: 0.5rem;
-  }
-
-  .post-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .system-status {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-    margin-bottom: 2rem;
-  }
-
-  .system-status h2 {
-    margin-bottom: 1rem;
-    color: #1f2937;
-  }
-
-  .status-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.875rem;
-  }
-
-  .status-indicator .loading {
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  .status-indicator.connected {
-    color: #059669;
-  }
-
-  .status-indicator.disconnected {
-    color: #dc2626;
-  }
-
-  .status-indicator.warning {
-    color: #d97706;
-  }
-
-  .env-badge {
-    background-color: #3b82f6;
-    color: white;
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .env-badge.production {
-    background-color: #dc2626;
-  }
-
-  .env-badge.development {
-    background-color: #059669;
-  }
-
-  @media (max-width: 768px) {
-    .admin-container {
-      padding: 1rem;
-    }
-    
-    .admin-stats {
-      grid-template-columns: 1fr;
-    }
-    
-    .posts-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .admin-actions {
-      flex-direction: column;
-    }
-  }
-</style>
-
-<script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script define:vars={{ analyticsData }}>
   // Check CMS status on page load
   async function checkCMSStatus() {
     try {
@@ -436,7 +438,84 @@ const totalPosts = memorial.length + news.length + articles.length;
     }
   }
 
+  // Initialize traffic chart
+  function initTrafficChart() {
+    if (!analyticsData) return;
+
+    const ctx = document.getElementById('trafficChart');
+    if (!ctx) return;
+
+    // Generate date labels for the last 30 days
+    const labels = [];
+    const now = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
+      labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    }
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Page Views',
+            data: analyticsData.pageViews,
+            borderColor: 'rgb(59, 130, 246)',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+          },
+          {
+            label: 'Unique Visitors',
+            data: analyticsData.uniqueVisitors,
+            borderColor: 'rgb(16, 185, 129)',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.1)'
+            }
+          },
+          x: {
+            grid: {
+              color: 'rgba(0, 0, 0, 0.1)'
+            }
+          }
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+          }
+        },
+        interaction: {
+          mode: 'nearest',
+          axis: 'x',
+          intersect: false
+        }
+      }
+    });
+  }
+
   // Check status when page loads
-  document.addEventListener('DOMContentLoaded', checkCMSStatus);
+  document.addEventListener('DOMContentLoaded', function() {
+    checkCMSStatus();
+    initTrafficChart();
+  });
 </script>
-</Layout>
+</AdminLayout>

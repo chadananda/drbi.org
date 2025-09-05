@@ -2,8 +2,7 @@
   import { onMount, onDestroy, tick, createEventDispatcher } from 'svelte';
   const dispatch = createEventDispatcher();
 
-  export let postid, sessionid, visible;
-  let post = {};
+  export let postid, sessionid, visible, post = {};
   let EasyMDE, easyMDEInstance, textArea, hasUnsavedChanges = false, content = '';
   let timeoutId = null;
 
@@ -13,7 +12,7 @@
   $: if (easyMDEInstance) updateSaveButton(hasUnsavedChanges);
   // $: if (visible && easyMDEInstance && post) tick().then(() => easyMDEInstance.value(post.body));
 
-  $: if (visible) tick().then(()=> loadPost());
+  $: if (visible && easyMDEInstance && post) tick().then(()=> loadPost());
 
   const updateSaveButton = (unsavedChanges) => {
     const saveButton = document.querySelector('.fa-save');
@@ -47,7 +46,7 @@
     easyMDEInstance = new EasyMDE({
       element: textArea,
       spellChecker: false,
-      initialValue: post?.body,
+      initialValue: post?.content || '',
       toolbar: [
         'bold', 'italic', 'heading', '|', 'code', 'quote', 'unordered-list', 'ordered-list', '|',
         'link', 'image', 'table', '|', 'preview', 'side-by-side', 'fullscreen',
@@ -187,21 +186,11 @@ const upload_s3 = async (dataURL, s3key) => {
 
   // API Functions
   const loadPost = async () => {
-    if (!postid) return;
-    const url = `/api/post_db?id=${encodeURIComponent(btoa(postid))}`; // regular encoding does not work with Astro
-    // console.log('Loading post from:', url);
-    try {
-      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${sessionid}` } });
-      if (response.ok) {
-        post.body = (await response.json()).body
-        easyMDEInstance.value(post.body);
-        hasUnsavedChanges = false;
-      } else {
-        throw new Error('Failed to load post');
-      }
-    } catch (error) {
-      console.error('Error loading post:', error);
-    }
+    if (!postid || !easyMDEInstance || !post) return;
+    // Use the post data passed as prop instead of making API call
+    const content = post.content || '';
+    easyMDEInstance.value(content);
+    hasUnsavedChanges = false;
   };
 
 

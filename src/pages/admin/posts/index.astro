@@ -1,0 +1,535 @@
+---
+export const prerender = false;
+
+/**
+ * Admin Posts Management - List all posts with filtering
+ */
+
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import { getAllPostsByType } from '../../../utils/cms-utils.js';
+
+// Get all posts for management
+let memorial = [];
+let news = [];
+let articles = [];
+let error = null;
+
+try {
+  [memorial, news, articles] = await Promise.all([
+    getAllPostsByType('memorial'),
+    getAllPostsByType('news'),
+    getAllPostsByType('articles')
+  ]);
+} catch (e) {
+  error = e.message;
+  console.error('Error loading posts for admin posts page:', e);
+}
+
+// Combine and sort all posts by date
+const allPosts = [...memorial, ...news, ...articles]
+  .sort((a, b) => new Date(b.frontmatter.datePublished) - new Date(a.frontmatter.datePublished));
+
+const totalPosts = allPosts.length;
+
+// Get session for authentication
+const sessionid = Astro.locals?.session?.id;
+---
+
+<AdminLayout title="Content Dashboard" user={Astro.locals?.user}>
+  <div class="max-w-6xl mx-auto px-6 py-6" data-sessionid={sessionid}>
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+          <span class="text-white text-xl">📝</span>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">Content Management</h1>
+      </div>
+      <p class="text-gray-600 mb-6">Manage all articles, news, and memorial posts</p>
+      
+      <!-- Search Bar -->
+      <div class="relative max-w-md">
+        <input type="text" 
+               id="searchInput" 
+               placeholder="Search posts by title or content..." 
+               class="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <button class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors hidden" 
+                id="searchClear">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    {error && (
+      <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <h3 class="text-lg font-semibold text-red-800 mb-2">Error Loading Posts</h3>
+        <p class="text-red-600">{error}</p>
+      </div>
+    )}
+
+    <!-- Quick Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
+      <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div class="text-2xl mb-2">📝</div>
+        <div class="text-2xl font-bold text-gray-900">{totalPosts}</div>
+        <p class="text-sm text-gray-600">Total Posts</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div class="text-2xl mb-2">🕯️</div>
+        <div class="text-2xl font-bold text-gray-900">{memorial.length}</div>
+        <p class="text-sm text-gray-600">Memorial Posts</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div class="text-2xl mb-2">📰</div>
+        <div class="text-2xl font-bold text-gray-900">{news.length}</div>
+        <p class="text-sm text-gray-600">News Articles</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div class="text-2xl mb-2">📄</div>
+        <div class="text-2xl font-bold text-gray-900">{articles.length}</div>
+        <p class="text-sm text-gray-600">General Articles</p>
+      </div>
+      <div class="bg-white border border-gray-200 rounded-lg p-4 text-center">
+        <div class="text-2xl mb-2">✏️</div>
+        <div class="text-2xl font-bold text-gray-900">{allPosts.filter(p => p.frontmatter.draft).length}</div>
+        <p class="text-sm text-gray-600">Draft Posts</p>
+      </div>
+    </div>
+
+    <!-- Posts Management Card -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow-sm">
+      <!-- Header with Filters and Actions -->
+      <div class="px-6 py-4 border-b border-gray-200">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div class="flex flex-col sm:flex-row gap-4">
+            <select class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="typeFilter">
+              <option value="all">All Types</option>
+              <option value="memorial">Memorial Posts</option>
+              <option value="news">News Articles</option>
+              <option value="articles">General Articles</option>
+            </select>
+            
+            <select class="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent" id="statusFilter">
+              <option value="all">All Status</option>
+              <option value="published">Published</option>
+              <option value="draft">Drafts</option>
+            </select>
+          </div>
+          
+          <div class="flex gap-3">
+            <button class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                    id="bulkDelete" disabled>
+              🗑️ Delete Selected
+            </button>
+            <a href="/admin/posts/new" 
+               class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors inline-flex items-center gap-2">
+              ➕ New Post
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Posts Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full table-fixed divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="w-8 px-2 py-1 text-left">
+                <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              </th>
+              <th class="w-24 px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+              <th class="w-64 px-3 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+              <th class="w-32 px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type / Status</th>
+              <th class="w-32 px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
+              <th class="w-32 px-2 py-1 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            {allPosts.map(post => {
+              const type = post.id.split('/')[0];
+              const isDraft = post.frontmatter.draft;
+              const publishedDate = new Date(post.frontmatter.datePublished);
+              const modifiedDate = post.frontmatter.dateModified ? 
+                new Date(post.frontmatter.dateModified) : publishedDate;
+              
+              return (
+                <tr class="post-row hover:bg-gray-50 transition-colors" data-type={type} data-status={isDraft ? 'draft' : 'published'}>
+                  <td class="px-2 py-1 whitespace-nowrap">
+                    <input type="checkbox" class="row-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500" data-post-id={post.id}>
+                  </td>
+                  <td class="px-2 py-1">
+                    {post.frontmatter.image?.src ? (
+                      <img 
+                        src={`https://drbi.imgix.net${post.frontmatter.image.src.replace('https://drbi.s3.amazonaws.com', '')}?w=120&h=80&fit=crop&crop=face,center&auto=format,compress&q=75`}
+                        alt={post.frontmatter.image.alt || post.frontmatter.title}
+                        class="w-20 h-12 object-cover rounded border border-gray-200"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div class="w-20 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                      </div>
+                    )}
+                  </td>
+                  <td class="w-64 px-3 py-1">
+                    <div class="min-w-0">
+                      <h3 class="text-sm font-medium text-gray-900 truncate leading-none">{post.frontmatter.title}</h3>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1 whitespace-nowrap">
+                    <div class="flex flex-col gap-1">
+                      <span class={`inline-flex px-1 py-1 text-xs font-medium rounded ${
+                        type === 'memorial' ? 'bg-rose-100 text-rose-800' :
+                        type === 'news' ? 'bg-emerald-100 text-emerald-800' :
+                        'bg-blue-100 text-blue-800'
+                      }`}>
+                        {type}
+                      </span>
+                      {isDraft ? (
+                        <span class="inline-flex px-1 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">Draft</span>
+                      ) : (
+                        <span class="inline-flex px-1 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Published</span>
+                      )}
+                    </div>
+                  </td>
+                  <td class="px-2 py-1 whitespace-nowrap text-xs text-gray-500">
+                    <div class="flex flex-col gap-1">
+                      <div>Pub: {publishedDate.toLocaleDateString()}</div>
+                      <div>Mod: {modifiedDate.toLocaleDateString()}</div>
+                    </div>
+                  </td>
+                  <td class="px-2 py-1 whitespace-nowrap">
+                    <div class="flex items-center gap-2">
+                      <a href={`/admin/${type}/${post.id.split('/').slice(1).join('/').replace('.md', '')}`} 
+                         class="p-1 text-blue-600 hover:text-blue-800 transition-colors" 
+                         title="Edit in Content Editor">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                      </a>
+                      <a href={post.frontmatter.url || `/${type}/${post.frontmatter.slug || post.id.split('/')[1].replace('.md', '')}`} 
+                         class="p-1 text-gray-600 hover:text-gray-800 transition-colors" 
+                         title="View on Site" target="_blank">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                      </a>
+                      <button class="p-1 text-gray-600 hover:text-gray-800 transition-colors" 
+                              title="Duplicate"
+                              onclick={`duplicatePost('${post.id}')`}>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                      </button>
+                      <button class="p-1 text-red-600 hover:text-red-800 transition-colors" 
+                              title="Delete"
+                              onclick={`deletePost('${post.id}')`}>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+
+<script>
+// Filter posts by type
+document.getElementById('typeFilter')?.addEventListener('change', function() {
+  const filterValue = this.value;
+  const rows = document.querySelectorAll('.post-row');
+  
+  rows.forEach(row => {
+    if (filterValue === 'all' || row.dataset.type === filterValue) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+});
+
+const sessionid = document.querySelector('.posts-container').dataset.sessionid;
+
+// Search functionality
+const searchInput = document.getElementById('searchInput');
+const searchClear = document.getElementById('searchClear');
+const rows = document.querySelectorAll('.post-row');
+
+if (searchInput) {
+  searchInput.addEventListener('input', function() {
+    const searchTerm = this.value.toLowerCase().trim();
+    
+    if (searchTerm.length > 0) {
+      searchClear.classList.remove('hidden');
+    } else {
+      searchClear.classList.add('hidden');
+    }
+    
+    let visibleCount = 0;
+    rows.forEach(row => {
+      const title = row.querySelector('h3').textContent.toLowerCase();
+      const excerpt = row.querySelector('p')?.textContent?.toLowerCase() || '';
+      
+      if (title.includes(searchTerm) || excerpt.includes(searchTerm)) {
+        row.classList.remove('hidden');
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.classList.add('hidden');
+        row.style.display = 'none';
+      }
+    });
+    
+    // Show/hide no results message
+    let noResultsMsg = document.querySelector('.no-results');
+    if (visibleCount === 0 && searchTerm.length > 0) {
+      if (!noResultsMsg) {
+        noResultsMsg = document.createElement('tr');
+        noResultsMsg.className = 'no-results';
+        noResultsMsg.innerHTML = '<td colspan="6" class="px-6 py-8 text-center text-gray-500">No posts found matching your search.</td>';
+        document.querySelector('table tbody').appendChild(noResultsMsg);
+      }
+      noResultsMsg.style.display = 'table-row';
+    } else if (noResultsMsg) {
+      noResultsMsg.style.display = 'none';
+    }
+  });
+}
+
+if (searchClear) {
+  searchClear.addEventListener('click', function() {
+    searchInput.value = '';
+    searchInput.dispatchEvent(new Event('input'));
+    searchInput.focus();
+  });
+}
+
+// Status filter
+document.getElementById('statusFilter')?.addEventListener('change', function() {
+  const filterValue = this.value;
+  rows.forEach(row => {
+    const status = row.dataset.status;
+    if (filterValue === 'all' || status === filterValue) {
+      if (!row.classList.contains('hidden')) {
+        row.style.display = '';
+      }
+    } else {
+      row.style.display = 'none';
+    }
+  });
+});
+
+// Checkbox functionality
+const selectAll = document.getElementById('selectAll');
+const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+const bulkDeleteBtn = document.getElementById('bulkDelete');
+
+if (selectAll) {
+  selectAll.addEventListener('change', function() {
+    rowCheckboxes.forEach(checkbox => {
+      if (checkbox.closest('.post-row').style.display !== 'none') {
+        checkbox.checked = this.checked;
+      }
+    });
+    updateBulkActions();
+  });
+}
+
+rowCheckboxes.forEach(checkbox => {
+  checkbox.addEventListener('change', updateBulkActions);
+});
+
+function updateBulkActions() {
+  const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+  bulkDeleteBtn.disabled = checkedBoxes.length === 0;
+  
+  // Update select all checkbox
+  const visibleCheckboxes = Array.from(rowCheckboxes).filter(cb => 
+    cb.closest('.post-row').style.display !== 'none'
+  );
+  const checkedVisible = visibleCheckboxes.filter(cb => cb.checked);
+  
+  selectAll.checked = visibleCheckboxes.length > 0 && checkedVisible.length === visibleCheckboxes.length;
+  selectAll.indeterminate = checkedVisible.length > 0 && checkedVisible.length < visibleCheckboxes.length;
+}
+
+// Bulk delete
+if (bulkDeleteBtn) {
+  bulkDeleteBtn.addEventListener('click', function() {
+    const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+    const postIds = Array.from(checkedBoxes).map(cb => cb.dataset.postId);
+    
+    if (confirm(`Are you sure you want to delete ${postIds.length} selected post(s)? This action cannot be undone.`)) {
+      bulkDeletePosts(postIds);
+    }
+  });
+}
+
+// Delete post function
+async function deletePost(postId) {
+  if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+    try {
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'delete',
+          postId: postId,
+          sessionid: sessionid
+        })
+      });
+      
+      if (response.ok) {
+        // Remove row from table
+        const row = document.querySelector(`[data-post-id="${postId}"]`).closest('.post-row');
+        row.remove();
+        
+        // Update stats
+        updateStats();
+        
+        showNotification('Post deleted successfully', 'success');
+      } else {
+        showNotification('Failed to delete post', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      showNotification('Error deleting post', 'error');
+    }
+  }
+}
+
+// Bulk delete posts
+async function bulkDeletePosts(postIds) {
+  try {
+    const promises = postIds.map(postId => 
+      fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'delete',
+          postId: postId,
+          sessionid: sessionid
+        })
+      })
+    );
+    
+    const responses = await Promise.all(promises);
+    const successful = responses.filter(r => r.ok).length;
+    
+    if (successful > 0) {
+      // Remove rows from table
+      postIds.forEach(postId => {
+        const row = document.querySelector(`[data-post-id="${postId}"]`).closest('.post-row');
+        if (row) row.remove();
+      });
+      
+      updateStats();
+      updateBulkActions();
+      
+      if (successful === postIds.length) {
+        showNotification(`Successfully deleted ${successful} post(s)`, 'success');
+      } else {
+        showNotification(`Deleted ${successful} of ${postIds.length} post(s)`, 'warning');
+      }
+    } else {
+      showNotification('Failed to delete posts', 'error');
+    }
+  } catch (error) {
+    console.error('Error bulk deleting posts:', error);
+    showNotification('Error deleting posts', 'error');
+  }
+}
+
+// Duplicate post function
+async function duplicatePost(postId) {
+  if (confirm('Create a duplicate of this post?')) {
+    try {
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'duplicate',
+          postId: postId,
+          sessionid: sessionid
+        })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        showNotification('Post duplicated successfully', 'success');
+        
+        // Redirect to edit the new post after a brief delay
+        setTimeout(() => {
+          const type = result.newPostId.split('/')[0];
+          const baseid = result.newPostId.split('/').slice(1).join('/').replace('.md', '');
+          window.location.href = `/admin/${type}/${baseid}`;
+        }, 1000);
+      } else {
+        showNotification('Failed to duplicate post', 'error');
+      }
+    } catch (error) {
+      console.error('Error duplicating post:', error);
+      showNotification('Error duplicating post', 'error');
+    }
+  }
+}
+
+// Update stats badges
+function updateStats() {
+  const visibleRows = document.querySelectorAll('.post-row:not([style*="display: none"])');
+  const totalBadge = document.querySelector('.stat-badge');
+  if (totalBadge) {
+    const currentTotal = visibleRows.length;
+    totalBadge.textContent = `${currentTotal} total posts`;
+  }
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  const bgColor = type === 'success' ? 'bg-green-500' : 
+                  type === 'error' ? 'bg-red-500' : 
+                  type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+  
+  notification.className = `fixed top-4 right-4 z-50 min-w-80 px-4 py-3 rounded-lg text-white font-medium shadow-lg transform transition-all duration-300 ${bgColor}`;
+  notification.textContent = message;
+  notification.style.transform = 'translateX(100%)';
+  
+  document.body.appendChild(notification);
+  
+  // Slide in
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)';
+  }, 100);
+  
+  // Slide out after 3 seconds
+  setTimeout(() => {
+    notification.style.transform = 'translateX(100%)';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+
+// Make functions globally available
+window.deletePost = deletePost;
+window.duplicatePost = duplicatePost;
+</script>

@@ -1,0 +1,376 @@
+---
+/**
+ * Admin Dashboard Sidebar Navigation
+ * Collapsible navigation for content management
+ */
+
+// Get current path for active state
+const currentPath = Astro.url.pathname;
+
+const navigationItems = [
+  {
+    title: "Dashboard",
+    icon: "🏠",
+    href: "/admin",
+    active: currentPath === "/admin"
+  },
+  {
+    title: "Content",
+    icon: "📝",
+    href: "/admin/posts",
+    active: currentPath.startsWith("/admin/posts") || currentPath.startsWith("/admin/memorial") || currentPath.startsWith("/admin/news") || currentPath.startsWith("/admin/articles")
+  },
+  {
+    title: "Events",
+    icon: "📅",
+    href: "/admin/events",
+    active: currentPath === "/admin/events"
+  },
+  {
+    title: "Comments",
+    icon: "💬",
+    href: "/admin/comments",
+    active: currentPath === "/admin/comments"
+  },
+  {
+    title: "Organization",
+    icon: "🏷️",
+    items: [
+      { title: "Categories", href: "/admin/categories", active: currentPath.startsWith("/admin/categories") },
+      { title: "Topics", href: "/admin/topics", active: currentPath.startsWith("/admin/topics") },
+      { title: "Tags", href: "/admin/tags", active: currentPath.startsWith("/admin/tags") }
+    ]
+  },
+  {
+    title: "Media",
+    icon: "🖼️",
+    items: [
+      { title: "Media Library", href: "/admin/media", active: currentPath === "/admin/media" },
+      { title: "Upload Files", href: "/admin/media/upload", active: currentPath === "/admin/media/upload" }
+    ]
+  },
+  {
+    title: "Team",
+    icon: "👥",
+    href: "/admin/team",
+    active: currentPath.startsWith("/admin/team")
+  },
+  {
+    title: "Settings",
+    icon: "⚙️",
+    href: "/admin/settings",
+    active: currentPath === "/admin/settings"
+  },
+];
+---
+
+<aside 
+  class="admin-sidebar" 
+  id="adminSidebar"
+>
+  <!-- Sidebar Header -->
+  <div class="px-4 py-6 border-b border-gray-200 bg-gray-50">
+    <div class="flex items-center justify-between">
+      <h2 class="text-xl font-semibold text-gray-900 transition-all duration-300">
+        DRBI Admin
+      </h2>
+      <button 
+        class="p-2 text-gray-500 hover:bg-gray-100 rounded-md transition-colors duration-200" 
+        id="sidebarToggle" 
+        aria-label="Toggle sidebar"
+      >
+        <div class="w-5 h-0.5 bg-gray-500 transition-all duration-300 relative">
+          <div class="absolute -top-1.5 w-5 h-0.5 bg-gray-500 transition-all duration-300"></div>
+          <div class="absolute top-1.5 w-5 h-0.5 bg-gray-500 transition-all duration-300"></div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 overflow-y-auto py-4">
+    <ul class="space-y-1">
+      {navigationItems.map((item) => (
+        <li class="px-2">
+          {item.items ? (
+            <!-- Collapsible section -->
+            <div>
+              <button 
+                class="w-full flex items-center py-3 px-4 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 rounded-lg group-[.collapsed]:justify-center group-[.collapsed]:px-3" 
+                data-section={item.title.toLowerCase()}
+                aria-expanded="false"
+              >
+                <span class="nav-icon w-8 h-8 flex items-center justify-center text-xl flex-shrink-0">
+                  {item.icon}
+                </span>
+                <span class="nav-text flex-1 ml-3 text-left transition-all duration-300 whitespace-nowrap">
+                  {item.title}
+                </span>
+                <span class="expand-icon ml-auto text-sm transition-transform duration-300">
+                  ▶
+                </span>
+              </button>
+              <ul class="nav-submenu ml-4 mt-1 space-y-1 max-h-0 overflow-hidden transition-all duration-300" data-submenu={item.title.toLowerCase()}>
+                {item.items.map((subItem) => (
+                  <li>
+                    <a 
+                      href={subItem.href} 
+                      class={`block py-2 px-4 pl-12 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 rounded-lg ${subItem.active ? 'text-blue-600 bg-blue-50' : ''}`}
+                    >
+                      {subItem.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <!-- Direct link -->
+            <a 
+              href={item.href} 
+              class={`flex items-center py-3 px-4 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 rounded-lg relative ${item.active ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-500' : ''}`}
+            >
+              <span class="nav-icon w-8 h-8 flex items-center justify-center text-xl flex-shrink-0">
+                {item.icon}
+              </span>
+              <span class="nav-text flex-1 ml-3 transition-all duration-300 whitespace-nowrap">
+                {item.title}
+              </span>
+            </a>
+          )}
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="p-4 border-t border-gray-200 bg-gray-50 space-y-4">
+    <div class="flex items-center p-2 bg-white border border-gray-200 rounded-lg">
+      <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 flex-shrink-0">
+        👤
+      </div>
+      <div class="user-details flex-1 ml-3 transition-all duration-300">
+        <div class="text-sm font-medium text-gray-900">Admin</div>
+        <div class="text-xs text-gray-400">Super Admin</div>
+      </div>
+    </div>
+    <a 
+      href="/api/auth/logout" 
+      class="flex items-center py-2 px-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 rounded-lg transition-all duration-200"
+    >
+      <span class="w-6 h-6 flex items-center justify-center flex-shrink-0">🚪</span>
+      <span class="nav-text ml-3 text-sm transition-all duration-300 whitespace-nowrap">
+        Logout
+      </span>
+    </a>
+  </div>
+</aside>
+
+<!-- Mobile Overlay -->
+<div class="fixed inset-0 bg-black/50 z-[999] opacity-0 invisible transition-all duration-300 md:hidden" id="sidebarOverlay"></div>
+
+<style>
+  /* Base sidebar styles */
+  .admin-sidebar {
+    width: 288px; /* w-72 equivalent */
+    height: 100vh;
+    background: white;
+    color: #374151;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-right: 1px solid #e5e7eb;
+    position: relative;
+    z-index: 1000;
+  }
+
+  /* Mobile: fixed positioning and hidden by default */
+  @media (max-width: 767px) {
+    .admin-sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      transform: translateX(-100%);
+      z-index: 1000;
+    }
+    
+    .admin-sidebar.mobile-open {
+      transform: translateX(0);
+    }
+  }
+
+  /* Desktop collapsed state */
+  @media (min-width: 768px) {
+    .admin-sidebar.collapsed {
+      width: 70px;
+    }
+    
+    .admin-sidebar.collapsed h2,
+    .admin-sidebar.collapsed .nav-text,
+    .admin-sidebar.collapsed .user-details,
+    .admin-sidebar.collapsed .expand-icon {
+      opacity: 0;
+      width: 0;
+      overflow: hidden;
+    }
+    
+    .admin-sidebar.collapsed .nav-submenu {
+      display: none;
+    }
+    
+    .admin-sidebar.collapsed .nav-icon {
+      margin: 0 auto;
+    }
+    
+    .admin-sidebar.collapsed .nav-link,
+    .admin-sidebar.collapsed button {
+      justify-content: center;
+      padding-left: 0.75rem;
+      padding-right: 0.75rem;
+    }
+  }
+
+  /* Sidebar overlay for mobile */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .sidebar-overlay.active {
+      display: block;
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sidebar = document.getElementById('adminSidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const sectionToggles = document.querySelectorAll('[data-section]');
+
+  // Sidebar collapse/expand
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', function() {
+      // Mobile behavior
+      if (window.innerWidth <= 768) {
+        sidebar.classList.toggle('translate-x-0');
+        sidebar.classList.toggle('-translate-x-full');
+        sidebarOverlay.classList.toggle('opacity-0');
+        sidebarOverlay.classList.toggle('invisible');
+        return;
+      }
+      
+      // Desktop collapse behavior
+      sidebar.classList.toggle('collapsed');
+      
+      // Save state in localStorage
+      const isCollapsed = sidebar.classList.contains('collapsed');
+      localStorage.setItem('adminSidebarCollapsed', isCollapsed);
+    });
+  }
+
+  // Overlay click to close mobile sidebar
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', function() {
+      sidebar.classList.add('-translate-x-full');
+      sidebar.classList.remove('translate-x-0');
+      sidebarOverlay.classList.add('opacity-0', 'invisible');
+    });
+  }
+
+  // Restore sidebar state
+  const savedState = localStorage.getItem('adminSidebarCollapsed');
+  if (savedState === 'true' && window.innerWidth > 768) {
+    sidebar.classList.add('collapsed');
+  }
+
+  // Section expand/collapse (accordion behavior)
+  sectionToggles.forEach(toggle => {
+    toggle.addEventListener('click', function() {
+      const isExpanded = this.getAttribute('aria-expanded') === 'true';
+      const section = this.getAttribute('data-section');
+      const submenu = document.querySelector(`[data-submenu="${section}"]`);
+      const expandIcon = this.querySelector('span:last-child');
+      
+      if (submenu) {
+        // Close all other sections first
+        sectionToggles.forEach(otherToggle => {
+          if (otherToggle !== this) {
+            const otherSection = otherToggle.getAttribute('data-section');
+            const otherSubmenu = document.querySelector(`[data-submenu="${otherSection}"]`);
+            const otherIcon = otherToggle.querySelector('span:last-child');
+            if (otherSubmenu) {
+              otherToggle.setAttribute('aria-expanded', 'false');
+              otherSubmenu.style.maxHeight = '0px';
+              if (otherIcon) otherIcon.style.transform = 'rotate(0deg)';
+            }
+          }
+        });
+        
+        // Toggle current section
+        if (!isExpanded) {
+          this.setAttribute('aria-expanded', 'true');
+          submenu.style.maxHeight = submenu.scrollHeight + 'px';
+          if (expandIcon) expandIcon.style.transform = 'rotate(90deg)';
+        } else {
+          this.setAttribute('aria-expanded', 'false');
+          submenu.style.maxHeight = '0px';
+          if (expandIcon) expandIcon.style.transform = 'rotate(0deg)';
+        }
+        
+        // Save state
+        const expandedSection = !isExpanded ? section : null;
+        localStorage.setItem('adminExpandedSections', JSON.stringify(expandedSection ? [expandedSection] : []));
+      }
+    });
+  });
+
+  // Restore expanded sections
+  const expandedSections = JSON.parse(localStorage.getItem('adminExpandedSections') || '[]');
+  expandedSections.forEach(section => {
+    const toggle = document.querySelector(`[data-section="${section}"]`);
+    const submenu = document.querySelector(`[data-submenu="${section}"]`);
+    const expandIcon = toggle ? toggle.querySelector('span:last-child') : null;
+    if (toggle && submenu) {
+      toggle.setAttribute('aria-expanded', 'true');
+      submenu.style.maxHeight = submenu.scrollHeight + 'px';
+      if (expandIcon) expandIcon.style.transform = 'rotate(90deg)';
+    }
+  });
+
+  // Handle window resize
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      // Reset mobile classes
+      sidebar.classList.remove('translate-x-0', '-translate-x-full');
+      sidebarOverlay.classList.add('opacity-0', 'invisible');
+      
+      // Restore desktop collapsed state
+      const savedState = localStorage.getItem('adminSidebarCollapsed');
+      if (savedState === 'true') {
+        sidebar.classList.add('collapsed');
+      }
+    } else {
+      // Remove desktop collapsed state on mobile
+      sidebar.classList.remove('collapsed');
+      sidebar.classList.add('-translate-x-full');
+    }
+  });
+
+  // Initialize mobile state
+  if (window.innerWidth <= 768) {
+    sidebar.classList.add('-translate-x-full');
+    sidebar.classList.remove('collapsed');
+  }
+});
+</script>

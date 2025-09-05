@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T21:37:11.160Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-how-purchase-plot/funeral-servicesjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-how-purchase-plot/funeral-services.jpg"
   alt: "Memorial Gardens: How to Purchase a Plot in the Desert Rose Bahá’í Cemetery"
 narrator: "auto"
 ---

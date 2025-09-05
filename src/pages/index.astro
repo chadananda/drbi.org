@@ -5,9 +5,10 @@ import Layout from "@layouts/Layout.astro";
 
 import { Image, Picture } from "astro:assets";
 import SuperHero from "@components/superhero.astro";
-import Tockify from "@components/tockify.astro";
+// import Tockify from "@components/tockify.astro";
 import DRBICategories from "@components/drbicategories.astro";
 import VideoPlayer from "@components/videoPlayer.astro";
+import EventCalendar from "@components/EventCalendar.astro";
 ---
 
 <Layout title="Desert Rose Bahá’í Institute"
@@ -39,11 +40,22 @@ import VideoPlayer from "@components/videoPlayer.astro";
     <Container>
       <div class="mt-24">
         <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
+            Upcoming DRBI Events
+        </h2>
+        <EventCalendar view="cards" />
+      </div>
+    </Container>
+
+    <!-- Tockify calendar section commented out - using EventCalendar instead
+    <Container>
+      <div class="mt-24">
+        <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
             Calendar of Upcoming Events
         </h2>
         <Tockify />
       </div>
     </Container>
+    -->
 
 
         <!-- sign up to our newsletter -->

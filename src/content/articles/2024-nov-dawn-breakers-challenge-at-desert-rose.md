@@ -20,7 +20,7 @@ keywords:
 datePublished: "2024-01-05T00:00:00.000Z"
 dateModified: "2024-05-29T03:20:02.403Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-05-2024-nov-dawn-breakers/20231006hillcrest-drbi-5websizejpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-05-2024-nov-dawn-breakers/20231006hillcrest-drbi-5websize.jpg"
   alt: "Join us for an immersive study of the Dawn-Breakers at the DRBI in Arizona, Nov 1-9, 2024."
 narrator: "auto"
 ---

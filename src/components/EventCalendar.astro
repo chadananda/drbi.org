@@ -1,0 +1,891 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from "astro:assets";
+import { transformS3Url } from '../utils/utils.js';
+
+const events = await getCollection('events');
+
+
+// Always use the real current date for filtering
+const referenceDate = new Date();
+
+let upcomingEvents = events
+  .filter(e => e.data.visible !== false && new Date(e.data.startDate) > referenceDate) // Only show visible events
+  .sort((a, b) => new Date(a.data.startDate).getTime() - new Date(b.data.startDate).getTime());
+
+
+const { view = 'cards', limit } = Astro.props; // 'cards', 'list', or 'list-full', optional limit
+
+// Apply limit if provided
+if (limit) {
+  upcomingEvents = upcomingEvents.slice(0, limit);
+}
+
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+const formatDateRange = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  const startDateStr = start.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short', 
+    day: 'numeric'
+  });
+  
+  const endDateStr = end.toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric'
+  });
+  
+  if (startDateStr === endDateStr) {
+    return startDateStr;
+  }
+  
+  return `${startDateStr} - ${endDateStr}`;
+};
+
+const formatTime = (date) => {
+  return new Date(date).toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+};
+
+const formatPrice = (price) => {
+  if (!price) return 'Free';
+  if (price.low === price.high) {
+    return `$${price.low}`;
+  }
+  return `$${price.low} - $${price.high}`;
+};
+
+---
+
+<div class="event-calendar" data-view={view}>
+  {upcomingEvents.length === 0 ? (
+    <div class="no-events text-center py-8">
+      <p class="text-slate-600 text-lg">No upcoming events at this time.</p>
+      <p class="text-slate-500 mt-2">Check back soon for new events!</p>
+    </div>
+  ) : (
+    <div class={
+      view === 'cards' ? 'flex flex-wrap gap-[120px] justify-center p-5' : 
+      view === 'list-full' ? 'events-list-full' : 
+      'events-list'
+    }>
+      {upcomingEvents.map(event => (
+        <div class={view === 'cards' ? 'relative' : 'event-container'}>
+          {view === 'cards' ? (
+            <>
+              <article class="relative overflow-hidden w-[450px] h-[300px] m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl">
+                <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="block no-underline text-inherit h-full">
+                  <div class="relative w-full h-full bg-contain bg-no-repeat bg-center rounded-lg overflow-hidden" style={`background-image: url(${transformS3Url(event.data.mainImage, 450, 300)})`}>
+                    <div class="event-overlay">
+                      <div class="event-content">
+                        <div class="event-meta">
+                          <time class="event-date">{formatDateRange(event.data.startDate, event.data.endDate)}</time>
+                          <span class="event-time">{formatTime(event.data.startDate)}</span>
+                          {event.data.price && (
+                            <span class="event-price">{formatPrice(event.data.price)}</span>
+                          )}
+                        </div>
+                        {event.data.highlights && (
+                          <div class="event-highlights">
+                            {event.data.highlights.map(highlight => (
+                              <span class="highlight-tag">{highlight}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </article>
+              {event.data.teacherImage && (
+                <div class="absolute top-0 -left-[90px] w-[150px] h-[160px] rounded-[30%] overflow-hidden border-[3px] border-white shadow-lg z-10 pointer-events-none">
+                  <img src={transformS3Url(event.data.teacherImage, 200)} alt="Teacher" class="w-full h-full object-cover" />
+                </div>
+              )}
+            </>
+          ) : view === 'list-full' ? (
+            <div class="list-full-wrapper">
+              <div class="date-badge-outside">
+                <div class="month">{new Date(event.data.startDate).toLocaleDateString('en-US', { month: 'short' })}</div>
+                <div class="day">{new Date(event.data.startDate).getDate()}</div>
+              </div>
+              {event.data.teacherImage && (
+                <div class="teacher-overlay-large">
+                  <img src={transformS3Url(event.data.teacherImage, 180)} alt="Teacher" class="teacher-image-large" />
+                </div>
+              )}
+              <article class="event-list-full-item">
+                <div class="card-title-header">
+                  <h3 class="card-title">
+                    <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">
+                      {event.data.name}
+                    </a>
+                  </h3>
+                  <div class="date-details">
+                    <div class="date-range">{formatDateRange(event.data.startDate, event.data.endDate)}</div>
+                    <div class="time">{formatTime(event.data.startDate)}</div>
+                  </div>
+                </div>
+                
+                <div class="list-full-content">
+                  <div class="list-full-left-column">
+                    <div class="list-full-image-container">
+                      <img src={transformS3Url(event.data.mainImage, 600, 400)} alt={event.data.name} class="main-image" />
+                    </div>
+                  </div>
+                  <div class="list-full-details">
+                    
+                    <p class="list-full-description">
+                      {event.data.shortDescription || event.data.fullDescription?.slice(0, 200) + '...' || 'No description available'}
+                    </p>
+                    
+                    <div class="list-full-meta">
+                      {event.data.price && (
+                        <div class="meta-item price">
+                          <span class="icon">💲</span>
+                          <span>{formatPrice(event.data.price)}</span>
+                        </div>
+                      )}
+                      <div class="meta-item organizer">
+                        <span class="icon">👥</span>
+                        <span>{event.data.organizer}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="event-text-preview">
+                  <p class="event-preview-text">
+                    {event.data.fullDescription ? 
+                      event.data.fullDescription.slice(0, 400) + '...' : 
+                      event.data.shortDescription || 'Join us for this transformative learning experience.'
+                    }
+                  </p>
+                </div>
+                
+                <div class="list-full-bottom">
+                  <div class="bottom-left">
+                    {event.data.highlights && event.data.highlights.length > 0 && (
+                      <div class="inline-highlights">
+                        {event.data.highlights.map(highlight => (
+                          <span class="highlight-tag">{highlight}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div class="list-full-actions">
+                    <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="read-more-btn">
+                      <span class="btn-text">Read More</span>
+                      <span class="btn-icon">→</span>
+                    </a>
+                  </div>
+                </div>
+              </article>
+            </div>
+          ) : (
+            <article class="event-list-item">
+              <div class="list-event">
+                <div class="list-date">
+                  <div class="month">{new Date(event.data.startDate).toLocaleDateString('en-US', { month: 'short' })}</div>
+                  <div class="day">{new Date(event.data.startDate).getDate()}</div>
+                </div>
+                <div class="list-content">
+                  <h3 class="list-title">
+                    <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">{event.data.name}</a>
+                  </h3>
+                  <div class="list-meta">
+                    <span class="time-icon">🕐&nbsp;</span><time>{formatTime(event.data.startDate)}</time>
+                    {event.data.price && (
+                      <>
+                        <span class="separator">•</span>
+                        <span class="price-icon">💰&nbsp;</span><span class="price">{formatPrice(event.data.price)}</span>
+                      </>
+                    )}
+                  </div>
+                  <p class="list-description">{event.data.shortDescription}</p>
+                </div>
+                <div class="list-actions">
+                  <a href={`/admin/events/${event.data.id}`} class="edit-btn">
+                    <span class="edit-icon">✏️&nbsp;</span>
+                    <span class="edit-text">Edit</span>
+                  </a>
+                </div>
+              </div>
+            </article>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+
+<style>
+/* Keep only the complex gradient that can't be done with Tailwind */
+.event-overlay {
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  padding: 25px 20px;
+  color: white;
+}
+
+.event-content {
+  position: relative;
+  z-index: 2;
+}
+
+.event-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+.event-meta {
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.event-date {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.event-time {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.event-location {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.event-price {
+  font-weight: 600;
+  color: rgb(134, 239, 172);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.event-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.highlight-tag {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+/* List View */
+.events-list {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.event-list-item {
+  border-bottom: 1px solid rgb(229, 231, 235);
+  padding: 20px 0;
+}
+
+.event-list-item:last-child {
+  border-bottom: none;
+}
+
+.list-event {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.list-date {
+  flex-shrink: 0;
+  text-align: center;
+  background-color: rgb(59, 130, 246);
+  color: white;
+  border-radius: 8px;
+  padding: 8px;
+  min-width: 60px;
+}
+
+.list-date .month {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.list-date .day {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+.list-content {
+  flex: 1;
+}
+
+.list-title {
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.list-title a {
+  color: rgb(44, 44, 44);
+  text-decoration: none;
+}
+
+.list-title a:hover {
+  color: rgb(59, 130, 246);
+  text-decoration: underline;
+}
+
+.list-meta {
+  font-size: 0.875rem;
+  color: rgb(107, 114, 128);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.list-meta .separator {
+  color: rgb(156, 163, 175);
+}
+
+.list-meta .price {
+  font-weight: 600;
+  color: rgb(16, 185, 129);
+}
+
+.list-description {
+  font-size: 0.9rem;
+  color: rgb(75, 85, 99);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.list-actions {
+  flex-shrink: 0;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgb(239, 68, 68), rgb(220, 38, 38));
+  color: white;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  border: 2px solid transparent;
+}
+
+.edit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, rgb(220, 38, 38), rgb(185, 28, 28));
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.edit-icon {
+  font-size: 1rem;
+}
+
+.edit-text {
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .events-grid {
+    padding: 10px;
+    gap: 15px;
+  }
+  
+  .event-card {
+    flex: 0 1 280px;
+    margin: 5px;
+  }
+  
+  .list-event {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .list-date {
+    align-self: flex-start;
+  }
+}
+
+/* List Full View */
+.events-list-full {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+/* New wrapper for external date badge layout */
+.list-full-wrapper {
+  display: block;
+  position: relative;
+}
+
+/* Date badge positioned outside the card, floating off the edge */
+.date-badge-outside {
+  background: linear-gradient(135deg, rgb(59, 130, 246), rgb(37, 99, 235));
+  color: white;
+  border-radius: 12px;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  min-width: 70px;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  position: absolute;
+  z-index: 20;
+  top: 20px;
+  left: -60px;
+}
+
+.date-badge-outside .month {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  line-height: 1;
+  opacity: 0.9;
+}
+
+.date-badge-outside .day {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.event-list-full-item {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgb(229, 231, 235);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  animation: slideInFromLeft 0.6s ease;
+  flex: 1;
+}
+
+.event-list-full-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  border-color: rgb(59, 130, 246);
+}
+
+.card-title-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem 1.5rem 1rem 2.5rem;
+  border-bottom: 1px solid rgb(229, 231, 235);
+  background: white;
+  gap: 1rem;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgb(17, 24, 39);
+  flex: 1;
+}
+
+.card-title a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.card-title a:hover {
+  color: rgb(59, 130, 246);
+}
+
+.list-full-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  padding: 1.5rem;
+  margin-left: 80px;
+}
+
+.list-full-left-column {
+  flex-shrink: 0;
+}
+
+/* New image container with teacher overlay */
+.list-full-image-container {
+  width: 300px;
+  height: 200px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgb(243, 244, 246);
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.list-full-image-container:hover .main-image {
+  transform: scale(1.05);
+}
+
+/* Teacher image overlaying left side of main image */
+.teacher-overlay-large {
+  position: absolute;
+  top: 120px;
+  left: -60px;
+  z-index: 30;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+.teacher-image-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid white;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.teacher-overlay-large:hover .teacher-image-large {
+  transform: scale(1.1);
+}
+
+.list-full-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-full-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.list-full-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: rgb(17, 24, 39);
+  flex: 1;
+}
+
+.list-full-title a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.list-full-title a:hover {
+  color: rgb(59, 130, 246);
+}
+
+/* Updated date details for top-right position */
+.date-details {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.date-range {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(55, 65, 81);
+  line-height: 1;
+}
+
+.time {
+  font-size: 0.75rem;
+  color: rgb(107, 114, 128);
+  margin-top: 2px;
+}
+
+.list-full-description {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgb(75, 85, 99);
+  margin: 0 0 1rem 0;
+}
+
+.list-full-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: rgb(107, 114, 128);
+}
+
+.meta-item .icon {
+  font-size: 1rem;
+}
+
+.meta-item.price {
+  font-weight: 600;
+  color: rgb(16, 185, 129);
+}
+
+.list-full-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.list-full-highlights .highlight-tag {
+  background: rgb(243, 244, 246);
+  color: rgb(75, 85, 99);
+  border: 1px solid rgb(229, 231, 235);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.event-text-preview {
+  margin: 1rem 1.5rem;
+  padding: 1rem;
+  background: rgb(249, 250, 251);
+  border-radius: 8px;
+  border-left: 4px solid rgb(59, 130, 246);
+}
+
+.event-preview-text {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: rgb(55, 65, 81);
+  margin: 0;
+  font-style: italic;
+}
+
+.list-full-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgb(229, 231, 235);
+  background: rgb(249, 250, 251);
+}
+
+.bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.inline-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.inline-highlights .highlight-tag {
+  background: rgb(243, 244, 246);
+  color: rgb(75, 85, 99);
+  border: 1px solid rgb(229, 231, 235);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.list-full-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.read-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgb(16, 185, 129), rgb(5, 150, 105));
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.read-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, rgb(5, 150, 105), rgb(4, 120, 87));
+}
+
+.read-more-btn .btn-icon {
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.read-more-btn:hover .btn-icon {
+  transform: translateX(2px);
+}
+
+/* Animations */
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* List Full Responsive Design */
+@media (max-width: 768px) {
+  .events-list-full {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+  
+  .list-full-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .date-badge-outside {
+    align-self: center;
+    margin-top: 0;
+  }
+  
+  .list-full-content {
+    flex-direction: column;
+    gap: 1rem;
+    margin-left: 0;
+  }
+  
+  .list-full-image-container {
+    width: 100%;
+    height: 200px;
+  }
+  
+  .card-title-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .date-details {
+    text-align: left;
+  }
+  
+  .list-full-meta {
+    gap: 1rem;
+  }
+  
+  .event-text-preview {
+    margin: 1rem;
+  }
+  
+  .list-full-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .list-full-actions {
+    align-self: stretch;
+  }
+  
+  .read-more-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* Staggered animation delays for multiple items */
+.event-list-full-item:nth-child(1) { animation-delay: 0.1s; }
+.event-list-full-item:nth-child(2) { animation-delay: 0.2s; }
+.event-list-full-item:nth-child(3) { animation-delay: 0.3s; }
+.event-list-full-item:nth-child(4) { animation-delay: 0.4s; }
+.event-list-full-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* No events state */
+.no-events {
+  background-color: rgb(249, 250, 251);
+  border: 2px dashed rgb(209, 213, 219);
+  border-radius: 12px;
+  margin: 20px;
+}
+</style>

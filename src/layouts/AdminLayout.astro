@@ -1,31 +1,365 @@
 ---
-import brand from '@data/site.json';
-// import Footer from "@components/footer.astro";
-import Navbar from "@components/navbar/navbar.astro";
-import SideBar from "@components/admin/sidebar.astro";
+export const prerender = false;
 
-const { title, user } = Astro.props;
+import "../styles/tailwind.css";
+import AdminSidebar from "@components/admin/AdminSidebar.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  user?: any;
+}
+
+const { title = "Admin Dashboard", description = "DRBI Content Management System", user } = Astro.props;
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content={description} />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="alternate icon" href="/favicon.ico" />
-  <title>{title} | {brand.title}</title>
+  <title>{title} - DRBI Admin</title>
 </head>
-<body>
-<Navbar />
+<body class="admin-body">
+  <div class="admin-layout">
+    <!-- Sidebar Navigation -->
+    <AdminSidebar />
+    
+    <!-- Main Content Area -->
+    <main class="admin-main" id="adminMain">
+      <!-- Top Bar -->
+      <header class="admin-topbar" style="padding-left: 1.5rem; padding-right: 1.5rem;">
+        <div class="topbar-left">
+          <a href="/" class="drbi-logo-link">
+            <img src="/logo.svg" alt="DRBI" class="drbi-logo" />
+          </a>
+          <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+        <div class="topbar-right">
+          <div class="admin-actions">
+            <button class="btn-icon" title="Notifications">
+              <span>🔔</span>
+            </button>
+            <button class="btn-icon" title="Settings">
+              <span>⚙️</span>
+            </button>
+            <div class="user-menu">
+              <button class="user-menu-toggle">
+                <span class="user-avatar">👤</span>
+                <span class="user-name">{user?.name || "Admin"}</span>
+                <span class="dropdown-arrow">▼</span>
+              </button>
+              <div class="user-dropdown absolute top-full right-0 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[160px] opacity-0 invisible transform -translate-y-2 transition-all duration-200 z-[1000]">
+                <a href="/admin/profile" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors first:rounded-t-lg">Profile</a>
+                <a href="/admin/settings" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">Settings</a>
+                <hr class="border-0 border-t border-gray-200 my-1" />
+                <a href="#" id="logoutLink" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors last:rounded-b-lg">Logout</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-
-<div class="flex">
-  <SideBar user={user} />  <!-- Admin Sidebar  -->
-  <slot />  <!-- Main Admin Content -->
-</div>
-
-
-<!-- <Footer margin={footerMargin} /> -->
+      <!-- Page Content -->
+      <div class="admin-content">
+        <slot />
+      </div>
+    </main>
+  </div>
 </body>
 </html>
+
+<style is:global>
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Only reset margin on elements that don't have utility classes */
+*:not([class*="m-"]):not([class*="mx-"]):not([class*="my-"]):not([class*="ml-"]):not([class*="mr-"]):not([class*="mt-"]):not([class*="mb-"]) {
+  margin: 0;
+}
+
+/* Only reset padding on elements that don't have utility classes */
+*:not([class*="p-"]):not([class*="px-"]):not([class*="py-"]):not([class*="pl-"]):not([class*="pr-"]):not([class*="pt-"]):not([class*="pb-"]) {
+  padding: 0;
+}
+
+.admin-body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  line-height: 1.5;
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevents overflow */
+  transition: all 0.3s ease;
+}
+
+/* Mobile: sidebar doesn't affect main content layout (overlay mode) */
+@media (max-width: 767px) {
+  .admin-main {
+    width: 100%;
+  }
+}
+
+.admin-topbar {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 2rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Mobile responsive topbar padding - more aggressive fix */
+@media (max-width: 768px) {
+  .admin-topbar {
+    padding: 0 1.5rem !important;
+  }
+}
+
+/* Extra specificity to force padding */
+.admin-layout .admin-main .admin-topbar {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+@media (max-width: 768px) {
+  .admin-layout .admin-main .admin-topbar {
+    padding: 0 2rem !important;
+  }
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-left: 0.5rem;
+}
+
+.drbi-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  margin-right: 0.5rem;
+}
+
+.drbi-logo {
+  height: 40px;
+  width: auto;
+  transition: opacity 0.2s ease;
+}
+
+.drbi-logo:hover {
+  opacity: 0.8;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: #f1f5f9;
+}
+
+.mobile-menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #64748b;
+  margin: 3px 0;
+  transition: all 0.3s ease;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  padding-right: 0.5rem;
+}
+
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+  font-size: 1.1rem;
+}
+
+.btn-icon:hover {
+  background: #f1f5f9;
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-menu-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.user-menu-toggle:hover {
+  background: #f1f5f9;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-name {
+  font-weight: 500;
+  color: #374151;
+}
+
+.dropdown-arrow {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  transition: transform 0.2s ease;
+}
+
+.user-menu:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.user-menu:hover .user-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.admin-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .admin-content {
+    padding: 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.25rem;
+  }
+  
+  .drbi-logo {
+    height: 32px;
+  }
+}
+
+/* Keep only essential layout styles - custom component styles have been replaced with Tailwind */
+</style>
+
+<script>
+// Mobile menu toggle and sidebar state sync
+document.addEventListener('DOMContentLoaded', function() {
+  const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+  const sidebar = document.getElementById('adminSidebar');
+  const adminMain = document.getElementById('adminMain');
+  
+  // No need for margin sync - flexbox handles layout automatically
+  
+  if (mobileMenuToggle && sidebar) {
+    mobileMenuToggle.addEventListener('click', function() {
+      // Toggle mobile-open class
+      sidebar.classList.toggle('mobile-open');
+      
+      // Toggle overlay
+      const overlay = document.querySelector('.sidebar-overlay') || (() => {
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+        
+        overlay.addEventListener('click', function() {
+          // Close sidebar
+          sidebar.classList.remove('mobile-open');
+          overlay.classList.remove('active');
+        });
+        
+        return overlay;
+      })();
+      
+      overlay.classList.toggle('active');
+    });
+  }
+
+  // Logout functionality
+  const logoutLink = document.getElementById('logoutLink');
+  if (logoutLink) {
+    logoutLink.addEventListener('click', async function(event) {
+      event.preventDefault();
+      try {
+        await fetch('/api/logout');
+        window.location.href = '/';
+      } catch (error) {
+        console.error('Logout failed:', error);
+        // Fallback - redirect anyway
+        window.location.href = '/';
+      }
+    });
+  }
+});
+</script>

@@ -1,0 +1,770 @@
+---
+// src/pages/admin/events/add.astro
+export const prerender = false;
+
+import Layout from '@layouts/AdminLayout.astro';
+import { lucia } from '@lib/auth';
+
+// Authentication check  
+const sessionCookieValue = Astro.cookies.get(lucia.sessionCookieName)?.value;
+const sessionid = sessionCookieValue; // Use the actual JWT token from cookie
+const user = Astro.locals?.user;
+if (!['admin', 'superadmin'].includes(user?.role)) {
+  return Astro.redirect('/admin');
+}
+
+let errorMsg = '';
+let formData = {};
+
+if (Astro.request.method === "POST") {
+  const requestBody = await Astro.request.formData();
+  formData = Object.fromEntries(requestBody);
+
+  // Basic validation
+  if (!formData.title?.trim()) {
+    errorMsg = 'Title is required';
+  } else if (!formData.startDate) {
+    errorMsg = 'Start date is required';
+  } else if (formData.isEventbrite === 'true' && !formData.eventbriteId?.trim()) {
+    errorMsg = 'Eventbrite ID is required for Eventbrite events';
+  } else if (formData.isEventbrite !== 'true' && !formData.registrationUrl?.trim()) {
+    errorMsg = 'Registration URL is required for non-Eventbrite events';
+  } else {
+    // Create event via API
+    try {
+      const eventData = {
+        title: formData.title.trim(),
+        shortDescription: formData.shortDescription?.trim() || '',
+        fullDescription: formData.fullDescription?.trim() || '',
+        startDate: formData.startDate ? new Date(formData.startDate + '-07:00').toISOString() : new Date().toISOString(),
+        endDate: formData.endDate ? new Date(formData.endDate + '-07:00').toISOString() : new Date(formData.startDate + '-07:00').toISOString(),
+        registrationUrl: formData.isEventbrite === 'true' 
+          ? `https://www.eventbrite.com/e/${formData.eventbriteId.trim()}`
+          : formData.registrationUrl.trim(),
+        organizer: formData.organizer?.trim() || 'DRBI',
+        visible: formData.visible !== 'false',
+        featured: formData.featured === 'true',
+        location: formData.onsite === 'true' ? {
+          name: 'Desert Rose Baha\'i Institute',
+          address: '1950 W William Sears Dr',
+          city: 'Eloy',
+          state: 'AZ',
+          zip: '85131'
+        } : {
+          name: 'Online',
+          address: '',
+          city: '',
+          state: '',
+          zip: ''
+        },
+        onsite: formData.onsite === 'true',
+        price: formData.priceValue ? {
+          low: parseFloat(formData.priceValue),
+          high: parseFloat(formData.priceValue),
+          currency: formData.priceCurrency || 'USD'
+        } : null,
+        highlights: formData.highlights ? formData.highlights.split(',').map(h => h.trim()).filter(Boolean) : [],
+        mainImage: formData.mainImage?.trim() || null,
+        teacherImage: formData.teacherImage?.trim() || null,
+        isEventbrite: formData.isEventbrite === 'true',
+        eventbriteId: formData.isEventbrite === 'true' ? formData.eventbriteId?.trim() : null
+      };
+
+      console.log('Sending API request with sessionid:', sessionid);
+      const response = await fetch(new URL('/api/events', Astro.url), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          eventData,
+          sessionid
+        })
+      });
+
+      if (response.ok) {
+        return Astro.redirect('/admin/events?created=true');
+      } else {
+        const errorText = await response.text();
+        errorMsg = `Failed to create event: ${errorText}`;
+      }
+    } catch (error) {
+      errorMsg = `Error creating event: ${error.message}`;
+    }
+  }
+}
+---
+
+<Layout title="Add Event - DRBI Admin">
+  <div class="max-w-4xl mx-auto p-8" data-sessionid={sessionid}>
+    <header class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Add Event</h1>
+      <p class="text-gray-600 mb-4">Create a new event or import from Eventbrite</p>
+      <a href="/admin/events" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">← Back to Events</a>
+    </header>
+
+    {errorMsg && (
+      <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 mb-6">
+        <h3>Error</h3>
+        <p>{errorMsg}</p>
+      </div>
+    )}
+
+    <!-- Quick Eventbrite Import -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 shadow-sm">
+      <h2 class="text-xl font-semibold text-blue-800 mb-4">🎫 Import from Eventbrite</h2>
+      <p class="text-blue-700 mb-4">Have an Eventbrite event ID? Import the event details automatically.</p>
+      <div class="flex gap-4">
+        <input 
+          type="text" 
+          id="eventbriteId" 
+          placeholder="Enter Eventbrite Event ID (e.g., 123456789)"
+          class="flex-1 px-3 py-2 border border-blue-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        />
+        <button 
+          type="button" 
+          id="importEventbrite"
+          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+        >
+          Import Event
+        </button>
+      </div>
+    </div>
+
+    <div class="text-center mb-8">
+      <span class="px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm">OR</span>
+    </div>
+
+    <form method="POST" class="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
+      <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Basic Information</h2>
+        
+        <div class="mb-4">
+          <label for="title" class="block font-medium text-gray-700 mb-1">Event Title *</label>
+          <input 
+            type="text" 
+            id="title" 
+            name="title" 
+            value={formData.title || ''} 
+            required
+            placeholder="Enter event title"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label for="shortDescription" class="block font-medium text-gray-700 mb-1">Short Description</label>
+          <textarea 
+            id="shortDescription" 
+            name="shortDescription" 
+            placeholder="Brief description for listings (optional)"
+            rows="2"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          >{formData.shortDescription || ''}</textarea>
+        </div>
+
+        <div class="mb-4">
+          <label for="fullDescription" class="block font-medium text-gray-700 mb-1">Full Description</label>
+          <textarea 
+            id="fullDescription" 
+            name="fullDescription" 
+            placeholder="Detailed event description (optional)"
+            rows="6"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          >{formData.fullDescription || ''}</textarea>
+        </div>
+      </div>
+
+      <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Date & Time</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label for="startDate" class="block font-medium text-gray-700 mb-1">Start Date & Time *</label>
+            <input 
+              type="datetime-local" 
+              id="startDate" 
+              name="startDate" 
+              value={formData.startDate || ''} 
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="endDate" class="block font-medium text-gray-700 mb-1">End Date & Time</label>
+            <input 
+              type="datetime-local" 
+              id="endDate" 
+              name="endDate" 
+              value={formData.endDate || ''}
+              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <small class="block text-gray-500 text-sm mt-1">Leave blank if same as start date</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Registration & Pricing</h2>
+        
+        <div class="mb-4">
+          <label class="flex items-center">
+            <input 
+              type="checkbox" 
+              id="isEventbrite" 
+              name="isEventbrite" 
+              value="true" 
+              checked={formData.isEventbrite === 'true'}
+              onchange="toggleRegistrationFields()"
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 mr-2"
+            />
+            <span class="font-medium text-gray-700">This is an Eventbrite event</span>
+          </label>
+        </div>
+
+        <div id="eventbriteFields" class="mb-4" style="display: none;">
+          <label for="eventbriteId" class="block font-medium text-gray-700 mb-1">Eventbrite Event ID</label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="eventbriteId" 
+              name="eventbriteId" 
+              value={formData.eventbriteId || ''} 
+              placeholder="1000901030927 or full URL"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+            <button type="button" onclick="importFromEventbrite()" id="importBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors text-sm">
+              📥 Import Data
+            </button>
+          </div>
+          <small class="block text-gray-500 text-sm mt-1">Enter the numeric ID from the Eventbrite URL or paste the full URL. Click "Import Data" to automatically fill in event details.</small>
+          
+          <div id="importStatus" class="flex items-center gap-2 mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md" style="display: none;">
+            <div class="text-blue-600">🔄</div>
+            <span id="importMessage" class="text-blue-800 text-sm">Importing event data...</span>
+          </div>
+          
+          <div id="importSuccess" class="flex items-center gap-2 mt-2 p-3 bg-green-50 border border-green-200 rounded-md" style="display: none;">
+            <div class="text-green-600">✅</div>
+            <span class="text-green-800 text-sm">Event data imported successfully! Review and modify as needed before saving.</span>
+          </div>
+        </div>
+
+        <div id="regularFields" class="mb-4">
+          <label for="registrationUrl" class="block font-medium text-gray-700 mb-1">Registration URL *</label>
+          <input 
+            type="url" 
+            id="registrationUrl" 
+            name="registrationUrl" 
+            value={formData.registrationUrl || ''} 
+            placeholder="https://example.com/register"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+          <small class="block text-gray-500 text-sm mt-1">Where people go to register for this event</small>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label for="priceValue" class="block font-medium text-gray-700 mb-1">Price</label>
+            <input 
+              type="number" 
+              id="priceValue" 
+              name="priceValue" 
+              value={formData.priceValue || ''} 
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label for="priceCurrency" class="block font-medium text-gray-700 mb-1">Currency</label>
+            <select id="priceCurrency" name="priceCurrency" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+              <option value="USD" selected>USD</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Location</h2>
+        
+        <div class="mb-4">
+          <label class="flex items-center">
+            <input 
+              type="checkbox" 
+              name="onsite" 
+              value="true" 
+              checked={formData.onsite !== 'false'}
+              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 mr-2"
+            />
+            <span class="font-medium text-gray-700">Onsite (Desert Rose Baha'i Institute)</span>
+          </label>
+          <small class="block text-gray-500 text-sm mt-1">Check if event is held at Desert Rose. Leave unchecked for online events.</small>
+        </div>
+      </div>
+
+      <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Images</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label for="mainImage" class="block font-medium text-gray-700 mb-1">Main Event Image</label>
+            <input 
+              type="file" 
+              id="mainImageFile" 
+              accept="image/*"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer cursor-pointer"
+            />
+            <input 
+              type="hidden" 
+              id="mainImage" 
+              name="mainImage" 
+              value={formData.mainImage || ''}
+            />
+            <div id="mainImagePreview" class="mt-2 p-2 border border-gray-200 rounded-md bg-gray-50" style="display: none;">
+              <img id="mainImagePreviewImg" src="" alt="Main image preview" class="w-full h-32 object-cover rounded" />
+              <button type="button" onclick="removeImage('mainImage')" class="mt-2 px-2 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">× Remove</button>
+            </div>
+            <small class="block text-gray-500 text-sm mt-1">Upload the main event image (recommended: 2000x1000px)</small>
+          </div>
+
+          <div class="mb-4">
+            <label for="teacherImage" class="block font-medium text-gray-700 mb-1">Teacher/Speaker Image</label>
+            <input 
+              type="file" 
+              id="teacherImageFile" 
+              accept="image/*"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer cursor-pointer"
+            />
+            <input 
+              type="hidden" 
+              id="teacherImage" 
+              name="teacherImage" 
+              value={formData.teacherImage || ''}
+            />
+            <div id="teacherImagePreview" class="mt-2 p-2 border border-gray-200 rounded-md bg-gray-50" style="display: none;">
+              <img id="teacherImagePreviewImg" src="" alt="Teacher image preview" class="w-full h-32 object-cover rounded" />
+              <button type="button" onclick="removeImage('teacherImage')" class="mt-2 px-2 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">× Remove</button>
+            </div>
+            <small class="block text-gray-500 text-sm mt-1">Upload the teacher/speaker image (recommended: square format)</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Additional Details</h2>
+        
+        <div class="mb-4">
+          <label for="organizer" class="block font-medium text-gray-700 mb-1">Organizer</label>
+          <input 
+            type="text" 
+            id="organizer" 
+            name="organizer" 
+            value={formData.organizer || 'DRBI'} 
+            placeholder="DRBI"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label for="highlights" class="block font-medium text-gray-700 mb-1">Highlights</label>
+          <input 
+            type="text" 
+            id="highlights" 
+            name="highlights" 
+            value={formData.highlights || ''} 
+            placeholder="In person, 2 days, Virtual (separate with commas)"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+          <small class="block text-gray-500 text-sm mt-1">Separate multiple highlights with commas</small>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="mb-4">
+            <label class="flex items-center">
+              <input 
+                type="checkbox" 
+                name="visible" 
+                value="true" 
+                checked={formData.visible !== 'false'}
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 mr-2"
+              />
+              <span class="font-medium text-gray-700">Visible (show on website)</span>
+            </label>
+          </div>
+
+          <div class="mb-4">
+            <label class="flex items-center">
+              <input 
+                type="checkbox" 
+                name="featured" 
+                value="true" 
+                checked={formData.featured === 'true'}
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 mr-2"
+              />
+              <span class="font-medium text-gray-700">Featured event</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-4 mt-8">
+        <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors">
+          ✅ Create Event
+        </button>
+        <a href="/admin/events" class="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+
+
+  <script>
+    // Session ID for API calls
+    const sessionid = document.querySelector('[data-sessionid]')?.dataset?.sessionid || 'NO_SESSION';
+    
+    // Eventbrite import functionality
+    document.getElementById('importEventbrite')?.addEventListener('click', async function() {
+      const eventbriteId = document.getElementById('eventbriteId').value.trim();
+      if (!eventbriteId) {
+        alert('Please enter an Eventbrite Event ID');
+        return;
+      }
+      
+      const button = this;
+      const originalText = button.textContent;
+      button.textContent = 'Importing...';
+      button.disabled = true;
+      
+      try {
+        const response = await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'import-eventbrite',
+            eventbriteId: eventbriteId,
+            sessionid: sessionid
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.eventData) {
+          const eventData = result.eventData;
+          
+          // Populate form fields with imported data
+          if (eventData.name) document.getElementById('title').value = eventData.name;
+          if (eventData.shortDescription) document.getElementById('shortDescription').value = eventData.shortDescription;
+          if (eventData.fullDescription) document.getElementById('fullDescription').value = eventData.fullDescription;
+          if (eventData.startDate) {
+            const startDate = new Date(eventData.startDate);
+            document.getElementById('startDate').value = startDate.toISOString().slice(0, 16);
+          }
+          if (eventData.endDate) {
+            const endDate = new Date(eventData.endDate);
+            document.getElementById('endDate').value = endDate.toISOString().slice(0, 16);
+          }
+          if (eventData.organizer) document.getElementById('organizer').value = eventData.organizer;
+          if (eventData.price && eventData.price.low) document.getElementById('priceValue').value = eventData.price.low;
+          if (eventData.highlights) document.getElementById('highlights').value = eventData.highlights.join(', ');
+          
+          // Set as Eventbrite event
+          document.getElementById('isEventbrite').checked = true;
+          document.getElementById('eventbriteIdField').value = eventbriteId;
+          
+          // Set registration URL
+          document.getElementById('registrationUrl').value = `https://www.eventbrite.com/e/${eventbriteId}`;
+          
+          alert('Event imported successfully! Review the details below and submit to save.');
+          
+          // Scroll to form
+          document.querySelector('form').scrollIntoView({ behavior: 'smooth' });
+          
+        } else {
+          alert(result.error || 'Failed to import event. Please check the Event ID and try again.');
+        }
+      } catch (error) {
+        console.error('Import error:', error);
+        alert('Error importing event. Please try again.');
+      } finally {
+        button.textContent = originalText;
+        button.disabled = false;
+      }
+    });
+
+    // Image upload functionality
+    function setupImageUpload(inputId, hiddenId, previewId) {
+      const fileInput = document.getElementById(inputId);
+      const hiddenInput = document.getElementById(hiddenId);
+      const preview = document.getElementById(previewId);
+      const previewImg = document.getElementById(previewId + 'Img');
+
+      if (!fileInput) return;
+
+      fileInput.addEventListener('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+          console.log('🔄 Starting upload process for file:', file.name);
+          // Convert file to base64
+          const reader = new FileReader();
+          reader.onload = async function(event) {
+            console.log('📊 File converted to base64, starting S3 upload...');
+            const base64Data = event.target.result;
+            
+            // Upload to S3
+            const s3Key = `events/manual-${Date.now()}-${inputId === 'mainImageFile' ? 'main' : 'teacher'}.${file.name.split('.').pop()}`;
+            
+            const response = await fetch('/api/upload_s3', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                filedata: base64Data.split(',')[1],
+                s3key: s3Key,
+                sessionid: sessionid
+              })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              console.log('📦 S3 response data:', data);
+              
+              if (data.s3url) {
+                console.log('✅ S3 URL received:', data.s3url);
+                
+                // Set the S3 URL in hidden input
+                hiddenInput.value = data.s3url;
+                console.log('💾 Hidden input updated:', hiddenInput.value);
+                
+                // Show preview with imgix thumbnail
+                const imgixUrl = `https://drbi.imgix.net${data.s3url.replace('https://drbi.s3.amazonaws.com', '')}?w=200&h=150&fit=crop&auto=format,compress&q=75`;
+                console.log('🖼️ Setting preview image:', imgixUrl);
+                console.log('🔍 Preview elements:', { previewImg: !!previewImg, preview: !!preview });
+                
+                if (previewImg) {
+                  previewImg.src = imgixUrl;
+                  console.log('🎯 Preview img src set');
+                } else {
+                  console.error('❌ Preview img element not found!');
+                }
+                
+                if (preview) {
+                  preview.style.display = 'block';
+                  console.log('👁️ Preview div made visible');
+                } else {
+                  console.error('❌ Preview div element not found!');
+                }
+                
+                console.log('🎉 Preview should now be visible!');
+              } else {
+                throw new Error('No S3 URL returned');
+              }
+            } else {
+              const errorText = await response.text();
+              console.error('❌ Upload failed:', response.status, errorText);
+              throw new Error('Upload failed');
+            }
+          };
+          reader.readAsDataURL(file);
+        } catch (error) {
+          console.error('Upload error:', error);
+          alert('Failed to upload image: ' + error.message);
+        }
+      });
+    }
+
+    // Remove image function
+    function removeImage(type) {
+      const hiddenInput = document.getElementById(type);
+      const preview = document.getElementById(type + 'Preview');
+      const fileInput = document.getElementById(type + 'File');
+      
+      hiddenInput.value = '';
+      preview.style.display = 'none';
+      fileInput.value = '';
+    }
+
+    // Make removeImage globally available
+    window.removeImage = removeImage;
+
+    // Import event data from Eventbrite
+    async function importFromEventbrite() {
+      const eventbriteIdInput = document.getElementById('eventbriteId');
+      const importBtn = document.getElementById('importBtn');
+      const importStatus = document.getElementById('importStatus');
+      const importSuccess = document.getElementById('importSuccess');
+      const importMessage = document.getElementById('importMessage');
+
+      let eventbriteInput = eventbriteIdInput.value.trim();
+      if (!eventbriteInput) {
+        alert('Please enter an Eventbrite ID or URL');
+        return;
+      }
+
+      // Extract ID from URL if a full URL was provided
+      let eventbriteId = eventbriteInput;
+      if (eventbriteInput.includes('eventbrite.com')) {
+        const match = eventbriteInput.match(/(?:registration|tickets|e)[-\/](\d+)/);
+        if (match) {
+          eventbriteId = match[1];
+        } else {
+          alert('Could not extract event ID from URL');
+          return;
+        }
+      }
+
+      // Update UI to show loading
+      importBtn.disabled = true;
+      importBtn.textContent = '⏳ Importing...';
+      importStatus.style.display = 'flex';
+      importSuccess.style.display = 'none';
+      importMessage.textContent = 'Fetching event data from Eventbrite...';
+
+      try {
+        const response = await fetch('/api/events/import-eventbrite', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ eventbriteId })
+        });
+
+        const result = await response.json();
+
+        if (result.success && result.eventData) {
+          const eventData = result.eventData;
+          
+          // Populate form fields with imported data
+          if (eventData.title) document.getElementById('title').value = eventData.title;
+          if (eventData.shortDescription) document.getElementById('shortDescription').value = eventData.shortDescription;
+          if (eventData.fullDescription) document.getElementById('fullDescription').value = eventData.fullDescription;
+          if (eventData.startDate) document.getElementById('startDate').value = eventData.startDate.split('T')[0];
+          if (eventData.startTime) document.getElementById('startTime').value = eventData.startTime;
+          if (eventData.endDate) document.getElementById('endDate').value = eventData.endDate.split('T')[0];
+          if (eventData.endTime) document.getElementById('endTime').value = eventData.endTime;
+          if (eventData.organizer) document.getElementById('organizer').value = eventData.organizer;
+          if (eventData.price && eventData.price.low) document.getElementById('priceValue').value = eventData.price.low;
+          if (eventData.highlights) document.getElementById('highlights').value = eventData.highlights.join(', ');
+
+          // Update the eventbrite ID field with the clean ID
+          eventbriteIdInput.value = eventbriteId;
+
+          // Show success message
+          importStatus.style.display = 'none';
+          importSuccess.style.display = 'flex';
+
+          console.log('Event data imported:', eventData);
+        } else {
+          throw new Error(result.error || 'Failed to import event data');
+        }
+      } catch (error) {
+        console.error('Import error:', error);
+        importMessage.textContent = `Error importing event: ${error.message}`;
+        setTimeout(() => {
+          importStatus.style.display = 'none';
+        }, 3000);
+      } finally {
+        // Reset button
+        importBtn.disabled = false;
+        importBtn.textContent = '📥 Import Data';
+      }
+    }
+
+    // Make importFromEventbrite globally available
+    window.importFromEventbrite = importFromEventbrite;
+
+    // Toggle registration fields based on Eventbrite checkbox
+    function toggleRegistrationFields() {
+      const isEventbrite = document.getElementById('isEventbrite').checked;
+      const eventbriteFields = document.getElementById('eventbriteFields');
+      const regularFields = document.getElementById('regularFields');
+      const registrationUrl = document.getElementById('registrationUrl');
+      const eventbriteId = document.getElementById('eventbriteId');
+      
+      if (isEventbrite) {
+        eventbriteFields.style.display = 'block';
+        regularFields.style.display = 'none';
+        registrationUrl.required = false;
+        eventbriteId.required = true;
+      } else {
+        eventbriteFields.style.display = 'none';
+        regularFields.style.display = 'block';
+        registrationUrl.required = true;
+        eventbriteId.required = false;
+      }
+    }
+
+    // Make toggleRegistrationFields globally available
+    window.toggleRegistrationFields = toggleRegistrationFields;
+
+    // Make setupImageUpload globally available
+    window.setupImageUpload = setupImageUpload;
+
+    // Initialize image upload handlers and form state
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 DOM loaded, initializing image upload...');
+      
+      // Clear file inputs to prevent browser caching issues
+      const mainImageFile = document.getElementById('mainImageFile');
+      const teacherImageFile = document.getElementById('teacherImageFile');
+      if (mainImageFile) mainImageFile.value = '';
+      if (teacherImageFile) teacherImageFile.value = '';
+      
+      console.log('📸 Setting up image upload handlers...');
+      setupImageUpload('mainImageFile', 'mainImage', 'mainImagePreview');
+      setupImageUpload('teacherImageFile', 'teacherImage', 'teacherImagePreview');
+      console.log('✅ Image upload handlers ready');
+      
+      // Initialize registration fields visibility
+      toggleRegistrationFields();
+      
+      // Set default times and auto-calculate end dates
+      setupDateTimeDefaults();
+    });
+    
+    // Function to set up date/time defaults and auto-calculation
+    function setupDateTimeDefaults() {
+      const startDateInput = document.getElementById('startDate');
+      const endDateInput = document.getElementById('endDate');
+      
+      // Set default times to 4:00 PM if fields are empty
+      if (startDateInput && !startDateInput.value) {
+        // Get today's date with 4:00 PM time
+        const today = new Date();
+        const defaultStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 0); // 4:00 PM
+        startDateInput.value = formatDateTimeLocal(defaultStart);
+        
+        // Set end date to next day, same time
+        const defaultEnd = new Date(defaultStart);
+        defaultEnd.setDate(defaultEnd.getDate() + 1);
+        endDateInput.value = formatDateTimeLocal(defaultEnd);
+      }
+      
+      // Auto-update end date when start date changes
+      startDateInput?.addEventListener('change', function() {
+        if (this.value && endDateInput) {
+          const startDate = new Date(this.value);
+          const endDate = new Date(startDate);
+          endDate.setDate(endDate.getDate() + 1); // Add one day
+          endDateInput.value = formatDateTimeLocal(endDate);
+        }
+      });
+    }
+    
+    // Helper function to format date for datetime-local input
+    function formatDateTimeLocal(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+  </script>
+</Layout>

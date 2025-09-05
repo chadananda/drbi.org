@@ -1,0 +1,325 @@
+---
+export const prerender = false;
+
+import AdminLayout from '@layouts/AdminLayout.astro';
+
+const user = Astro.locals.user;
+
+// Simulate tags data (in a real app, this would come from content analysis)
+const tags = [
+  { id: 'unity', name: 'Unity', count: 15, color: '#3b82f6' },
+  { id: 'service', name: 'Service', count: 12, color: '#10b981' },
+  { id: 'justice', name: 'Justice', count: 8, color: '#f59e0b' },
+  { id: 'prayer', name: 'Prayer', count: 10, color: '#8b5cf6' },
+  { id: 'education', name: 'Education', count: 6, color: '#ef4444' },
+  { id: 'community', name: 'Community', count: 14, color: '#06b6d4' },
+  { id: 'devotional', name: 'Devotional', count: 5, color: '#84cc16' },
+  { id: 'children', name: 'Children', count: 7, color: '#f97316' },
+  { id: 'youth', name: 'Youth', count: 9, color: '#ec4899' },
+  { id: 'consultation', name: 'Consultation', count: 4, color: '#6366f1' }
+];
+
+// Handle form submissions
+let actionMessage = '';
+let actionError = '';
+
+if (Astro.request.method === 'POST') {
+  try {
+    const formData = await Astro.request.formData();
+    const action = formData.get('action');
+    
+    if (action === 'create') {
+      const tagName = formData.get('tagName');
+      const tagColor = formData.get('tagColor');
+      actionMessage = `Tag "${tagName}" created successfully!`;
+    } else if (action === 'delete') {
+      const tagId = formData.get('tagId');
+      actionMessage = `Tag deleted successfully!`;
+    } else if (action === 'edit') {
+      const tagName = formData.get('tagName');
+      actionMessage = `Tag "${tagName}" updated successfully!`;
+    }
+  } catch (error) {
+    console.error('Error handling tag action:', error);
+    actionError = 'An error occurred. Please try again.';
+  }
+}
+---
+
+<AdminLayout title="Tags Management" user={user}>
+  <div class="max-w-6xl mx-auto px-6 py-6">
+    <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Tags Management</h1>
+        <p class="text-gray-600">Organize content with tags and keywords</p>
+      </div>
+      <div>
+        <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2" onclick="openCreateModal()">
+          <span>➕</span> Create Tag
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {actionMessage && (
+    <div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 mb-6">
+      <strong>Success!</strong> {actionMessage}
+    </div>
+  )}
+
+  {actionError && (
+    <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 mb-6">
+      <strong>Error!</strong> {actionError}
+    </div>
+  )}
+
+  <!-- Tags Overview -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900">All Tags ({tags.length})</h3>
+      <div class="flex gap-3">
+        <input type="search" placeholder="Search tags..." class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="tagSearch">
+        <select class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" id="tagSort">
+          <option value="name">Sort by Name</option>
+          <option value="count">Sort by Usage</option>
+          <option value="recent">Sort by Recent</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="tagsGrid">
+      {tags.map(tag => (
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow" data-name={tag.name.toLowerCase()} data-count={tag.count}>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <div class="w-4 h-4 rounded-full" style={`background-color: ${tag.color}`}></div>
+              <h4 class="font-medium text-gray-900">{tag.name}</h4>
+            </div>
+            <div class="flex gap-1">
+              <button class="p-1 text-gray-600 hover:text-blue-600 transition-colors" onclick={`editTag('${tag.id}', '${tag.name}', '${tag.color}')`} title="Edit">
+                ✏️
+              </button>
+              <button class="p-1 text-gray-600 hover:text-red-600 transition-colors" onclick={`deleteTag('${tag.id}', '${tag.name}')`} title="Delete">
+                🗑️
+              </button>
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-sm">
+            <span class="text-gray-600">{tag.count} posts</span>
+            <span class="text-gray-500 font-mono">#{tag.id}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  <!-- Tag Analytics -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Tag Analytics</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-gray-50 rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-blue-600 mb-2">{tags.length}</div>
+        <div class="text-sm text-gray-600 font-medium">Total Tags</div>
+      </div>
+      <div class="bg-gray-50 rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-green-600 mb-2">{Math.max(...tags.map(t => t.count))}</div>
+        <div class="text-sm text-gray-600 font-medium">Most Used</div>
+      </div>
+      <div class="bg-gray-50 rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-purple-600 mb-2">{tags.reduce((sum, t) => sum + t.count, 0)}</div>
+        <div class="text-sm text-gray-600 font-medium">Total Usage</div>
+      </div>
+      <div class="bg-gray-50 rounded-xl p-6 text-center">
+        <div class="text-3xl font-bold text-orange-600 mb-2">{Math.round(tags.reduce((sum, t) => sum + t.count, 0) / tags.length)}</div>
+        <div class="text-sm text-gray-600 font-medium">Avg Usage</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Popular Tags -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Most Popular Tags</h3>
+    <div class="space-y-3">
+      {tags
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+        .map(tag => (
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3 flex-1">
+              <div class="w-3 h-3 rounded-full" style={`background-color: ${tag.color}`}></div>
+              <span class="font-medium text-gray-900">{tag.name}</span>
+            </div>
+            <div class="flex-1 bg-gray-200 rounded-full h-2 mx-4">
+              <div 
+                class="h-2 rounded-full" 
+                style={`width: ${(tag.count / Math.max(...tags.map(t => t.count))) * 100}%; background-color: ${tag.color}`}
+              ></div>
+            </div>
+            <span class="text-sm text-gray-600 font-medium w-12 text-right">{tag.count}</span>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- Create/Edit Tag Modal -->
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center" id="tagModal">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900" id="modalTitle">Create New Tag</h3>
+        <button class="text-gray-400 hover:text-gray-600 text-xl font-bold" onclick="closeModal()">&times;</button>
+      </div>
+      <form method="POST" id="tagForm">
+        <input type="hidden" name="action" id="formAction" value="create">
+        <input type="hidden" name="tagId" id="tagId">
+        
+        <div class="mb-4">
+          <label for="tagName" class="block text-sm font-medium text-gray-700 mb-2">Tag Name</label>
+          <input type="text" id="tagName" name="tagName" required maxlength="50" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        
+        <div class="mb-4">
+          <label for="tagColor" class="block text-sm font-medium text-gray-700 mb-2">Tag Color</label>
+          <div class="flex gap-2">
+            <input type="color" id="tagColor" name="tagColor" value="#3b82f6" class="w-12 h-10 border border-gray-300 rounded cursor-pointer">
+            <input type="text" id="tagColorText" placeholder="#3b82f6" pattern="^#[0-9A-Fa-f]{6}$" class="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+        
+        <div class="mb-6">
+          <label for="tagDescription" class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+          <textarea id="tagDescription" name="tagDescription" rows="3" placeholder="Brief description of when to use this tag..." class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+        </div>
+        
+        <div class="flex gap-3 justify-end">
+          <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors" onclick="closeModal()">Cancel</button>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors" id="submitBtn">Create Tag</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center" id="deleteModal">
+    <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold text-gray-900">Delete Tag</h3>
+        <button class="text-gray-400 hover:text-gray-600 text-xl font-bold" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="mb-6">
+        <p class="text-gray-700 mb-2">Are you sure you want to delete the tag "<strong id="deleteTagName"></strong>"?</p>
+        <p class="text-sm text-red-600">This action cannot be undone. The tag will be removed from all posts.</p>
+      </div>
+      <form method="POST" id="deleteForm">
+        <input type="hidden" name="action" value="delete">
+        <input type="hidden" name="tagId" id="deleteTagId">
+        
+        <div class="flex gap-3 justify-end">
+          <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors" onclick="closeDeleteModal()">Cancel</button>
+          <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">Delete Tag</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</AdminLayout>
+
+
+<script>
+function openCreateModal() {
+  document.getElementById('modalTitle').textContent = 'Create New Tag';
+  document.getElementById('formAction').value = 'create';
+  document.getElementById('submitBtn').textContent = 'Create Tag';
+  document.getElementById('tagForm').reset();
+  document.getElementById('tagColor').value = '#3b82f6';
+  document.getElementById('tagColorText').value = '#3b82f6';
+  document.getElementById('tagModal').classList.remove('hidden');
+  document.getElementById('tagModal').classList.add('flex');
+}
+
+function editTag(id, name, color) {
+  document.getElementById('modalTitle').textContent = 'Edit Tag';
+  document.getElementById('formAction').value = 'edit';
+  document.getElementById('submitBtn').textContent = 'Update Tag';
+  document.getElementById('tagId').value = id;
+  document.getElementById('tagName').value = name;
+  document.getElementById('tagColor').value = color;
+  document.getElementById('tagColorText').value = color;
+  document.getElementById('tagModal').classList.remove('hidden');
+  document.getElementById('tagModal').classList.add('flex');
+}
+
+function deleteTag(id, name) {
+  document.getElementById('deleteTagName').textContent = name;
+  document.getElementById('deleteTagId').value = id;
+  document.getElementById('deleteModal').classList.remove('hidden');
+  document.getElementById('deleteModal').classList.add('flex');
+}
+
+function closeModal() {
+  document.getElementById('tagModal').classList.add('hidden');
+  document.getElementById('tagModal').classList.remove('flex');
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.add('hidden');
+  document.getElementById('deleteModal').classList.remove('flex');
+}
+
+// Color input synchronization
+document.getElementById('tagColor').addEventListener('change', function() {
+  document.getElementById('tagColorText').value = this.value;
+});
+
+document.getElementById('tagColorText').addEventListener('input', function() {
+  if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) {
+    document.getElementById('tagColor').value = this.value;
+  }
+});
+
+// Search functionality
+document.getElementById('tagSearch').addEventListener('input', function() {
+  const query = this.value.toLowerCase();
+  const cards = document.querySelectorAll('.tag-card');
+  
+  cards.forEach(card => {
+    const name = card.getAttribute('data-name');
+    if (name.includes(query)) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+});
+
+// Sort functionality
+document.getElementById('tagSort').addEventListener('change', function() {
+  const sortBy = this.value;
+  const grid = document.getElementById('tagsGrid');
+  const cards = Array.from(grid.children);
+  
+  cards.sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
+    } else if (sortBy === 'count') {
+      return parseInt(b.getAttribute('data-count')) - parseInt(a.getAttribute('data-count'));
+    }
+    return 0;
+  });
+  
+  cards.forEach(card => grid.appendChild(card));
+});
+
+// Close modals when clicking outside
+document.getElementById('tagModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeModal();
+  }
+});
+
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeDeleteModal();
+  }
+});
+</script>

@@ -11,6 +11,7 @@ import {
   getAllPostsByType,
   searchPosts 
 } from '../../utils/cms-utils.js';
+import { lucia } from "../../lib/auth";
 
 export const prerender = false;
 
@@ -77,30 +78,53 @@ async function handleGet(request) {
 }
 
 /**
- * Handle POST requests - Create new post
+ * Handle POST requests - Multiple operations
  */
 async function handlePost(request) {
   try {
-    const postData = await request.json();
+    const requestData = await request.json();
+    const { action, sessionid } = requestData;
     
-    // Validate required fields
-    if (!postData.title || !postData.content) {
-      return new Response(JSON.stringify({ error: 'Title and content are required' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    // Authentication required for write operations
+    if (!sessionid) {
+      return new Response('Session ID required', { status: 401 });
     }
-
-    const result = await createPost(postData);
     
-    return new Response(JSON.stringify({ 
-      success: true, 
-      message: 'Post created successfully',
-      ...result
-    }), {
-      status: 201,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    const { user } = await lucia.validateSession(sessionid);
+    if (!user || !['superadmin', 'admin', 'editor', 'author'].includes(user.role)) {
+      return new Response('Unauthorized', { status: 403 });
+    }
+    
+    switch (action) {
+      case 'create':
+        return await handleCreatePost(requestData);
+        
+      case 'delete':
+        return await handleDeletePost(requestData);
+        
+      case 'duplicate':
+        return await handleDuplicatePost(requestData);
+        
+      default:
+        // Legacy create post (no action specified)
+        if (!requestData.title || !requestData.content) {
+          return new Response(JSON.stringify({ error: 'Title and content are required' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+        
+        const result = await createPost(requestData);
+        
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: 'Post created successfully',
+          ...result
+        }), {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' }
+        });
+    }
   } catch (error) {
     console.error('POST /api/posts error:', error);
     
@@ -122,6 +146,112 @@ async function handlePost(request) {
   }
 }
 
+// Handle create post action
+async function handleCreatePost(requestData) {
+  const { title, content } = requestData;
+  
+  if (!title || !content) {
+    return new Response(JSON.stringify({ error: 'Title and content are required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  
+  const result = await createPost(requestData);
+  
+  return new Response(JSON.stringify({ 
+    success: true, 
+    message: 'Post created successfully',
+    ...result
+  }), {
+    status: 201,
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
+// Handle delete post action
+async function handleDeletePost(requestData) {
+  const { postId } = requestData;
+  
+  if (!postId) {
+    return new Response(JSON.stringify({ error: 'Post ID is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  
+  const result = await deletePostById(postId);
+  
+  if (result.success) {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: 'Post deleted successfully',
+      ...result
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } else {
+    return new Response(JSON.stringify({ 
+      success: false, 
+      error: result.error || 'Failed to delete post' 
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Handle duplicate post action
+async function handleDuplicatePost(requestData) {
+  const { postId } = requestData;
+  
+  if (!postId) {
+    return new Response(JSON.stringify({ error: 'Post ID is required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  
+  try {
+    // Read original post
+    const originalPost = await readPostById(postId);
+    if (!originalPost) {
+      return new Response(JSON.stringify({ error: 'Original post not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Create duplicate with modified title
+    const duplicateData = {
+      ...originalPost.frontmatter,
+      title: `${originalPost.frontmatter.title} (Copy)`,
+      slug: `${originalPost.frontmatter.slug || originalPost.frontmatter.title.toLowerCase().replace(/\s+/g, '-')}-copy`,
+      content: originalPost.content,
+      draft: true // Always create duplicates as drafts
+    };
+    
+    const result = await createPost(duplicateData);
+    
+    return new Response(JSON.stringify({ 
+      success: true, 
+      message: 'Post duplicated successfully',
+      newPostId: result.id,
+      ...result
+    }), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Error duplicating post:', error);
+    return new Response(JSON.stringify({ error: 'Failed to duplicate post' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
 /**
  * Handle PUT requests - Update existing post
  */
@@ -137,8 +267,20 @@ async function handlePut(request) {
       });
     }
 
-    const updates = await request.json();
-    const result = await updatePostById(id, updates);
+    const requestData = await request.json();
+    const { sessionid } = requestData;
+    
+    // Authentication required
+    if (!sessionid) {
+      return new Response('Session ID required', { status: 401 });
+    }
+    
+    const { user } = await lucia.validateSession(sessionid);
+    if (!user || !['superadmin', 'admin', 'editor', 'author'].includes(user.role)) {
+      return new Response('Unauthorized', { status: 403 });
+    }
+
+    const result = await updatePostById(id, requestData);
     
     if (result.success) {
       return new Response(JSON.stringify({ 
@@ -186,12 +328,23 @@ async function handleDelete(request) {
   try {
     const url = new URL(request.url);
     const id = url.searchParams.get('id');
+    const sessionid = url.searchParams.get('sessionid');
     
     if (!id) {
       return new Response(JSON.stringify({ error: 'Post ID is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
+    }
+
+    // Authentication required
+    if (!sessionid) {
+      return new Response('Session ID required', { status: 401 });
+    }
+    
+    const { user } = await lucia.validateSession(sessionid);
+    if (!user || !['superadmin', 'admin', 'editor'].includes(user.role)) {
+      return new Response('Unauthorized', { status: 403 });
     }
 
     const result = await deletePostById(id);

@@ -2,12 +2,10 @@
 export const prerender = false;
 export const ssr = true;
 
-import { lucia } from '@lib/auth';
+import { lucia, adminUser } from '@lib/auth';
 import { Argon2id } from "oslo/password";
 import Layout from "@layouts/Layout.astro";
-// Legacy Astro DB import - temporarily disabled during migration
-// import { db, Users, eq } from 'astro:db';
-import { seedSuperUser, logoutUser } from '@utils/utils';
+import { logoutUser } from '@utils/utils';
 
 
 // let thisUser = Astro.locals?.user;
@@ -20,7 +18,6 @@ if (Astro.locals?.user) {
 } else console.log('No user session found', Astro.locals);
 
 
-await seedSuperUser();
 // Setup for error messaging
 let errorMsg = '';
 
@@ -38,28 +35,31 @@ if (Astro.request.method === "POST") {
   if (!isValidPassword) console.error('Invalid password!',);
 
    if (!errorMsg) try {
-      // user email and hashed password match
-      // seedSuperUser();
-      const user = (await db.select().from(Users).where(eq(Users.email, email)))[0];
-      if (!user) {
-       console.log('Failed to load user from: ', email);
-        let users = await db.select().from(Users);
-        console.error('all users: ', JSON.stringify(users));
-      }
-      // console.log('Validating user login:', user, user?.hashed_password);
-      const isValidUser = !!user && (await new Argon2id().verify(user?.hashed_password, password));
-      // console.log(isValidUser ? "Valid user "+JSON.stringify(user, null, 2) : "not valid user");
-      // console.log(password);
-      // if valid user found, create session and redirect to admin
-      if (isValidUser) {
+      // Validate against environment variables (single admin user)
+      const envEmail = import.meta.env.SITE_ADMIN_EMAIL?.trim().toLowerCase();
+      const envPassword = import.meta.env.SITE_ADMIN_PASS?.trim();
+      
+      if (!envEmail || !envPassword) {
+        console.error('Missing SITE_ADMIN_EMAIL or SITE_ADMIN_PASS environment variables');
+        errorMsg = 'Server configuration error.';
+      } else if (email === envEmail && password === envPassword) {
+        // Valid admin credentials - create session
         await logoutUser(Astro);
-        const session = await lucia.createSession(user.id, {role: 'visitor'});
-        // console.log('Session', !!session ? "session created" : "session not created");
-        const sessionCookie = lucia.createSessionCookie(session.id);
-        // console.log('Cookie', sessionCookie ? "cookie created" : "cookie not created");
-        Astro.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
+        const session = await lucia.createSession(adminUser.id, { role: 'superadmin' });
+        console.log('Session created successfully');
+        
+        // Set JWT token directly as session cookie (session.id is the JWT token)
+        Astro.cookies.set(lucia.sessionCookieName, session.id, {
+          httpOnly: true,
+          secure: import.meta.env.APP_ENV !== 'dev',
+          sameSite: 'lax',
+          path: '/',
+          expires: session.expiresAt
+        });
         return Astro.redirect('/admin', 303);
-      } else errorMsg = 'Invalid email or password.';
+      } else {
+        errorMsg = 'Invalid email or password.';
+      }
 
     } catch (error) {
         console.error('Authentication error:', error);

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collapsible Sidebar Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { font-family: sans-serif; }
+        
+        .admin-layout { 
+            display: flex; 
+            min-height: 100vh; 
+        }
+        
+        /* Sidebar styles */
+        .admin-sidebar {
+            width: 288px;
+            height: 100vh;
+            background: white;
+            color: #374151;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-right: 1px solid #e5e7eb;
+            position: relative;
+            z-index: 1000;
+        }
+
+        /* Mobile: fixed positioning and hidden by default */
+        @media (max-width: 767px) {
+            .admin-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+            
+            .admin-sidebar.mobile-open {
+                transform: translateX(0);
+            }
+        }
+
+        /* Desktop collapsed state */
+        @media (min-width: 768px) {
+            .admin-sidebar.collapsed {
+                width: 70px;
+            }
+            
+            .admin-sidebar.collapsed h2,
+            .admin-sidebar.collapsed .nav-text,
+            .admin-sidebar.collapsed .user-details {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+            }
+            
+            .admin-sidebar.collapsed .nav-icon {
+                margin: 0 auto;
+            }
+        }
+        
+        .admin-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            transition: all 0.3s ease;
+        }
+
+        /* Mobile: sidebar doesn't affect main content layout (overlay mode) */
+        @media (max-width: 767px) {
+            .admin-main {
+                width: 100%;
+            }
+        }
+        
+        .admin-topbar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        @media (max-width: 767px) {
+            .admin-topbar {
+                padding: 0 1rem !important;
+            }
+        }
+        
+        /* Force padding on mobile */
+        @media (max-width: 400px) {
+            .admin-topbar {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .desktop-menu-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        @media (max-width: 767px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+            .desktop-menu-toggle {
+                display: none;
+            }
+        }
+        
+        .mobile-menu-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: #64748b;
+            margin: 3px 0;
+        }
+        
+        .admin-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+        
+        @media (max-width: 767px) {
+            .admin-content {
+                padding: 1rem;
+            }
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+        
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            margin: 0 0.5rem;
+            color: #6b7280;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .nav-item:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .nav-icon {
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.75rem;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        @media (max-width: 767px) {
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <h2 style="font-size: 1.25rem; font-weight: 600; color: #111827; transition: all 0.3s ease;">DRBI Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📝</span>
+                    <span class="nav-text">Content</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">📅</span>
+                    <span class="nav-text">Events</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">💬</span>
+                    <span class="nav-text">Comments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <span class="nav-icon">🖼️</span>
+                    <span class="nav-text">Media</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <main class="admin-main" id="adminMain">
+            <header class="admin-topbar">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <button class="desktop-menu-toggle" id="desktopMenuToggle">☰</button>
+                    <h1 style="font-size: 1.5rem; font-weight: 600;">Dashboard</h1>
+                </div>
+                <div>DRBI Admin</div>
+            </header>
+            
+            <div class="admin-content">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; color: white;">
+                    <h1 style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">DRBI Content Management System</h1>
+                    <p style="opacity: 0.9;">File-based content management for drbi.org</p>
+                    <p style="opacity: 0.8; font-size: 0.9rem; margin-top: 0.5rem;">This is a collapsible sidebar test. On desktop, click the ☰ button to collapse the sidebar and watch the content area expand. On mobile, the sidebar becomes an overlay.</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                    <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <h3 style="color: #6366f1; font-weight: 600; margin-bottom: 0.5rem;">Total Posts</h3>
+                        <div style="font-size: 2rem; font-weight: bold; color: #1f2937;">48</div>
+                        <p style="color: #6b7280; font-size: 0.875rem;">This content should expand when sidebar collapses</p>
+                    </div>
+                    <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <h3 style="color: #ec4899; font-weight: 600; margin-bottom: 0.5rem;">Memorial Posts</h3>
+                        <div style="font-size: 2rem; font-weight: bold; color: #1f2937;">42</div>
+                        <p style="color: #6b7280; font-size: 0.875rem;">Watch this area grow when collapsing!</p>
+                    </div>
+                    <div style="background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <h3 style="color: #10b981; font-weight: 600; margin-bottom: 0.5rem;">News Articles</h3>
+                        <div style="font-size: 2rem; font-weight: bold; color: #1f2937;">12</div>
+                        <p style="color: #6b7280; font-size: 0.875rem;">Flexbox layout responds to sidebar width</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const desktopMenuToggle = document.getElementById('desktopMenuToggle');
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            // Mobile menu toggle
+            if (mobileMenuToggle && sidebar) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('mobile-open');
+                    overlay.classList.toggle('active');
+                });
+            }
+            
+            // Desktop menu toggle (collapse)
+            if (desktopMenuToggle && sidebar) {
+                desktopMenuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+            
+            // Overlay click to close mobile menu
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('mobile-open');
+                    overlay.classList.remove('active');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -5,7 +5,18 @@
       "mcp__claude-context__search_code",
       "mcp__puppeteer__puppeteer_navigate",
       "WebFetch(domain:drbi.org)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:www.eventbrite.com)",
+      "WebFetch(domain:idratherbewriting.com)",
+      "WebFetch(domain:www.eventbriteapi.com)",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_evaluate",
+      "mcp__puppeteer__puppeteer_fill",
+      "mcp__puppeteer__puppeteer_click",
+      "WebFetch(domain:www.youtube.com)",
+      "WebFetch(domain:docs.astro.build)",
+      "WebFetch(domain:posthog.com)",
+      "Read(/tmp/**)"
     ],
     "deny": [],
     "ask": []

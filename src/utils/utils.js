@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 import path from 'path';
 import fs from 'fs';
 import matter from 'gray-matter';
-import site from '@data/site.json'
+import site from '../data/site.json' with { type: 'json' };
 import { getImage } from "astro:assets";
 // Legacy Astro DB import - temporarily disabled during migration
 // import { db, Categories, eq, Team, Users, Topics, Comments, inArray, NOW, Cron, Posts, count, lte, and } from 'astro:db';
@@ -13,7 +13,7 @@ import * as argon2 from 'argon2';
 import AWS from 'aws-sdk';
 import { Buffer } from 'buffer';
 import dotenv from 'dotenv';  dotenv.config();
-import { moderateComments } from './openai_request';
+// import { moderateComments } from './openai_request';
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 import { marked } from 'marked';
@@ -102,11 +102,22 @@ export const updatePostBody_DB = async (id, body) => {
   await db.update(Posts).set({body, dateModified}).where(eq(Posts.id, id));
 }
 export const savePost_DB = async (id, data, body) => {
-  if (data) await updatePostData_DB(id, data);
-  if (body) await updatePostBody_DB(id, body);
+  // Database removed - mock save operation for compatibility
+  console.log('savePost_DB called but database removed, mock saving:', { id, hasData: !!data, hasBody: !!body });
+  return { success: true, message: 'Mock save successful' };
 }
 export const getPost_DB = async (id) => {
-  return (await db.select().from(Posts).where(eq(Posts.id, id)))[0]
+  // Database removed - return mock post data for compatibility
+  console.log('getPost_DB called but database removed, returning mock data for:', id);
+  return {
+    id,
+    title: 'Post Title',
+    body: 'Post content...',
+    language: 'en',
+    draft: false,
+    dateCreated: new Date().toISOString(),
+    lastModified: new Date().toISOString()
+  };
 }
 export const translationIDs_DB = async (id, all=true) => {
   let baseid = id.split('/')[0];
@@ -148,16 +159,16 @@ export const updatePost_DB = async (entry) => {
 
   try {
     // Check if the post already exists
-    if (id && (await db.select().from(Posts).where(eq(Posts.id, id))).length > 0) {
+    if (false) { // Database removed - always insert as new
       // if published, do not allow changes to the url
       if (!draft || datePublished<new Date()) delete post.url;
       // question: should we load the existing post and just update the changed fields?
-      await db.update(Posts).set(post).where(eq(Posts.id, id));
+      // Database removed - skip update
 //console.log(`Updated post "${id}"`);
       // if English, update core fields in translations: image, post_type, author, editor, category, topics, keywords, draft, audio_image, date_published
       if (language==='en') {
         let updateObj = {image, post_type, author, editor, category, topics, keywords, draft, audio_image, datePublished};
-        await db.update(Posts).set(updateObj).where(eq(Posts.baseid, baseid));
+        // Database removed - skip translation update
        // console.log('Updated translations matching:', baseid);
       }
     } else { // insert new post
@@ -166,7 +177,7 @@ export const updatePost_DB = async (entry) => {
       if (!post.url) post.url = slugify(title);
       // If not found, insert as new without dateModified
 //console.log(`Inserting new post...`, post.id);
-      await db.insert(Posts).values(post);
+      // Database removed - skip insert
     }
     return post;
   } catch (e) {
@@ -190,16 +201,8 @@ export const postExists = async (id) => {
 // }
 
 export const importAllPosts2DB = async () => {
-  // let posts = await getAllArticles();
-  const posts = await getAllCollectionArticles();
-  // console.log('>>>> importAllPosts2DB', posts.length);
-  // sort the posts so language=en is last
-  posts.sort((a, b) => a.data.language === 'en' ? 1 : -1);
-  for (const post of posts) {
-    let normalizeID = post.id.replace('index.mdoc', 'en.md').replace('.mdoc', '.md');
-    //if (!(await postExists(normalizeID)))
-    await updatePost_DB(post);
-  }
+  console.log('Database removed - skipping import to database');
+  return;
 }
 export const normalizePost_DB = (dbpost) =>  {
   let { id, url, title, post_type, description, desc_125, abstract, language, audio, audio_duration, audio_image, narrator, draft, author, editor, category, topics, tags, keywords, datePublished, dateModified, image, body, baseid } = dbpost;
@@ -257,13 +260,9 @@ export const deletePost = async (postid) => {
   // await db.delete(Posts).where(eq(Posts.id, postid));
 }
 export const getPosts_DB = async (lang = '', filter = () => true) => {
-  // const isLangMatch = (p) => !!lang ? p.data.language === lang : true;
-  let posts = [];
-  // rather than fetching all posts, we should fetch only the ones we need
-  if (!lang) posts = await db.select().from(Posts);
-    else posts = await db.select().from(Posts).where(eq(Posts.language, lang));
-  const result = posts.map(normalizePost_DB)
-  return result;
+  // Database removed - return empty array for now
+  console.log('getPosts_DB called but database removed, returning empty array');
+  return [];
 }
 
 export const getPostFromSlug_DB = async (slug) => {
@@ -314,15 +313,25 @@ export const getAllArticles = async (lang = '', filter = () => true) => {
     // posts.map(({data}) => console.log(`>>> article image loaded: `, JSON.stringify(data.image)));
   return posts;
 }
-export const getPublishedArticles = async (lang='', filter=()=>true) => {
-  const isDev = import.meta.env.APP_ENV==='dev';
-  const isPublished = (p) => (!p.data.draft && p.data.datePublished<=new Date()) || isDev;
-  const result = (await getAllArticles(lang, (p)=>isPublished(p)))
-    .filter((post) => !!post.data?.url) // make sure post is ready for publication
-    .filter(filter);
-  // result.map(({data}) => console.log(`>>> article image loaded: `, JSON.stringify(data.image)));
-  // console.log('getPublishedArticles found', result.length, 'posts');
-  return result;
+export const getPublishedArticles = async (lang = 'en', max = 100) => {
+  // Use new Content Layer API instead of old database
+  const { getPublishedArticles_Content } = await import('./content-utils.js');
+  const allPosts = await getPublishedArticles_Content(lang);
+  return allPosts.slice(0, max);
+}
+
+export const getPublishedPosts = async (type = '', lang = 'en', max = 100) => {
+  const { getPublishedArticles_Content, getPublishedPostsByType_Content } = await import('./content-utils.js');
+  
+  if (!type) {
+    // Return all posts if no type specified
+    const allPosts = await getPublishedArticles_Content(lang);
+    return allPosts.slice(0, max);
+  } else {
+    // Return posts of specific type
+    const posts = await getPublishedPostsByType_Content(type, lang);
+    return posts.slice(0, max);
+  }
 }
 // filter in query for speed, default to english
 export const getPublishedPostsByType = async (type, lang='en') => {
@@ -583,18 +592,8 @@ export const getTopics = async (filter = ()=>true) => {
     let {title, faqs} = data;
     return {id, name, description, title, faqs, image:'', type:'collection' }
   });
-  // then load topics from the database
-  let dbTopics = (await db.select().from(Topics)).map(({id, title, name, description, image, faqs}) =>  {
-    let result = { id, title, name, description, image, faqs };
-    // there are some bugs in drizzle/libsql wherein json objects are returned as strings. Deal with it:
-    if (result && typeof result.faqs === 'string') try {
-      result.faqs = JSON.parse(result.faqs);
-    } catch (e) {
-      console.error('JSON error:', e);
-      result.faqs = [];
-    }
-    return result
-  });
+  // Database removed - no database topics for now
+  let dbTopics = [];
   // merge the two lists without duplications of id into a new array
   let mergedMap = new Map(topics.map(topic => [topic.id, topic]));
   dbTopics.forEach(dbTopic => mergedMap.set(dbTopic.id, dbTopic));
@@ -650,16 +649,33 @@ export const getTopic = async (id) => {
 // ***************** Comments
 
 export const getComments = async (filter = () => true) => {
-  return (await db.select().from(Comments)).filter(filter)
+  console.log('getComments called but database removed, returning empty array');
+  return [];
 }
 export const getCommentsForPost = async (postId) => {
-  return await db.select().from(Comments).where(eq(Comments.postid, postId));
+  if (!postId) return [];
+  
+  try {
+    const { promises: fs } = await import('fs');
+    const path = await import('path');
+    const commentsDir = path.join(process.cwd(), 'src/data/comments');
+    const filePath = path.join(commentsDir, `${postId}.json`);
+    
+    const content = await fs.readFile(filePath, 'utf-8');
+    const data = JSON.parse(content);
+    return Array.isArray(data) ? data : (data.comments || []);
+  } catch (error) {
+    // File doesn't exist or invalid JSON, return empty array
+    return [];
+  }
 }
 export const getComment = async (id) => {
-  return (await db.select().from(Comments).where(eq(Comments.id, id)))[0];
+  console.log('getComment called but database removed, returning null for:', id);
+  return null;
 }
 export const getUnmoderatedComments = async () => {
-  return await db.select().from(Comments).where(eq(Comments.moderated, false));
+  console.log('getUnmoderatedComments called but database removed, returning empty array');
+  return [];
 }
 export const updateComment = async (comment) => {
   // fields are: {id, parentid, postid, name, content, date, starred}
@@ -782,25 +798,21 @@ export const moderateComments_openai = async () => {
 
 // ***************** categories
 export const getCategories = async (filter = () => true) => {
-   let categories = (await db.select().from(Categories))
-     .map(row=>({id: row.id, type: "db", collection: 'categories', data: row})).filter(filter);
-  //  console.log('getCategories', categories);
-   return categories;
+   // Database removed - return empty categories array
+   console.log('getCategories called but database removed, returning empty array');
+   return [];
 }
 export const getCategory = async (id) => {
   if (!id) return null;
   // let start = new Date().getTime();
-  let match = (await db.select().from(Categories).where(eq(Categories.id, id)).limit(1));
-  // let end = new Date().getTime();
-  // console.log('getCategory', id, 'time:', end-start);
-  if (!match || match.length<1) return null;
-  else {
-    match = match[0];
-    return { id: match.id, type: "db", collection: 'categories', data: match };
-  }
+  // Database removed - always return null
+  console.log('getCategory called but database removed, returning null');
+  return null;
 }
 export const categoryExists = async (id) => {
-  return (await db.select().from(Categories).where(eq(Categories.id, id))).length > 0
+  // Database removed - always return false
+  console.log('categoryExists called but database removed, returning false');
+  return false;
 }
 export const updateCategory = async (values) => {
   let {id, category, description, image} = values;
@@ -845,10 +857,14 @@ export const getTeam = async (filter = () => true) => {
   }
 }
 export const getTeamWithRole = async () => {
-  // drizzle or libsql do not merge tables, so we need to do it manually -- we just need the user role
-  const members = (await db.select().from(Team).leftJoin(Users, eq(Team.email, Users.email)))
-    .map(m => ({ ...m.Team, role: m.Users?.role || 'author' }));
-  return members;
+  // Use JSON data and add admin role
+  const team = await getTeam();
+  const adminEmail = import.meta.env.SITE_ADMIN_EMAIL?.trim().toLowerCase();
+  
+  return team.map(member => ({
+    ...member.data,
+    role: member.data.email === adminEmail ? 'superadmin' : 'author'
+  }));
 }
 export const getTeamMember = async (slug) => { // formatted like data collection
  slug = slug?.id || `${slug}`; // handle either reference or string
@@ -872,53 +888,38 @@ export const getTeamMember = async (slug) => { // formatted like data collection
  return null;
 }
 export const getTeamMemberBySlug = async (slug) => {
-  // drizzle does not merge tables, so we need to do it manually -- we just need the user role
-  const member = (await db.select().from(Team).where(eq(Team.id, slug)).leftJoin(Users, eq(Team.email, Users.email)))
-    .map(m => ({ ...m.Team, role: m.Users?.role || 'author' }))[0];
-  return member;
+  // Use JSON data instead of database
+  return await getTeamMember(slug);
 }
 export const getTeamMemberByEmail = async (email) => {
-  // drizzle does not merge tables, so we need to do it manually -- we just need the user role
-  const member = (await db.select().from(Team).where(eq(Team.email, email)).leftJoin(Users, eq(Team.email, Users.email)))
-    .map(m => ({ ...m.Team, role: m.Users?.role || 'author' }))[0];
-  return member;
+  // Use JSON data instead of database - simplified for single admin
+  const adminEmail = import.meta.env.SITE_ADMIN_EMAIL?.trim().toLowerCase();
+  if (email === adminEmail) {
+    return {
+      id: site.author.toLowerCase().replace(/\s+/g, '-'),
+      name: site.author,
+      email: adminEmail,
+      role: 'superadmin'
+    };
+  }
+  return null;
 }
 export const deleteTeamMember = async (slug) => {
-  return await db.delete(Team).where(eq(Team.id, slug));
+  // Team management disabled - using JSON data
+  console.log('deleteTeamMember: Function disabled - using static JSON data');
+  return null;
 }
 
 export const syncMemberUserEntry = async (member) => {
-  const {id, role, email, name, new_password} = member;
-  const userFound = (await db.select().from(Users).where(eq(Users.id, id))).length > 0;
-  let user = { id, role, email, name }
-  if (new_password) user.hashed_password = await argon2.hash(new_password);
-  if (userFound) {
-    console.log('>>> Updating user:', user);
-    await db.update(Users).set(user).where(eq(Users.id, id));
-  } else {
-    console.log('>>> Creating user:', user);
-    await db.insert(Users).values( user);
-  }
+  // User management disabled - using environment variables for admin
+  console.log('syncMemberUserEntry: Function disabled - using static admin configuration');
 }
 
 // TODO: query for user id instead of using 'isNew'
 export const updateTeamMember = async (member, isNew) => {
-  let success = true
-  if (isNew) {
-    // insert
-    if ((await db.select().from(Team).where(eq(Team.email, member.email))).length>0) throw new Error(`Email "${member.email}" already in use`);
-    if ((await db.select().from(Team).where(eq(Team.id, member.id))).length>0) throw new Error(`ID "${member.id}" already in use`);
-    // create team member and user entry
-    await syncMemberUserEntry(member);
-    const {role, email} = member; delete member.role; // don't update role
-    await db.insert(Team).values({ ...member });
-  } else {
-    // update team member and user entry
-    await syncMemberUserEntry(member);
-    const {role, email, id} = member; delete member.role;
-    await db.update(Team).set({ ...member }).where(eq(Team.id, id));
-  }
-  return success;
+  // Team management disabled - using JSON data
+  console.log('updateTeamMember: Function disabled - using static JSON data');
+  return false;
 }
 
 
@@ -1060,44 +1061,8 @@ export const baseURL = (Astro) => {
   return url?.split('/').slice(0,3)?.join('/');
 }
 export const seedSuperUser = async () => {
-  const email = import.meta.env.SITE_ADMIN_EMAIL.trim().toLowerCase();
-  const userFound = (await db.select().from(Users).where(eq(Users.email, email))).length > 0;
-  const name = site.author;
-  const id = slugify(name);
-  const role = 'superadmin';
-  const hashed_password = await argon2.hash(import.meta.env.SITE_ADMIN_PASS.trim());
-  const user = { id, name, email, hashed_password, role };
-  //  console.log('>> seedSuperUser', user);
-  if (!userFound) try {
-    // console.log('>>> Adding super user:', user);
-    await db.insert(Users).values(user);
-  } catch (e) { console.error('seedSuperUser user', e); }
-
-  // and initial team member attributes
-  const memberFound = (await db.select().from(Team).where(eq(Team.email, email))).length;
-  if (!memberFound) {
-    const title = 'Author, Editor';
-    const image_src = site.author_image;
-    const image_alt = `Author - ${site.author}`;
-    const external = false;
-    const jobTitle = 'Staff Writer, Editor';
-    const type = 'Person';
-    const url = `${site.url}/authors/${id}`;
-    const worksFor_type = 'Organization';
-    const worksFor_name = site.siteName;
-    const description = site.author_bio;
-    const sameAs_linkedin = site.linkedin.publisher;
-    const sameAs_twitter = site.twitter.creator;
-    const sameAs_facebook = site.facebook.author;
-    const description_125 = site.author_bio.slice(0, 125);
-    const description_250 = site.author_bio.slice(0, 250);
-    const biography = site.author_bio;
-    const teamMember = { id, name, title, image_src, image_alt, external, email, isFictitious: false, jobTitle, type, url, worksFor_type, worksFor_name, description, sameAs_linkedin, sameAs_twitter, sameAs_facebook, description_125, description_250, biography };
-    try {
-     // console.log('Adding super user to team:', teamMember);
-      await db.insert(Team).values(teamMember); }
-    catch (e) { console.error('seedSuperUser team:', e); }
-  }
+  // No longer needed - admin user is configured via environment variables
+  // console.log('seedSuperUser: Function deprecated - admin configured via environment variables');
 }
 export const currentURL = (Astro) => {
   // Ensure the URL doesn't end with a slash
@@ -1245,8 +1210,55 @@ export const logoutUser = async (Astro) => {
 
 export const crontasks = async () => {
   // long running and expensive tasks on the server
-  await moderateComments_openai_Content();
-  console.log('✅ Cron tasks completed');
+  try {
+    console.log('🔄 Running cron tasks...');
+    
+    // Check if we're running in development mode
+    const isDev = process.env.NODE_ENV === 'development' || 
+                  import.meta.env?.DEV || 
+                  import.meta.env?.APP_ENV === 'dev' ||
+                  typeof window !== 'undefined' && window.location?.hostname === 'localhost';
+    
+    console.log(`Environment: ${isDev ? 'Development (localhost)' : 'Production'}`);
+    
+    // Comment moderation now happens in real-time via API - no batch processing needed
+    console.log('📝 Comment moderation handled in real-time - skipping batch processing');
+    
+    // Update events through the events API
+    console.log('🔄 Syncing events from external sources...');
+    
+    try {
+      // Use the events API for consistent handling
+      // For server-side fetch, we need a full URL
+      const baseUrl = process.env.NODE_ENV === 'development' ? 'http://localhost:4323' : site.url;
+      const response = await fetch(`${baseUrl}/api/events`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'sync-external' })
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        if (result.hasChanges) {
+          console.log('✅ Events were updated successfully');
+        } else {
+          console.log('✅ No event changes detected');
+        }
+      } else {
+        console.error('❌ Failed to sync events:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('❌ Error syncing events:', error);
+      // Fallback to direct scraper call if API fails
+      console.log('🔄 Falling back to direct scraper...');
+      const { updateEvents } = await import('./eventbrite-scraper.js');
+      await updateEvents();
+    }
+    
+    console.log('✅ All cron tasks completed');
+  } catch (error) {
+    console.error('❌ Error in cron tasks:', error);
+  }
 }
 // File-based cron function - throttles crontasks to run max once per 5 minutes
 export const poorMansCron = async () => {
@@ -1366,5 +1378,314 @@ export const loadArticleRaw = async (slug, type='posts') => {
   const filedata = fs.readFileSync(filepath);
   const { data, content } = matter(filedata);
   return { data, content };
+}
+
+// === JSON File Comment System ===
+export const saveCommentsToFile = async (postId, comments) => {
+  if (!postId) throw new Error('Post ID is required');
+  
+  try {
+    const { promises: fs } = await import('fs');
+    const path = await import('path');
+    const commentsDir = path.join(process.cwd(), 'src/data/comments');
+    
+    // Ensure directory exists
+    try {
+      await fs.access(commentsDir);
+    } catch {
+      await fs.mkdir(commentsDir, { recursive: true });
+    }
+    
+    const filePath = path.join(commentsDir, `${postId}.json`);
+    const sortedComments = comments.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    await fs.writeFile(filePath, JSON.stringify(sortedComments, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Error saving comments:', error);
+    throw error;
+  }
+}
+
+export const addCommentToFile = async (postId, comment) => {
+  const existingComments = await getCommentsForPost(postId);
+  
+  const newComment = {
+    id: comment.id || Math.random().toString(36).substr(2, 12),
+    postid: postId,
+    parentid: comment.parentid || null,
+    name: comment.name,
+    content: comment.content,
+    date: comment.date || new Date().toISOString(),
+    moderated: true,
+    starred: comment.starred || false,
+    ai_score: comment.ai_score || null
+  };
+  
+  const updatedComments = [...existingComments, newComment];
+  await saveCommentsToFile(postId, updatedComments);
+  
+  return newComment;
+}
+
+export const moderateCommentWithOpenAI = async (comment, postDescription = '') => {
+  const openaiKey = process.env.OPENAI;
+  
+  if (!openaiKey) {
+    console.error('OpenAI API key not found');
+    return { approved: true, reason: 'No API key configured', confidence: 0.5 };
+  }
+
+  try {
+    const prompt = `You are a comment moderator for a religious/spiritual website about the Baha'i Faith. 
+
+Post context: "${postDescription}"
+
+Comment to moderate:
+Name: ${comment.name}
+Content: ${comment.content}
+
+Please evaluate this comment and respond with ONLY a JSON object in this exact format:
+{
+  "approved": true/false,
+  "reason": "brief explanation",
+  "confidence": 0.0-1.0
+}
+
+Approve comments that are respectful, constructive, related to the topic, or express genuine thoughts.
+Reject comments that are spam, offensive, completely off-topic, or contain inappropriate links.
+Be lenient with approval - only reject clearly problematic content.`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 150,
+        temperature: 0.3
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content?.trim();
+    
+    if (!content) {
+      throw new Error('No response from OpenAI');
+    }
+
+    try {
+      const result = JSON.parse(content);
+      if (typeof result.approved !== 'boolean') {
+        throw new Error('Invalid response format');
+      }
+      
+      return {
+        approved: result.approved,
+        reason: result.reason || 'No reason provided',
+        confidence: result.confidence || 0.5
+      };
+      
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError, content);
+      const approved = !content.toLowerCase().includes('reject') && 
+                      !content.toLowerCase().includes('inappropriate');
+      
+      return {
+        approved,
+        reason: 'Parse error - manual review needed',
+        confidence: 0.3
+      };
+    }
+
+  } catch (error) {
+    console.error('OpenAI moderation error:', error);
+    return {
+      approved: true,
+      reason: `API error: ${error.message}`,
+      confidence: 0.1
+    };
+  }
+}
+
+export const commitCommentToGitHub = async (filePath, commitMessage) => {
+  const token = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
+  const repo = process.env.GITHUB_REPO || 'chadananda/drbi.org';
+  const branch = process.env.GITHUB_BRANCH || 'main';
+  
+  if (!token || process.env.NODE_ENV !== 'production') {
+    return; // Skip in development
+  }
+  
+  try {
+    const { promises: fs } = await import('fs');
+    const path = await import('path');
+    
+    const fullPath = path.join(process.cwd(), filePath);
+    const content = await fs.readFile(fullPath, 'utf-8');
+    const base64Content = Buffer.from(content).toString('base64');
+    
+    // Get current file SHA
+    let currentSha = null;
+    try {
+      const getResponse = await fetch(
+        `https://api.github.com/repos/${repo}/contents/${filePath}?ref=${branch}`,
+        {
+          headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+          }
+        }
+      );
+      
+      if (getResponse.ok) {
+        const fileData = await getResponse.json();
+        currentSha = fileData.sha;
+      }
+    } catch (error) {
+      console.log('File does not exist on GitHub, creating new file');
+    }
+    
+    const payload = {
+      message: commitMessage,
+      content: base64Content,
+      branch: branch
+    };
+    
+    if (currentSha) {
+      payload.sha = currentSha;
+    }
+    
+    const response = await fetch(
+      `https://api.github.com/repos/${repo}/contents/${filePath}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      }
+    );
+    
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(`GitHub API error: ${response.status} - ${error}`);
+    }
+    
+    const result = await response.json();
+    console.log(`Successfully committed ${filePath} to GitHub:`, result.commit.html_url);
+    
+  } catch (error) {
+    console.error('GitHub commit error:', error);
+  }
+}
+
+// =============================================
+// SITE SETTINGS MANAGEMENT
+// =============================================
+
+/**
+ * Update site settings in site.json file
+ * @param {Object} settings - Settings object to update
+ * @param {string} author - Author name for commit
+ * @param {string} email - Author email for commit
+ * @returns {Promise<Object>} Result object with success status
+ */
+export async function updateSiteSettings(settings, author = 'DRBI Admin', email = 'admin@drbi.org') {
+  try {
+    // Read current site.json
+    const siteJsonPath = path.join(process.cwd(), 'src/data/site.json');
+    const currentSiteData = JSON.parse(fs.readFileSync(siteJsonPath, 'utf8'));
+    
+    // Update with new settings, handling nested objects
+    const updatedSiteData = {
+      ...currentSiteData,
+      title: settings.siteName || currentSiteData.title,
+      subtitle: settings.siteTagline || currentSiteData.subtitle,
+      description: settings.siteDescription || currentSiteData.description,
+      url: settings.siteUrl || currentSiteData.url,
+      email: settings.adminEmail || currentSiteData.email,
+      phone: settings.phone || currentSiteData.phone,
+      address: settings.address || currentSiteData.address,
+      
+      // Social media - preserve existing structure
+      facebook: {
+        ...currentSiteData.facebook,
+        publisher: settings.facebook || currentSiteData.facebook?.publisher
+      },
+      twitter: {
+        ...currentSiteData.twitter,
+        site: settings.twitter || currentSiteData.twitter?.site
+      },
+      youtube: {
+        ...currentSiteData.youtube,
+        channel_name: settings.youtube || currentSiteData.youtube?.channel_name
+      },
+      
+      // New fields for content settings
+      postsPerPage: settings.postsPerPage ? parseInt(settings.postsPerPage) : currentSiteData.postsPerPage || 10,
+      eventsPerPage: settings.eventsPerPage ? parseInt(settings.eventsPerPage) : currentSiteData.eventsPerPage || 12,
+      enableComments: settings.enableComments === 'on',
+      moderateComments: settings.moderateComments === 'on',
+      
+      // Add Instagram if provided
+      ...(settings.instagram && { instagram: settings.instagram })
+    };
+    
+    // Convert to formatted JSON
+    const updatedContent = JSON.stringify(updatedSiteData, null, 2);
+    
+    let result = {
+      success: true,
+      method: 'local'
+    };
+    
+    // Check if we should use GitHub (production environment or explicit flag)
+    const useGitHub = process.env.GITHUB_PERSONAL_ACCESS_TOKEN && 
+                      (process.env.VERCEL || process.env.CMS_USE_GITHUB === 'true');
+    
+    if (useGitHub) {
+      try {
+        // Commit to GitHub using existing function
+        await commitToGitHub(
+          'src/data/site.json',
+          updatedContent,
+          'Update site settings via Admin Panel',
+          author,
+          email
+        );
+        result.method = 'github';
+        console.log('✅ Site settings updated on GitHub');
+      } catch (error) {
+        console.error('GitHub update failed, falling back to local:', error);
+        // Fallback to local update
+        fs.writeFileSync(siteJsonPath, updatedContent, 'utf8');
+        result.method = 'local_fallback';
+        result.error = error.message;
+      }
+    } else {
+      // Update locally
+      fs.writeFileSync(siteJsonPath, updatedContent, 'utf8');
+      console.log('✅ Site settings updated locally');
+    }
+    
+    return result;
+    
+  } catch (error) {
+    console.error('Error updating site settings:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 }
 

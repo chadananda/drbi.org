@@ -62,11 +62,11 @@ export default defineConfig({
   // markdown: {
   //   remarkPlugins: [remarkAttr],
   // },
-  output: 'static',
+  output: 'static', // Static by default, use prerender: false for SSR pages
   site: site.url,
   adapter: vercel({
     imageService: false,
-    webAnalytics: { enabled: true }
+    webAnalytics: { enabled: false } // Disabled to prevent console errors in dev
   }),
   integrations: [
     // { hooks: { 'astro:server:setup': ({ app }) => {  app.use(authMiddleware);  },}, },
@@ -100,7 +100,9 @@ export default defineConfig({
     server: {
       watch: {
         ignored: ['**/node_modules/**', '**/.vscode/**', '**/.vercel/**', '**/dist/**', '**/public/**', '**/.astro/**', '.env', '.git', '.DS_Store', '.aider.chat.history.md', '.aider*','src/content/topics/*', 'src/content/categories/*', 'src/content/faqs/*',
-        ]
+        ],
+        // Explicitly watch content JSON files
+        include: ['src/content/events/**/*.json', 'src/content/**/*.md']
       },
       logLevel: 'info'
     }

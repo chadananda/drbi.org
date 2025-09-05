@@ -1,0 +1,299 @@
+---
+export const prerender = false;
+
+import AdminLayout from '@layouts/AdminLayout.astro';
+
+const user = Astro.locals.user;
+
+// Simulate log entries (in a real app, these would come from log files or database)
+const logEntries = [
+  {
+    id: 1,
+    timestamp: new Date(Date.now() - 1000 * 60 * 5),
+    level: 'info',
+    message: 'User admin logged in from 127.0.0.1',
+    category: 'auth'
+  },
+  {
+    id: 2,
+    timestamp: new Date(Date.now() - 1000 * 60 * 15),
+    level: 'info',
+    message: 'Eventbrite sync completed successfully - 19 events processed',
+    category: 'sync'
+  },
+  {
+    id: 3,
+    timestamp: new Date(Date.now() - 1000 * 60 * 30),
+    level: 'warning',
+    message: 'Comment moderation took longer than expected (3.2s)',
+    category: 'comments'
+  },
+  {
+    id: 4,
+    timestamp: new Date(Date.now() - 1000 * 60 * 45),
+    level: 'error',
+    message: 'Failed to upload image to S3: Access denied',
+    category: 'media'
+  },
+  {
+    id: 5,
+    timestamp: new Date(Date.now() - 1000 * 60 * 60),
+    level: 'info',
+    message: 'New article created: "Understanding Baha\'i Principles"',
+    category: 'content'
+  },
+  {
+    id: 6,
+    timestamp: new Date(Date.now() - 1000 * 60 * 75),
+    level: 'info',
+    message: 'Scheduled backup completed successfully',
+    category: 'system'
+  }
+];
+
+function formatTimestamp(date) {
+  return date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+---
+
+<AdminLayout title="System Logs" user={user}>
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 mb-2">System Logs</h1>
+    <p class="text-gray-600">Monitor system activity and troubleshoot issues</p>
+  </div>
+
+  <!-- Log Filters -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-6">
+    <div class="flex flex-wrap gap-4 items-end">
+      <div class="flex flex-col">
+        <label for="logLevel" class="text-sm font-medium text-gray-700 mb-2">Log Level:</label>
+        <select id="logLevel" class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="all">All Levels</option>
+          <option value="error">Error</option>
+          <option value="warning">Warning</option>
+          <option value="info">Info</option>
+          <option value="debug">Debug</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="logCategory" class="text-sm font-medium text-gray-700 mb-2">Category:</label>
+        <select id="logCategory" class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="all">All Categories</option>
+          <option value="auth">Authentication</option>
+          <option value="content">Content</option>
+          <option value="media">Media</option>
+          <option value="sync">Synchronization</option>
+          <option value="comments">Comments</option>
+          <option value="system">System</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="dateRange" class="text-sm font-medium text-gray-700 mb-2">Date Range:</label>
+        <select id="dateRange" class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <option value="today">Today</option>
+          <option value="week">Last 7 days</option>
+          <option value="month">Last 30 days</option>
+          <option value="all">All time</option>
+        </select>
+      </div>
+
+      <div class="flex gap-2">
+        <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors" onclick="clearFilters()">Clear Filters</button>
+        <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2" onclick="refreshLogs()">🔄 Refresh</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Entries -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Log Entries</h3>
+      <div class="flex gap-2">
+        <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2" onclick="exportLogs()">📥 Export</button>
+        <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2" onclick="clearLogs()">🗑️ Clear Old Logs</button>
+      </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm max-h-96 overflow-y-auto">
+      <div id="logEntries">
+        {logEntries.map(entry => (
+          <div class={`flex flex-wrap items-center gap-4 py-2 border-b border-gray-700 last:border-b-0 ${
+            entry.level === 'error' ? 'text-red-400' :
+            entry.level === 'warning' ? 'text-yellow-400' :
+            entry.level === 'info' ? 'text-green-400' :
+            'text-gray-400'
+          }`} data-level={entry.level} data-category={entry.category}>
+            <div class="text-gray-500 text-xs">
+              {formatTimestamp(entry.timestamp)}
+            </div>
+            <div>
+              <span class={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                entry.level === 'error' ? 'bg-red-900 text-red-200' :
+                entry.level === 'warning' ? 'bg-yellow-900 text-yellow-200' :
+                entry.level === 'info' ? 'bg-green-900 text-green-200' :
+                'bg-gray-700 text-gray-200'
+              }`}>
+                {entry.level.toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-900 text-blue-200">{entry.category}</span>
+            </div>
+            <div class="flex-1 text-white">
+              {entry.message}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+      <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Previous</button>
+      <span class="text-sm text-gray-600">Showing 1-6 of 6 entries</span>
+      <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
+    </div>
+  </div>
+
+  <!-- Log Statistics -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Log Statistics (Last 24 Hours)</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="text-center">
+        <div class="text-3xl font-bold text-red-600 mb-2">1</div>
+        <div class="text-sm text-gray-600 font-medium">Errors</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-yellow-600 mb-2">1</div>
+        <div class="text-sm text-gray-600 font-medium">Warnings</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-green-600 mb-2">4</div>
+        <div class="text-sm text-gray-600 font-medium">Info</div>
+      </div>
+      <div class="text-center">
+        <div class="text-3xl font-bold text-gray-600 mb-2">0</div>
+        <div class="text-sm text-gray-600 font-medium">Debug</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real-time Log Viewer -->
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold text-gray-900">Real-time Logs</h3>
+      <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors" id="toggleRealtime">🔴 Start Monitoring</button>
+    </div>
+    
+    <div class="bg-gray-900 text-green-400 p-4 rounded-lg font-mono text-sm h-48 overflow-y-auto" id="realtimeLogs">
+      <div class="text-gray-500 text-center pt-16">
+        Click "Start Monitoring" to view real-time logs
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+
+<script>
+let isMonitoring = false;
+
+function clearFilters() {
+  document.getElementById('logLevel').value = 'all';
+  document.getElementById('logCategory').value = 'all';
+  document.getElementById('dateRange').value = 'today';
+  filterLogs();
+}
+
+function refreshLogs() {
+  location.reload();
+}
+
+function exportLogs() {
+  // In a real implementation, this would generate and download a log file
+  alert('Log export functionality would be implemented here');
+}
+
+function clearLogs() {
+  if (confirm('Are you sure you want to clear old logs? This action cannot be undone.')) {
+    alert('Old logs cleared successfully');
+  }
+}
+
+function filterLogs() {
+  const level = document.getElementById('logLevel').value;
+  const category = document.getElementById('logCategory').value;
+  const entries = document.querySelectorAll('.log-entry');
+  
+  entries.forEach(entry => {
+    const entryLevel = entry.getAttribute('data-level');
+    const entryCategory = entry.getAttribute('data-category');
+    
+    const levelMatch = level === 'all' || entryLevel === level;
+    const categoryMatch = category === 'all' || entryCategory === category;
+    
+    if (levelMatch && categoryMatch) {
+      entry.style.display = 'grid';
+    } else {
+      entry.style.display = 'none';
+    }
+  });
+}
+
+// Add event listeners for filters
+document.getElementById('logLevel').addEventListener('change', filterLogs);
+document.getElementById('logCategory').addEventListener('change', filterLogs);
+
+// Real-time monitoring toggle
+document.getElementById('toggleRealtime').addEventListener('click', function() {
+  const button = this;
+  const logsContainer = document.getElementById('realtimeLogs');
+  
+  if (!isMonitoring) {
+    isMonitoring = true;
+    button.textContent = '🟢 Stop Monitoring';
+    button.classList.remove('bg-gray-500', 'hover:bg-gray-600');
+    button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+    
+    logsContainer.innerHTML = '';
+    
+    // Simulate real-time logs
+    const interval = setInterval(() => {
+      if (!isMonitoring) {
+        clearInterval(interval);
+        return;
+      }
+      
+      const messages = [
+        'Page request: /admin/dashboard - 200ms',
+        'Authentication check passed for user: admin',
+        'File upload initiated: image-2024.jpg',
+        'Database query executed in 45ms',
+        'Cache invalidated for content updates'
+      ];
+      
+      const levels = ['info', 'info', 'info', 'debug', 'info'];
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      const randomLevel = levels[Math.floor(Math.random() * levels.length)];
+      
+      const timestamp = new Date().toLocaleTimeString();
+      const logLine = `[${timestamp}] [${randomLevel.toUpperCase()}] ${randomMessage}\n`;
+      
+      logsContainer.innerHTML += logLine;
+      logsContainer.scrollTop = logsContainer.scrollHeight;
+    }, 2000);
+    
+  } else {
+    isMonitoring = false;
+    button.textContent = '🔴 Start Monitoring';
+    button.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+    button.classList.add('bg-gray-500', 'hover:bg-gray-600');
+  }
+});
+</script>

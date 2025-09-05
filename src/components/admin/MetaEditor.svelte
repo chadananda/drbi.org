@@ -2,10 +2,10 @@
   import { onMount, onDestroy } from 'svelte';
   import slugger from 'slugify';
 
-  export let postid, sessionid, site, visible, topicList, categoryList, authorList;
+  export let postid, sessionid, site, visible, topicList, categoryList, authorList, post = {};
 
   const POST_TYPES = site.post_types || ["Article", "WebPage", "Event", "Organization", "Person", "LocalBusiness", "Product", "Recipe", "Review", "BreadcrumbList", "Course", "JobPosting", "Movie", "MusicAlbum", "QAPage", "SearchResultsPage", "SoftwareApplication", "VideoObject", "BookReview", "VideoReview", "Newsletter"];
-  let post = {}, dirty = false, timeoutId = null, imagePreviewUrl = '', inputKeyword = '', inputTopic = '', keywordList = []
+  let postData = {}, dirty = false, timeoutId = null, imagePreviewUrl = '', inputKeyword = '', inputTopic = '', keywordList = []
   let suggestedKeywords = [], suggestedTopics = [];
   let dateInput;
 
@@ -29,26 +29,28 @@
 
   // API Functions
   const loadPost = async () => {
-    if (!postid) return;
-    const url = `/api/post_db?id=${encodeURIComponent(btoa(postid))}`;
-    // console.log('Loading post from:', url);
-    try {
-      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${sessionid}` } });
-      if (response.ok) {
-        const newPost = await response.json();
-        if (newPost.body) delete newPost.body;
-        post = { ...newPost, keywords: newPost.keywords || [], topics: newPost.topics || [] };
-        imagePreviewUrl = post.image ? transformS3Url(post.image) : '';
-        // console.log('Loaded post:', post.datePublished);
-        if (!post.datePublished) post.datePublished = new Date().toISOString().split('T')[0];
-          else post.datePublished = new Date(post.datePublished).toISOString().split('T')[0];
-        // console.log('Loaded post:', post);
-      } else {
-        throw new Error('Failed to load post');
-      }
-    } catch (error) {
-      console.error('Error loading post:', error);
-    }
+    if (!postid || !post || !post.frontmatter) return;
+    // Use the post data passed as prop, convert from CMS format to editor format
+    const fm = post.frontmatter;
+    postData = {
+      id: post.id,
+      title: fm.title,
+      description: fm.description || '',
+      desc_125: fm.desc_125 || '',
+      abstract: fm.abstract || '',
+      post_type: fm.post_type || 'Article',
+      url: fm.url || '',
+      language: fm.language || 'en',
+      draft: fm.draft || false,
+      topics: fm.topics || [],
+      keywords: fm.keywords || [],
+      datePublished: fm.datePublished ? new Date(fm.datePublished).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      dateModified: fm.dateModified || '',
+      narrator: fm.narrator || 'auto',
+      image: fm.image || ''
+    };
+    imagePreviewUrl = postData.image ? transformS3Url(postData.image) : '';
+    dirty = false;
   };
 
 

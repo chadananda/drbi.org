@@ -1,0 +1,59 @@
+{
+  "id": "673216577907",
+  "url": "https://www.eventbrite.com/e/dawn-breakers-challenge-at-the-ffa-retreat-center-tickets-673216577907",
+  "name": "Dawn-Breakers Challenge at the FFA Retreat Center",
+  "shortDescription": "Join us for an intensive deep dive into Nabil's immortal history. Facilitated by Chad",
+  "startDate": "2023-09-01T18:00:00-0700",
+  "endDate": "2023-09-10T09:00:00-0700",
+  "location": {
+    "name": "FFA School / Retreat Center",
+    "address": "1999 Ridge Road",
+    "city": "North San Juan",
+    "state": "CA",
+    "zip": "95960",
+    "latitude": "39.42557600000001",
+    "longitude": "-120.997795"
+  },
+  "price": null,
+  "organizer": "Desert Rose Baha'i Institute",
+  "fullDescription": "",
+  "eventSchedule": [],
+  "highlights": [
+    "Virtual"
+  ],
+  "refundPolicy": "refunds\":{\"refundPolicyIsNoRefunds\":false,\"refundPolicyCode\":\"moderate\",\"refundPolicyDescription\":\"Refunds up to \\u003cb\\u003e7 days\\u003c/b\\u003e before event\",\"isPaidEvent\":true,\"validDays\":7,\"isRefundRequestAllowed\":false,\"refundRequestOrganizer\":false},\"performers\":{\"supporters\":[],\"headliners\":[]},\"highlights\":{\"freeParking\":false,\"notAvailableParking\":false,\"paidParking\":false,\"parking\":false},\"parentEventId\":null,\"structuredContent\":{\"heroCarouselWidget\":{\"type\":\"herocarousel\",\"data\":{\"slides\":[{\"image\":{\"url\":\"https://img.",
+  "categories": [],
+  "images": [
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553758649%2F177237344149%2F1%2Foriginal.20230712-171420",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553798659%2F177237344149%2F1%2Foriginal.20230712-175546",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1098024683%2F2766106491401%2F1%2Foriginal.20250817-222050",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1086900033%2F262381906%2F1%2Foriginal.20250802-193933",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1058022453%2F893833107383%2F1%2Foriginal.20250622-054550",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1104966913%2F300673942992%2F1%2Foriginal.20250826-004850",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1093168703%2F475925732877%2F1%2Foriginal.20250811-193406",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1047606923%2F2599026521621%2F1%2Foriginal.20250606-174220",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1099974323%2F2739502951131%2F1%2Foriginal.20250819-201919",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F830472639%2F203379660293%2F1%2Foriginal.20240820-110110",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1110764913%2F176572349545%2F1%2Foriginal.20250901-171531",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F552955379%2F177237344149%2F1%2Foriginal.20230711-180245",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F549856519%2F177237344149%2F1%2Foriginal.20230706-181250",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F552955679%2F177237344149%2F1%2Foriginal.20230711-180304",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F552956009%2F177237344149%2F1%2Foriginal.20230711-180319",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553756579%2F177237344149%2F1%2Foriginal.20230712-171238",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553757509%2F177237344149%2F1%2Foriginal.20230712-171310"
+  ],
+  "teacherImage": "https://drbi.s3.amazonaws.com/events/673216577907-teacher.jpg",
+  "source": "external",
+  "externalId": "673216577907",
+  "registrationUrl": "https://www.eventbrite.com/e/dawn-breakers-challenge-at-the-ffa-retreat-center-tickets-673216577907",
+  "visible": true,
+  "featured": false,
+  "mainImage": "https://drbi.s3.amazonaws.com/events/673216577907-main.jpg",
+  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553758649%2F177237344149%2F1%2Foriginal.20230712-171420?h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&rect=94%2C0%2C4972%2C2486&s=31ea76147d96bdd44ac52fae33445f22",
+  "lastModified": "3a32ec5df89adbd672b68ceeb4c5a7cf",
+  "lastSynced": "2025-09-02T01:06:45.027Z",
+  "scraped": {
+    "orgPageDate": "2025-09-05T20:16:05.301Z",
+    "detailPageDate": "2025-09-02T01:06:45.027Z"
+  }
+}

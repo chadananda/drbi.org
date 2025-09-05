@@ -1,0 +1,242 @@
+---
+export const prerender = false;
+
+import AdminLayout from '@layouts/AdminLayout.astro';
+
+const user = Astro.locals.user;
+---
+
+<AdminLayout title="Upload Files" user={user}>
+  <div class="mb-8">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 mb-2">Upload Files</h1>
+        <p class="text-gray-600">Upload images, documents, and other media files</p>
+      </div>
+      <div>
+        <a href="/admin/media" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+          <span>📁</span> Back to Library
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-6">
+    <form class="space-y-6" id="uploadForm" enctype="multipart/form-data">
+      <div class="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center hover:border-gray-400 transition-colors cursor-pointer" id="uploadArea">
+        <div class="text-6xl mb-4">📤</div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-2">Drag & Drop Files Here</h3>
+        <p class="text-gray-600">Or click to select files</p>
+        <input type="file" id="fileInput" name="files" multiple accept="image/*,application/pdf,.doc,.docx" hidden>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="flex flex-col">
+          <label for="uploadFolder" class="text-sm font-medium text-gray-700 mb-2">Upload to folder:</label>
+          <select id="uploadFolder" name="folder" class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            <option value="general">General</option>
+            <option value="events">Events</option>
+            <option value="articles">Articles</option>
+            <option value="team">Team</option>
+          </select>
+        </div>
+        
+        <div class="flex items-center pt-6">
+          <label class="flex items-center">
+            <input type="checkbox" id="resizeImages" name="resizeImages" checked class="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+            <span class="text-sm text-gray-700">Automatically resize large images</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="hidden" id="uploadQueue">
+        <h4 class="text-lg font-semibold text-gray-900 mb-3">Files to Upload:</h4>
+        <div class="space-y-2" id="queueList"></div>
+      </div>
+
+      <div class="flex gap-3 justify-end">
+        <button type="button" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" id="clearQueue" disabled>Clear Queue</button>
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed" id="startUpload" disabled>
+          <span>📤</span> Start Upload
+        </button>
+      </div>
+    </form>
+
+    <div class="hidden" id="uploadProgress">
+      <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
+        <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" id="progressFill"></div>
+      </div>
+      <div class="text-sm text-gray-600 text-center" id="progressText">Uploading files...</div>
+    </div>
+
+    <div class="hidden" id="uploadResults">
+      <h4 class="text-lg font-semibold text-gray-900 mb-3">Upload Results:</h4>
+      <div class="space-y-2" id="resultsList"></div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Upload Guidelines</h3>
+    <ul class="space-y-2 text-gray-700">
+      <li><strong>Supported formats:</strong> JPEG, PNG, GIF, WebP, PDF, DOC, DOCX</li>
+      <li><strong>Maximum file size:</strong> 10MB per file</li>
+      <li><strong>Image recommendations:</strong> Use high-quality images (1920x1080 or higher for hero images)</li>
+      <li><strong>File naming:</strong> Use descriptive names with hyphens instead of spaces</li>
+      <li><strong>Storage:</strong> Files are uploaded to AWS S3 for optimal performance</li>
+    </ul>
+  </div>
+</AdminLayout>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('fileInput');
+  const uploadQueue = document.getElementById('uploadQueue');
+  const queueList = document.getElementById('queueList');
+  const clearQueue = document.getElementById('clearQueue');
+  const startUpload = document.getElementById('startUpload');
+  const uploadProgress = document.getElementById('uploadProgress');
+  const uploadResults = document.getElementById('uploadResults');
+  
+  let selectedFiles = [];
+
+  // Upload area click handler
+  uploadArea.addEventListener('click', () => {
+    fileInput.click();
+  });
+
+  // Drag and drop handlers
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('border-blue-400', 'bg-blue-50');
+  });
+
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+  });
+
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('border-blue-400', 'bg-blue-50');
+    
+    const files = Array.from(e.dataTransfer.files);
+    addFilesToQueue(files);
+  });
+
+  // File input handler
+  fileInput.addEventListener('change', (e) => {
+    const files = Array.from(e.target.files);
+    addFilesToQueue(files);
+  });
+
+  function addFilesToQueue(files) {
+    files.forEach(file => {
+      if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+        selectedFiles.push(file);
+      }
+    });
+    
+    updateQueue();
+  }
+
+  function updateQueue() {
+    if (selectedFiles.length > 0) {
+      uploadQueue.classList.remove('hidden');
+      queueList.innerHTML = '';
+      
+      selectedFiles.forEach((file, index) => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+        item.innerHTML = `
+          <div class="flex-1">
+            <div class="font-medium text-gray-900">${file.name}</div>
+            <div class="text-sm text-gray-600">${formatFileSize(file.size)}</div>
+          </div>
+          <button type="button" class="text-red-600 hover:text-red-800 font-bold" data-index="${index}">✕</button>
+        `;
+        queueList.appendChild(item);
+      });
+      
+      clearQueue.disabled = false;
+      startUpload.disabled = false;
+    } else {
+      uploadQueue.classList.add('hidden');
+      clearQueue.disabled = true;
+      startUpload.disabled = true;
+    }
+  }
+
+  // Remove file from queue
+  queueList.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-file')) {
+      const index = parseInt(e.target.getAttribute('data-index'));
+      selectedFiles.splice(index, 1);
+      updateQueue();
+    }
+  });
+
+  // Clear queue
+  clearQueue.addEventListener('click', () => {
+    selectedFiles = [];
+    updateQueue();
+  });
+
+  // Format file size
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Upload files (placeholder - would integrate with actual upload API)
+  document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    if (selectedFiles.length === 0) return;
+    
+    uploadProgress.classList.remove('hidden');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    
+    // Simulate upload progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 15;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        showResults();
+      }
+      
+      progressFill.style.width = progress + '%';
+      progressText.textContent = `Uploading files... ${Math.round(progress)}%`;
+    }, 500);
+  });
+
+  function showResults() {
+    uploadProgress.classList.add('hidden');
+    uploadResults.classList.remove('hidden');
+    
+    const resultsList = document.getElementById('resultsList');
+    resultsList.innerHTML = '';
+    
+    selectedFiles.forEach(file => {
+      const item = document.createElement('div');
+      item.className = 'flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg';
+      item.innerHTML = `
+        <span class="text-green-600 font-bold">✓</span>
+        <span class="text-green-800">${file.name} uploaded successfully</span>
+      `;
+      resultsList.appendChild(item);
+    });
+    
+    // Reset form
+    selectedFiles = [];
+    updateQueue();
+    fileInput.value = '';
+  }
+});
+</script>

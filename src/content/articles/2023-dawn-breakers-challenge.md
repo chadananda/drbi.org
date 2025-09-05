@@ -13,7 +13,7 @@ keywords: []
 datePublished: "2024-01-05T00:00:00.000Z"
 dateModified: "2024-05-29T03:14:35.635Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-05-2023-dawn-breakers-challenge/20231006hillcrest-drbi-60websizejpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-05-2023-dawn-breakers-challenge/20231006hillcrest-drbi-60websize.jpg"
   alt: "2023 Dawn-Breakers Challenge Event Overview"
 narrator: "auto"
 ---

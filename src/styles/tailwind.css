@@ -4,6 +4,7 @@
   --font-family-serif: Merriweather, ui-serif, Georgia, "Times New Roman", Times, serif;
 }
 
+
 /* This will hide the elements on screen, but show them when printing */
 @media screen {
   .printonly { display: none; }

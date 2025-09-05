@@ -1,0 +1,57 @@
+{
+  "id": "878646674857",
+  "url": "https://www.eventbrite.com/e/journey-to-the-heart-of-the-hidden-words-tickets-878646674857",
+  "name": "Journey to the Heart of the Hidden Words",
+  "shortDescription": "3-day, in-person retreat featuring group discussions and remote/live Q&A lectures with Bahá’í scholars Dr. Julio Savi and Dr. John",
+  "startDate": "2024-10-18T14:00:00-0700",
+  "endDate": "2024-10-20T14:00:00-0700",
+  "location": {
+    "name": "Desert Rose Baha'i Institute",
+    "address": "1950 W William Sears Dr",
+    "city": "Eloy",
+    "state": "AZ",
+    "zip": "85131",
+    "latitude": "32.826648",
+    "longitude": "-111.586983"
+  },
+  "price": null,
+  "organizer": "Desert Rose Baha'i Institute",
+  "fullDescription": "",
+  "eventSchedule": [],
+  "highlights": [
+    "In person",
+    "Virtual"
+  ],
+  "refundPolicy": "refunds\":{\"refundPolicyIsNoRefunds\":false,\"refundPolicyCode\":\"moderate\",\"refundPolicyDescription\":\"Refunds up to \\u003cb\\u003e7 days\\u003c/b\\u003e before event\",\"isPaidEvent\":true,\"validDays\":7,\"isRefundRequestAllowed\":false,\"refundRequestOrganizer\":false},\"performers\":{\"supporters\":[],\"headliners\":[]},\"highlights\":{\"freeParking\":false,\"notAvailableParking\":false,\"paidParking\":false,\"parking\":false},\"parentEventId\":null,\"structuredContent\":{\"heroCarouselWidget\":{\"type\":\"herocarousel\",\"data\":{\"slides\":[{\"image\":{\"url\":\"https://img.",
+  "categories": [],
+  "images": [
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F739912969%2F177237344149%2F1%2Foriginal.20240410-005459",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553798659%2F177237344149%2F1%2Foriginal.20230712-175546",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1110182303%2F177237344149%2F1%2Foriginal.20250901-003630",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F659915219%2F1938122408013%2F1%2Foriginal.20231217-231312",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1091036973%2F1333365164423%2F1%2Foriginal.20250808-021438",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1025530763%2F177237344149%2F1%2Foriginal.20250507-171929",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1093579883%2F2319110556403%2F1%2Foriginal.20250812-072652",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1085529233%2F547930780489%2F1%2Foriginal.20250731-165629",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1103144373%2F1939147735413%2F1%2Foriginal.20250823-014619",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1092953023%2F2855904719471%2F1%2Foriginal.20250811-155839",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F812521359%2F128227798101%2F1%2Foriginal.20240723-002235",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F737356309%2F177237344149%2F1%2Foriginal.20240406-150134",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F737356569%2F177237344149%2F1%2Foriginal.20240406-150206",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F737356039%2F177237344149%2F1%2Foriginal.20240406-150103"
+  ],
+  "teacherImage": "https://drbi.s3.amazonaws.com/events/878646674857-teacher.jpg",
+  "source": "external",
+  "externalId": "878646674857",
+  "registrationUrl": "https://www.eventbrite.com/e/journey-to-the-heart-of-the-hidden-words-tickets-878646674857",
+  "visible": true,
+  "featured": false,
+  "mainImage": "https://drbi.s3.amazonaws.com/events/878646674857-main.jpg",
+  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F739912969%2F177237344149%2F1%2Foriginal.20240410-005459?h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&rect=0%2C0%2C2488%2C1244&s=b51356412a2480ce9de98577531cd3d8",
+  "lastModified": "b932b7362797c0c07f493847b4fac4e4",
+  "lastSynced": "2025-09-02T01:05:55.806Z",
+  "scraped": {
+    "orgPageDate": "2025-09-05T20:16:05.300Z",
+    "detailPageDate": "2025-09-02T01:05:55.806Z"
+  }
+}

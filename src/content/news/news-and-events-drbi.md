@@ -14,6 +14,14 @@ dateModified: "2024-06-10T19:51:34.412Z"
 narrator: "auto"
 ---
 
+# News and Events at DRBI
 
+Welcome to our news section! Here you can catch up with all the fun stuff happening at the Desert Rose Bahai Institute.
 
+## Recent Updates
 
+- Event announcements
+- News from the community
+- Updates from our programs
+
+Stay tuned for more exciting content!

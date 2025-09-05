@@ -13,8 +13,16 @@ export const prerender = false;
 async function handleGet(request) {
   try {
     const isGitHubAvailable = isGitHubConfigured();
-    const isProduction = process.env.VERCEL || false;
-    const isDevelopment = !isProduction;
+    // More robust environment detection for both local and production
+    const url = new URL(request.url);
+    const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+    const isDev = process.env.APP_ENV === 'dev';
+    const nodeEnvDev = process.env.NODE_ENV === 'development';
+    const hasVercel = !!process.env.VERCEL;
+    
+    // If any dev indicator is present, treat as development
+    const isDevelopment = isLocalhost || isDev || nodeEnvDev || !hasVercel;
+    const isProduction = !isDevelopment;
     const useGitHub = isGitHubAvailable && (isProduction || process.env.CMS_USE_GITHUB === 'true');
     
     const status = {

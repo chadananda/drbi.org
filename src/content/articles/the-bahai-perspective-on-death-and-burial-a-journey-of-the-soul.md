@@ -20,7 +20,7 @@ keywords:
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T21:24:07.469Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-bahai-perspective-death-burial/bahai-literature-2png"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-bahai-perspective-death-burial/bahai-literature-2.png"
   alt: "The Bahai Faiths spiritual perspective on death as the souls transition, exploring burial practices and the Prayer for the Dead."
 narrator: "auto"
 ---

@@ -5,7 +5,7 @@ export const prerender = true;
 import "@styles/article.css";
 import "@styles/tailwind.css";
 // import { ViewTransitions } from "astro:transitions";
-import  SpeedInsights  from "@vercel/speed-insights/astro"
+// import  SpeedInsights  from "@vercel/speed-insights/astro" // Disabled to prevent console errors
 import Footer from "@components/footer.astro";
 import Navbar from "@components/navbar/navbar.astro";
 import JSONLD  from "@components/article/JSONLD.astro"; // validate at https://validator.schema.org/
@@ -26,7 +26,7 @@ const {footerMargin = true, post, author, category, language } = Astro.props;
     <Navbar />
       <slot />
     <Footer margin={footerMargin} />
-    <SpeedInsights />
+    <!-- <SpeedInsights /> Disabled to prevent console errors -->
     <!-- <ViewTransitions /> -->
     <script type="module" src="/js/hidePosts.js"     client:idle></script>
     <script type="module" src="/js/appendLink.js"    client:idle></script>
