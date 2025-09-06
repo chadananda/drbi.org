@@ -278,6 +278,16 @@ if (isDevelopment) {
     analyticsData = createDemoData();
   }
 }
+
+// Create debug info for client-side logging
+const debugInfo = {
+  isDemo: analyticsData.isDemo,
+  countriesCount: analyticsData.countries?.length || 0,
+  statesCount: analyticsData.states?.length || 0,
+  hasPosthogKey: !!posthogApiKey,
+  countries: analyticsData.countries?.slice(0, 3) || [],
+  states: analyticsData.states?.slice(0, 3) || []
+};
 ---
 
 <AdminLayout title="Admin Dashboard" user={Astro.locals?.user}>
@@ -973,13 +983,14 @@ if (isDevelopment) {
   // Check status when page loads
   document.addEventListener('DOMContentLoaded', function() {
     // Client-side debug logging for PostHog data
-    console.log('🔍 DRBI Analytics Debug Info:');
-    console.log('Analytics data isDemo:', ${analyticsData.isDemo});
-    console.log('Countries data:', ${JSON.stringify(analyticsData.countries?.slice(0, 5) || [])});
-    console.log('States data:', ${JSON.stringify(analyticsData.states?.slice(0, 5) || [])});
-    console.log('Total countries:', ${analyticsData.countries?.length || 0});
-    console.log('Total states:', ${analyticsData.states?.length || 0});
-    console.log('PostHog API key present:', ${!!posthogApiKey});
+    const debugInfo = ${JSON.stringify(debugInfo)};
+    console.log('🔍 DRBI Analytics Debug Info:', debugInfo);
+    console.log('Analytics data isDemo:', debugInfo.isDemo);
+    console.log('Countries data:', debugInfo.countries);
+    console.log('States data:', debugInfo.states);
+    console.log('Total countries:', debugInfo.countriesCount);
+    console.log('Total states:', debugInfo.statesCount);
+    console.log('PostHog API key present:', debugInfo.hasPosthogKey);
     
     checkCMSStatus();
     initTrafficChart();
