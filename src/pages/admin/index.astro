@@ -974,9 +974,9 @@ if (isDevelopment) {
   document.addEventListener('DOMContentLoaded', function() {
     // Client-side debug logging for PostHog data
     console.log('🔍 DRBI Analytics Debug Info:');
-    console.log('Analytics data isDemo:', JSON.parse('${JSON.stringify(analyticsData.isDemo)}'));
-    console.log('Countries data:', JSON.parse('${JSON.stringify(analyticsData.countries?.slice(0, 5) || [])}'));
-    console.log('States data:', JSON.parse('${JSON.stringify(analyticsData.states?.slice(0, 5) || [])}'));
+    console.log('Analytics data isDemo:', ${analyticsData.isDemo});
+    console.log('Countries data:', ${JSON.stringify(analyticsData.countries?.slice(0, 5) || [])});
+    console.log('States data:', ${JSON.stringify(analyticsData.states?.slice(0, 5) || [])});
     console.log('Total countries:', ${analyticsData.countries?.length || 0});
     console.log('Total states:', ${analyticsData.states?.length || 0});
     console.log('PostHog API key present:', ${!!posthogApiKey});
