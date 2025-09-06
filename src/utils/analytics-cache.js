@@ -55,12 +55,16 @@ export async function generateStaticAnalyticsSummary() {
       dateRange: analyticsData.dateRange,
       topPages: analyticsData.topPages.slice(0, 10), // Top 10 only
       referrers: analyticsData.referrers.slice(0, 10), // Top 10 only
-      dailyStats: analyticsData.dailyStats ? 
+      dailyStats: Array.isArray(analyticsData.dailyStats) ? 
         analyticsData.dailyStats.map(day => ({
           date: day.date,
           pageViews: day.pageViews,
           uniqueVisitors: day.uniqueVisitors
-        })) : [],
+        })) : Array.from(analyticsData.dailyStats?.values?.() || []).map(day => ({
+          date: day.date,
+          pageViews: day.pageViews,
+          uniqueVisitors: day.uniqueVisitors
+        })),
       pageViews: analyticsData.pageViews || [],
       uniqueVisitors: analyticsData.uniqueVisitors || [],
       sources: analyticsData.sources || [],

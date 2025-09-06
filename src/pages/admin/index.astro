@@ -140,13 +140,23 @@ const isDevelopment = import.meta.env.DEV ||
                      import.meta.env.APP_ENV === 'dev' ||
                      process.env.NODE_ENV === 'development';
 
-// Load imported analytics data (if any) - use fast cached summary
-const importedAnalytics = isDevelopment ? null : await loadAnalyticsSummary();
+// Load imported analytics data (if any) - use fast cached summary  
+const importedAnalytics = await loadAnalyticsSummary();
+console.log('📊 Imported analytics loaded:', importedAnalytics ? 'Yes' : 'No');
+if (importedAnalytics) {
+  console.log('📈 Imported data sources:', importedAnalytics.sources?.length || 0);
+  console.log('📊 Total imported page views:', importedAnalytics.totalPageViews);
+}
 
 if (isDevelopment) {
-  // Always use demo data in development
-  console.log('Development mode: Using demo analytics data');
-  analyticsData = createDemoData();
+  // In development, use imported data if available, otherwise demo data
+  if (importedAnalytics) {
+    console.log('Development mode: Using imported analytics data');
+    analyticsData = importedAnalytics;
+  } else {
+    console.log('Development mode: Using demo analytics data');
+    analyticsData = createDemoData();
+  }
 } else if (posthogApiKey && posthogApiKey.trim()) {
   // Production: Try to get real PostHog data
   console.log('Production mode: PostHog API key found, fetching real analytics data...');
