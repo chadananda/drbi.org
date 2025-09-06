@@ -142,33 +142,18 @@ const isDevelopment = import.meta.env.DEV ||
 
 // Load imported analytics data (if any) - use fast cached summary  
 const importedAnalytics = await loadAnalyticsSummary();
-console.log('📊 Imported analytics loaded:', importedAnalytics ? 'Yes' : 'No');
+
+// Initialize with imported data as fallback
 if (importedAnalytics) {
-  console.log('📈 Imported data sources:', importedAnalytics.sources?.length || 0);
-  console.log('📊 Total imported page views:', importedAnalytics.totalPageViews);
+  console.log('Imported analytics available, will combine with PostHog data if available');
+  analyticsData = importedAnalytics;
+} else {
+  console.log('No imported analytics, will use PostHog or demo data');
 }
 
-if (isDevelopment) {
-  // In development, try to combine imported data with PostHog if possible, otherwise use imported data
-  if (importedAnalytics) {
-    console.log('Development mode: Using imported analytics data');
-    // Try to get some PostHog data to combine with imported data if API key exists
-    if (posthogApiKey && posthogApiKey.trim()) {
-      console.log('Development mode: Attempting to combine with PostHog data');
-      // Set analyticsData to imported for now, will be combined below if PostHog succeeds
-      analyticsData = importedAnalytics;
-    } else {
-      analyticsData = importedAnalytics;
-    }
-  } else {
-    console.log('Development mode: Using demo analytics data');
-    analyticsData = createDemoData();
-  }
-} 
-
 if (posthogApiKey && posthogApiKey.trim()) {
-  // Production: Try to get real PostHog data
-  console.log('Production mode: PostHog API key found, fetching real analytics data...');
+  // Try to get real PostHog data and combine with imported data
+  console.log('PostHog API key found, fetching real analytics data to combine with imported data...');
   try {
     // Get current date and 30 days ago
     const now = new Date();
@@ -289,15 +274,14 @@ if (posthogApiKey && posthogApiKey.trim()) {
     }
   }
 } else {
-  // Production but no API key - check for imported data
-  if (importedAnalytics) {
-    console.log('Production mode: No PostHog API key, using imported analytics data');
-    analyticsData = importedAnalytics;
-  } else {
-    console.log('Production mode: No PostHog API key and no imported data, using demo data');
+  // No PostHog API key - use imported data or demo data
+  if (!analyticsData) {
+    console.log('No PostHog API key and no imported data, using demo data');
     analyticsData = createDemoData();
   }
 }
+
+// Final analytics data is ready
 
 // Create debug info for client-side logging
 const debugInfo = {
@@ -334,30 +318,10 @@ const debugInfo = {
               </svg>
             </div>
             <h2 class="text-2xl font-bold text-gray-900">Website Analytics</h2>
-            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">PostHog</span>
-            {analyticsData.isDemo && (
-              <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                {isDevelopment ? 'Demo Data - Development' :
-                 analyticsError ? 'Demo Data - API Error' : 'Demo Data - No API Key'}
-              </span>
-            )}
-            {analyticsData.isHybrid && (
-              <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                {analyticsData.dataSource === 'combined' ? 'Hybrid Data - Imported + Live' : 'Imported Data - Vercel'}
-              </span>
-            )}
-            {!analyticsData.isDemo && !analyticsData.isHybrid && (
-              <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Live Data</span>
-            )}
           </div>
 
           <!-- Actions -->
           <div class="flex items-center gap-3">
-            <a href="/admin/analytics/import" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
-              <span>📊</span>
-              Import Data
-            </a>
-            <div class="border-l border-gray-300 h-6"></div>
             <label class="text-sm font-medium text-gray-700">Period:</label>
             <select id="analyticsPeriod" class="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
               <option value="30" selected>30 Days</option>
