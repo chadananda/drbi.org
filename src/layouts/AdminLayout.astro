@@ -11,6 +11,15 @@ interface Props {
 }
 
 const { title = "Admin Dashboard", description = "DRBI Content Management System", user } = Astro.props;
+
+// Get git commit hash for version display
+let gitCommit = 'dev';
+try {
+  const { execSync } = await import('child_process');
+  gitCommit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+} catch (error) {
+  console.log('Could not get git commit hash:', error.message);
+}
 ---
 
 <!DOCTYPE html>
@@ -49,6 +58,12 @@ const { title = "Admin Dashboard", description = "DRBI Content Management System
             <button class="btn-icon" title="Settings">
               <span>⚙️</span>
             </button>
+            <!-- Version Display -->
+            <div class="version-display" title={`Git commit: ${gitCommit}`}>
+              <span class="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-1 rounded">
+                v{gitCommit}
+              </span>
+            </div>
             <div class="user-menu">
               <button class="user-menu-toggle">
                 <span class="user-avatar">👤</span>
