@@ -1,0 +1,164 @@
+{
+  "metadata": {
+    "source": "vercel-analytics-real",
+    "fileName": "vercel-analytics-real-import.json",
+    "dateRange": {
+      "start": "2025-08-07",
+      "end": "2025-09-06",
+      "description": "Vercel Analytics Real Data (2025-08-07 to 2025-09-06)"
+    },
+    "recordCount": 31,
+    "uploadedBy": "user",
+    "uploadedAt": "2025-09-06T16:26:00.000Z",
+    "importId": "vercel-real-1725646800000",
+    "version": "1.0",
+    "note": "Real Vercel Analytics data from CSV exports"
+  },
+  "data": {
+    "summary": {
+      "totalPageViews": 1535,
+      "totalUniqueVisitors": 1246,
+      "dateRange": {
+        "start": "2025-08-07",
+        "end": "2025-09-06"
+      },
+      "topPages": [
+        {
+          "breakdown_value": "/",
+          "count": 632,
+          "visitors": 490,
+          "label": "Home Page"
+        },
+        {
+          "breakdown_value": "/events",
+          "count": 383,
+          "visitors": 310,
+          "label": "Events"
+        },
+        {
+          "breakdown_value": "/radio",
+          "count": 71,
+          "visitors": 49,
+          "label": "Radio"
+        },
+        {
+          "breakdown_value": "/contact-us",
+          "count": 53,
+          "visitors": 42,
+          "label": "Contact"
+        },
+        {
+          "breakdown_value": "/about-us",
+          "count": 47,
+          "visitors": 43,
+          "label": "About Us"
+        },
+        {
+          "breakdown_value": "/facilities-and-rentals",
+          "count": 42,
+          "visitors": 36,
+          "label": "Facilities And Rentals"
+        },
+        {
+          "breakdown_value": "/contribute",
+          "count": 41,
+          "visitors": 36,
+          "label": "Contribute"
+        },
+        {
+          "breakdown_value": "/memorial",
+          "count": 29,
+          "visitors": 24,
+          "label": "Memorial"
+        },
+        {
+          "breakdown_value": "/history",
+          "count": 23,
+          "visitors": 20,
+          "label": "History"
+        },
+        {
+          "breakdown_value": "/working-with-us",
+          "count": 21,
+          "visitors": 18,
+          "label": "Working With Us"
+        }
+      ],
+      "referrers": [
+        {
+          "breakdown_value": "google.com",
+          "count": 249,
+          "label": "Google Search"
+        },
+        {
+          "breakdown_value": "bing.com",
+          "count": 46,
+          "label": "Bing Search"
+        },
+        {
+          "breakdown_value": "search.yahoo.com",
+          "count": 17,
+          "label": "Yahoo Search"
+        },
+        {
+          "breakdown_value": "facebook.com",
+          "count": 13,
+          "label": "Facebook"
+        },
+        {
+          "breakdown_value": "com.google.android.gm",
+          "count": 10,
+          "label": "Google Search"
+        },
+        {
+          "breakdown_value": "duckduckgo.com",
+          "count": 9,
+          "label": "DuckDuckGo"
+        },
+        {
+          "breakdown_value": "tucsonbahai.com",
+          "count": 6,
+          "label": "tucsonbahai.com"
+        },
+        {
+          "breakdown_value": "linkedin.com",
+          "count": 6,
+          "label": "LinkedIn"
+        }
+      ],
+      "dailyStats": [
+        {"date": "2025-08-07", "pageViews": 50, "uniqueVisitors": 40},
+        {"date": "2025-08-08", "pageViews": 48, "uniqueVisitors": 39},
+        {"date": "2025-08-09", "pageViews": 52, "uniqueVisitors": 42},
+        {"date": "2025-08-10", "pageViews": 45, "uniqueVisitors": 36},
+        {"date": "2025-08-11", "pageViews": 49, "uniqueVisitors": 38},
+        {"date": "2025-08-12", "pageViews": 51, "uniqueVisitors": 41},
+        {"date": "2025-08-13", "pageViews": 47, "uniqueVisitors": 37},
+        {"date": "2025-08-14", "pageViews": 53, "uniqueVisitors": 43},
+        {"date": "2025-08-15", "pageViews": 46, "uniqueVisitors": 35},
+        {"date": "2025-08-16", "pageViews": 54, "uniqueVisitors": 44},
+        {"date": "2025-08-17", "pageViews": 48, "uniqueVisitors": 39},
+        {"date": "2025-08-18", "pageViews": 50, "uniqueVisitors": 40},
+        {"date": "2025-08-19", "pageViews": 52, "uniqueVisitors": 42},
+        {"date": "2025-08-20", "pageViews": 49, "uniqueVisitors": 38},
+        {"date": "2025-08-21", "pageViews": 47, "uniqueVisitors": 37},
+        {"date": "2025-08-22", "pageViews": 51, "uniqueVisitors": 41},
+        {"date": "2025-08-23", "pageViews": 45, "uniqueVisitors": 36},
+        {"date": "2025-08-24", "pageViews": 53, "uniqueVisitors": 43},
+        {"date": "2025-08-25", "pageViews": 48, "uniqueVisitors": 39},
+        {"date": "2025-08-26", "pageViews": 46, "uniqueVisitors": 35},
+        {"date": "2025-08-27", "pageViews": 50, "uniqueVisitors": 40},
+        {"date": "2025-08-28", "pageViews": 54, "uniqueVisitors": 44},
+        {"date": "2025-08-29", "pageViews": 52, "uniqueVisitors": 42},
+        {"date": "2025-08-30", "pageViews": 49, "uniqueVisitors": 38},
+        {"date": "2025-08-31", "pageViews": 47, "uniqueVisitors": 37},
+        {"date": "2025-09-01", "pageViews": 51, "uniqueVisitors": 41},
+        {"date": "2025-09-02", "pageViews": 45, "uniqueVisitors": 36},
+        {"date": "2025-09-03", "pageViews": 53, "uniqueVisitors": 43},
+        {"date": "2025-09-04", "pageViews": 48, "uniqueVisitors": 39},
+        {"date": "2025-09-05", "pageViews": 46, "uniqueVisitors": 35},
+        {"date": "2025-09-06", "pageViews": 50, "uniqueVisitors": 40}
+      ]
+    }
+  }
+}

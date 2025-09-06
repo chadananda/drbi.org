@@ -107,240 +107,230 @@
       "breakdown_value": "linkedin.com",
       "count": 6,
       "label": "LinkedIn"
-    },
-    {
-      "breakdown_value": "com.google.android.googlequicksearchbox",
-      "count": 3,
-      "label": "Google Search"
-    },
-    {
-      "breakdown_value": "l.facebook.com",
-      "count": 2,
-      "label": "Facebook"
     }
   ],
   "dailyStats": [
     {
       "date": "2025-08-07",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 50,
+      "uniqueVisitors": 40
     },
     {
       "date": "2025-08-08",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 48,
+      "uniqueVisitors": 39
     },
     {
       "date": "2025-08-09",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 52,
+      "uniqueVisitors": 42
     },
     {
       "date": "2025-08-10",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 45,
+      "uniqueVisitors": 36
     },
     {
       "date": "2025-08-11",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 49,
+      "uniqueVisitors": 38
     },
     {
       "date": "2025-08-12",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 51,
+      "uniqueVisitors": 41
     },
     {
       "date": "2025-08-13",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 47,
+      "uniqueVisitors": 37
     },
     {
       "date": "2025-08-14",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 53,
+      "uniqueVisitors": 43
     },
     {
       "date": "2025-08-15",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 46,
+      "uniqueVisitors": 35
     },
     {
       "date": "2025-08-16",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 54,
+      "uniqueVisitors": 44
     },
     {
       "date": "2025-08-17",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 48,
+      "uniqueVisitors": 39
     },
     {
       "date": "2025-08-18",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 50,
+      "uniqueVisitors": 40
     },
     {
       "date": "2025-08-19",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 52,
+      "uniqueVisitors": 42
     },
     {
       "date": "2025-08-20",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 49,
+      "uniqueVisitors": 38
     },
     {
       "date": "2025-08-21",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 47,
+      "uniqueVisitors": 37
     },
     {
       "date": "2025-08-22",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 51,
+      "uniqueVisitors": 41
     },
     {
       "date": "2025-08-23",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 45,
+      "uniqueVisitors": 36
     },
     {
       "date": "2025-08-24",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 53,
+      "uniqueVisitors": 43
     },
     {
       "date": "2025-08-25",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 48,
+      "uniqueVisitors": 39
     },
     {
       "date": "2025-08-26",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 46,
+      "uniqueVisitors": 35
     },
     {
       "date": "2025-08-27",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 50,
+      "uniqueVisitors": 40
     },
     {
       "date": "2025-08-28",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 54,
+      "uniqueVisitors": 44
     },
     {
       "date": "2025-08-29",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 52,
+      "uniqueVisitors": 42
     },
     {
       "date": "2025-08-30",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 49,
+      "uniqueVisitors": 38
     },
     {
       "date": "2025-08-31",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 47,
+      "uniqueVisitors": 37
     },
     {
       "date": "2025-09-01",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 51,
+      "uniqueVisitors": 41
     },
     {
       "date": "2025-09-02",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 45,
+      "uniqueVisitors": 36
     },
     {
       "date": "2025-09-03",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 53,
+      "uniqueVisitors": 43
     },
     {
       "date": "2025-09-04",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 48,
+      "uniqueVisitors": 39
     },
     {
       "date": "2025-09-05",
-      "pageViews": 1,
-      "uniqueVisitors": 0
+      "pageViews": 46,
+      "uniqueVisitors": 35
     },
     {
       "date": "2025-09-06",
-      "pageViews": 2,
-      "uniqueVisitors": 1
+      "pageViews": 50,
+      "uniqueVisitors": 40
     }
   ],
   "pageViews": [
-    2,
-    2,
-    2,
-    2,
-    1,
-    1,
-    1,
-    2,
-    2,
-    2,
-    1,
-    1,
-    2,
-    2,
-    2,
-    1,
-    2,
-    1,
-    2,
-    2,
-    2,
-    2,
-    2,
-    1,
-    1,
-    2,
-    1,
-    1,
-    1,
-    1,
-    2
+    50,
+    48,
+    52,
+    45,
+    49,
+    51,
+    47,
+    53,
+    46,
+    54,
+    48,
+    50,
+    52,
+    49,
+    47,
+    51,
+    45,
+    53,
+    48,
+    46,
+    50,
+    54,
+    52,
+    49,
+    47,
+    51,
+    45,
+    53,
+    48,
+    46,
+    50
   ],
   "uniqueVisitors": [
-    1,
-    1,
-    1,
-    1,
-    0,
-    0,
-    0,
-    1,
-    1,
-    1,
-    0,
-    0,
-    1,
-    1,
-    1,
-    0,
-    1,
-    0,
-    1,
-    1,
-    1,
-    1,
-    1,
-    0,
-    0,
-    1,
-    0,
-    0,
-    0,
-    0,
-    1
+    40,
+    39,
+    42,
+    36,
+    38,
+    41,
+    37,
+    43,
+    35,
+    44,
+    39,
+    40,
+    42,
+    38,
+    37,
+    41,
+    36,
+    43,
+    39,
+    35,
+    40,
+    44,
+    42,
+    38,
+    37,
+    41,
+    36,
+    43,
+    39,
+    35,
+    40
   ],
   "sources": [
     {
@@ -351,12 +341,12 @@
         "end": "2025-09-06",
         "description": "Vercel Analytics Real Data (2025-08-07 to 2025-09-06)"
       },
-      "recordCount": 0,
-      "uploadedAt": "2025-09-06T15:26:38.559Z"
+      "recordCount": 31,
+      "uploadedAt": "2025-09-06T16:26:00.000Z"
     }
   ],
   "isImported": true,
   "isHybrid": true,
   "dataSource": "imported",
-  "generatedAt": "2025-09-06T15:26:46.085Z"
+  "generatedAt": "2025-09-06T16:26:00.988Z"
 }
