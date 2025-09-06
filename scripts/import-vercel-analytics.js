@@ -17,10 +17,9 @@ const VERCEL_ACCESS_TOKEN = process.env.VERCEL_ACCESSS_TOKEN || process.env.VERC
 const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID || process.env.TEAM_ID;
 const PROJECT_ID = process.env.VERCEL_PROJECT_ID || 'prj_uTpboV9oIYhXwhY0OBRGC0K9ja8g';
 
-// Date range for import (last 730 days = 2 years)
-const endDate = new Date();
-const startDate = new Date();
-startDate.setDate(startDate.getDate() - 730);
+// Date range for actual Vercel export period (Aug 7 - Sep 6, 2025)
+const endDate = new Date('2025-09-06');
+const startDate = new Date('2025-08-07');
 
 const formatDate = (date) => date.toISOString().split('T')[0];
 

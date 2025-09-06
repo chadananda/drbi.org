@@ -149,15 +149,24 @@ if (importedAnalytics) {
 }
 
 if (isDevelopment) {
-  // In development, use imported data if available, otherwise demo data
+  // In development, try to combine imported data with PostHog if possible, otherwise use imported data
   if (importedAnalytics) {
     console.log('Development mode: Using imported analytics data');
-    analyticsData = importedAnalytics;
+    // Try to get some PostHog data to combine with imported data if API key exists
+    if (posthogApiKey && posthogApiKey.trim()) {
+      console.log('Development mode: Attempting to combine with PostHog data');
+      // Set analyticsData to imported for now, will be combined below if PostHog succeeds
+      analyticsData = importedAnalytics;
+    } else {
+      analyticsData = importedAnalytics;
+    }
   } else {
     console.log('Development mode: Using demo analytics data');
     analyticsData = createDemoData();
   }
-} else if (posthogApiKey && posthogApiKey.trim()) {
+} 
+
+if (posthogApiKey && posthogApiKey.trim()) {
   // Production: Try to get real PostHog data
   console.log('Production mode: PostHog API key found, fetching real analytics data...');
   try {
