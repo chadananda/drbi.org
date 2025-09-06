@@ -8,6 +8,9 @@ export const prerender = false;
 
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { getAllPostsByType } from '../../utils/cms-utils.js';
+// Import analytics utilities
+import { combineAnalyticsData } from '../../utils/analytics-utils.js';
+import { loadAnalyticsSummary } from '../../utils/analytics-cache.js';
 
 // Get all posts for dashboard overview
 let memorial = [];
@@ -61,6 +64,45 @@ function createDemoData() {
       { breakdown_value: '/faq', count: 65, label: 'FAQ' },
       { breakdown_value: '/subscribe', count: 54, label: 'Subscribe' }
     ],
+    countries: [
+      { breakdown_value: 'United States', count: 2850, label: 'United States' },
+      { breakdown_value: 'United Kingdom', count: 1240, label: 'United Kingdom' },
+      { breakdown_value: 'Canada', count: 980, label: 'Canada' },
+      { breakdown_value: 'Australia', count: 720, label: 'Australia' },
+      { breakdown_value: 'Germany', count: 650, label: 'Germany' },
+      { breakdown_value: 'France', count: 590, label: 'France' },
+      { breakdown_value: 'Netherlands', count: 430, label: 'Netherlands' },
+      { breakdown_value: 'Spain', count: 380, label: 'Spain' },
+      { breakdown_value: 'Italy', count: 320, label: 'Italy' },
+      { breakdown_value: 'Sweden', count: 280, label: 'Sweden' },
+      { breakdown_value: 'Norway', count: 250, label: 'Norway' },
+      { breakdown_value: 'Belgium', count: 210, label: 'Belgium' },
+      { breakdown_value: 'Switzerland', count: 180, label: 'Switzerland' },
+      { breakdown_value: 'Denmark', count: 150, label: 'Denmark' },
+      { breakdown_value: 'Finland', count: 120, label: 'Finland' }
+    ],
+    states: [
+      { breakdown_value: 'California', count: 850, label: 'California' },
+      { breakdown_value: 'Texas', count: 620, label: 'Texas' },
+      { breakdown_value: 'New York', count: 580, label: 'New York' },
+      { breakdown_value: 'Florida', count: 450, label: 'Florida' },
+      { breakdown_value: 'Illinois', count: 280, label: 'Illinois' },
+      { breakdown_value: 'Pennsylvania', count: 250, label: 'Pennsylvania' },
+      { breakdown_value: 'Ohio', count: 220, label: 'Ohio' },
+      { breakdown_value: 'Georgia', count: 190, label: 'Georgia' },
+      { breakdown_value: 'North Carolina', count: 170, label: 'North Carolina' },
+      { breakdown_value: 'Michigan', count: 150, label: 'Michigan' },
+      { breakdown_value: 'Washington', count: 140, label: 'Washington' },
+      { breakdown_value: 'Arizona', count: 130, label: 'Arizona' },
+      { breakdown_value: 'Virginia', count: 120, label: 'Virginia' },
+      { breakdown_value: 'Colorado', count: 110, label: 'Colorado' },
+      { breakdown_value: 'Oregon', count: 100, label: 'Oregon' },
+      { breakdown_value: 'Massachusetts', count: 95, label: 'Massachusetts' },
+      { breakdown_value: 'Tennessee', count: 85, label: 'Tennessee' },
+      { breakdown_value: 'Maryland', count: 80, label: 'Maryland' },
+      { breakdown_value: 'Minnesota', count: 75, label: 'Minnesota' },
+      { breakdown_value: 'Wisconsin', count: 70, label: 'Wisconsin' }
+    ],
     referrers: [
       { breakdown_value: 'direct', count: 1250, label: 'Direct Traffic' },
       { breakdown_value: 'https://google.com', count: 890, label: 'Google Search' },
@@ -73,8 +115,8 @@ function createDemoData() {
       { breakdown_value: 'https://pinterest.com', count: 154, label: 'Pinterest' },
       { breakdown_value: 'https://reddit.com', count: 134, label: 'Reddit' },
       { breakdown_value: 'https://newsletter.drbi.org', count: 123, label: 'Newsletter' },
-      { breakdown_value: 'https://bahai.org', count: 98, label: 'Baha\'i.org' },
-      { breakdown_value: 'https://bahaicentre.org', count: 87, label: 'Baha\'i Centre' },
+      { breakdown_value: 'https://bahai.org', count: 98, label: 'Bahai.org' },
+      { breakdown_value: 'https://bahaicentre.org', count: 87, label: 'Bahai Centre' },
       { breakdown_value: 'https://duckduckgo.com', count: 76, label: 'DuckDuckGo' },
       { breakdown_value: 'https://yahoo.com', count: 65, label: 'Yahoo Search' },
       { breakdown_value: 'https://whatsapp.com', count: 54, label: 'WhatsApp' },
@@ -91,13 +133,11 @@ function createDemoData() {
   };
 }
 
-// Import analytics utilities
-import { combineAnalyticsData } from '../../utils/analytics-utils.js';
-import { loadAnalyticsSummary } from '../../utils/analytics-cache.js';
+
 
 // Determine if we're in development
-const isDevelopment = import.meta.env.DEV || 
-                     import.meta.env.APP_ENV === 'dev' || 
+const isDevelopment = import.meta.env.DEV ||
+                     import.meta.env.APP_ENV === 'dev' ||
                      process.env.NODE_ENV === 'development';
 
 // Load imported analytics data (if any) - use fast cached summary
@@ -114,38 +154,47 @@ if (isDevelopment) {
     // Get current date and 30 days ago
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-    
+
     // Format dates for PostHog API
     const endDate = now.toISOString().split('T')[0];
     const startDate = thirtyDaysAgo.toISOString().split('T')[0];
 
-    console.log(`Fetching PostHog data from ${startDate} to ${endDate}`);
+    console.log('Fetching PostHog data from ' + startDate + ' to ' + endDate);
 
-    // PostHog API endpoints
     const headers = {
-      'Authorization': `Bearer ${posthogApiKey}`,
+      'Authorization': 'Bearer ' + posthogApiKey,
       'Content-Type': 'application/json'
     };
 
     // Multiple API calls to get comprehensive data
     const apiCalls = await Promise.allSettled([
       // Page views over time
-      fetch(`${posthogHost}/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0}]&date_from=${startDate}&date_to=${endDate}&interval=day`, {
+      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0}]&date_from=' + startDate + '&date_to=' + endDate + '&interval=day', {
         headers
       }),
-      
+
       // Top pages
-      fetch(`${posthogHost}/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$current_url&date_from=${startDate}&date_to=${endDate}`, {
+      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$current_url&date_from=' + startDate + '&date_to=' + endDate, {
         headers
       }),
-      
+
       // Referrer sources
-      fetch(`${posthogHost}/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$referrer&date_from=${startDate}&date_to=${endDate}`, {
+      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$referrer&date_from=' + startDate + '&date_to=' + endDate, {
         headers
       }),
 
       // Unique visitors
-      fetch(`${posthogHost}/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"math":"dau"}]&date_from=${startDate}&date_to=${endDate}&interval=day`, {
+      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"math":"dau"}]&date_from=' + startDate + '&date_to=' + endDate + '&interval=day', {
+        headers
+      }),
+
+      // Geographic data - Countries
+      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=person&breakdown=$geoip_country_name&date_from=' + startDate + '&date_to=' + endDate, {
+        headers
+      }),
+
+      // Geographic data - US States (regions)
+      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=person&breakdown=$geoip_subdivision_1_name&date_from=' + startDate + '&date_to=' + endDate, {
         headers
       })
     ]);
@@ -156,21 +205,21 @@ if (isDevelopment) {
       apiCalls.map(async (result, index) => {
         if (result.status === 'fulfilled' && result.value.ok) {
           const data = await result.value.json();
-          console.log(`PostHog API call ${index} successful:`, !!data.result);
+          console.log('PostHog API call ' + index + ' successful:', !!data.result);
           return data;
         } else if (result.status === 'fulfilled') {
-          console.error(`PostHog API call ${index} failed with status:`, result.value.status, await result.value.text());
+          console.error('PostHog API call ' + index + ' failed with status:', result.value.status, await result.value.text());
         } else {
-          console.error(`PostHog API call ${index} rejected:`, result.reason);
+          console.error('PostHog API call ' + index + ' rejected:', result.reason);
         }
         return null;
       })
     );
 
-    const [pageViewsData, topPagesData, referrerData, uniqueVisitorsData] = responses;
+    const [pageViewsData, topPagesData, referrerData, uniqueVisitorsData, countriesData, statesData] = responses;
 
     // Check if we got any real data
-    const hasRealData = pageViewsData?.result || topPagesData?.result || referrerData?.result || uniqueVisitorsData?.result;
+    const hasRealData = pageViewsData?.result || topPagesData?.result || referrerData?.result || uniqueVisitorsData?.result || countriesData?.result || statesData?.result;
 
     if (hasRealData) {
       console.log('Using real PostHog analytics data');
@@ -179,15 +228,17 @@ if (isDevelopment) {
         topPages: topPagesData?.result?.slice(0, 20) || [],
         referrers: referrerData?.result?.slice(0, 20) || [],
         uniqueVisitors: uniqueVisitorsData?.result?.[0]?.data || [],
+        countries: countriesData?.result?.slice(0, 15) || [],
+        states: statesData?.result?.slice(0, 25) || [],
         dateRange: { startDate, endDate },
         totalPageViews: pageViewsData?.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || 0,
         totalUniqueVisitors: uniqueVisitorsData?.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || 0,
         isDemo: false
       };
-      
+
       // Combine with imported data if available
       analyticsData = combineAnalyticsData(importedAnalytics, posthogData);
-      
+
     } else {
       console.log('No real data received from PostHog, checking imported data');
       if (importedAnalytics) {
@@ -202,8 +253,8 @@ if (isDevelopment) {
 
   } catch (e) {
     console.error('PostHog API error:', e);
-    analyticsError = `PostHog API failed: ${e.message}`;
-    
+    analyticsError = 'PostHog API failed: ' + e.message;
+
     // Fallback to imported data if available
     if (importedAnalytics) {
       console.log('PostHog failed, using imported analytics data');
@@ -251,7 +302,7 @@ if (isDevelopment) {
             <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">PostHog</span>
             {analyticsData.isDemo && (
               <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                {isDevelopment ? 'Demo Data - Development' : 
+                {isDevelopment ? 'Demo Data - Development' :
                  analyticsError ? 'Demo Data - API Error' : 'Demo Data - No API Key'}
               </span>
             )}
@@ -264,7 +315,7 @@ if (isDevelopment) {
               <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Live Data</span>
             )}
           </div>
-          
+
           <!-- Actions -->
           <div class="flex items-center gap-3">
             <a href="/admin/analytics/import" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
@@ -282,7 +333,7 @@ if (isDevelopment) {
             </select>
           </div>
         </div>
-        
+
         <!-- Analytics Overview -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
@@ -388,7 +439,7 @@ if (isDevelopment) {
           <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 20 Pages</h3>
             <div class="space-y-2">
-              {analyticsData.topPages.map((page, index) => (
+              {analyticsData.topPages.map((page: any, index: number) => (
                 <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
                   <div class="flex items-center gap-3 min-w-0 flex-1">
                     <div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">{index + 1}</div>
@@ -407,23 +458,28 @@ if (isDevelopment) {
 
           <!-- Traffic Sources -->
           <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 20 Traffic Sources</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Traffic Sources</h3>
             <div class="space-y-2">
-              {analyticsData.referrers.map((referrer, index) => {
-                const getSourceIcon = (url) => {
-                  if (url.includes('google')) return '🔍';
-                  if (url.includes('facebook')) return '📘';
-                  if (url.includes('twitter')) return '🐦';
-                  if (url.includes('linkedin')) return '💼';
-                  if (url.includes('instagram')) return '📷';
-                  if (url.includes('youtube')) return '📹';
-                  if (url.includes('bing')) return '🔍';
-                  if (url.includes('pinterest')) return '📌';
-                  if (url.includes('reddit')) return '🤖';
-                  if (url === 'direct') return '🌐';
-                  return '🔗';
+              {analyticsData.referrers?.map((referrer) => {
+                const getSourceIcon = (source) => {
+                  if (source === 'direct') return '🔗';
+                  if (source.includes('google')) return '🔍';
+                  if (source.includes('facebook')) return '📘';
+                  if (source.includes('twitter')) return '🐦';
+                  if (source.includes('linkedin')) return '💼';
+                  if (source.includes('youtube')) return '📺';
+                  if (source.includes('pinterest')) return '📌';
+                  if (source.includes('instagram')) return '📷';
+                  if (source.includes('reddit')) return '🤖';
+                  if (source.includes('tiktok')) return '🎵';
+                  if (source.includes('github')) return '⚙️';
+                  if (source.includes('medium')) return '📝';
+                  if (source.includes('yahoo')) return '🌐';
+                  if (source.includes('bing')) return '🔎';
+                  if (source.includes('ecosia')) return '🌱';
+                  return '🌐';
                 };
-                
+
                 return (
                   <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
                     <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -441,6 +497,90 @@ if (isDevelopment) {
               })}
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Geographic Analytics - World Map Full Width -->
+      <div class="mt-6">
+        <!-- World Map -->
+        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">Traffic by Location</h3>
+          <div id="worldMap" class="h-96 bg-gray-50 rounded-lg"></div>
+        </div>
+
+        <!-- Geographic Data -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Top Countries -->
+          <div class="bg-white border border-gray-200 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Countries</h3>
+            <div class="space-y-2 max-h-[48rem] overflow-y-auto">
+              {analyticsData.countries?.map((country, index) => {
+                // Get flag emoji for country (basic mapping)
+                const getCountryFlag = (countryName) => {
+                  const flags = {
+                    'United States': '🇺🇸',
+                    'United Kingdom': '🇬🇧',
+                    'Canada': '🇨🇦',
+                    'Australia': '🇦🇺',
+                    'Germany': '🇩🇪',
+                    'France': '🇫🇷',
+                    'Netherlands': '🇳🇱',
+                    'Spain': '🇪🇸',
+                    'Italy': '🇮🇹',
+                    'Sweden': '🇸🇪',
+                    'Norway': '🇳🇴',
+                    'Belgium': '🇧🇪',
+                    'Switzerland': '🇨🇭',
+                    'Denmark': '🇩🇰',
+                    'Finland': '🇫🇮',
+                  };
+                  return flags[countryName] || '🏳️';
+                };
+
+                return (
+                  <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                      <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-lg">{getCountryFlag(country.breakdown_value)}</div>
+                      <div class="min-w-0 flex-1">
+                        <h4 class="text-sm font-medium text-gray-900 truncate">{country.label || country.breakdown_value}</h4>
+                        <p class="text-xs text-gray-500">Rank #{index + 1}</p>
+                      </div>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                      <span class="text-sm font-semibold text-gray-900">{country.count?.toLocaleString()}</span>
+                      <p class="text-xs text-gray-500">visitors</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <!-- US States -->
+          {analyticsData.states && analyticsData.states.length > 0 && (
+            <div class="bg-white border border-gray-200 rounded-xl p-6">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Top US States</h3>
+              <div class="space-y-2 max-h-[48rem] overflow-y-auto">
+                {analyticsData.states?.slice(0, 15).map((state, index) => {
+                  return (
+                    <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
+                      <div class="flex items-center gap-3 min-w-0 flex-1">
+                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">🇺🇸</div>
+                        <div class="min-w-0 flex-1">
+                          <h4 class="text-sm font-medium text-gray-900 truncate">{state.label || state.breakdown_value}</h4>
+                          <p class="text-xs text-gray-500">#{index + 1} in US</p>
+                        </div>
+                      </div>
+                      <div class="text-right flex-shrink-0">
+                        <span class="text-sm font-semibold text-gray-900">{state.count?.toLocaleString()}</span>
+                        <p class="text-xs text-gray-500">visitors</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     )}
@@ -470,14 +610,25 @@ if (isDevelopment) {
   </div>
 </AdminLayout>
 
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script define:vars={{ analyticsData }}>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+<script define:vars={{ analyticsData }} is:inline>
   // Check CMS status on page load
   async function checkCMSStatus() {
     try {
       const response = await fetch('/api/cms-status');
       const data = await response.json();
-      
+
       if (data.success) {
         updateGitHubStatus(data.status);
         updateEnvironmentStatus(data.status);
@@ -499,9 +650,9 @@ if (isDevelopment) {
 
     if (github.enabled) {
       icon = '✅';
-      text = `GitHub connected (${github.repository})`;
+      text = 'GitHub connected (' + github.repository + ')';
       className = 'connected';
-      
+
       if (environment === 'development' && status.features.autoSync) {
         text += ' • Auto-sync enabled';
       }
@@ -509,7 +660,7 @@ if (isDevelopment) {
       icon = '⚠️';
       text = 'GitHub configured but not enabled';
       className = 'warning';
-      
+
       if (environment === 'development') {
         text += ' • Set CMS_USE_GITHUB=true to enable';
       }
@@ -519,8 +670,8 @@ if (isDevelopment) {
       className = 'disconnected';
     }
 
-    githubStatus.innerHTML = `<span>${icon}</span> ${text}`;
-    githubStatus.className = `status-indicator ${className}`;
+    githubStatus.innerHTML = '<span>' + icon + '</span> ' + text;
+    githubStatus.className = 'status-indicator ' + className;
   }
 
   function updateEnvironmentStatus(status) {
@@ -529,7 +680,7 @@ if (isDevelopment) {
 
     const { environment, validation } = status;
     const envClass = environment === 'production' ? 'production' : 'development';
-    
+
     let validationText = '';
     if (validation.strict) {
       validationText += ' • Strict validation';
@@ -538,16 +689,13 @@ if (isDevelopment) {
       validationText += ' • Build checks enabled';
     }
 
-    envStatus.innerHTML = `
-      <span class="env-badge ${envClass}">${environment}</span>
-      Environment: ${environment}${validationText}
-    `;
+    envStatus.innerHTML = '<span class="env-badge ' + envClass + '">' + environment + '</span> Environment: ' + environment + validationText;
   }
 
   function showError(message) {
     const githubStatus = document.getElementById('github-status');
     if (githubStatus) {
-      githubStatus.innerHTML = `<span>❌</span> ${message}`;
+      githubStatus.innerHTML = '<span>❌</span> ' + message;
       githubStatus.className = 'status-indicator disconnected';
     }
   }
@@ -626,10 +774,201 @@ if (isDevelopment) {
     });
   }
 
+  // Initialize world map with heat mapping
+  function initWorldMap() {
+    if (!analyticsData || (!analyticsData.countries && !analyticsData.states)) {
+      console.log('No geographic data available for world map');
+      return;
+    }
+
+    // Create the map centered on the world
+    const map = L.map('worldMap').setView([20, 0], 2);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Country coordinates mapping (basic set)
+    const countryCoords = {
+      'United Kingdom': [55.3781, -3.4360],
+      'Canada': [56.1304, -106.3468],
+      'Australia': [-25.2744, 133.7751],
+      'Germany': [51.1657, 10.4515],
+      'France': [46.2276, 2.2137],
+      'Netherlands': [52.1326, 5.2913],
+      'Spain': [40.4637, -3.7492],
+      'Italy': [41.8719, 12.5674],
+      'Sweden': [60.1282, 18.6435],
+      'Norway': [60.4720, 8.4689],
+      'Belgium': [50.5039, 4.4699],
+      'Switzerland': [46.8182, 8.2275],
+      'Denmark': [56.2639, 9.5018],
+      'Finland': [61.9241, 25.7482],
+    };
+
+    // US State coordinates mapping
+    const stateCoords = {
+      'Alabama': [32.806671, -86.791130],
+      'Alaska': [61.370716, -152.404419],
+      'Arizona': [33.729759, -111.431221],
+      'Arkansas': [34.969704, -92.373123],
+      'California': [36.116203, -119.681564],
+      'Colorado': [39.059811, -105.311104],
+      'Connecticut': [41.597782, -72.755371],
+      'Delaware': [39.318523, -75.507141],
+      'Florida': [27.766279, -81.686783],
+      'Georgia': [33.040619, -83.643074],
+      'Hawaii': [21.094318, -157.498337],
+      'Idaho': [44.240459, -114.478828],
+      'Illinois': [40.349457, -88.986137],
+      'Indiana': [39.849426, -86.258278],
+      'Iowa': [42.011539, -93.210526],
+      'Kansas': [38.526600, -96.726486],
+      'Kentucky': [37.668140, -84.670067],
+      'Louisiana': [31.169546, -91.867805],
+      'Maine': [44.323535, -69.765261],
+      'Maryland': [39.063946, -76.802101],
+      'Massachusetts': [42.230171, -71.530106],
+      'Michigan': [43.326618, -84.536095],
+      'Minnesota': [45.694454, -93.900192],
+      'Mississippi': [32.741646, -89.678696],
+      'Missouri': [38.572954, -92.189283],
+      'Montana': [47.052952, -110.454353],
+      'Nebraska': [41.125370, -98.268082],
+      'Nevada': [38.313515, -117.055374],
+      'New Hampshire': [43.452492, -71.563896],
+      'New Jersey': [40.298904, -74.756138],
+      'New Mexico': [34.840515, -106.248482],
+      'New York': [42.165726, -74.948051],
+      'North Carolina': [35.630066, -79.806419],
+      'North Dakota': [47.528912, -99.784012],
+      'Ohio': [40.388783, -82.764915],
+      'Oklahoma': [35.565342, -96.928917],
+      'Oregon': [44.572021, -122.070938],
+      'Pennsylvania': [40.590752, -77.209755],
+      'Rhode Island': [41.680893, -71.511780],
+      'South Carolina': [33.856892, -80.945007],
+      'South Dakota': [44.299782, -99.438828],
+      'Tennessee': [35.747845, -86.692345],
+      'Texas': [31.054487, -97.563461],
+      'Utah': [40.150032, -111.862434],
+      'Vermont': [44.045876, -72.710686],
+      'Virginia': [37.769337, -78.169968],
+      'Washington': [47.400902, -121.490494],
+      'West Virginia': [38.491226, -80.954570],
+      'Wisconsin': [44.268543, -89.616508],
+      'Wyoming': [42.755966, -107.302490]
+    };
+
+    // Get max count for color scaling from both countries and states
+    const allData = [...(analyticsData.countries || []), ...(analyticsData.states || [])];
+    const maxCount = Math.max(...allData.map(item => item.count));
+
+    // Add country markers (excluding US since we'll show states instead)
+    if (analyticsData.countries) {
+      analyticsData.countries.forEach(country => {
+        // Skip United States since we'll show individual states
+        if (country.breakdown_value === 'United States') return;
+        
+        const coords = countryCoords[country.breakdown_value];
+        if (coords) {
+          const [lat, lng] = coords;
+          const count = country.count || 0;
+          
+          // Calculate circle size and opacity based on traffic
+          const radius = Math.max(8, (count / maxCount) * 40);
+          const opacity = Math.max(0.4, count / maxCount);
+
+          // Color gradient from light blue to dark red
+          const intensity = count / maxCount;
+          let color = '#3b82f6'; // Default blue
+          if (intensity > 0.7) color = '#dc2626'; // Red
+          else if (intensity > 0.4) color = '#f59e0b'; // Orange
+          else if (intensity > 0.2) color = '#10b981'; // Green
+
+          // Create circle marker
+          L.circleMarker([lat, lng], {
+            radius: radius,
+            fillColor: color,
+            color: color,
+            weight: 2,
+            opacity: opacity,
+            fillOpacity: opacity * 0.7
+          })
+          .bindPopup(`
+            <div class="font-semibold">${country.breakdown_value}</div>
+            <div class="text-sm text-gray-600">${count.toLocaleString()} visitors</div>
+          `)
+          .addTo(map);
+        }
+      });
+    }
+
+    // Add US state markers
+    if (analyticsData.states) {
+      analyticsData.states.forEach(state => {
+        const coords = stateCoords[state.breakdown_value];
+        if (coords) {
+          const [lat, lng] = coords;
+          const count = state.count || 0;
+          
+          // Calculate circle size and opacity based on traffic
+          const radius = Math.max(6, (count / maxCount) * 35);
+          const opacity = Math.max(0.4, count / maxCount);
+
+          // Color gradient for states (slightly different to distinguish from countries)
+          const intensity = count / maxCount;
+          let color = '#1e40af'; // Darker blue for states
+          if (intensity > 0.7) color = '#b91c1c'; // Dark red
+          else if (intensity > 0.4) color = '#d97706'; // Dark orange
+          else if (intensity > 0.2) color = '#059669'; // Dark green
+
+          // Create circle marker for state
+          L.circleMarker([lat, lng], {
+            radius: radius,
+            fillColor: color,
+            color: color,
+            weight: 2,
+            opacity: opacity,
+            fillOpacity: opacity * 0.7
+          })
+          .bindPopup(`
+            <div class="font-semibold">${state.breakdown_value}</div>
+            <div class="text-sm text-gray-600">${count.toLocaleString()} visitors</div>
+            <div class="text-xs text-gray-500">United States</div>
+          `)
+          .addTo(map);
+        }
+      });
+    }
+
+    // Add legend
+    const legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function(map) {
+      const div = L.DomUtil.create('div', 'info legend');
+      div.style.background = 'white';
+      div.style.padding = '10px';
+      div.style.border = '1px solid #ccc';
+      div.style.borderRadius = '5px';
+      div.style.fontSize = '12px';
+      
+      div.innerHTML = `
+        <div style="font-weight: bold; margin-bottom: 5px;">Visitors</div>
+        <div><span style="color: #dc2626;">●</span> High (${Math.round(maxCount * 0.7)}+)</div>
+        <div><span style="color: #f59e0b;">●</span> Medium (${Math.round(maxCount * 0.4)}+)</div>
+        <div><span style="color: #10b981;">●</span> Low (${Math.round(maxCount * 0.2)}+)</div>
+        <div><span style="color: #3b82f6;">●</span> Minimal</div>
+      `;
+      return div;
+    };
+    legend.addTo(map);
+  }
+
   // Check status when page loads
   document.addEventListener('DOMContentLoaded', function() {
     checkCMSStatus();
     initTrafficChart();
+    initWorldMap();
   });
 </script>
-</AdminLayout>

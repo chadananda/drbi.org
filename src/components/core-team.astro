@@ -3,7 +3,7 @@ import { Picture } from "astro:assets";
 import brand from "@data/site.json"
 import { getTeam } from '@utils/utils.js';
 
-const publishedTeamMembers = getTeam(({ data }) => !data.draft);
+const publishedTeamMembers = await getTeam().then(team => team.filter(({ data }) => !data.draft));
 ---
 
 
