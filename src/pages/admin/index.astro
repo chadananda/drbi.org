@@ -200,6 +200,7 @@ if (isDevelopment) {
     ]);
 
     console.log('PostHog API calls completed:', apiCalls.map(call => call.status));
+    console.log('PostHog API results: pageViews=', !!pageViewsData?.result, 'topPages=', !!topPagesData?.result, 'referrers=', !!referrerData?.result, 'visitors=', !!uniqueVisitorsData?.result, 'countries=', !!countriesData?.result, 'states=', !!statesData?.result);
 
     const responses = await Promise.all(
       apiCalls.map(async (result, index) => {
@@ -220,6 +221,10 @@ if (isDevelopment) {
 
     // Check if we got any real data
     const hasRealData = pageViewsData?.result || topPagesData?.result || referrerData?.result || uniqueVisitorsData?.result || countriesData?.result || statesData?.result;
+
+    console.log('Has real PostHog data:', hasRealData);
+    console.log('Countries data length:', countriesData?.result?.length || 0);
+    console.log('States data length:', statesData?.result?.length || 0);
 
     if (hasRealData) {
       console.log('Using real PostHog analytics data');
