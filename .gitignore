@@ -18,6 +18,10 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+
+# analytics data (exclude raw imports but include processed summary)
+src/data/analytics-imports/
+!src/data/analytics-summary.json
 .env.development.local
 
 # macOS-specific files and dev

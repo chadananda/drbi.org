@@ -35,62 +35,81 @@ const posthogHost = 'https://us.i.posthog.com';
 let analyticsData = null;
 let analyticsError = null;
 
-// Provide demo analytics data for display
-analyticsData = {
-  pageViews: Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 100) + 50),
-  topPages: [
-    { breakdown_value: '/', count: 1250, label: 'Home Page' },
-    { breakdown_value: '/events', count: 890, label: 'Events' },
-    { breakdown_value: '/articles', count: 654, label: 'Articles' },
-    { breakdown_value: '/about', count: 432, label: 'About Us' },
-    { breakdown_value: '/contact', count: 398, label: 'Contact' },
-    { breakdown_value: '/team', count: 356, label: 'Team' },
-    { breakdown_value: '/news', count: 298, label: 'News' },
-    { breakdown_value: '/memorial', count: 276, label: 'Memorial' },
-    { breakdown_value: '/categories', count: 234, label: 'Categories' },
-    { breakdown_value: '/tags', count: 212, label: 'Tags' },
-    { breakdown_value: '/search', count: 198, label: 'Search' },
-    { breakdown_value: '/archive', count: 176, label: 'Archive' },
-    { breakdown_value: '/sitemap', count: 154, label: 'Sitemap' },
-    { breakdown_value: '/privacy', count: 134, label: 'Privacy Policy' },
-    { breakdown_value: '/terms', count: 123, label: 'Terms of Service' },
-    { breakdown_value: '/donate', count: 98, label: 'Donate' },
-    { breakdown_value: '/volunteer', count: 87, label: 'Volunteer' },
-    { breakdown_value: '/newsletter', count: 76, label: 'Newsletter' },
-    { breakdown_value: '/faq', count: 65, label: 'FAQ' },
-    { breakdown_value: '/subscribe', count: 54, label: 'Subscribe' }
-  ],
-  referrers: [
-    { breakdown_value: 'direct', count: 1250, label: 'Direct Traffic' },
-    { breakdown_value: 'https://google.com', count: 890, label: 'Google Search' },
-    { breakdown_value: 'https://facebook.com', count: 456, label: 'Facebook' },
-    { breakdown_value: 'https://twitter.com', count: 334, label: 'Twitter' },
-    { breakdown_value: 'https://instagram.com', count: 298, label: 'Instagram' },
-    { breakdown_value: 'https://linkedin.com', count: 234, label: 'LinkedIn' },
-    { breakdown_value: 'https://youtube.com', count: 198, label: 'YouTube' },
-    { breakdown_value: 'https://bing.com', count: 176, label: 'Bing Search' },
-    { breakdown_value: 'https://pinterest.com', count: 154, label: 'Pinterest' },
-    { breakdown_value: 'https://reddit.com', count: 134, label: 'Reddit' },
-    { breakdown_value: 'https://newsletter.drbi.org', count: 123, label: 'Newsletter' },
-    { breakdown_value: 'https://bahai.org', count: 98, label: 'Baha\'i.org' },
-    { breakdown_value: 'https://bahaicentre.org', count: 87, label: 'Baha\'i Centre' },
-    { breakdown_value: 'https://duckduckgo.com', count: 76, label: 'DuckDuckGo' },
-    { breakdown_value: 'https://yahoo.com', count: 65, label: 'Yahoo Search' },
-    { breakdown_value: 'https://whatsapp.com', count: 54, label: 'WhatsApp' },
-    { breakdown_value: 'https://telegram.org', count: 43, label: 'Telegram' },
-    { breakdown_value: 'https://signal.org', count: 32, label: 'Signal' },
-    { breakdown_value: 'https://wikipedia.org', count: 28, label: 'Wikipedia' },
-    { breakdown_value: 'https://ecosia.org', count: 21, label: 'Ecosia' }
-  ],
-  uniqueVisitors: Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 50) + 20),
-  dateRange: { startDate: '2024-01-01', endDate: '2024-01-31' },
-  totalPageViews: 3524,
-  totalUniqueVisitors: 1456,
-  isDemo: true
-};
+// Helper function to create demo data
+function createDemoData() {
+  return {
+    pageViews: Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 100) + 50),
+    topPages: [
+      { breakdown_value: '/', count: 1250, label: 'Home Page' },
+      { breakdown_value: '/events', count: 890, label: 'Events' },
+      { breakdown_value: '/articles', count: 654, label: 'Articles' },
+      { breakdown_value: '/about', count: 432, label: 'About Us' },
+      { breakdown_value: '/contact', count: 398, label: 'Contact' },
+      { breakdown_value: '/team', count: 356, label: 'Team' },
+      { breakdown_value: '/news', count: 298, label: 'News' },
+      { breakdown_value: '/memorial', count: 276, label: 'Memorial' },
+      { breakdown_value: '/categories', count: 234, label: 'Categories' },
+      { breakdown_value: '/tags', count: 212, label: 'Tags' },
+      { breakdown_value: '/search', count: 198, label: 'Search' },
+      { breakdown_value: '/archive', count: 176, label: 'Archive' },
+      { breakdown_value: '/sitemap', count: 154, label: 'Sitemap' },
+      { breakdown_value: '/privacy', count: 134, label: 'Privacy Policy' },
+      { breakdown_value: '/terms', count: 123, label: 'Terms of Service' },
+      { breakdown_value: '/donate', count: 98, label: 'Donate' },
+      { breakdown_value: '/volunteer', count: 87, label: 'Volunteer' },
+      { breakdown_value: '/newsletter', count: 76, label: 'Newsletter' },
+      { breakdown_value: '/faq', count: 65, label: 'FAQ' },
+      { breakdown_value: '/subscribe', count: 54, label: 'Subscribe' }
+    ],
+    referrers: [
+      { breakdown_value: 'direct', count: 1250, label: 'Direct Traffic' },
+      { breakdown_value: 'https://google.com', count: 890, label: 'Google Search' },
+      { breakdown_value: 'https://facebook.com', count: 456, label: 'Facebook' },
+      { breakdown_value: 'https://twitter.com', count: 334, label: 'Twitter' },
+      { breakdown_value: 'https://instagram.com', count: 298, label: 'Instagram' },
+      { breakdown_value: 'https://linkedin.com', count: 234, label: 'LinkedIn' },
+      { breakdown_value: 'https://youtube.com', count: 198, label: 'YouTube' },
+      { breakdown_value: 'https://bing.com', count: 176, label: 'Bing Search' },
+      { breakdown_value: 'https://pinterest.com', count: 154, label: 'Pinterest' },
+      { breakdown_value: 'https://reddit.com', count: 134, label: 'Reddit' },
+      { breakdown_value: 'https://newsletter.drbi.org', count: 123, label: 'Newsletter' },
+      { breakdown_value: 'https://bahai.org', count: 98, label: 'Baha\'i.org' },
+      { breakdown_value: 'https://bahaicentre.org', count: 87, label: 'Baha\'i Centre' },
+      { breakdown_value: 'https://duckduckgo.com', count: 76, label: 'DuckDuckGo' },
+      { breakdown_value: 'https://yahoo.com', count: 65, label: 'Yahoo Search' },
+      { breakdown_value: 'https://whatsapp.com', count: 54, label: 'WhatsApp' },
+      { breakdown_value: 'https://telegram.org', count: 43, label: 'Telegram' },
+      { breakdown_value: 'https://signal.org', count: 32, label: 'Signal' },
+      { breakdown_value: 'https://wikipedia.org', count: 28, label: 'Wikipedia' },
+      { breakdown_value: 'https://ecosia.org', count: 21, label: 'Ecosia' }
+    ],
+    uniqueVisitors: Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 50) + 20),
+    dateRange: { startDate: '2024-01-01', endDate: '2024-01-31' },
+    totalPageViews: 3524,
+    totalUniqueVisitors: 1456,
+    isDemo: true
+  };
+}
 
-// If PostHog API key exists, try to get real data
-if (posthogApiKey) {
+// Import analytics utilities
+import { combineAnalyticsData } from '../../utils/analytics-utils.js';
+import { loadAnalyticsSummary } from '../../utils/analytics-cache.js';
+
+// Determine if we're in development
+const isDevelopment = import.meta.env.DEV || 
+                     import.meta.env.APP_ENV === 'dev' || 
+                     process.env.NODE_ENV === 'development';
+
+// Load imported analytics data (if any) - use fast cached summary
+const importedAnalytics = isDevelopment ? null : await loadAnalyticsSummary();
+
+if (isDevelopment) {
+  // Always use demo data in development
+  console.log('Development mode: Using demo analytics data');
+  analyticsData = createDemoData();
+} else if (posthogApiKey && posthogApiKey.trim()) {
+  // Production: Try to get real PostHog data
+  console.log('Production mode: PostHog API key found, fetching real analytics data...');
   try {
     // Get current date and 30 days ago
     const now = new Date();
@@ -99,6 +118,8 @@ if (posthogApiKey) {
     // Format dates for PostHog API
     const endDate = now.toISOString().split('T')[0];
     const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+
+    console.log(`Fetching PostHog data from ${startDate} to ${endDate}`);
 
     // PostHog API endpoints
     const headers = {
@@ -129,10 +150,18 @@ if (posthogApiKey) {
       })
     ]);
 
+    console.log('PostHog API calls completed:', apiCalls.map(call => call.status));
+
     const responses = await Promise.all(
-      apiCalls.map(async (result) => {
+      apiCalls.map(async (result, index) => {
         if (result.status === 'fulfilled' && result.value.ok) {
-          return await result.value.json();
+          const data = await result.value.json();
+          console.log(`PostHog API call ${index} successful:`, !!data.result);
+          return data;
+        } else if (result.status === 'fulfilled') {
+          console.error(`PostHog API call ${index} failed with status:`, result.value.status, await result.value.text());
+        } else {
+          console.error(`PostHog API call ${index} rejected:`, result.reason);
         }
         return null;
       })
@@ -140,23 +169,57 @@ if (posthogApiKey) {
 
     const [pageViewsData, topPagesData, referrerData, uniqueVisitorsData] = responses;
 
-    // If we got real data, use it
-    if (pageViewsData || topPagesData || referrerData || uniqueVisitorsData) {
-      analyticsData = {
-        pageViews: pageViewsData ? pageViewsData.result?.[0]?.data || analyticsData.pageViews : analyticsData.pageViews,
-        topPages: topPagesData ? topPagesData.result?.slice(0, 5) || analyticsData.topPages : analyticsData.topPages,
-        referrers: referrerData ? referrerData.result?.slice(0, 5) || analyticsData.referrers : analyticsData.referrers,
-        uniqueVisitors: uniqueVisitorsData ? uniqueVisitorsData.result?.[0]?.data || analyticsData.uniqueVisitors : analyticsData.uniqueVisitors,
+    // Check if we got any real data
+    const hasRealData = pageViewsData?.result || topPagesData?.result || referrerData?.result || uniqueVisitorsData?.result;
+
+    if (hasRealData) {
+      console.log('Using real PostHog analytics data');
+      const posthogData = {
+        pageViews: pageViewsData?.result?.[0]?.data || [],
+        topPages: topPagesData?.result?.slice(0, 20) || [],
+        referrers: referrerData?.result?.slice(0, 20) || [],
+        uniqueVisitors: uniqueVisitorsData?.result?.[0]?.data || [],
         dateRange: { startDate, endDate },
-        totalPageViews: pageViewsData ? pageViewsData.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || analyticsData.totalPageViews : analyticsData.totalPageViews,
-        totalUniqueVisitors: uniqueVisitorsData ? uniqueVisitorsData.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || analyticsData.totalUniqueVisitors : analyticsData.totalUniqueVisitors,
+        totalPageViews: pageViewsData?.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || 0,
+        totalUniqueVisitors: uniqueVisitorsData?.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || 0,
         isDemo: false
       };
+      
+      // Combine with imported data if available
+      analyticsData = combineAnalyticsData(importedAnalytics, posthogData);
+      
+    } else {
+      console.log('No real data received from PostHog, checking imported data');
+      if (importedAnalytics) {
+        console.log('Using imported analytics data');
+        analyticsData = importedAnalytics;
+      } else {
+        console.log('No imported data available, falling back to demo data');
+        analyticsError = 'PostHog API returned no data - using demo data';
+        analyticsData = createDemoData();
+      }
     }
 
   } catch (e) {
-    analyticsError = `PostHog API failed: ${e.message}`;
     console.error('PostHog API error:', e);
+    analyticsError = `PostHog API failed: ${e.message}`;
+    
+    // Fallback to imported data if available
+    if (importedAnalytics) {
+      console.log('PostHog failed, using imported analytics data');
+      analyticsData = importedAnalytics;
+    } else {
+      analyticsData = createDemoData();
+    }
+  }
+} else {
+  // Production but no API key - check for imported data
+  if (importedAnalytics) {
+    console.log('Production mode: No PostHog API key, using imported analytics data');
+    analyticsData = importedAnalytics;
+  } else {
+    console.log('Production mode: No PostHog API key and no imported data, using demo data');
+    analyticsData = createDemoData();
   }
 }
 ---
@@ -186,13 +249,29 @@ if (posthogApiKey) {
             </div>
             <h2 class="text-2xl font-bold text-gray-900">Website Analytics</h2>
             <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">PostHog</span>
-            {analyticsError && (
-              <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Demo Data</span>
+            {analyticsData.isDemo && (
+              <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                {isDevelopment ? 'Demo Data - Development' : 
+                 analyticsError ? 'Demo Data - API Error' : 'Demo Data - No API Key'}
+              </span>
+            )}
+            {analyticsData.isHybrid && (
+              <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                {analyticsData.dataSource === 'combined' ? 'Hybrid Data - Imported + Live' : 'Imported Data - Vercel'}
+              </span>
+            )}
+            {!analyticsData.isDemo && !analyticsData.isHybrid && (
+              <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">Live Data</span>
             )}
           </div>
           
-          <!-- Period Selector -->
+          <!-- Actions -->
           <div class="flex items-center gap-3">
+            <a href="/admin/analytics/import" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
+              <span>📊</span>
+              Import Data
+            </a>
+            <div class="border-l border-gray-300 h-6"></div>
             <label class="text-sm font-medium text-gray-700">Period:</label>
             <select id="analyticsPeriod" class="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
               <option value="30" selected>30 Days</option>
@@ -267,6 +346,41 @@ if (posthogApiKey) {
             <canvas id="trafficChart"></canvas>
           </div>
         </div>
+
+        <!-- Data Sources Info (for hybrid/imported data) -->
+        {analyticsData.isHybrid && analyticsData.sources && (
+          <div class="bg-purple-50 border border-purple-200 rounded-xl p-6 shadow-sm mb-8">
+            <h3 class="text-lg font-semibold text-purple-900 mb-4 flex items-center gap-2">
+              <span>🔄</span>
+              Data Sources
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {analyticsData.sources.map((source) => (
+                <div class="bg-white border border-purple-200 rounded-lg p-4">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
+                    <h4 class="font-medium text-gray-900">{source.source === 'vercel' ? 'Vercel Analytics' : source.source}</h4>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-1">{source.recordCount?.toLocaleString()} records</p>
+                  <p class="text-sm text-gray-600 mb-1">{source.dateRange}</p>
+                  <p class="text-xs text-gray-500">
+                    Uploaded: {new Date(source.uploadedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              ))}
+              {analyticsData.dataSource === 'combined' && (
+                <div class="bg-white border border-green-200 rounded-lg p-4">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
+                    <h4 class="font-medium text-gray-900">PostHog Live</h4>
+                  </div>
+                  <p class="text-sm text-gray-600">Real-time analytics data</p>
+                  <p class="text-xs text-gray-500">Current session</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <!-- Top Pages and Traffic Sources -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
