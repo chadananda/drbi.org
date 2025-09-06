@@ -207,10 +207,12 @@ export function combineAnalyticsData(importedData, posthogData) {
   console.log(`🔄 Merging data: Imported ends ${importedEndDate.toISOString().split('T')[0]}, PostHog starts ${posthogStartDate.toISOString().split('T')[0]}`);
   
   // Check for overlap and decide merge strategy
-  const hasOverlap = importedEndDate >= posthogStartDate;
+  // Only consider overlap if PostHog actually has meaningful data
+  const hasOverlap = importedEndDate >= posthogStartDate && 
+                     (posthogData.totalPageViews > 0 || posthogData.pageViews?.length > 0);
   
   if (hasOverlap) {
-    console.log('⚠️  Date overlap detected - using PostHog for recent data, imported for historical');
+    console.log('⚠️  Date overlap detected with real PostHog data - using PostHog for recent data, imported for historical');
     
     // Use PostHog for current period, imported for historical period only
     // Filter daily stats to avoid overlap
@@ -368,6 +370,7 @@ function combineNonOverlappingDailyStats(importedDailyStats, posthogPageViews, p
   const posthogStartStr = posthogStartDate.toISOString().split('T')[0];
   
   // Filter imported data to only include dates before PostHog starts
+  // Use <= instead of < to include the last day of imported data if PostHog has no data for it
   const historicalStats = importedDailyStats.filter(day => day.date < posthogStartStr);
   
   // Create PostHog daily stats from the arrays (assumes they're aligned by day)
