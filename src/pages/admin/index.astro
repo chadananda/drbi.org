@@ -983,14 +983,14 @@ const debugInfo = {
   // Check status when page loads
   document.addEventListener('DOMContentLoaded', function() {
     // Client-side debug logging for PostHog data
-    const debugInfo = ${JSON.stringify(debugInfo)};
-    console.log('🔍 DRBI Analytics Debug Info:', debugInfo);
-    console.log('Analytics data isDemo:', debugInfo.isDemo);
-    console.log('Countries data:', debugInfo.countries);
-    console.log('States data:', debugInfo.states);
-    console.log('Total countries:', debugInfo.countriesCount);
-    console.log('Total states:', debugInfo.statesCount);
-    console.log('PostHog API key present:', debugInfo.hasPosthogKey);
+    const debug = ${JSON.stringify(debugInfo)};
+    console.log('🔍 DRBI Analytics Debug Info:', debug);
+    console.log('Analytics data isDemo:', debug.isDemo);
+    console.log('Countries data:', debug.countries);
+    console.log('States data:', debug.states);
+    console.log('Total countries:', debug.countriesCount);
+    console.log('Total states:', debug.statesCount);
+    console.log('PostHog API key present:', debug.hasPosthogKey);
     
     checkCMSStatus();
     initTrafficChart();
