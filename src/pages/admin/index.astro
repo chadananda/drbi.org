@@ -145,10 +145,10 @@ const importedAnalytics = await loadAnalyticsSummary();
 
 // Initialize with imported data as fallback
 if (importedAnalytics) {
-  console.log('Imported analytics available, will combine with PostHog data if available');
+  console.log('🔧 DEBUG: Imported analytics available:', importedAnalytics.totalPageViews, 'views');
   analyticsData = importedAnalytics;
 } else {
-  console.log('No imported analytics, will use PostHog or demo data');
+  console.log('🔧 DEBUG: No imported analytics found');
 }
 
 if (posthogApiKey && posthogApiKey.trim()) {
@@ -281,7 +281,11 @@ if (posthogApiKey && posthogApiKey.trim()) {
   }
 }
 
-// Final analytics data is ready
+// Final analytics data logging
+console.log('🎯 FINAL DEBUG: Analytics data ready');
+console.log('  📊 Total page views:', analyticsData?.totalPageViews || 0);
+console.log('  👥 Total unique visitors:', analyticsData?.totalUniqueVisitors || 0);
+console.log('  🔄 Data source:', analyticsData?.dataSource || 'unknown');
 
 // Create debug info for client-side logging
 const debugInfo = {

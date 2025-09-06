@@ -207,9 +207,9 @@ export function combineAnalyticsData(importedData, posthogData) {
   console.log(`🔄 Merging data: Imported ends ${importedEndDate.toISOString().split('T')[0]}, PostHog starts ${posthogStartDate.toISOString().split('T')[0]}`);
   
   // Check for overlap and decide merge strategy
-  // Only consider overlap if PostHog actually has meaningful data
+  // Only consider overlap if PostHog has meaningful data (more than minimal tracking)
   const hasOverlap = importedEndDate >= posthogStartDate && 
-                     (posthogData.totalPageViews > 0 || posthogData.pageViews?.length > 0);
+                     (posthogData.totalPageViews > 50);
   
   if (hasOverlap) {
     console.log('⚠️  Date overlap detected with real PostHog data - using PostHog for recent data, imported for historical');
