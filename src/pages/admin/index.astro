@@ -32,7 +32,7 @@ try {
 const totalPosts = memorial.length + news.length + articles.length;
 
 // PostHog API integration
-const posthogApiKey = process.env.POSTHOG_API_KEY || import.meta.env.POSTHOG_API_KEY;
+const posthogApiKey = process.env.POSTHOG_API_SERVER_KEY || import.meta.env.POSTHOG_API_SERVER_KEY || process.env.POSTHOG_API_KEY || import.meta.env.POSTHOG_API_KEY;
 const posthogHost = process.env.POSTHOG_HOST || import.meta.env.POSTHOG_HOST || 'https://us.i.posthog.com';
 
 let analyticsData = null;
