@@ -1,4 +1,5 @@
 ---
+import PostHogLayout from '@layouts/PostHogLayout.astro';
 import Container from "@components/container.astro";
 import Testimonials from "@components/testimonials.astro";
 import Layout from "@layouts/Layout.astro";
@@ -11,64 +12,63 @@ import VideoPlayer from "@components/videoPlayer.astro";
 import EventCalendar from "@components/EventCalendar.astro";
 ---
 
-<Layout title="Desert Rose Bahá’í Institute"
-  description="A school for the furtherance of arts, agriculture and Bahá’í education. Founded by Marguerite Sears."
-  image="/drbi-landscape.webp"
+<PostHogLayout>
+  <Layout
+    title="Desert Rose Bahá’í Institute"
+    description="A school for the furtherance of arts, agriculture and Bahá’í education. Founded by Marguerite Sears."
+    image="/drbi-landscape.webp"
   >
+    <main class="overflow-x-clip">
 
-  <main class="overflow-x-clip">
+      <SuperHero />
 
-    <SuperHero />
+      <Container>
+        <DRBICategories />
+      </Container>
 
-    <Container>
-      <DRBICategories />
-    </Container>
+      <Container>
+        <!-- margarite sears speaks about Desert Rose  -->
+        <VideoPlayer video="https://www.youtube.com/embed/HbHLSZoy7bw?si=ElAKh9mwXq03oGhd" />
+      </Container>
 
+      <!-- Transformational Leadership with Wade
+      <Container>
+        <VideoPlayer video="https://youtu.be/Sb09jJe1HYA" />
+      </Container> -->
 
-
-    <Container>
-       <!-- margarite sears speaks about Desert Rose  -->
-      <VideoPlayer video="https://www.youtube.com/embed/HbHLSZoy7bw?si=ElAKh9mwXq03oGhd" />
-    </Container>
-
-     <!-- Transformational Leadership with Wade
-    <Container>
-      <VideoPlayer video="https://youtu.be/Sb09jJe1HYA" />
-    </Container> -->
-
-
-    <Container>
-      <div class="mt-24">
-        <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
+      <Container>
+        <div class="mt-24">
+          <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
             Upcoming DRBI Events
-        </h2>
-        <EventCalendar view="cards" />
-      </div>
-    </Container>
+          </h2>
+          <EventCalendar view="cards" />
+        </div>
+      </Container>
 
-    <!-- Tockify calendar section commented out - using EventCalendar instead
-    <Container>
-      <div class="mt-24">
-        <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
-            Calendar of Upcoming Events
-        </h2>
-        <Tockify />
-      </div>
-    </Container>
-    -->
+      <!-- Tockify calendar section commented out - using EventCalendar instead
+      <Container>
+        <div class="mt-24">
+          <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
+              Calendar of Upcoming Events
+          </h2>
+          <Tockify />
+        </div>
+      </Container>
+      -->
 
+      <!-- sign up to our newsletter -->
+      <Container>
+        <div class="mt-24">
+          <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
+            <a href="http://eepurl.com/gTGwNH" class="text-indigo-600 hover:underline" target="_blank">
+              Sign Up to Our Newsletter »
+            </a>
+          </h2>
+        </div>
+      </Container>
 
-        <!-- sign up to our newsletter -->
-        <Container>
-          <div class="mt-24">
-            <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
-                <a href="http://eepurl.com/gTGwNH" class="text-indigo-600 hover:underline" target="_blank">Sign Up to Our Newsletter &raquo; </a>
-            </h2>
-          </div>
-        </Container>
+    </main>
 
-
-  </main>
-
-  <!-- <Testimonials /> -->
-</Layout>
+    <!-- <Testimonials /> -->
+  </Layout>
+</PostHogLayout>

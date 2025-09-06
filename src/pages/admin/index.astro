@@ -33,7 +33,7 @@ const totalPosts = memorial.length + news.length + articles.length;
 
 // PostHog API integration
 const posthogApiKey = import.meta.env.POSTHOG_API_KEY;
-const posthogHost = 'https://us.i.posthog.com';
+const posthogHost = import.meta.env.POSTHOG_HOST || 'https://us.i.posthog.com';
 
 let analyticsData = null;
 let analyticsError = null;
