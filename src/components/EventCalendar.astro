@@ -84,7 +84,7 @@ const formatPrice = (price) => {
       'events-list'
     }>
       {upcomingEvents.map(event => (
-        <div class={view === 'cards' ? 'relative' : 'event-container'}>
+        <div class={view === 'cards' ? 'relative' : 'event-container'} data-event-start={event.data.startDate}>
           {view === 'cards' ? (
             <>
               <article class="relative overflow-hidden w-[450px] h-[300px] m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl">
@@ -233,7 +233,33 @@ const formatPrice = (price) => {
   )}
 </div>
 
+<script>
+  // Hide events that have passed since the static build
+  function hideExpiredEvents() {
+    const now = new Date();
+    const eventElements = document.querySelectorAll('[data-event-start]');
+
+    eventElements.forEach((element) => {
+      const startDate = element.getAttribute('data-event-start');
+      if (startDate) {
+        const eventDate = new Date(startDate);
+        if (eventDate <= now) {
+          element.classList.add('event-expired');
+        }
+      }
+    });
+  }
+
+  // Run on page load
+  hideExpiredEvents();
+</script>
+
 <style>
+/* Hide expired events */
+.event-expired {
+  display: none !important;
+}
+
 /* Keep only the complex gradient that can't be done with Tailwind */
 .event-overlay {
   position: absolute;
