@@ -84,6 +84,7 @@
     "@astrojs/svelte": "^7.1.0",
     "@fontsource-variable/inter": "^5.2.6",
     "@markdoc/markdoc": "^0.5.4",
+    "@tailwindcss/typography": "^0.5.19",
     "astro-critical-css": "^0.0.7",
     "aws-sdk": "^2.1692.0",
     "axios": "^1.11.0",
