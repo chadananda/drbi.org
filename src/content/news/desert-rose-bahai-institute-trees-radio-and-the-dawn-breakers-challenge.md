@@ -13,7 +13,7 @@ keywords: []
 datePublished: "2024-01-15T00:00:00.000Z"
 dateModified: "2025-01-14T21:07:12.082Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-01-desert-rose-bahai-institute-news/desert-rose-institute-newsletterpng"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-01-desert-rose-bahai-institute-news/desert-rose-institute-newsletter.png"
   alt: "An update from the Desert Rose Baháí Institute covering new tree plantings, radio station achievements, and the Dawn-Breakers Challenge program."
 narrator: "auto"
 ---
