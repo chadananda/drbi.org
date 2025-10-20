@@ -501,6 +501,9 @@ export const getArticleAssetURL = async (slug, filename, full=false) => {
 }
 export const generateArticleImage = async (imgfile, post=null, baseUrl="", width, height=100, format='webp', quality=80, alt="") => {
   if (imgfile?.src) imgfile = imgfile.src; // in case we get an object instead of a string
+  // Ensure width and height are numbers, not objects
+  width = width ? parseInt(width, 10) : 0;
+  height = height ? parseInt(height, 10) : 100;
   alt = alt || post.data.title;
   let empty ={src:'', width, height, alt}
   if (!imgfile) {
@@ -1029,9 +1032,12 @@ export const transformS3Url = (url = '', width = null, height = null, format = '
   url = url || '';
   if (!url.includes('.s3.')) return url;
   const imagePath = new URL(url).pathname;
+  // Ensure width and height are numbers, not objects
+  width = width ? parseInt(width, 10) : null;
+  height = height ? parseInt(height, 10) : null;
   let params = [];
-  if (width) params.push(`w=${width}`);
-  if (height) params.push(`h=${height}`);
+  if (width && !isNaN(width)) params.push(`w=${width}`);
+  if (height && !isNaN(height)) params.push(`h=${height}`);
   // set default quality
   if (quality===0 && width<400) quality = 100; else if (quality===0) quality = 80;
   params.push(`fm=${format}`, `q=${quality}`, `fit=crop`, `crop=faces`);
@@ -1049,6 +1055,9 @@ export const transformS3Url = (url = '', width = null, height = null, format = '
   return `${site.img_base_url}${imagePath}?${params.join('&')}`;
 }
 export const displayImageObj = (url, alt='', width=0, height=0, format='webp', quality=80) => {
+  // Ensure width and height are numbers, not objects
+  width = width ? parseInt(width, 10) : 0;
+  height = height ? parseInt(height, 10) : 0;
   // console.log(`>>> displayImageObj`, {url, src: (url, width, height, format, quality)});
   return {
     src: transformS3Url(url, width, height, format, quality),
