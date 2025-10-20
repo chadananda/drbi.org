@@ -16,8 +16,13 @@ import { markedExt_TextCleanup } from "src/components/md/textCleanup.js"
 
 const { post } = Astro.props;
 const InternalComponents = {Aside, RelatedResource, BookQuote, Heading, VideoPlayer, img, aside}
+
+// For Astro 5.0 content collections, use pre-rendered HTML if available
+const usePreRendered = post.rendered?.html;
 ---
-{post.data?.language==='en' ? (
+{usePreRendered ? (
+  <Fragment set:html={post.rendered.html} />
+) : post.data?.language==='en' ? (
 <Markdown content={post.body} sanitize={{ allowComponents: true }}
    components={{ ...InternalComponents }}
    marked={{ extensions: [markedExt_TextCleanup()] }} />

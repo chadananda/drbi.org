@@ -17,12 +17,32 @@ export async function getStaticPaths() {
   const allAuthors = await getTeam();
   const allTopics = await getTopics();
   const allCategories = await getCategories();
-  const relatedArticles = (post) => articles.filter((ar) => {
-    let langmatch = (post.data.language) === (ar.data.language);
-    return langmatch && ar.id!=post.id && ar.data.topics && ar.data.topics.some((topic) => post.data?.topics?.includes(topic))
-  });
+  const relatedArticles = (post) => {
+    let langmatch = (ar) => (post.data.language) === (ar.data.language);
+
+    // First try topic matches
+    let matches = articles.filter((ar) =>
+      langmatch(ar) && ar.id!=post.id && ar.data.topics && ar.data.topics.some((topic) => post.data?.topics?.includes(topic))
+    );
+
+    // If no matches and this is a cemetery/memorial article, show memorial pages
+    if (matches.length === 0 && (post.data?.topics?.includes('memorial') || post.data?.topics?.includes('cemetery'))) {
+      matches = articles.filter((ar) =>
+        langmatch(ar) && ar.id!=post.id && ar.collection === 'memorial'
+      ).slice(0, 10);
+    }
+
+    // Fallback to recent articles in same language
+    if (matches.length === 0) {
+      matches = articles.filter((ar) =>
+        langmatch(ar) && ar.id!=post.id
+      ).slice(0, 10);
+    }
+
+    return matches;
+  };
   // const translations = (post) => articles.filter((ar) => ar.id.split('/')[0] === post.id.split('/')[0]);
-  const translations = (post) => articles.filter(ar => ar.baseid === post.baseid && ar.id !== post.id);
+  const translations = (post) => articles.filter(ar => ar.baseid && post.baseid && ar.baseid === post.baseid && ar.id !== post.id);
   // articles.map(({data}) => console.log(JSON.stringify(data.image)));
   return articles.map((post) => {
     return {

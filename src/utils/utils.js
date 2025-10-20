@@ -500,7 +500,7 @@ export const getArticleAssetURL = async (slug, filename, full=false) => {
    else return path
 }
 export const generateArticleImage = async (imgfile, post=null, baseUrl="", width, height=100, format='webp', quality=80, alt="") => {
-  if (imgfile?.src) imgfile == imgfile.src; // in case we get an object instead of a string
+  if (imgfile?.src) imgfile = imgfile.src; // in case we get an object instead of a string
   alt = alt || post.data.title;
   let empty ={src:'', width, height, alt}
   if (!imgfile) {
