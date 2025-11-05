@@ -56,13 +56,13 @@ h1,h2,h3,h4,h5 {
   font-weight: 700;
 }
 
-.prose-lg a {
+.prose-lg a:not([class]) {
   color: #2563eb;
   text-decoration: underline;
   font-weight: 500;
 }
 
-.prose-lg a:hover {
+.prose-lg a:not([class]):hover {
   color: #1d4ed8;
 }
 
