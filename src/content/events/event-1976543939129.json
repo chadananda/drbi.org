@@ -1,0 +1,47 @@
+{
+  "id": "1976543939129",
+  "url": "https://www.eventbrite.com/e/the-first-sunday-concert-series-tickets-1976543939129",
+  "name": "The First Sunday Concert Series",
+  "shortDescription": "Ms. Somlee Lee will perform her choices of the world’s favorite classical piano",
+  "startDate": "2026-01-04T14:00:00-0700",
+  "endDate": "2026-01-04T18:00:00-0700",
+  "image": "https://drbi.s3.amazonaws.com/events/1976543939129-main.jpg",
+  "location": {
+    "name": "Desert Rose Baha'i Institute",
+    "address": "1950 West William Sears Drive",
+    "city": "Eloy",
+    "state": "AZ",
+    "zip": "85131",
+    "latitude": "32.8276776",
+    "longitude": "-111.5880328"
+  },
+  "price": null,
+  "organizer": "Desert Rose Baha'i Institute",
+  "fullDescription": "Ms. Somlee Lee will perform her choices of the world’s favorite classical piano pieces.",
+  "eventSchedule": [],
+  "highlights": [
+    "In person",
+    "Virtual"
+  ],
+  "refundPolicy": "Refund Policy</p><div class=\"Card_body__vj7ua undefined\">Refunds up to 7 days before event</div></div></div></div></div><dialog class=\"Modal_dialog__1zirs \"><div class=\"Modal_container__1zirs\"><div class=\"Modal_header__1zirs\"><button class=\"Modal_closeButton__1zirs\" aria-label=\"close\"><i class=\"Icon_root__1kdkz Icon_icon-medium__1kdkz\" aria-hidden=\"true\"><svg xmlns=\"http://www.",
+  "categories": [],
+  "images": [
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172125190%2F177237344149%2F1%2Foriginal.20251202-053756",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553798659%2F177237344149%2F1%2Foriginal.20230712-175546",
+    "https://cdn.evbuc.com/images/1172125190/177237344149/1/logo.20251202-053756"
+  ],
+  "teacherImage": "https://drbi.s3.amazonaws.com/events/1976543939129-teacher.jpg",
+  "source": "external",
+  "externalId": "1976543939129",
+  "registrationUrl": "https://www.eventbrite.com/e/the-first-sunday-concert-series-tickets-1976543939129",
+  "visible": true,
+  "featured": false,
+  "mainImage": "https://drbi.s3.amazonaws.com/events/1976543939129-main.jpg",
+  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172125190%2F177237344149%2F1%2Foriginal.20251202-053756?crop=focalpoint&fit=crop&h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.509&fp-y=0.026&s=a5ccbbf177357218494414103fe364c0",
+  "lastModified": "08e7b0a9275585cbe89b23377ad218d1",
+  "lastSynced": "2025-12-02T19:10:38.623Z",
+  "scraped": {
+    "orgPageDate": "2025-12-02T19:17:22.322Z",
+    "detailPageDate": "2025-12-02T19:10:38.623Z"
+  }
+}
