@@ -3,6 +3,128 @@
  */
 
 /**
+ * Normalize a page URL to a consistent path format
+ * Converts "https://drbi.org/events" -> "/events"
+ * Converts "/" -> "/"
+ * Strips trailing slashes and query strings
+ */
+function normalizePageUrl(url) {
+  if (!url) return '/';
+
+  let path = url;
+
+  // Remove protocol and domain
+  try {
+    const urlObj = new URL(url, 'https://drbi.org');
+    path = urlObj.pathname;
+  } catch {
+    // If not a valid URL, treat as path
+    path = url;
+  }
+
+  // Remove trailing slash (except for root)
+  if (path !== '/' && path.endsWith('/')) {
+    path = path.slice(0, -1);
+  }
+
+  // Ensure leading slash
+  if (!path.startsWith('/')) {
+    path = '/' + path;
+  }
+
+  return path;
+}
+
+/**
+ * Normalize a referrer to a consistent domain format
+ * Converts "https://www.google.com/search?q=..." -> "google.com"
+ * Converts "google.com" -> "google.com"
+ * Handles special cases like $direct, com.google.android.gm
+ */
+function normalizeReferrer(referrer) {
+  if (!referrer) return 'direct';
+
+  // Handle special PostHog direct traffic markers
+  if (referrer === '$direct' || referrer === 'direct' || referrer === '') {
+    return '$direct';
+  }
+
+  // Handle Android app referrers (e.g., com.google.android.gm -> google.com)
+  if (referrer.startsWith('com.google.')) {
+    return 'google.com';
+  }
+  if (referrer.startsWith('com.') || referrer.startsWith('org.')) {
+    // Generic app referrer - extract middle part
+    const parts = referrer.split('.');
+    if (parts.length >= 2) {
+      return parts[1] + '.com';
+    }
+  }
+
+  let domain = referrer;
+
+  // Extract domain from full URL
+  try {
+    const urlObj = new URL(referrer.startsWith('http') ? referrer : 'https://' + referrer);
+    domain = urlObj.hostname;
+  } catch {
+    // If not a valid URL, use as-is
+    domain = referrer;
+  }
+
+  // Remove www. prefix
+  if (domain.startsWith('www.')) {
+    domain = domain.slice(4);
+  }
+
+  return domain;
+}
+
+/**
+ * Get a display label for a referrer domain
+ */
+function getReferrerLabel(domain) {
+  const labels = {
+    '$direct': 'Direct Traffic',
+    'google.com': 'Google Search',
+    'bing.com': 'Bing Search',
+    'yahoo.com': 'Yahoo Search',
+    'search.yahoo.com': 'Yahoo Search',
+    'duckduckgo.com': 'DuckDuckGo',
+    'facebook.com': 'Facebook',
+    'twitter.com': 'Twitter',
+    'x.com': 'X (Twitter)',
+    'linkedin.com': 'LinkedIn',
+    'instagram.com': 'Instagram',
+    'youtube.com': 'YouTube',
+    'pinterest.com': 'Pinterest',
+    'reddit.com': 'Reddit',
+    'tiktok.com': 'TikTok',
+    'ecosia.org': 'Ecosia',
+  };
+
+  return labels[domain] || domain;
+}
+
+/**
+ * Get a display label for a page path
+ */
+function getPageLabel(path) {
+  if (path === '/') return 'Home Page';
+
+  // Convert path to title case
+  const name = path
+    .replace(/^\//, '')
+    .replace(/-/g, ' ')
+    .replace(/\//g, ' > ')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+
+  return name;
+}
+
+/**
  * Load all imported analytics data
  */
 export async function loadImportedAnalytics() {
@@ -273,34 +395,48 @@ export function combineAnalyticsData(importedData, posthogData) {
 }
 
 /**
- * Combine top pages from different sources
+ * Combine top pages from different sources with URL normalization
  */
 function combineTopPages(imported, live) {
   const combined = new Map();
 
-  // Add imported data
-  for (const page of imported) {
-    combined.set(page.breakdown_value, {
-      breakdown_value: page.breakdown_value,
-      count: page.count,
-      visitors: page.visitors || 0,
-      label: page.label
-    });
+  // Add imported data with normalized paths
+  if (Array.isArray(imported)) {
+    for (const page of imported) {
+      if (!page || !page.breakdown_value) continue;
+      const normalizedPath = normalizePageUrl(page.breakdown_value);
+      const existing = combined.get(normalizedPath);
+      if (existing) {
+        existing.count += page.count || 0;
+        existing.visitors += (page.visitors || 0);
+      } else {
+        combined.set(normalizedPath, {
+          breakdown_value: normalizedPath,
+          count: page.count || 0,
+          visitors: page.visitors || 0,
+          label: page.label || getPageLabel(normalizedPath)
+        });
+      }
+    }
   }
 
-  // Add live data
-  for (const page of live) {
-    const existing = combined.get(page.breakdown_value);
-    if (existing) {
-      existing.count += page.count;
-      existing.visitors += (page.visitors || 0);
-    } else {
-      combined.set(page.breakdown_value, {
-        breakdown_value: page.breakdown_value,
-        count: page.count,
-        visitors: page.visitors || 0,
-        label: page.label
-      });
+  // Add live data with normalized paths
+  if (Array.isArray(live)) {
+    for (const page of live) {
+      if (!page || !page.breakdown_value) continue;
+      const normalizedPath = normalizePageUrl(page.breakdown_value);
+      const existing = combined.get(normalizedPath);
+      if (existing) {
+        existing.count += page.count || 0;
+        existing.visitors += (page.visitors || 0);
+      } else {
+        combined.set(normalizedPath, {
+          breakdown_value: normalizedPath,
+          count: page.count || 0,
+          visitors: page.visitors || 0,
+          label: page.label || getPageLabel(normalizedPath)
+        });
+      }
     }
   }
 
@@ -310,31 +446,44 @@ function combineTopPages(imported, live) {
 }
 
 /**
- * Combine referrers from different sources
+ * Combine referrers from different sources with domain normalization
  */
 function combineReferrers(imported, live) {
   const combined = new Map();
 
-  // Add imported data
-  for (const referrer of imported) {
-    combined.set(referrer.breakdown_value, {
-      breakdown_value: referrer.breakdown_value,
-      count: referrer.count,
-      label: referrer.label
-    });
+  // Add imported data with normalized domains
+  if (Array.isArray(imported)) {
+    for (const referrer of imported) {
+      if (!referrer || !referrer.breakdown_value) continue;
+      const normalizedDomain = normalizeReferrer(referrer.breakdown_value);
+      const existing = combined.get(normalizedDomain);
+      if (existing) {
+        existing.count += referrer.count || 0;
+      } else {
+        combined.set(normalizedDomain, {
+          breakdown_value: normalizedDomain,
+          count: referrer.count || 0,
+          label: getReferrerLabel(normalizedDomain)
+        });
+      }
+    }
   }
 
-  // Add live data
-  for (const referrer of live) {
-    const existing = combined.get(referrer.breakdown_value);
-    if (existing) {
-      existing.count += referrer.count;
-    } else {
-      combined.set(referrer.breakdown_value, {
-        breakdown_value: referrer.breakdown_value,
-        count: referrer.count,
-        label: referrer.label
-      });
+  // Add live data with normalized domains
+  if (Array.isArray(live)) {
+    for (const referrer of live) {
+      if (!referrer || !referrer.breakdown_value) continue;
+      const normalizedDomain = normalizeReferrer(referrer.breakdown_value);
+      const existing = combined.get(normalizedDomain);
+      if (existing) {
+        existing.count += referrer.count || 0;
+      } else {
+        combined.set(normalizedDomain, {
+          breakdown_value: normalizedDomain,
+          count: referrer.count || 0,
+          label: getReferrerLabel(normalizedDomain)
+        });
+      }
     }
   }
 

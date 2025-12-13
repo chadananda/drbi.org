@@ -510,17 +510,26 @@ if (Astro.request.method === "POST") {
         const file = e.target.files[0];
         if (!file) return;
 
-        try {
-          console.log('🔄 Starting upload process for file:', file.name);
-          // Convert file to base64
-          const reader = new FileReader();
-          reader.onload = async function(event) {
+        console.log('🔄 Starting upload process for file:', file.name);
+        console.log('🔑 Session ID:', sessionid ? sessionid.substring(0, 20) + '...' : 'NO SESSION');
+
+        // Convert file to base64
+        const reader = new FileReader();
+
+        reader.onerror = function(error) {
+          console.error('❌ FileReader error:', error);
+          alert('Failed to read file: ' + error.message);
+        };
+
+        reader.onload = async function(event) {
+          try {
             console.log('📊 File converted to base64, starting S3 upload...');
             const base64Data = event.target.result;
-            
+
             // Upload to S3
             const s3Key = `events/manual-${Date.now()}-${inputId === 'mainImageFile' ? 'main' : 'teacher'}.${file.name.split('.').pop()}`;
-            
+            console.log('📤 Uploading to S3 key:', s3Key);
+
             const response = await fetch('/api/upload_s3', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -531,51 +540,53 @@ if (Astro.request.method === "POST") {
               })
             });
 
+            console.log('📬 Response status:', response.status);
+
             if (response.ok) {
               const data = await response.json();
               console.log('📦 S3 response data:', data);
-              
+
               if (data.s3url) {
                 console.log('✅ S3 URL received:', data.s3url);
-                
+
                 // Set the S3 URL in hidden input
                 hiddenInput.value = data.s3url;
                 console.log('💾 Hidden input updated:', hiddenInput.value);
-                
+
                 // Show preview with imgix thumbnail
                 const imgixUrl = `https://drbi.imgix.net${data.s3url.replace('https://drbi.s3.amazonaws.com', '')}?w=200&h=150&fit=crop&auto=format,compress&q=75`;
                 console.log('🖼️ Setting preview image:', imgixUrl);
                 console.log('🔍 Preview elements:', { previewImg: !!previewImg, preview: !!preview });
-                
+
                 if (previewImg) {
                   previewImg.src = imgixUrl;
                   console.log('🎯 Preview img src set');
                 } else {
                   console.error('❌ Preview img element not found!');
                 }
-                
+
                 if (preview) {
                   preview.style.display = 'block';
                   console.log('👁️ Preview div made visible');
                 } else {
                   console.error('❌ Preview div element not found!');
                 }
-                
+
                 console.log('🎉 Preview should now be visible!');
               } else {
-                throw new Error('No S3 URL returned');
+                throw new Error('No S3 URL returned from server');
               }
             } else {
               const errorText = await response.text();
               console.error('❌ Upload failed:', response.status, errorText);
-              throw new Error('Upload failed');
+              alert('Upload failed: ' + response.status + ' - ' + errorText);
             }
-          };
-          reader.readAsDataURL(file);
-        } catch (error) {
-          console.error('Upload error:', error);
-          alert('Failed to upload image: ' + error.message);
-        }
+          } catch (error) {
+            console.error('❌ Upload error:', error);
+            alert('Failed to upload image: ' + error.message);
+          }
+        };
+        reader.readAsDataURL(file);
       });
     }
 

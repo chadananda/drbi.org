@@ -26,9 +26,10 @@
   "refundPolicy": "Refund Policy</p><div class=\"Card_body__vj7ua undefined\">Refunds up to 1 day before event</div></div></div></div></div><dialog class=\"Modal_dialog__1zirs \"><div class=\"Modal_container__1zirs\"><div class=\"Modal_header__1zirs\"><button class=\"Modal_closeButton__1zirs\" aria-label=\"close\"><i class=\"Icon_root__1kdkz Icon_icon-medium__1kdkz\" aria-hidden=\"true\"><svg xmlns=\"http://www.",
   "categories": [],
   "images": [
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172183482%2F177237344149%2F1%2Foriginal.20251202-210535",
     "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172123811%2F177237344149%2F1%2Foriginal.20251202-050102",
     "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553798659%2F177237344149%2F1%2Foriginal.20230712-175546",
-    "https://cdn.evbuc.com/images/1172123811/177237344149/1/logo.20251202-050102"
+    "https://cdn.evbuc.com/images/1172183482/177237344149/1/logo.20251202-210535"
   ],
   "teacherImage": "https://drbi.s3.amazonaws.com/events/1976541912066-teacher.jpg",
   "source": "external",
@@ -37,11 +38,11 @@
   "visible": true,
   "featured": false,
   "mainImage": "https://drbi.s3.amazonaws.com/events/1976541912066-main.jpg",
-  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172123811%2F177237344149%2F1%2Foriginal.20251202-050102?crop=focalpoint&fit=crop&h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=7e2780ca28fc56ddcf728af17238e6d4",
-  "lastModified": "c075ea696596d0c9bdaf0d184778c6b9",
-  "lastSynced": "2025-12-02T19:10:18.477Z",
+  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172183482%2F177237344149%2F1%2Foriginal.20251202-210535?h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&s=5f696066265b6e186adcc0dafeea8b73",
+  "lastModified": "568bc5b42bafbbe4f2aa61b14e42c087",
+  "lastSynced": "2025-12-02T21:11:36.964Z",
   "scraped": {
-    "orgPageDate": "2025-12-02T19:17:22.319Z",
-    "detailPageDate": "2025-12-02T19:10:18.477Z"
+    "orgPageDate": "2025-12-13T16:53:43.589Z",
+    "detailPageDate": "2025-12-02T21:11:36.964Z"
   }
 }

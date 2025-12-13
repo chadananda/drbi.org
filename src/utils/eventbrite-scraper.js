@@ -651,9 +651,30 @@ const refreshSingleEvent = async (eventId) => {
       return false;
     }
 
+    // Merge existing event with fresh details (preserve id, name, url, dates, etc.)
+    const refreshedEvent = {
+      ...existingEvent,
+      ...eventDetails,
+      // Preserve key fields from existing event
+      id: existingEvent.id,
+      name: existingEvent.name,
+      url: existingEvent.url,
+      startDate: existingEvent.startDate,
+      endDate: existingEvent.endDate,
+      location: existingEvent.location,
+      organizer: existingEvent.organizer,
+      // Update metadata
+      lastSynced: new Date().toISOString(),
+      manuallyEdited: false, // Clear the manual edit flag since we're refreshing
+      scraped: {
+        ...existingEvent.scraped,
+        detailPageDate: new Date().toISOString()
+      }
+    };
+
     // Force save (override manual edit protection)
-    const saved = saveEvent(eventsDir, eventDetails, true);
-    
+    const saved = saveEvent(eventsDir, refreshedEvent, true);
+
     if (saved) {
       console.log(`✅ Successfully refreshed event ${eventId} from Eventbrite`);
       return true;

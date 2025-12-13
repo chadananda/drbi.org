@@ -524,6 +524,9 @@ if (Astro.request.method === "POST" && event) {
     // Session ID for API calls (will be set when DOM loads)
     let sessionid;
 
+    // Track uploads in progress
+    let uploadsInProgress = 0;
+
     // Image upload functionality
     function setupImageUpload(inputId, hiddenId, previewId) {
       const fileInput = document.getElementById(inputId);
@@ -537,16 +540,46 @@ if (Astro.request.method === "POST" && event) {
         const file = e.target.files[0];
         if (!file) return;
 
-        try {
-          // Convert file to base64
-          const reader = new FileReader();
-          reader.onload = async function(event) {
+        // Mark upload as in progress
+        uploadsInProgress++;
+        const saveButton = document.querySelector('button[type="submit"]');
+        if (saveButton) {
+          saveButton.disabled = true;
+          saveButton.textContent = 'Uploading image...';
+        }
+
+        console.log('🔄 Starting upload process for file:', file.name);
+        console.log('🔑 Session ID:', sessionid ? sessionid.substring(0, 20) + '...' : 'NO SESSION');
+
+        // Convert file to base64
+        const reader = new FileReader();
+
+        reader.onerror = function(error) {
+          console.error('❌ FileReader error:', error);
+          alert('Failed to read file: ' + error.message);
+          // Re-enable save button
+          uploadsInProgress--;
+          if (uploadsInProgress <= 0) {
+            uploadsInProgress = 0;
+            const saveButton = document.querySelector('button[type="submit"]');
+            if (saveButton) {
+              saveButton.disabled = false;
+              saveButton.textContent = 'Save Changes';
+            }
+          }
+        };
+
+        reader.onload = async function(event) {
+          try {
+            console.log('📊 File converted to base64, starting S3 upload...');
             const base64Data = event.target.result;
-            
-            // Upload to S3 
+
+            // Upload to S3 with timestamp to avoid cache issues
             const eventId = document.querySelector('[data-event-id]')?.dataset?.eventId || 'edit';
-            const s3Key = `events/${eventId}-${inputId === 'mainImageFile' ? 'main' : 'teacher'}.${file.name.split('.').pop()}`;
-            
+            const timestamp = Date.now();
+            const s3Key = `events/${eventId}-${inputId === 'mainImageFile' ? 'main' : 'teacher'}-${timestamp}.${file.name.split('.').pop()}`;
+            console.log('📤 Uploading to S3 key:', s3Key);
+
             const response = await fetch('/api/upload_s3', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -557,36 +590,56 @@ if (Astro.request.method === "POST" && event) {
               })
             });
 
+            console.log('📬 Response status:', response.status);
+
             if (response.ok) {
               const data = await response.json();
+              console.log('📦 S3 response data:', data);
+
               if (data.s3url) {
+                console.log('✅ S3 URL received:', data.s3url);
+
                 // Set the S3 URL in hidden input
                 hiddenInput.value = data.s3url;
-                
-                // Show preview with imgix thumbnail
-                const imgixUrl = `https://drbi.imgix.net${data.s3url.replace('https://drbi.s3.amazonaws.com', '')}?w=200&h=150&fit=crop&auto=format,compress&q=75`;
+
+                // Show preview with imgix thumbnail (add cache buster)
+                const imgixUrl = `https://drbi.imgix.net${data.s3url.replace('https://drbi.s3.amazonaws.com', '')}?w=200&h=150&fit=crop&auto=format,compress&q=75&_cb=${Date.now()}`;
                 previewImg.src = imgixUrl;
                 preview.style.display = 'block';
-                
+
                 // Hide current image if it exists
                 const currentImage = fileInput.parentNode.querySelector('.current-image');
                 if (currentImage) currentImage.style.display = 'none';
-                
+
                 // Show success feedback
                 console.log('✅ Image uploaded successfully in edit form:', data.s3url);
+                console.log('💾 Hidden input value is now:', hiddenInput.value);
                 console.log('🎉 Preview should now be visible in edit form!');
               } else {
-                throw new Error('No S3 URL returned');
+                throw new Error('No S3 URL returned from server');
               }
             } else {
-              throw new Error('Upload failed');
+              const errorText = await response.text();
+              console.error('❌ Upload failed:', response.status, errorText);
+              alert('Upload failed: ' + response.status + ' - ' + errorText);
             }
-          };
-          reader.readAsDataURL(file);
-        } catch (error) {
-          console.error('Upload error:', error);
-          alert('Failed to upload image: ' + error.message);
-        }
+          } catch (error) {
+            console.error('❌ Upload error:', error);
+            alert('Failed to upload image: ' + error.message);
+          } finally {
+            // Re-enable save button
+            uploadsInProgress--;
+            if (uploadsInProgress <= 0) {
+              uploadsInProgress = 0;
+              const saveButton = document.querySelector('button[type="submit"]');
+              if (saveButton) {
+                saveButton.disabled = false;
+                saveButton.textContent = 'Save Changes';
+              }
+            }
+          }
+        };
+        reader.readAsDataURL(file);
       });
     }
 
@@ -646,14 +699,26 @@ if (Astro.request.method === "POST" && event) {
     // Initialize image upload handlers
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 DOM loaded, initializing image upload in edit form...');
-      
+
       // Set sessionid from data attribute
       sessionid = document.querySelector('[data-sessionid]')?.dataset?.sessionid || 'NO_SESSION';
       console.log('📝 Session ID loaded:', sessionid?.substring(0, 20) + '...');
-      
+
       setupImageUpload('mainImageFile', 'mainImage', 'mainImagePreview');
       setupImageUpload('teacherImageFile', 'teacherImage', 'teacherImagePreview');
       console.log('✅ Image upload handlers ready in edit form');
+
+      // Log form values on submit for debugging
+      const form = document.querySelector('form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          const mainImageInput = document.getElementById('mainImage');
+          const teacherImageInput = document.getElementById('teacherImage');
+          console.log('📝 Form submitting with values:');
+          console.log('   mainImage:', mainImageInput?.value || '(empty)');
+          console.log('   teacherImage:', teacherImageInput?.value || '(empty)');
+        });
+      }
     });
   </script>
 </Layout>
