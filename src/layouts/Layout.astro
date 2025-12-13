@@ -12,6 +12,7 @@ import "../styles/tailwind.css";
 import { SEO } from "astro-seo";
 import Footer from "@components/footer.astro";
 import Navbar from "@components/navbar/navbar.astro";
+import PostHog from "@components/posthog.astro";
 
 import site from "@data/site.json";
 import { currentURL } from '@utils/utils.js';
@@ -66,6 +67,7 @@ const { title, footerMargin = true } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <PostHog />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="sitemap" href="/sitemap-index.xml" />

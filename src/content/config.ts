@@ -215,8 +215,8 @@ const eventsSchema = z.object({
   shortDescription: z.string(),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
-  mainImage: z.string().optional().default(''),
-  teacherImage: z.string().optional().default(''),
+  mainImage: z.string().nullable().optional().default(''),
+  teacherImage: z.string().nullable().optional().default(''),
   images: z.array(z.string()).optional(),
 
   // Detailed info from event page
