@@ -1,6 +1,7 @@
-echo "🔨 Running build check before commit..."
+echo "🔨 Running pre-commit checks..."
 
 # Run the build (which also generates analytics summary)
+echo "📦 Building project..."
 npm run build
 
 # Check if build succeeded
@@ -9,9 +10,52 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+echo "✅ Build passed!"
+
+# Run E2E tests (start dev server, run tests, stop server)
+echo "🧪 Running E2E tests..."
+
+# Start dev server in background
+npm run dev > /tmp/astro-test-server.log 2>&1 &
+DEV_PID=$!
+
+# Wait for server to be ready (max 30 seconds)
+echo "⏳ Waiting for dev server..."
+for i in {1..30}; do
+  if curl -s -o /dev/null -w "" http://localhost:4321/ 2>/dev/null; then
+    break
+  fi
+  if curl -s -o /dev/null -w "" http://localhost:4322/ 2>/dev/null; then
+    export BASE_URL=http://localhost:4322
+    break
+  fi
+  sleep 1
+done
+
+# Set BASE_URL if not already set
+if [ -z "$BASE_URL" ]; then
+  export BASE_URL=http://localhost:4321
+fi
+
+# Run critical tests only (faster subset)
+npx playwright test tests/homepage.spec.js tests/build-integrity.spec.js --reporter=line
+
+TEST_EXIT_CODE=$?
+
+# Kill dev server
+kill $DEV_PID 2>/dev/null || true
+
+# Check if tests succeeded
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+  echo "❌ E2E tests failed! Please fix the issues before committing."
+  exit 1
+fi
+
+echo "✅ E2E tests passed!"
+
 # Add any modified analytics files to the commit
 if [ -f "src/data/analytics-summary.json" ]; then
   git add src/data/analytics-summary.json 2>/dev/null || true
 fi
 
-echo "✅ Build passed! Proceeding with commit..."
+echo "✅ All checks passed! Proceeding with commit..."

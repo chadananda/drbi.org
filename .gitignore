@@ -37,3 +37,10 @@ work/
 
 # local test db
 tmpdata.db
+
+# Playwright test outputs
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+tests/reports/

@@ -58,6 +58,9 @@ const minifyConfig = {
 
 // https://astro.build/config
 export default defineConfig({
+  devToolbar: {
+    enabled: false
+  },
   // this does not seem to apply markdownId attrs to our .md files
   // markdown: {
   //   remarkPlugins: [remarkAttr],
