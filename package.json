@@ -29,7 +29,8 @@
     "make_audio": "node ./src/scripts/_create_audio.js",
     "upload_audio": "node ./src/scripts/_upload_audio.js",
     "move_s3": "node ./src/scripts/_moveassets_s3.js",
-    "migrate_2_pocketbase": "node ./src/scripts/_migrate_pocketbase.js ./db/db-export-1736903622-drbi.sql http://127.0.0.1:8090 --clear"
+    "migrate_2_pocketbase": "node ./src/scripts/_migrate_pocketbase.js ./db/db-export-1736903622-drbi.sql http://127.0.0.1:8090 --clear",
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/markdoc": "^0.15.5",
@@ -94,6 +95,7 @@
     "elevenlabs": "^1.59.0",
     "esbuild": "^0.25.9",
     "eslint": "^9.34.0",
+    "husky": "^9.1.7",
     "inquirer": "^12.9.4",
     "install": "^0.13.0",
     "js-yaml": "^4.1.0",

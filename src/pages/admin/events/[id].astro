@@ -97,7 +97,7 @@ if (Astro.request.method === "POST" && event) {
           ? `https://www.eventbrite.com/e/${postData.eventbriteId.trim()}`
           : postData.registrationUrl.trim(), // Alias for compatibility
         organizer: postData.organizer?.trim() || 'DRBI',
-        visible: postData.visible !== 'false',
+        visible: postData.visible === 'true',
         featured: postData.featured === 'true',
         onsite: postData.onsite === 'true',
         location: postData.onsite === 'true' ? {

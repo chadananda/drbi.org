@@ -1,10 +1,23 @@
 ---
-import { getCollection } from 'astro:content';
 import { Image } from "astro:assets";
 import { transformS3Url } from '../utils/utils.js';
+import fs from 'fs/promises';
+import path from 'path';
 
-const events = await getCollection('events');
-
+// Read events directly from filesystem to ensure fresh data
+// (Astro's content collection cache doesn't invalidate on API-driven file changes)
+const eventsDir = path.join(process.cwd(), 'src/content/events');
+const eventFiles = await fs.readdir(eventsDir);
+const events = await Promise.all(
+  eventFiles
+    .filter(file => file.endsWith('.json'))
+    .map(async (file) => {
+      const filePath = path.join(eventsDir, file);
+      const content = await fs.readFile(filePath, 'utf-8');
+      const data = JSON.parse(content);
+      return { id: file.replace('.json', ''), data };
+    })
+);
 
 // Always use the real current date for filtering
 const referenceDate = new Date();

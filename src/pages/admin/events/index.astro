@@ -4,9 +4,11 @@ export const prerender = false;
 
 import Layout from '@layouts/AdminLayout.astro';
 import { getCollection } from 'astro:content';
+import { lucia } from '@lib/auth';
 
 // Authentication check (same as articles)
-const sessionid = Astro.locals.session.id;
+// Get the actual JWT token from the cookie (not the decoded session.id)
+const sessionid = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
 const user = Astro.locals?.user;
 if (!['admin', 'superadmin'].includes(user?.role)) {
   return Astro.redirect('/admin');
@@ -177,7 +179,7 @@ const getEventLocation = (event) => {
 
     <div id="events-list">
       {filteredEvents.map(event => (
-        <div class={`bg-white border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow mb-4 ${getEventStatus(event) === 'past' ? 'bg-gray-50' : ''} ${!event.data.visible ? 'opacity-75' : ''}`}>
+        <div class={`rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow mb-4 event-card ${getEventStatus(event) === 'past' ? 'bg-gray-50 border border-gray-200' : ''} ${event.data.visible === false ? 'bg-orange-50 border-2 border-orange-300 border-dashed opacity-60' : 'bg-white border border-gray-200'}`}>
           <div class="flex gap-6">
             <!-- Left: Large Main Image -->
             <div class="flex-shrink-0">
@@ -214,7 +216,14 @@ const getEventLocation = (event) => {
               <!-- Top: Title, Date, and Teacher Thumbnail -->
               <div class="flex items-start justify-between mb-4">
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-2xl font-bold text-gray-900 leading-tight mb-2">{event.data.name}</h3>
+                  <div class="flex items-center gap-3 mb-2">
+                    <h3 class="text-2xl font-bold text-gray-900 leading-tight">{event.data.name}</h3>
+                    {event.data.visible === false && (
+                      <span class="hidden-badge inline-flex items-center px-2 py-1 text-xs font-bold text-orange-700 bg-orange-100 border border-orange-300 rounded">
+                        🙈 HIDDEN
+                      </span>
+                    )}
+                  </div>
                   <div class="flex items-center gap-3">
                     <span class="text-lg font-semibold text-blue-700">{formatDate(event.data.startDate)}</span>
                     {event.data.endDate && event.data.endDate !== event.data.startDate && (
@@ -271,8 +280,8 @@ const getEventLocation = (event) => {
                     View
                   </a>
                   
-                  <button 
-                    class={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer ${event.data.visible ? 'text-gray-600 bg-gray-50 hover:bg-gray-100' : 'text-gray-600 bg-gray-50 hover:bg-gray-100'}`}
+                  <button
+                    class={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility ${event.data.visible ? 'text-gray-600 bg-gray-50 hover:bg-gray-100' : 'text-orange-600 bg-orange-50 hover:bg-orange-100'}`}
                     data-event-id={event.data.id}
                     title={event.data.visible ? 'Hide event' : 'Show event'}
                   >
@@ -340,12 +349,8 @@ const getEventLocation = (event) => {
       }, 4000);
     }
 
-    // Session ID for API calls (use actual JWT token from cookie)
-    const sessionCookieName = 'auth_session'; // Lucia session cookie name
-    const sessionid = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(sessionCookieName + '='))
-      ?.split('=')[1] || document.querySelector('[data-sessionid]').dataset.sessionid;
+    // Session ID for API calls (JWT token passed from server via data attribute)
+    const sessionid = document.querySelector('[data-sessionid]')?.dataset.sessionid;
     
     // Load events data
     const allEventsData = JSON.parse(document.getElementById('events-data').textContent);
@@ -574,16 +579,16 @@ const getEventLocation = (event) => {
     });
     
     // Toggle visibility
-    document.querySelectorAll('.visibility-toggle').forEach(button => {
+    document.querySelectorAll('.toggle-visibility').forEach(button => {
       button.addEventListener('click', async () => {
         const eventId = button.dataset.eventId;
-        
+
         try {
           const response = await fetch('/api/events', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              action: 'toggle-visibility', 
+            body: JSON.stringify({
+              action: 'toggle-visibility',
               eventData: { id: eventId },
               sessionid 
             })
@@ -591,19 +596,39 @@ const getEventLocation = (event) => {
           
           if (response.ok) {
             const result = await response.json();
-            button.className = `p-1 rounded hover:bg-gray-100 transition-colors ${result.visible ? 'text-green-600' : 'text-red-600'}`;
-            button.innerHTML = result.visible ? '👁️' : '🙈';
+            button.className = `inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility ${result.visible ? 'text-gray-600 bg-gray-50 hover:bg-gray-100' : 'text-orange-600 bg-orange-50 hover:bg-orange-100'}`;
+            button.innerHTML = result.visible ? '👁️ Hide' : '🙈 Show';
             button.title = result.visible ? 'Hide event' : 'Show event';
-            
-            // Update row styling
-            const row = button.closest('tr');
-            if (result.visible) {
-              row.classList.remove('opacity-60');
-            } else {
-              row.classList.add('opacity-60');
+
+            // Update card styling
+            const card = button.closest('.event-card');
+            if (card) {
+              if (result.visible) {
+                card.classList.remove('bg-orange-50', 'border-orange-300', 'border-dashed', 'border-2', 'opacity-60');
+                card.classList.add('bg-white', 'border-gray-200', 'border');
+              } else {
+                card.classList.remove('bg-white', 'border-gray-200', 'border');
+                card.classList.add('bg-orange-50', 'border-orange-300', 'border-dashed', 'border-2', 'opacity-60');
+              }
+            }
+
+            // Update or add/remove HIDDEN badge
+            const titleContainer = card?.querySelector('h3')?.parentElement;
+            if (titleContainer) {
+              const existingBadge = titleContainer.querySelector('.hidden-badge');
+              if (result.visible && existingBadge) {
+                existingBadge.remove();
+              } else if (!result.visible && !existingBadge) {
+                const badge = document.createElement('span');
+                badge.className = 'hidden-badge inline-flex items-center px-2 py-1 text-xs font-bold text-orange-700 bg-orange-100 border border-orange-300 rounded';
+                badge.innerHTML = '🙈 HIDDEN';
+                titleContainer.appendChild(badge);
+              }
             }
           } else {
-            alert('Failed to toggle visibility. Please try again.');
+            const errorText = await response.text();
+            console.error('Toggle failed:', response.status, errorText);
+            alert(`Failed to toggle visibility: ${errorText}`);
           }
         } catch (error) {
           console.error('Toggle error:', error);

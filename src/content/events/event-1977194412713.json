@@ -26,12 +26,11 @@
   "refundPolicy": "Refund Policy</p><div class=\"Card_body__vj7ua undefined\">Refunds up to 1 day before event</div></div></div></div></div><dialog class=\"Modal_dialog__1zirs \"><div class=\"Modal_container__1zirs\"><div class=\"Modal_header__1zirs\"><button class=\"Modal_closeButton__1zirs\" aria-label=\"close\"><i class=\"Icon_root__1kdkz Icon_icon-medium__1kdkz\" aria-hidden=\"true\"><svg xmlns=\"http://www.",
   "categories": [],
   "images": [
-    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172483045%2F177237344149%2F1%2Foriginal.20251207-193752",
-    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783259399%2F177237344149%2F1%2Foriginal.20240605-033438",
-    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F908344933%2F177237344149%2F1%2Foriginal.20241128-210424",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173001641%2F177237344149%2F1%2Foriginal.20251215-185636",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173001584%2F177237344149%2F1%2Foriginal.20251215-185548",
     "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553798659%2F177237344149%2F1%2Foriginal.20230712-175546",
     "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F783253739%2F177237344149%2F1%2Foriginal.20240605-031951",
-    "https://cdn.evbuc.com/images/1172483045/177237344149/1/logo.20251207-193752"
+    "https://cdn.evbuc.com/images/1173001641/177237344149/1/logo.20251215-185636"
   ],
   "teacherImage": "https://drbi.s3.amazonaws.com/events/1977194412713-teacher.jpg",
   "source": "external",
@@ -40,11 +39,11 @@
   "visible": true,
   "featured": false,
   "mainImage": "https://drbi.s3.amazonaws.com/events/1977194412713-main.jpg",
-  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172483045%2F177237344149%2F1%2Foriginal.20251207-193752?crop=focalpoint&fit=crop&h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.524&fp-y=0.312&s=eec86ce375175fbca5a226cd3f8e879e",
-  "lastModified": "89f23a07dceaaca5a5318e492e095f42",
-  "lastSynced": "2025-12-13T16:48:50.677Z",
+  "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1173001641%2F177237344149%2F1%2Foriginal.20251215-185636?h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&s=4a790c6914a728312b03ca36857890da",
+  "lastModified": "ae9a8551ebc115c1c878389c9e6e71c9",
+  "lastSynced": "2025-12-16T16:42:00.069Z",
   "scraped": {
-    "orgPageDate": "2025-12-13T16:53:43.589Z",
-    "detailPageDate": "2025-12-13T16:48:50.677Z"
+    "orgPageDate": "2025-12-16T17:05:10.113Z",
+    "detailPageDate": "2025-12-16T16:42:00.069Z"
   }
 }

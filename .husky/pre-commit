@@ -1,0 +1,12 @@
+echo "🔨 Running build check before commit..."
+
+# Run the build
+npm run build
+
+# Check if build succeeded
+if [ $? -ne 0 ]; then
+  echo "❌ Build failed! Please fix the errors before committing."
+  exit 1
+fi
+
+echo "✅ Build passed! Proceeding with commit..."
