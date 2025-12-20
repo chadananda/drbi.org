@@ -45,18 +45,6 @@ Dwight worked 43 years in aviation, far from that little farm of his youth, but 
 
 *****
 
-## THE HAITI PROJECT
-
-![haiti project](./_Happy-Child.webp)
-
-Haiti Project May 2021Great news!  Revenue from 3,000 sq ft of DRBI’s land is dedicated to feeding children in Haiti.
-
-“WHAT IF we could grow food through the Agricultural Project, sell it in local farmer’s markets, and distribute ALL gross revenues DIRECTLY to Justin and the GBCCS?”
-
-[That's the idea behind the Haiti Project -->](/agriculture/haiti-project)
-
-----
-
 ## Permaculture: Greening the Desert by Geoff Lawton
 
 <div style="padding:56.25% 0 0 0;position:relative;">
