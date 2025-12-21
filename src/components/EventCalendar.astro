@@ -82,6 +82,44 @@ const formatPrice = (price) => {
   return `$${price.low} - $${price.high}`;
 };
 
+// Convert straight quotes to curly quotes
+const curlyQuotes = (text: string): string => {
+  if (!text) return '';
+  const openDouble = '\u201C';  // "
+  const closeDouble = '\u201D'; // "
+  const openSingle = '\u2018';  // '
+  const closeSingle = '\u2019'; // '
+  return text
+    .replace(/(\s|^)"(\S)/g, '$1' + openDouble + '$2')
+    .replace(/(\S)"(\s|$|[.,!?])/g, '$1' + closeDouble + '$2')
+    .replace(/(\s|^)'(\S)/g, '$1' + openSingle + '$2')
+    .replace(/(\S)'(\s|$|[.,!?])/g, '$1' + closeSingle + '$2')
+    .replace(/(\w)'(\w)/g, '$1' + closeSingle + '$2');  // apostrophe
+};
+
+// Prepare display data for each event
+const displayEvents = upcomingEvents.map(event => {
+  const d = event.data;
+  return {
+    ...event,
+    display: {
+      name: curlyQuotes(d.name),
+      shortDescription: curlyQuotes(d.shortDescription || ''),
+      fullDescription: curlyQuotes(d.fullDescription || ''),
+      preview: curlyQuotes(d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.'),
+      dateRange: formatDateRange(d.startDate, d.endDate),
+      time: formatTime(d.startDate),
+      price: formatPrice(d.price),
+      month: new Date(d.startDate).toLocaleDateString('en-US', { month: 'short' }),
+      day: new Date(d.startDate).getDate(),
+      mainImage: transformS3Url(d.mainImage, 450, 300),
+      mainImageLarge: transformS3Url(d.mainImage, 600, 400),
+      teacherImage: d.teacherImage ? transformS3Url(d.teacherImage, 200) : null,
+      teacherImageLarge: d.teacherImage ? transformS3Url(d.teacherImage, 180) : null,
+    }
+  };
+});
+
 ---
 
 <div class="event-calendar" data-view={view}>
@@ -92,85 +130,79 @@ const formatPrice = (price) => {
     </div>
   ) : (
     <div class={
-      view === 'cards' ? 'flex flex-wrap gap-[120px] justify-center p-5' : 
-      view === 'list-full' ? 'events-list-full' : 
+      view === 'cards' ? 'flex flex-wrap gap-[120px] justify-center p-5' :
+      view === 'list-full' ? 'events-list-full' :
       'events-list'
     }>
-      {upcomingEvents.map(event => (
+      {displayEvents.map(event => (
         <div class={view === 'cards' ? 'relative' : 'event-container'} data-event-start={event.data.startDate}>
           {view === 'cards' ? (
             <>
               <article class="relative overflow-hidden w-[450px] h-[300px] m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl">
                 <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="block no-underline text-inherit h-full">
-                  <div class="relative w-full h-full bg-contain bg-no-repeat bg-center rounded-lg overflow-hidden" style={`background-image: url(${transformS3Url(event.data.mainImage, 450, 300)})`}>
+                  <div class="relative w-full h-full bg-contain bg-no-repeat bg-center rounded-lg overflow-hidden" style={`background-image: url(${event.display.mainImage})`}>
                     <div class="event-overlay">
                       <div class="event-content">
+                        <h3 class="event-title">{event.display.name}</h3>
                         <div class="event-meta">
-                          <time class="event-date">{formatDateRange(event.data.startDate, event.data.endDate)}</time>
-                          <span class="event-time">{formatTime(event.data.startDate)}</span>
+                          <time class="event-date">{event.display.dateRange}</time>
+                          <span class="event-time">{event.display.time}</span>
                           {event.data.price && (
-                            <span class="event-price">{formatPrice(event.data.price)}</span>
+                            <span class="event-price">{event.display.price}</span>
                           )}
                         </div>
-                        {event.data.highlights && (
-                          <div class="event-highlights">
-                            {event.data.highlights.map(highlight => (
-                              <span class="highlight-tag">{highlight}</span>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
                 </a>
               </article>
-              {event.data.teacherImage && (
+              {event.display.teacherImage && (
                 <div class="absolute top-0 -left-[90px] w-[150px] h-[160px] rounded-[30%] overflow-hidden border-[3px] border-white shadow-lg z-10 pointer-events-none">
-                  <img src={transformS3Url(event.data.teacherImage, 200)} alt="Teacher" class="w-full h-full object-cover" />
+                  <img src={event.display.teacherImage} alt="Teacher" class="w-full h-full object-cover" />
                 </div>
               )}
             </>
           ) : view === 'list-full' ? (
             <div class="list-full-wrapper">
               <div class="date-badge-outside">
-                <div class="month">{new Date(event.data.startDate).toLocaleDateString('en-US', { month: 'short' })}</div>
-                <div class="day">{new Date(event.data.startDate).getDate()}</div>
+                <div class="month">{event.display.month}</div>
+                <div class="day">{event.display.day}</div>
               </div>
-              {event.data.teacherImage && (
+              {event.display.teacherImageLarge && (
                 <div class="teacher-overlay-large">
-                  <img src={transformS3Url(event.data.teacherImage, 180)} alt="Teacher" class="teacher-image-large" />
+                  <img src={event.display.teacherImageLarge} alt="Teacher" class="teacher-image-large" />
                 </div>
               )}
               <article class="event-list-full-item">
                 <div class="card-title-header">
                   <h3 class="card-title">
                     <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">
-                      {event.data.name}
+                      {event.display.name}
                     </a>
                   </h3>
                   <div class="date-details">
-                    <div class="date-range">{formatDateRange(event.data.startDate, event.data.endDate)}</div>
-                    <div class="time">{formatTime(event.data.startDate)}</div>
+                    <div class="date-range">{event.display.dateRange}</div>
+                    <div class="time">{event.display.time}</div>
                   </div>
                 </div>
-                
+
                 <div class="list-full-content">
                   <div class="list-full-left-column">
                     <div class="list-full-image-container">
-                      <img src={transformS3Url(event.data.mainImage, 600, 400)} alt={event.data.name} class="main-image" />
+                      <img src={event.display.mainImageLarge} alt={event.display.name} class="main-image" />
                     </div>
                   </div>
                   <div class="list-full-details">
-                    
+
                     <p class="list-full-description">
-                      {event.data.shortDescription || event.data.fullDescription?.slice(0, 200) + '...' || 'No description available'}
+                      {event.display.shortDescription || 'No description available'}
                     </p>
-                    
+
                     <div class="list-full-meta">
                       {event.data.price && (
                         <div class="meta-item price">
                           <span class="icon">💲</span>
-                          <span>{formatPrice(event.data.price)}</span>
+                          <span>{event.display.price}</span>
                         </div>
                       )}
                       <div class="meta-item organizer">
@@ -180,13 +212,10 @@ const formatPrice = (price) => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="event-text-preview">
                   <p class="event-preview-text">
-                    {event.data.fullDescription ? 
-                      event.data.fullDescription.slice(0, 400) + '...' : 
-                      event.data.shortDescription || 'Join us for this transformative learning experience.'
-                    }
+                    {event.display.preview}
                   </p>
                 </div>
                 
@@ -213,23 +242,23 @@ const formatPrice = (price) => {
             <article class="event-list-item">
               <div class="list-event">
                 <div class="list-date">
-                  <div class="month">{new Date(event.data.startDate).toLocaleDateString('en-US', { month: 'short' })}</div>
-                  <div class="day">{new Date(event.data.startDate).getDate()}</div>
+                  <div class="month">{event.display.month}</div>
+                  <div class="day">{event.display.day}</div>
                 </div>
                 <div class="list-content">
                   <h3 class="list-title">
-                    <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">{event.data.name}</a>
+                    <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">{event.display.name}</a>
                   </h3>
                   <div class="list-meta">
-                    <span class="time-icon">🕐&nbsp;</span><time>{formatTime(event.data.startDate)}</time>
+                    <span class="time-icon">🕐&nbsp;</span><time>{event.display.time}</time>
                     {event.data.price && (
                       <>
                         <span class="separator">•</span>
-                        <span class="price-icon">💰&nbsp;</span><span class="price">{formatPrice(event.data.price)}</span>
+                        <span class="price-icon">💰&nbsp;</span><span class="price">{event.display.price}</span>
                       </>
                     )}
                   </div>
-                  <p class="list-description">{event.data.shortDescription}</p>
+                  <p class="list-description">{event.display.shortDescription}</p>
                 </div>
                 <div class="list-actions">
                   <a href={`/admin/events/${event.data.id}`} class="edit-btn">
@@ -279,7 +308,7 @@ const formatPrice = (price) => {
   bottom: -10px;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
   padding: 25px 20px;
   color: white;
 }
