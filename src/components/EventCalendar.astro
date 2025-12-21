@@ -46,23 +46,26 @@ const formatDate = (date) => {
 const formatDateRange = (startDate, endDate) => {
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
+  const tz = 'America/Phoenix'; // Arizona timezone (no DST)
+
   const startDateStr = start.toLocaleDateString('en-US', {
     weekday: 'short',
-    month: 'short', 
-    day: 'numeric'
+    month: 'short',
+    day: 'numeric',
+    timeZone: tz
   });
-  
+
   const endDateStr = end.toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
+    timeZone: tz
   });
-  
+
   if (startDateStr === endDateStr) {
     return startDateStr;
   }
-  
+
   return `${startDateStr} - ${endDateStr}`;
 };
 
@@ -70,7 +73,8 @@ const formatTime = (date) => {
   return new Date(date).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
+    timeZone: 'America/Phoenix'
   });
 };
 
@@ -110,8 +114,8 @@ const displayEvents = upcomingEvents.map(event => {
       dateRange: formatDateRange(d.startDate, d.endDate),
       time: formatTime(d.startDate),
       price: formatPrice(d.price),
-      month: new Date(d.startDate).toLocaleDateString('en-US', { month: 'short' }),
-      day: new Date(d.startDate).getDate(),
+      month: new Date(d.startDate).toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Phoenix' }),
+      day: new Date(d.startDate).toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Phoenix' }),
       mainImage: transformS3Url(d.mainImage, 450, 300),
       mainImageLarge: transformS3Url(d.mainImage, 600, 400),
       teacherImage: d.teacherImage ? transformS3Url(d.teacherImage, 200) : null,
