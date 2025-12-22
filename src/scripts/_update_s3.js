@@ -25,7 +25,7 @@ import fg from 'fast-glob';
 import matter from 'gray-matter';
 import Markdoc from '@markdoc/markdoc';
 import markdoc_config from '../../markdoc.config.js';
-import { ElevenLabsClient, stream } from "elevenlabs";
+import { ElevenLabsClient, stream } from "@elevenlabs/elevenlabs-js";
 // import ffmpeg from 'fluent-ffmpeg';
 import { promisify } from 'util';
 import { exec } from 'child_process';
