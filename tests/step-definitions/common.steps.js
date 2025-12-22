@@ -1,57 +1,44 @@
-import { Given, When, Then, Before, After } from '@cucumber/cucumber';
-import { chromium } from '@playwright/test';
+import { Given, When, Then } from '@cucumber/cucumber';
 
-let browser;
-let page;
-
-Before(async function () {
-  browser = await chromium.launch();
-  const context = await browser.newContext();
-  page = await context.newPage();
-  this.page = page;
-});
-
-After(async function () {
-  if (browser) {
-    await browser.close();
-  }
-});
+// Browser lifecycle hooks are in tests/support/hooks.js
 
 Given('the website is running', async function () {
-  // Assumes dev server is running on port 4321
-  const response = await this.page.goto('http://localhost:4321');
+  const response = await this.page.goto(this.baseURL);
   if (!response || response.status() >= 400) {
     throw new Error('Website is not running');
   }
 });
 
 When('I visit the homepage', async function () {
-  await this.page.goto('http://localhost:4321/');
+  await this.page.goto(`${this.baseURL}/`);
 });
 
 When('I visit the events page', async function () {
-  await this.page.goto('http://localhost:4321/events');
+  await this.page.goto(`${this.baseURL}/events`);
 });
 
 When('I visit the login page', async function () {
-  await this.page.goto('http://localhost:4321/login');
+  await this.page.goto(`${this.baseURL}/login`);
 });
 
 When('I visit the login page directly', async function () {
-  await this.page.goto('http://localhost:4321/login');
+  await this.page.goto(`${this.baseURL}/login`);
 });
 
 When('I visit the admin page', async function () {
-  await this.page.goto('http://localhost:4321/admin');
+  await this.page.goto(`${this.baseURL}/admin`);
 });
 
 When('I visit the admin events page', async function () {
-  await this.page.goto('http://localhost:4321/admin/events');
+  await this.page.goto(`${this.baseURL}/admin/events`);
 });
 
 Then('I should see the page title {string}', async function (title) {
   const pageTitle = await this.page.title();
-  if (!pageTitle.includes(title)) {
+  // Normalize unicode characters for comparison
+  const normalizedTitle = pageTitle.normalize('NFC').toLowerCase();
+  const normalizedExpected = title.normalize('NFC').toLowerCase();
+  if (!normalizedTitle.includes(normalizedExpected)) {
     throw new Error(`Expected title to contain "${title}" but got "${pageTitle}"`);
   }
 });

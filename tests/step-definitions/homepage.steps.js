@@ -1,65 +1,63 @@
 import { Then } from '@cucumber/cucumber';
+import { expect } from '@playwright/test';
+import selectors from '../support/selectors.js';
+import { getVisibleEvents, getHiddenEvents } from '../support/test-data.js';
 
 Then('I should see the hero section', async function () {
-  const hero = this.page.locator('[class*="hero"], .superhero, section').first();
-  const visible = await hero.isVisible();
-  if (!visible) {
-    throw new Error('Hero section not found');
-  }
+  const hero = this.page.locator(selectors.heroSection);
+  await expect(hero.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the categories section', async function () {
-  const categories = this.page.locator('[class*="categories"], [class*="category"]').first();
-  const visible = await categories.isVisible();
-  if (!visible) {
-    throw new Error('Categories section not found');
-  }
+  const categories = this.page.locator(selectors.categoriesSection);
+  await expect(categories.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the video player', async function () {
-  const video = this.page.locator('iframe[src*="youtube"]');
-  const visible = await video.isVisible();
-  if (!visible) {
-    throw new Error('Video player not found');
-  }
+  const video = this.page.locator(selectors.videoPlayer);
+  await expect(video.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the events calendar', async function () {
-  const events = this.page.locator('[class*="event"]');
-  const count = await events.count();
-  if (count === 0) {
-    throw new Error('Events calendar not found');
-  }
+  const events = this.page.locator(selectors.eventsCalendar);
+  await expect(events.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('visible events should be displayed', async function () {
-  // Events section should have content
-  const events = this.page.locator('[class*="event-card"], .event-item');
-  // Just verify the section exists - may be empty if no visible events
-  await this.page.waitForTimeout(500);
+  // Get visible events from data
+  const visibleEvents = await getVisibleEvents();
+  const now = new Date();
+  const upcomingEvents = visibleEvents.filter(e => new Date(e.startDate) > now);
+
+  if (upcomingEvents.length > 0) {
+    // Verify at least one event card is visible
+    const eventCards = this.page.locator(selectors.eventCard);
+    const count = await eventCards.count();
+    expect(count).toBeGreaterThan(0);
+  }
+  // If no upcoming events, test passes (empty state is valid)
 });
 
 Then('hidden events should not be displayed', async function () {
-  // Hidden events should not appear in public view
-  const hiddenEvents = this.page.locator('[data-visible="false"]');
-  const count = await hiddenEvents.count();
-  if (count > 0) {
-    throw new Error('Hidden events are being displayed');
+  // Get hidden events from data
+  const hiddenEvents = await getHiddenEvents();
+
+  // Verify none of the hidden event names appear on the page
+  for (const event of hiddenEvents) {
+    if (event.name) {
+      const eventName = this.page.locator(`text="${event.name}"`);
+      await expect(eventName).not.toBeVisible();
+    }
   }
 });
 
 Then('I should see a newsletter signup link', async function () {
-  const link = this.page.getByRole('link', { name: /newsletter/i });
-  const visible = await link.isVisible();
-  if (!visible) {
-    throw new Error('Newsletter link not found');
-  }
+  const link = this.page.locator(selectors.newsletterLink);
+  await expect(link.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('the newsletter link should open in a new tab', async function () {
-  const link = this.page.getByRole('link', { name: /newsletter/i });
+  const link = this.page.locator(selectors.newsletterLink).first();
   const target = await link.getAttribute('target');
-  if (target !== '_blank') {
-    throw new Error('Newsletter link does not open in new tab');
-  }
+  expect(target).toBe('_blank');
 });

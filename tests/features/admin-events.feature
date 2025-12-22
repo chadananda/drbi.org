@@ -1,3 +1,4 @@
+@admin @auth
 Feature: Admin Event Management
   As an administrator
   I want to manage events in the admin panel
@@ -7,6 +8,7 @@ Feature: Admin Event Management
     Given the website is running
     And I am logged in as an admin
 
+  @critical
   Scenario: View events list in admin
     When I visit the admin events page
     Then I should see a list of all events

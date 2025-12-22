@@ -1,3 +1,4 @@
+@auth
 Feature: Admin Authentication
   As an administrator
   I want to log in to the admin panel
@@ -6,6 +7,7 @@ Feature: Admin Authentication
   Background:
     Given the website is running
 
+  @smoke @critical
   Scenario: View login page
     When I visit the admin page
     Then I should be redirected to the login page

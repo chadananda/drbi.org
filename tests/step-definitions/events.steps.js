@@ -1,70 +1,90 @@
 import { Given, When, Then } from '@cucumber/cucumber';
+import { expect } from '@playwright/test';
+import selectors from '../support/selectors.js';
+import { getVisibleEvents } from '../support/test-data.js';
 
 Then('I should see a list of events', async function () {
-  const events = this.page.locator('[class*="event"], article, .card');
-  const visible = await events.first().isVisible();
-  if (!visible) {
-    throw new Error('No events list found');
-  }
+  const events = this.page.locator(selectors.eventCard);
+  await expect(events.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('each event should have a title', async function () {
-  const titles = this.page.locator('[class*="event"] h2, [class*="event"] h3, article h2, article h3');
-  const count = await titles.count();
-  if (count === 0) {
-    throw new Error('No event titles found');
+  const eventCards = this.page.locator(selectors.eventCard);
+  const count = await eventCards.count();
+  expect(count).toBeGreaterThan(0);
+
+  // Check first few events have titles
+  for (let i = 0; i < Math.min(count, 3); i++) {
+    const card = eventCards.nth(i);
+    const title = card.locator(selectors.eventTitle);
+    await expect(title.first()).toBeVisible();
   }
 });
 
 Then('each event should have a date', async function () {
-  const dates = this.page.locator('time, [class*="date"]');
-  const count = await dates.count();
-  // Dates are expected but may not be present in all layouts
-});
+  const eventCards = this.page.locator(selectors.eventCard);
+  const count = await eventCards.count();
+  expect(count).toBeGreaterThan(0);
 
-Given('there is at least one visible event', async function () {
-  await this.page.goto('http://localhost:4321/events');
-  const events = this.page.locator('a[href*="/events/"]');
-  const count = await events.count();
-  if (count === 0) {
-    throw new Error('No visible events found');
+  // Check first few events have dates
+  for (let i = 0; i < Math.min(count, 3); i++) {
+    const card = eventCards.nth(i);
+    const date = card.locator(selectors.eventDate);
+    await expect(date.first()).toBeVisible();
   }
 });
 
+Given('there is at least one visible event', async function () {
+  const visibleEvents = await getVisibleEvents();
+  const now = new Date();
+  const upcomingEvents = visibleEvents.filter(e => new Date(e.startDate) > now);
+
+  if (upcomingEvents.length === 0) {
+    return 'skipped'; // Skip test if no events
+  }
+  this.testData.hasEvents = true;
+});
+
 When('I click on the first event', async function () {
-  const event = this.page.locator('a[href*="/events/"]').first();
+  const event = this.page.locator(selectors.eventLink).first();
   await event.click();
+  await this.page.waitForLoadState('networkidle');
 });
 
 Then('I should see the event details page', async function () {
   const url = this.page.url();
-  if (!url.includes('/events/')) {
-    throw new Error('Not on event details page');
-  }
+  expect(url).toContain('/events/');
 });
 
 Then('I should see the event title', async function () {
-  const title = this.page.locator('h1, h2').first();
-  const visible = await title.isVisible();
-  if (!visible) {
-    throw new Error('Event title not found');
-  }
+  const title = this.page.locator('h1').first();
+  await expect(title).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the event description', async function () {
-  const content = this.page.locator('main, article, [class*="content"]');
+  const content = this.page.locator('main, article');
   const text = await content.textContent();
-  if (text.length < 10) {
-    throw new Error('Event description seems empty');
-  }
+  expect(text.length).toBeGreaterThan(10);
 });
 
 Then('events should be displayed in chronological order', async function () {
-  // This would require parsing dates - simplified check
-  const events = this.page.locator('[class*="event"], article');
-  const count = await events.count();
-  // Assume events are sorted if they exist
-  if (count > 0) {
-    return;
+  const eventCards = this.page.locator(selectors.eventCard);
+  const count = await eventCards.count();
+
+  if (count > 1) {
+    const dates = [];
+    for (let i = 0; i < count; i++) {
+      const card = eventCards.nth(i);
+      // Try to get data-event-start attribute
+      const startDate = await card.getAttribute('data-event-start');
+      if (startDate) {
+        dates.push(new Date(startDate));
+      }
+    }
+
+    // Verify dates are in ascending order
+    for (let i = 1; i < dates.length; i++) {
+      expect(dates[i].getTime()).toBeGreaterThanOrEqual(dates[i - 1].getTime());
+    }
   }
 });

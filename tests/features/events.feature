@@ -6,6 +6,7 @@ Feature: Events Page
   Background:
     Given the website is running
 
+  @smoke @critical
   Scenario: View all events page
     When I visit the events page
     Then I should see the page title containing "Events"

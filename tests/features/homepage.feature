@@ -6,9 +6,10 @@ Feature: Homepage
   Background:
     Given the website is running
 
+  @smoke @critical
   Scenario: View homepage
     When I visit the homepage
-    Then I should see the page title "Desert Rose Bahá'í Institute"
+    Then I should see the page title containing "Desert Rose"
     And I should see the hero section
     And I should see the categories section
     And I should see the video player

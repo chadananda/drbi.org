@@ -1,0 +1,68 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-push behavioral tests..."
+
+# Check if dev server is already running
+if curl -s -o /dev/null http://localhost:4321/ 2>/dev/null; then
+  export BASE_URL=http://localhost:4321
+  echo "✓ Using existing dev server on port 4321"
+elif curl -s -o /dev/null http://localhost:4322/ 2>/dev/null; then
+  export BASE_URL=http://localhost:4322
+  echo "✓ Using existing dev server on port 4322"
+else
+  echo "⏳ Starting dev server..."
+  npm run dev > /tmp/astro-prepush-server.log 2>&1 &
+  DEV_PID=$!
+
+  # Wait for server to be ready (max 30 seconds)
+  for i in $(seq 1 30); do
+    if curl -s -o /dev/null http://localhost:4321/ 2>/dev/null; then
+      export BASE_URL=http://localhost:4321
+      echo "✓ Dev server ready on port 4321"
+      break
+    fi
+    if curl -s -o /dev/null http://localhost:4322/ 2>/dev/null; then
+      export BASE_URL=http://localhost:4322
+      echo "✓ Dev server ready on port 4322"
+      break
+    fi
+    sleep 1
+  done
+
+  if [ -z "$BASE_URL" ]; then
+    echo "❌ Dev server failed to start"
+    kill $DEV_PID 2>/dev/null || true
+    exit 1
+  fi
+fi
+
+# Run Cucumber SMOKE tests only (fast, ~15 seconds)
+echo "🧪 Running smoke tests..."
+npx cucumber-js "tests/features/**/*.feature" --import "tests/step-definitions/**/*.js" --import "tests/support/**/*.js" --tags "@smoke" --format progress-bar
+
+CUCUMBER_EXIT_CODE=$?
+
+# Run remaining Playwright tests (accessibility + build-integrity)
+echo "♿ Running accessibility and build tests..."
+npx playwright test tests/accessibility.spec.js tests/build-integrity.spec.js --reporter=line
+
+PLAYWRIGHT_EXIT_CODE=$?
+
+# Kill dev server if we started it
+if [ -n "$DEV_PID" ]; then
+  kill $DEV_PID 2>/dev/null || true
+fi
+
+# Check results
+if [ $CUCUMBER_EXIT_CODE -ne 0 ]; then
+  echo "❌ Behavioral tests failed! Push aborted."
+  exit 1
+fi
+
+if [ $PLAYWRIGHT_EXIT_CODE -ne 0 ]; then
+  echo "❌ Accessibility/build tests failed! Push aborted."
+  exit 1
+fi
+
+echo "✅ All pre-push tests passed! Proceeding with push..."
