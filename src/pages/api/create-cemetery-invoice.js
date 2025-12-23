@@ -94,8 +94,15 @@ async function createInvoice(accessToken, formData) {
         national_number: '5204667961',
         phone_type: 'MOBILE'
       }],
+      address: {
+        address_line_1: '1950 W. William Sears Dr.',
+        admin_area_2: 'Eloy',
+        admin_area_1: 'AZ',
+        postal_code: '85131',
+        country_code: 'US'
+      },
       website: 'https://drbi.org',
-      logo_url: 'https://drbi.org/logo.svg'
+      logo_url: 'https://drbi.org/favicon.png'
     },
     primary_recipients: [{
       billing_info: {
