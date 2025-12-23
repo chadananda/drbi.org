@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:16:56.734Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-wendy-lind/lind-wendyjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-wendy-lind/lind-wendy.jpg"
   alt: "Memorial for Wendy Lind"
 narrator: "auto"
 ---

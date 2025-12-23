@@ -9,8 +9,20 @@ import EventCalendar from "@components/EventCalendar.astro";
 // import Tockify from "@components/tockify.astro";
 import image from "../history/_Round-House.webp"
 
-<Image src={image} alt="Desert Rose Institute"
-       class="h-auto max-h-64 w-full   mx-auto object-cover object-center rounded-lg mb-8" />
+<div class="full-bleed">
+  <Image src={image} alt="Desert Rose Institute"
+         class="w-full h-96 md:h-[28rem] lg:h-[32rem] object-cover object-[center_60%]" />
+</div>
+
+<style>{`
+  .full-bleed {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    margin-left: -50vw;
+    margin-bottom: 2rem;
+  }
+`}</style>
 
 {/* Tockify calendars commented out - replaced with EventCalendar
 <Tockify type="agenda" />

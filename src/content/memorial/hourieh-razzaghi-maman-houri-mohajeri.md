@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:42:58.670Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-hourieh-razzaghi-maman-houri/mohajeri-houriehjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-hourieh-razzaghi-maman-houri/mohajeri-hourieh.jpg"
   alt: 'Memorial for Hourieh Razzaghi "Maman Houri" Mohajeri'
 narrator: "auto"
 ---

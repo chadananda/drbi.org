@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:02:24.146Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-steven-gonzalez/gonzalez-stevenjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-steven-gonzalez/gonzalez-steven.jpg"
   alt: "Memorial for Steven Gonzalez"
 narrator: "auto"
 ---

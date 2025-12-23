@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:47:39.337Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-bradley-roger-mortensen/mortensen-bradleyjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-bradley-roger-mortensen/mortensen-bradley.jpg"
   alt: "Memorial for Bradley Roger Mortensen"
 narrator: "auto"
 ---

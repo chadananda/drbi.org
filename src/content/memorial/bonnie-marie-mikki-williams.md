@@ -13,7 +13,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T21:25:40.484Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-bonnie-marie-mikki-williams/williams-bonniejpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-bonnie-marie-mikki-williams/williams-bonnie.jpg"
   alt: 'Memorial for Bonnie Marie "Mikki" Williams'
 narrator: "auto"
 ---

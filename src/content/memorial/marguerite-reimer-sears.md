@@ -13,7 +13,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T21:27:55.433Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-marguerite-reimer-sears/sears-margueritejpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-marguerite-reimer-sears/sears-marguerite.jpg"
   alt: "Memorial for Marguerite Reimer Sears"
 narrator: "auto"
 ---

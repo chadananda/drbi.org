@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T17:36:17.579Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-afshin-atoofi/atoofi-afshinjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-afshin-atoofi/atoofi-afshin.jpg"
   alt: "Memorial for Afshin Atoofi"
 narrator: "auto"
 ---

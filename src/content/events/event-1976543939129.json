@@ -3,8 +3,8 @@
   "url": "https://www.eventbrite.com/e/the-first-sunday-concert-series-tickets-1976543939129",
   "name": "The First Sunday Concert Series",
   "shortDescription": "Ms. Somlee Lee will perform her choices of the world’s favorite classical piano",
-  "startDate": "2026-01-04T14:00:00-0700",
-  "endDate": "2026-01-04T18:00:00-0700",
+  "startDate": "2026-01-04T15:00:00-0700",
+  "endDate": "2026-01-04T16:30:00-0700",
   "image": "https://drbi.s3.amazonaws.com/events/1976543939129-main.jpg",
   "location": {
     "name": "Desert Rose Baha'i Institute",
@@ -17,13 +17,21 @@
   },
   "price": null,
   "organizer": "Desert Rose Baha'i Institute",
-  "fullDescription": "",
+  "fullDescription": "Ms. Somlee Lee will perform her choices of the world’s favorite classical piano pieces.",
   "eventSchedule": [],
-  "highlights": [],
-  "refundPolicy": "",
+  "highlights": [
+    "In person",
+    "Virtual"
+  ],
+  "refundPolicy": "Refund Policy</p><div class=\"Card_body__vj7ua undefined\">Refunds up to 7 days before event</div></div></div></div></div><dialog class=\"Modal_dialog__1zirs \"><div class=\"Modal_container__1zirs\"><div class=\"Modal_header__1zirs\"><button class=\"Modal_closeButton__1zirs\" aria-label=\"close\"><i class=\"Icon_root__1kdkz Icon_icon-medium__1kdkz\" aria-hidden=\"true\"><svg xmlns=\"http://www.",
   "categories": [],
-  "images": [],
-  "teacherImage": null,
+  "images": [
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172184004%2F177237344149%2F1%2Foriginal.20251202-211200",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172184881%2F177237344149%2F1%2Foriginal.20251202-212142",
+    "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F553798659%2F177237344149%2F1%2Foriginal.20230712-175546",
+    "https://cdn.evbuc.com/images/1172184004/177237344149/1/logo.20251202-211200"
+  ],
+  "teacherImage": "https://drbi.s3.amazonaws.com/events/1976543939129-teacher.jpg",
   "source": "external",
   "externalId": "1976543939129",
   "registrationUrl": "https://www.eventbrite.com/e/the-first-sunday-concert-series-tickets-1976543939129",
@@ -31,10 +39,10 @@
   "featured": false,
   "mainImage": "https://drbi.s3.amazonaws.com/events/1976543939129-main.jpg",
   "originalImage": "https://img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com%2Fimages%2F1172184004%2F177237344149%2F1%2Foriginal.20251202-211200?crop=focalpoint&fit=crop&h=1000&w=2000&auto=format%2Ccompress&q=75&sharp=10&fp-x=0.5&fp-y=0.5&s=d33ca302995650c4a562871c0c3bf02e",
-  "lastModified": "431cbff54ee8957cad868d9066909903",
-  "lastSynced": "2025-12-02T21:45:24.373Z",
+  "lastModified": "26ed5e5fb39ce07e52e0ebb9a82facdd",
+  "lastSynced": "2025-12-23T15:26:52.828Z",
   "scraped": {
-    "orgPageDate": "2025-12-21T19:39:24.660Z",
-    "detailPageDate": "2025-12-02T21:45:24.374Z"
+    "orgPageDate": "2025-12-23T15:26:52.828Z",
+    "detailPageDate": "2025-12-23T15:26:52.828Z"
   }
 }

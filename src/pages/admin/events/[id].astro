@@ -162,14 +162,19 @@ if (Astro.request.method === "POST" && event) {
       )}
       <div class="flex flex-wrap gap-4 items-center">
         <a href="/admin/events" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">← Back to Events</a>
-        {event?.source === 'external' && event?.manuallyEdited && (
-          <button type="button" id="refresh-from-eventbrite" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
-            🔄 Force Re-sync from Eventbrite
+        {event?.source === 'external' && (
+          <button type="button" id="refresh-from-eventbrite" class="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors">
+            🔄 Re-sync from Eventbrite
+          </button>
+        )}
+        {event?.source === 'external' && (
+          <button type="button" id="refresh-with-images" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+            🖼️ Re-sync + Re-download Images
           </button>
         )}
         {event?.source === 'external' && !event?.manuallyEdited && (
           <span class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
-            ℹ️ Manual edits will prevent automatic syncing with Eventbrite
+            ℹ️ Manual edits will prevent automatic syncing
           </span>
         )}
         {event?.source === 'external' && event?.manuallyEdited && (
@@ -661,37 +666,78 @@ if (Astro.request.method === "POST" && event) {
     // Make removeImage globally available
     window.removeImage = removeImage;
 
-    // Refresh from Eventbrite functionality
+    // Refresh from Eventbrite functionality (data only)
     document.getElementById('refresh-from-eventbrite')?.addEventListener('click', async function() {
       const confirmed = confirm(
-        '⚠️ WARNING: This will overwrite all manual changes with fresh data from Eventbrite.\\n\\n' +
-        'This action cannot be undone. Are you sure you want to proceed?'
+        '🔄 Re-sync Event Data\\n\\n' +
+        'This will refresh event details from Eventbrite (title, description, dates, etc.)\\n\\n' +
+        'Images will NOT be re-downloaded.\\n\\n' +
+        'Proceed?'
       );
-      
+
       if (confirmed) {
-        try {
-          const response = await fetch(`${window.location.origin}/api/events`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              action: 'force-refresh',
-              eventData: { id: document.querySelector('[data-event-id]')?.dataset?.eventId },
-              sessionid: sessionid
-            })
-          });
-          
-          if (response.ok) {
-            alert('Event refreshed from Eventbrite successfully!');
-            window.location.reload();
-          } else {
-            alert('Failed to refresh event from Eventbrite.');
-          }
-        } catch (error) {
-          console.error('Refresh error:', error);
-          alert('Error refreshing from Eventbrite: ' + error.message);
-        }
+        await doRefresh(false);
       }
     });
+
+    // Refresh with images functionality
+    document.getElementById('refresh-with-images')?.addEventListener('click', async function() {
+      const confirmed = confirm(
+        '🖼️ Full Re-sync with Images\\n\\n' +
+        '⚠️ WARNING: This will:\\n' +
+        '• Refresh all event details from Eventbrite\\n' +
+        '• Re-download and replace the main image\\n' +
+        '• Re-download and replace the teacher image\\n\\n' +
+        'This may take a few seconds. Proceed?'
+      );
+
+      if (confirmed) {
+        await doRefresh(true);
+      }
+    });
+
+    // Shared refresh function
+    async function doRefresh(includeImages) {
+      const button = includeImages
+        ? document.getElementById('refresh-with-images')
+        : document.getElementById('refresh-from-eventbrite');
+
+      const originalText = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = includeImages
+        ? '⏳ Re-downloading images...'
+        : '⏳ Syncing...';
+
+      try {
+        const response = await fetch(`${window.location.origin}/api/events`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'force-refresh',
+            eventData: {
+              id: document.querySelector('[data-event-id]')?.dataset?.eventId,
+              redownloadImages: includeImages
+            },
+            sessionid: sessionid
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          alert(result.message || 'Event refreshed from Eventbrite successfully!');
+          window.location.reload();
+        } else {
+          const errorText = await response.text();
+          alert('Failed to refresh event: ' + errorText);
+        }
+      } catch (error) {
+        console.error('Refresh error:', error);
+        alert('Error refreshing from Eventbrite: ' + error.message);
+      } finally {
+        button.disabled = false;
+        button.innerHTML = originalText;
+      }
+    }
 
     // Make setupImageUpload globally available
     window.setupImageUpload = setupImageUpload;

@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:12:09.532Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-rohollah-heydarian/heydarian-rohollahjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-rohollah-heydarian/heydarian-rohollah.jpg"
   alt: "Memorial for Rohollah Heydarian"
 narrator: "auto"
 ---

@@ -13,7 +13,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T21:24:45.962Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-edward-peace/drbisunsetjpeg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-edward-peace/drbisunset.jpeg"
   alt: "Memorial for Edward Peace"
 narrator: "auto"
 ---

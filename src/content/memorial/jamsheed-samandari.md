@@ -13,7 +13,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T21:28:12.212Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-jamsheed-samandari/samandari-jamsheedjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-jamsheed-samandari/samandari-jamsheed.jpg"
   alt: "Memorial for Jamsheed Samandari"
 narrator: "auto"
 ---

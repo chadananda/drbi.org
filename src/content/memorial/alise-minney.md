@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:24:57.358Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-alise-minney/minney-alisejpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-alise-minney/minney-alise.jpg"
   alt: "Memorial for Alise Minney"
 narrator: "auto"
 ---

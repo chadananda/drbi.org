@@ -16,7 +16,7 @@ keywords:
 datePublished: "2024-05-26T00:00:00.000Z"
 dateModified: "2024-05-28T16:22:08.149Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-02-houshang-aghdasi/aghdasi-houshangjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-02-houshang-aghdasi/aghdasi-houshang.jpg"
   alt: "Memorial for Houshang Aghdasi"
 audio_duration: "0.0"
 narrator: "auto"

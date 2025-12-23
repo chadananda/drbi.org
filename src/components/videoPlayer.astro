@@ -9,13 +9,20 @@
 // https://www.youtube-nocookie.com/embed/gHcPWsg75CI
 // https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
+interface Props {
+  video: string;
+  thumbnail?: boolean;
+  title?: string;
+}
 
+const { video, thumbnail = false, title = "Watch Video" } = Astro.props;
 
 // extract out video id from any youtube url:
-const videoid = ((Astro.props.video.match(/(?:youtu.be\/|youtube(-nocookie)?.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([a-zA-Z0-9_-]{11})/)) || [null, null, null])[2];
+const videoid = ((video.match(/(?:youtu.be\/|youtube(-nocookie)?.com\/(?:watch\?v=|embed\/|v\/|shorts\/))([a-zA-Z0-9_-]{11})/)) || [null, null, null])[2];
 
-// const imageURL = `https://img.youtube.com/vi/${videoid}/mqdefault.jpg`
-const embedURL = `https://www.youtube.com/embed/${videoid}`
+// Use medium quality thumbnail - helps mask grainy source videos
+const imageURL = `https://img.youtube.com/vi/${videoid}/mqdefault.jpg`;
+const embedURL = `https://www.youtube.com/embed/${videoid}`;
 
 // console.log('Astro.props.video:', Astro.props.video, "vidoID:", videoid, "embedURL:", embedURL);
 
@@ -78,8 +85,106 @@ const playerID = 'id-' + uniqueID;
 //     {% video-player  meta=$meta  video=$meta.main_video /%}
 ---
 
-<div id={playerID} class="video-player w-full my-20 border-4  border-gray-400 p-3 relative overflow-hidden shadow-lg rounded-xl noprint" style="padding-top: 56%">
-  <iframe class="absolute top-0 left-0 w-full h-full" src={embedURL} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;" allowfullscreen></iframe>
-</div>
+{thumbnail ? (
+  <!-- Thumbnail mode: small preview that opens fullscreen modal -->
+  <div id={playerID} class="video-player-thumbnail my-20 noprint">
+    <button
+      type="button"
+      class="video-thumbnail-btn group relative mx-auto block max-w-sm rounded-xl overflow-hidden shadow-lg border-4 border-gray-400 hover:border-indigo-500 transition-all duration-300 hover:shadow-xl cursor-pointer"
+      data-video-url={embedURL}
+      aria-label={`Play video: ${title}`}
+    >
+      <img
+        src={imageURL}
+        alt={title}
+        class="w-full h-auto"
+        loading="lazy"
+      />
+      <!-- Play button overlay -->
+      <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
+        <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
+          <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        </div>
+      </div>
+      <!-- Title caption -->
+      <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+        <p class="text-white text-sm font-medium">{title}</p>
+        <p class="text-white/70 text-xs mt-1">Click to play fullscreen</p>
+      </div>
+    </button>
+  </div>
+
+  <!-- Fullscreen modal -->
+  <div id={`${playerID}-modal`} class="video-modal fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-4">
+    <button
+      type="button"
+      class="video-modal-close absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+      aria-label="Close video"
+    >
+      <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+    <div class="video-modal-content w-full max-w-5xl aspect-video">
+      <!-- iframe inserted by JS on open -->
+    </div>
+  </div>
+
+  <script>
+    // Video thumbnail modal functionality
+    document.querySelectorAll<HTMLButtonElement>('.video-thumbnail-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const videoUrl = btn.dataset.videoUrl;
+        const playerId = btn.closest('.video-player-thumbnail')?.id;
+        const modal = document.getElementById(`${playerId}-modal`);
+        const content = modal?.querySelector('.video-modal-content');
+
+        if (modal && content) {
+          // Create iframe with autoplay
+          content.innerHTML = `<iframe class="w-full h-full rounded-lg" src="${videoUrl}?autoplay=1" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    });
+
+    // Close modal handlers
+    document.querySelectorAll('.video-modal').forEach(modal => {
+      const closeBtn = modal.querySelector('.video-modal-close');
+      const content = modal.querySelector('.video-modal-content');
+
+      closeBtn?.addEventListener('click', () => closeModal(modal, content));
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal(modal, content);
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.video-modal:not(.hidden)').forEach(modal => {
+          const content = modal.querySelector('.video-modal-content');
+          closeModal(modal, content);
+        });
+      }
+    });
+
+    function closeModal(modal: Element | null, content: Element | null) {
+      if (modal && content) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        content.innerHTML = '';
+        document.body.style.overflow = '';
+      }
+    }
+  </script>
+) : (
+  <!-- Standard full-width embed -->
+  <div id={playerID} class="video-player w-full my-20 border-4 border-gray-400 p-3 relative overflow-hidden shadow-lg rounded-xl noprint" style="padding-top: 56%">
+    <iframe class="absolute top-0 left-0 w-full h-full" src={embedURL} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;" allowfullscreen></iframe>
+  </div>
+)}
 <!-- <script type="application/ld+json" set:html={JSON.stringify(schema)} /> -->
 

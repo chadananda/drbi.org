@@ -334,7 +334,7 @@ async function handleForceRefresh(eventData) {
   try {
     const fs = await import('fs/promises');
     const path = await import('path');
-    
+
     if (!eventData.id) {
       return new Response('Event ID is required', { status: 400 });
     }
@@ -352,23 +352,27 @@ async function handleForceRefresh(eventData) {
 
     // Read current event data
     const currentData = JSON.parse(await fs.readFile(filePath, 'utf8'));
-    
+
     // Force refresh by removing manuallyEdited flag and calling scraper
     const scraperModule = await import('../../utils/eventbrite-scraper.js');
     const { refreshSingleEvent } = scraperModule.default;
-    
+
     // Call the scraper to refresh this specific event
-    const refreshed = await refreshSingleEvent(eventData.id);
-    
+    const redownloadImages = eventData.redownloadImages || false;
+    const refreshed = await refreshSingleEvent(eventData.id, redownloadImages);
+
     if (refreshed) {
-      return new Response(JSON.stringify({ success: true, message: 'Event refreshed successfully' }), {
+      const message = redownloadImages
+        ? 'Event refreshed and images re-downloaded successfully!'
+        : 'Event data refreshed successfully!';
+      return new Response(JSON.stringify({ success: true, message }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
     } else {
       return new Response('Failed to refresh event', { status: 500 });
     }
-    
+
   } catch (error) {
     console.error('Error force refreshing event:', error);
     return new Response('Error force refreshing event', { status: 500 });

@@ -27,7 +27,7 @@ Before(async function () {
     viewport: { width: 1280, height: 720 }
   });
   this.page = await this.context.newPage();
-  this.baseURL = process.env.BASE_URL || 'http://localhost:4321';
+  this.baseURL = process.env.BASE_URL || 'http://localhost:4327';
   this.testData = {};
 });
 

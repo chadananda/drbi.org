@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:05:34.715Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-james-ray-guffey/guffey-jamesjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-james-ray-guffey/guffey-james.jpg"
   alt: "Memorial for James Ray Guffey"
 narrator: "auto"
 ---

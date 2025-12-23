@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:51:07.906Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-glenn-oneal/oneal-glennjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-glenn-oneal/oneal-glenn.jpg"
   alt: "Memorial for Glenn ONeal"
 narrator: "auto"
 ---

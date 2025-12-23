@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:10:22.483Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-margaret-ellen-peggy-hadden/hadden-margaretjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-margaret-ellen-peggy-hadden/hadden-margaret.jpg"
   alt: 'Memorial for Margaret Ellen "Peggy" Hadden'
 narrator: "auto"
 ---

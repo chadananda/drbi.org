@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T20:00:18.235Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-farahbakhsh-farah-roshan/roshan-farahbakhshjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-farahbakhsh-farah-roshan/roshan-farahbakhsh.jpg"
   alt: 'Memorial for Farahbakhsh "Farah" Roshan'
 narrator: "auto"
 ---

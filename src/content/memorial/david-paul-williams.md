@@ -13,7 +13,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T21:25:11.637Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-david-paul-williams/williams-davidjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-david-paul-williams/williams-david.jpg"
   alt: "Memorial for David Paul Williams"
 narrator: "auto"
 ---

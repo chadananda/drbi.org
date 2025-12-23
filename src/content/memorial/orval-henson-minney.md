@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:27:12.628Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-orval-henson-minney/minney-orvaljpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-orval-henson-minney/minney-orval.jpg"
   alt: "Memorial for Orval Henson Minney"
 narrator: "auto"
 ---

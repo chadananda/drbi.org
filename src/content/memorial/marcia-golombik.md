@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T17:38:34.030Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-marcia-golombik/golombik-marciajpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-marcia-golombik/golombik-marcia.jpg"
   alt: "Memorial for Marcia Golombik"
 narrator: "auto"
 ---

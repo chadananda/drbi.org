@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:22:50.660Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-patricia-louise-mcdowell/mcdowell-patriciajpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-patricia-louise-mcdowell/mcdowell-patricia.jpg"
   alt: "Memorial for Patricia Louise McDowell"
 narrator: "auto"
 ---

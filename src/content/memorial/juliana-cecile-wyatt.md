@@ -13,7 +13,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T21:25:30.184Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-juliana-cecile-wyatt/wyatt-julianajpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-juliana-cecile-wyatt/wyatt-juliana.jpg"
   alt: "Memorial for Juliana Cecile Wyatt"
 narrator: "auto"
 ---

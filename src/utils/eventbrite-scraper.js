@@ -619,10 +619,13 @@ export const updateEvents = async (forceRefresh = false) => {
 };
 
 // Refresh a single event from Eventbrite (force override manual edit protection)
-const refreshSingleEvent = async (eventId) => {
+const refreshSingleEvent = async (eventId, redownloadImages = false) => {
   try {
     console.log(`🔄 Force refreshing event ${eventId} from Eventbrite...`);
-    
+    if (redownloadImages) {
+      console.log(`🖼️ Will also re-download images`);
+    }
+
     const eventsDir = path.join(process.cwd(), 'src/content/events');
     const filename = `event-${eventId}.json`;
     const filePath = path.join(eventsDir, filename);
@@ -671,6 +674,24 @@ const refreshSingleEvent = async (eventId) => {
         detailPageDate: new Date().toISOString()
       }
     };
+
+    // Re-download images if requested
+    if (redownloadImages) {
+      console.log(`📸 Re-downloading images for event ${eventId}...`);
+      const imageResults = await downloadEventImages(
+        { id: eventId, image: existingEvent.originalImage || existingEvent.image },
+        eventDetails
+      );
+
+      if (imageResults.downloadedMain) {
+        refreshedEvent.mainImage = imageResults.mainImage;
+        console.log(`✅ Updated main image: ${imageResults.mainImage}`);
+      }
+      if (imageResults.downloadedTeacher) {
+        refreshedEvent.teacherImage = imageResults.teacherImage;
+        console.log(`✅ Updated teacher image: ${imageResults.teacherImage}`);
+      }
+    }
 
     // Force save (override manual edit protection)
     const saved = saveEvent(eventsDir, refreshedEvent, true);

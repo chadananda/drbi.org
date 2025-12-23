@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:45:24.416Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-maliheh-kimiai-asadi-mohajeri/mohajeri-malihehjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-maliheh-kimiai-asadi-mohajeri/mohajeri-maliheh.jpg"
   alt: "Memorial for Maliheh Kimiai-Asadi Mohajeri"
 narrator: "auto"
 ---

@@ -35,8 +35,20 @@ import ffa8 from "./history/_David-Hadden.webp"
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Zeyada&display=swap" rel="stylesheet" />
 
- <Image src={drbiimg} alt="Desert Rose Institute"
-       class="h-auto max-h-64 w-full   mx-auto object-cover object-center rounded-lg mb-8" />
+<div class="full-bleed">
+  <Image src={drbiimg} alt="Desert Rose Institute"
+         class="w-full h-96 md:h-[28rem] lg:h-[32rem] object-cover object-[center_60%]" />
+</div>
+
+<style>{`
+  .full-bleed {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    margin-left: -50vw;
+    margin-bottom: 2rem;
+  }
+`}</style>
 
 
 <script async src="https://widgets.givebutter.com/latest.umd.cjs?acct=1qYQLHeWtFc20ZMq&p=other"></script>

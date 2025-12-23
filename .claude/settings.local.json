@@ -19,7 +19,9 @@
       "Read(/tmp/**)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:vercel.com)",
-      "WebFetch(domain:localhost)"
+      "WebFetch(domain:localhost)",
+      "mcp__posthog__docs-search",
+      "Skill(webapp-testing)"
     ],
     "deny": [],
     "ask": []

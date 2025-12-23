@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:57:21.609Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-c-lawrence-patton/patton-c-lawrencejpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-c-lawrence-patton/patton-c-lawrence.jpg"
   alt: "Memorial for C. Lawrence Patton"
 narrator: "auto"
 ---

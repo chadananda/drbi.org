@@ -12,7 +12,7 @@ keywords: []
 datePublished: "2024-05-04T00:00:00.000Z"
 dateModified: "2024-05-28T19:49:01.181Z"
 image:
-  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-enayat-navidi/navidi-enayatjpg"
+  src: "https://drbi.s3.amazonaws.com/uploads/2024-06-04-enayat-navidi/navidi-enayat.jpg"
   alt: "Memorial for Enayat Navidi"
 narrator: "auto"
 ---
