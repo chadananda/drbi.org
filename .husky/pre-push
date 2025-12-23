@@ -1,7 +1,11 @@
 echo "🚀 Running pre-push behavioral tests..."
 
+# DRBI uses port 4327 by default - check that first to avoid conflicts with other projects
 # Check if dev server is already running
-if curl -s -o /dev/null http://localhost:4321/ 2>/dev/null; then
+if curl -s -o /dev/null http://localhost:4327/ 2>/dev/null; then
+  export BASE_URL=http://localhost:4327
+  echo "✓ Using existing dev server on port 4327"
+elif curl -s -o /dev/null http://localhost:4321/ 2>/dev/null; then
   export BASE_URL=http://localhost:4321
   echo "✓ Using existing dev server on port 4321"
 elif curl -s -o /dev/null http://localhost:4322/ 2>/dev/null; then
@@ -14,6 +18,11 @@ else
 
   # Wait for server to be ready (max 30 seconds)
   for i in $(seq 1 30); do
+    if curl -s -o /dev/null http://localhost:4327/ 2>/dev/null; then
+      export BASE_URL=http://localhost:4327
+      echo "✓ Dev server ready on port 4327"
+      break
+    fi
     if curl -s -o /dev/null http://localhost:4321/ 2>/dev/null; then
       export BASE_URL=http://localhost:4321
       echo "✓ Dev server ready on port 4321"
