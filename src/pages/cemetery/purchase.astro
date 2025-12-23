@@ -1,0 +1,333 @@
+---
+export const prerender = false;
+
+import Layout from "@layouts/Layout.astro";
+import Container from "src/components/container.astro";
+import Sectionhead from "src/components/sectionhead.astro";
+import Button from "src/components/ui/button.astro";
+import site from "@data/site.json";
+
+const PLOT_PRICE = 1500;
+---
+
+<Layout title="Purchase a Cemetery Plot">
+  <Container>
+    <Sectionhead>
+      <Fragment slot="title">Purchase a Cemetery Plot</Fragment>
+      <Fragment slot="desc">Desert Rose Memorial Gardens - Request a plot reservation</Fragment>
+    </Sectionhead>
+
+    <div class="grid md:grid-cols-2 gap-10 mx-auto max-w-4xl mt-16">
+      <!-- Left side: Info -->
+      <div>
+        <h2 class="font-medium text-2xl text-gray-800">Plot Purchase Information</h2>
+        <p class="text-lg leading-relaxed text-slate-500 mt-3">
+          Complete this form to request a cemetery plot at Desert Rose Memorial Gardens.
+          We'll send you a PayPal invoice that you can pay online or by phone.
+        </p>
+
+        <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <h3 class="font-semibold text-amber-800">Current Pricing</h3>
+          <p class="text-2xl font-bold text-amber-900 mt-2">$1,500 per plot</p>
+          <p class="text-sm text-amber-700 mt-1">Invoice will be sent via PayPal</p>
+        </div>
+
+        <div class="mt-6">
+          <h3 class="font-semibold text-gray-800 mb-2">Questions?</h3>
+          <div class="flex items-center mt-2 space-x-2 text-gray-600">
+            <span>{site.address}</span>
+          </div>
+          <div class="flex items-center mt-2 space-x-2 text-gray-600">
+            <a href={`mailto:${site.email}`} class="text-indigo-600 hover:underline">{site.email}</a>
+          </div>
+          <div class="flex items-center mt-2 space-x-2 text-gray-600">
+            <a href={`tel:${site.phone}`} class="text-indigo-600 hover:underline">{site.phone}</a>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-slate-100 rounded-lg">
+          <h3 class="font-semibold text-gray-800 mb-2">Funeral Services</h3>
+          <p class="text-sm text-gray-600">
+            For caskets, headstones, and burial arrangements, please contact:
+          </p>
+          <p class="mt-2">
+            <a href="https://www.jwarrenfuneral.com/" target="_blank" class="text-indigo-600 hover:underline font-medium">
+              J. Warren Funeral Home
+            </a>
+            <br />
+            <a href="tel:5203742000" class="text-gray-600">(520) 374-2000</a>
+          </p>
+          <p class="text-xs text-gray-500 mt-2">
+            J. Warren is familiar with Baha'i burial practices and exclusively manages burials at Desert Rose.
+          </p>
+        </div>
+      </div>
+
+      <!-- Right side: Form -->
+      <div class="bg-slate-100 p-5 md:p-8 rounded-xl mb-5">
+        <form id="purchase-form" class="needs-validation" novalidate>
+          <!-- Full Name -->
+          <div class="mb-5">
+            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <input
+              type="text"
+              id="fullName"
+              name="fullName"
+              required
+              placeholder="Your full name"
+              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100"
+            />
+            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+              Please provide your full name.
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="mb-5">
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              placeholder="you@example.com"
+              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100"
+            />
+            <div class="empty-feedback text-red-400 text-sm mt-1">
+              Please provide your email address.
+            </div>
+            <div class="invalid-feedback text-red-400 text-sm mt-1">
+              Please provide a valid email address.
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="mb-5">
+            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              required
+              placeholder="(555) 123-4567"
+              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100"
+            />
+            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+              Please provide your phone number.
+            </div>
+          </div>
+
+          <!-- Number of Plots -->
+          <div class="mb-5">
+            <label for="numPlots" class="block text-sm font-medium text-gray-700 mb-1">Number of Plots *</label>
+            <select
+              id="numPlots"
+              name="numPlots"
+              required
+              class="w-full px-4 py-3 border rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
+            >
+              <option value="">Select number of plots</option>
+              <option value="1">1 plot - $1,500</option>
+              <option value="2">2 plots - $3,000</option>
+              <option value="3">3 plots - $4,500</option>
+              <option value="4">4 plots - $6,000</option>
+              <option value="5">5 plots - $7,500</option>
+              <option value="6">6 plots - $9,000</option>
+              <option value="7">7 plots - $10,500</option>
+              <option value="8">8 plots - $12,000</option>
+              <option value="9">9 plots - $13,500</option>
+              <option value="10">10 plots - $15,000</option>
+            </select>
+            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+              Please select the number of plots.
+            </div>
+          </div>
+
+          <!-- Who are the plots for -->
+          <div class="mb-5">
+            <label for="plotsFor" class="block text-sm font-medium text-gray-700 mb-1">Who are the plots intended for? *</label>
+            <textarea
+              id="plotsFor"
+              name="plotsFor"
+              required
+              rows="3"
+              placeholder="Please list the name(s) of who the plot(s) are intended for"
+              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100"
+            ></textarea>
+            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+              Please provide the names of who the plots are for.
+            </div>
+          </div>
+
+          <!-- Dates of Birth -->
+          <div class="mb-5">
+            <label for="datesOfBirth" class="block text-sm font-medium text-gray-700 mb-1">Date(s) of Birth *</label>
+            <textarea
+              id="datesOfBirth"
+              name="datesOfBirth"
+              required
+              rows="2"
+              placeholder="Please list date of birth for each person (e.g., John Doe - January 15, 1950)"
+              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100"
+            ></textarea>
+            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+              Please provide date(s) of birth.
+            </div>
+          </div>
+
+          <!-- Special Requests -->
+          <div class="mb-5">
+            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Special Requests or Notes (Optional)</label>
+            <textarea
+              id="notes"
+              name="notes"
+              rows="3"
+              placeholder="Any special requests, plot location preferences, or additional notes"
+              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100"
+            ></textarea>
+          </div>
+
+          <!-- Total Display -->
+          <div class="mb-6 p-4 bg-white rounded-lg border border-slate-200">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-700 font-medium">Total Amount:</span>
+              <span id="totalAmount" class="text-2xl font-bold text-indigo-600">$0.00</span>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <Button type="submit" size="lg" block>
+            Request Invoice
+          </Button>
+
+          <!-- Result message -->
+          <div id="result" class="mt-4 text-center"></div>
+        </form>
+      </div>
+    </div>
+  </Container>
+</Layout>
+
+<style>
+  .invalid-feedback,
+  .empty-feedback {
+    display: none;
+  }
+
+  .was-validated :placeholder-shown:invalid ~ .empty-feedback {
+    display: block;
+  }
+
+  .was-validated :not(:placeholder-shown):invalid ~ .invalid-feedback {
+    display: block;
+  }
+
+  .was-validated select:invalid ~ .empty-feedback,
+  .was-validated select:invalid ~ .invalid-feedback {
+    display: block;
+  }
+
+  .is-invalid,
+  .was-validated :invalid {
+    border-color: #dc3545;
+  }
+</style>
+
+<script is:inline>
+const PLOT_PRICE = 1500;
+const form = document.getElementById("purchase-form");
+const result = document.getElementById("result");
+const numPlotsSelect = document.getElementById("numPlots");
+const totalAmountDisplay = document.getElementById("totalAmount");
+
+// Update total when number of plots changes
+numPlotsSelect.addEventListener("change", function() {
+  const numPlots = parseInt(this.value) || 0;
+  const total = numPlots * PLOT_PRICE;
+  totalAmountDisplay.textContent = `$${total.toLocaleString()}.00`;
+});
+
+// Form submission
+form.addEventListener("submit", async function(e) {
+  e.preventDefault();
+  form.classList.add("was-validated");
+
+  if (!form.checkValidity()) {
+    form.querySelectorAll(":invalid")[0].focus();
+    return;
+  }
+
+  // Collect form data
+  const formData = {
+    fullName: document.getElementById("fullName").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    numPlots: parseInt(document.getElementById("numPlots").value),
+    plotsFor: document.getElementById("plotsFor").value.trim(),
+    datesOfBirth: document.getElementById("datesOfBirth").value.trim(),
+    notes: document.getElementById("notes").value.trim() || ""
+  };
+
+  // Show loading state
+  result.className = "mt-4 text-center";
+  result.innerHTML = `<span class="text-slate-600">Creating your invoice...</span>`;
+
+  // Disable submit button
+  const submitBtn = form.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Processing...";
+
+  try {
+    const response = await fetch("/api/create-cemetery-invoice", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      // Replace form with success message
+      const formContainer = form.parentElement;
+      formContainer.innerHTML = `
+        <div class="text-center py-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Invoice Sent!</h3>
+          <p class="text-gray-600 mb-4">
+            A PayPal invoice for <strong>$${data.total.toLocaleString()}</strong> has been sent to <strong>${formData.email}</strong>
+          </p>
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left mb-4">
+            <h4 class="font-semibold text-amber-800 mb-1">What happens next?</h4>
+            <ul class="text-sm text-amber-700 space-y-1">
+              <li>• Check your email for the PayPal invoice</li>
+              <li>• Pay online using the link in the email</li>
+              <li>• PayPal accepts credit cards, debit cards, and bank transfers</li>
+              <li>• Your plot reservation is confirmed upon payment</li>
+            </ul>
+          </div>
+          <a href="${data.paymentUrl}" target="_blank" rel="noopener noreferrer"
+             class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+            Pay Now with PayPal
+          </a>
+          <p class="text-sm text-gray-500 mt-3">Invoice ID: ${data.invoiceId}</p>
+        </div>
+      `;
+    } else {
+      result.innerHTML = `<span class="text-red-500">${data.error || "Something went wrong. Please try again or contact us directly."}</span>`;
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Request Invoice";
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    result.innerHTML = `<span class="text-red-500">Network error. Please check your connection and try again.</span>`;
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Request Invoice";
+  }
+});
+</script>

@@ -17,11 +17,15 @@ image:
 narrator: "auto"
 ---
 
-##  How to Purchase a Plot in the Desert Rose Bahá’í Cemetery
+##  How to Purchase a Plot in the Desert Rose Bahá'í Cemetery
 
-**Request a plot by contacting Desert Rose at:  [info@drbi.org](mailto:info@drbi.org).**
+<a href="/cemetery/purchase" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors no-underline mb-6">Request a Plot Online</a>
 
+Use our online form to request a cemetery plot. We'll send you a PayPal invoice that you can pay online at your convenience.
 
+---
+
+#### Prefer email? Contact us at [info@drbi.org](mailto:info@drbi.org)
 
 #### Please provide us with:
 
