@@ -55,13 +55,12 @@ async function getAccessToken() {
 
 // Create draft invoice
 async function createInvoice(accessToken, formData) {
-  const { fullName, email, phone, numPlots, plotsFor, datesOfBirth, notes } = formData;
+  const { fullName, email, phone, numPlots, plotsFor, notes } = formData;
   const total = numPlots * PLOT_PRICE;
 
   // Build invoice note with customer details
   const invoiceNote = [
     `Plot(s) intended for: ${plotsFor}`,
-    `Date(s) of birth: ${datesOfBirth}`,
     notes ? `Special requests: ${notes}` : ''
   ].filter(Boolean).join('\n\n');
 
@@ -210,7 +209,7 @@ export async function POST({ request }) {
     const formData = await request.json();
 
     // Validate required fields
-    const required = ['fullName', 'email', 'phone', 'numPlots', 'plotsFor', 'datesOfBirth'];
+    const required = ['fullName', 'email', 'phone', 'numPlots', 'plotsFor'];
     for (const field of required) {
       if (!formData[field]) {
         return new Response(JSON.stringify({
