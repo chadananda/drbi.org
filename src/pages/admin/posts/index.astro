@@ -7,6 +7,7 @@ export const prerender = false;
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import { getAllPostsByType } from '../../../utils/cms-utils.js';
+import { transformS3Url } from '../../../utils/utils.js';
 
 // Get all posts for management
 let memorial = [];
@@ -161,8 +162,8 @@ const sessionid = Astro.locals?.session?.id;
                   </td>
                   <td class="px-2 py-1">
                     {post.frontmatter.image?.src ? (
-                      <img 
-                        src={`https://drbi.imgix.net${post.frontmatter.image.src.replace('https://drbi.s3.amazonaws.com', '')}?w=120&h=80&fit=crop&crop=face,center&auto=format,compress&q=75`}
+                      <img
+                        src={transformS3Url(post.frontmatter.image.src, 120, 80)}
                         alt={post.frontmatter.image.alt || post.frontmatter.title}
                         class="w-20 h-12 object-cover rounded border border-gray-200"
                         loading="lazy"

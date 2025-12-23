@@ -427,6 +427,22 @@ if (Astro.request.method === "POST") {
   <script>
     // Session ID for API calls
     const sessionid = document.querySelector('[data-sessionid]')?.dataset?.sessionid || 'NO_SESSION';
+
+    // Helper function for S3 to imgix URL transformation
+    const imgixBaseUrl = 'https://drbi.imgix.net';
+    const transformS3Url = (url, width = null, height = null, format = 'webp', quality = 80) => {
+      if (!url || !url.includes('.s3.')) return url;
+      try {
+        const imagePath = new URL(url).pathname;
+        let params = [];
+        if (width) params.push(`w=${width}`);
+        if (height) params.push(`h=${height}`);
+        params.push(`fm=${format}`, `q=${quality}`, `fit=crop`, `crop=faces`);
+        if (width && width < 400) params.push('usm=20&usmrad=20');
+        else params.push('sharp=20');
+        return `${imgixBaseUrl}${imagePath}?${params.join('&')}`;
+      } catch { return url; }
+    };
     
     // Eventbrite import functionality
     document.getElementById('importEventbrite')?.addEventListener('click', async function() {
@@ -554,7 +570,7 @@ if (Astro.request.method === "POST") {
                 console.log('💾 Hidden input updated:', hiddenInput.value);
 
                 // Show preview with imgix thumbnail
-                const imgixUrl = `https://drbi.imgix.net${data.s3url.replace('https://drbi.s3.amazonaws.com', '')}?w=200&h=150&fit=crop&auto=format,compress&q=75`;
+                const imgixUrl = transformS3Url(data.s3url, 200, 150);
                 console.log('🖼️ Setting preview image:', imgixUrl);
                 console.log('🔍 Preview elements:', { previewImg: !!previewImg, preview: !!preview });
 

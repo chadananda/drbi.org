@@ -5,6 +5,8 @@ export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
 import { getCollection } from 'astro:content';
 import { lucia } from '@lib/auth';
+import { transformS3Url } from '@utils/utils.js';
+import site from '@data/site.json';
 
 // Authentication check (same as articles)
 // Get the actual JWT token from the cookie (not the decoded session.id)
@@ -184,10 +186,8 @@ const getEventLocation = (event) => {
             <!-- Left: Large Main Image -->
             <div class="flex-shrink-0">
               {event.data.mainImage ? (
-                <img 
-                  src={event.data.mainImage?.startsWith('https://drbi.s3.amazonaws.com') 
-                    ? `https://drbi.imgix.net${event.data.mainImage.replace('https://drbi.s3.amazonaws.com', '')}?w=400&h=240&fit=crop&crop=center&auto=format,compress&q=75`
-                    : event.data.mainImage}
+                <img
+                  src={transformS3Url(event.data.mainImage, 400, 240)}
                   alt={event.data.name}
                   class="w-48 h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
                   loading="lazy"
@@ -235,10 +235,8 @@ const getEventLocation = (event) => {
                 <!-- Small Teacher Thumbnail -->
                 <div class="flex-shrink-0 ml-4">
                   {event.data.teacherImage ? (
-                    <img 
-                      src={event.data.teacherImage.startsWith('https://drbi.s3.amazonaws.com') 
-                        ? `https://drbi.imgix.net${event.data.teacherImage.replace('https://drbi.s3.amazonaws.com', '')}?w=160&h=160&fit=crop&crop=face,center&auto=format,compress&q=75`
-                        : `https://drbi.imgix.net/events/${event.data.id}-teacher.jpg?w=160&h=160&fit=crop&crop=face,center&auto=format,compress&q=75`}
+                    <img
+                      src={transformS3Url(event.data.teacherImage, 160, 160)}
                       alt="Teacher"
                       class="w-16 h-16 object-cover rounded-full border-2 border-gray-200 shadow-sm"
                       loading="lazy"
@@ -357,6 +355,22 @@ const getEventLocation = (event) => {
     let showingOldEvents = false;
     
     // Helper functions
+    const imgixBaseUrl = 'https://drbi.imgix.net';
+
+    const transformS3Url = (url, width = null, height = null, format = 'webp', quality = 80) => {
+      if (!url || !url.includes('.s3.')) return url;
+      try {
+        const imagePath = new URL(url).pathname;
+        let params = [];
+        if (width) params.push(`w=${width}`);
+        if (height) params.push(`h=${height}`);
+        params.push(`fm=${format}`, `q=${quality}`, `fit=crop`, `crop=faces`);
+        if (width && width < 400) params.push('usm=20&usmrad=20');
+        else params.push('sharp=20');
+        return `${imgixBaseUrl}${imagePath}?${params.join('&')}`;
+      } catch { return url; }
+    };
+
     const formatDate = (dateStr) => {
       return new Date(dateStr).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -411,8 +425,8 @@ const getEventLocation = (event) => {
               <!-- Left: Large Main Image -->
               <div class="flex-shrink-0">
                 ${event.mainImage ? `
-                  <img 
-                    src="https://drbi.imgix.net${event.mainImage.replace('https://drbi.s3.amazonaws.com', '')}?w=400&h=240&fit=crop&crop=center&auto=format,compress&q=75"
+                  <img
+                    src="${transformS3Url(event.mainImage, 400, 240)}"
                     alt="${event.name}"
                     class="w-48 h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
                     loading="lazy"
@@ -448,10 +462,8 @@ const getEventLocation = (event) => {
                   
                   <!-- Small Teacher Thumbnail -->
                   <div class="flex-shrink-0 ml-4">
-                    ${event.teacherImage ? `<img 
-                      src="${event.teacherImage.startsWith('https://drbi.s3.amazonaws.com') 
-                        ? `https://drbi.imgix.net${event.teacherImage.replace('https://drbi.s3.amazonaws.com', '')}?w=160&h=160&fit=crop&crop=face,center&auto=format,compress&q=75`
-                        : `https://drbi.imgix.net/events/${event.id}-teacher.jpg?w=160&h=160&fit=crop&crop=face,center&auto=format,compress&q=75`}"
+                    ${event.teacherImage ? `<img
+                      src="${transformS3Url(event.teacherImage, 160, 160)}"
                       alt="Teacher"
                       class="w-16 h-16 object-cover rounded-full border-2 border-gray-200 shadow-sm"
                       loading="lazy"
