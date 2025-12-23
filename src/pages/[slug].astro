@@ -26,7 +26,8 @@ export async function getStaticPaths() {
     );
 
     // If no matches and this is a cemetery/memorial article, show memorial pages
-    if (matches.length === 0 && (post.data?.topics?.includes('memorial') || post.data?.topics?.includes('cemetery'))) {
+    const burialTopics = ['memorial', 'cemetery', 'bahai-burial', 'burial', 'death'];
+    if (matches.length === 0 && post.data?.topics?.some(t => burialTopics.includes(t))) {
       matches = articles.filter((ar) =>
         langmatch(ar) && ar.id!=post.id && ar.collection === 'memorial'
       ).slice(0, 10);
@@ -61,7 +62,7 @@ export async function getStaticPaths() {
 
 const { post, author, category, topics, related, translations } = Astro.props;
 const language = post.data?.language || "en";
-const isCemeteryArticle = post.data?.topics?.some(t => ['memorial', 'cemetery'].includes(t));
+const isCemeteryArticle = post.data?.topics?.some(t => ['memorial', 'cemetery', 'bahai-burial', 'burial', 'death'].includes(t));
 const dir = mainLanguages[language].dir;
 const base_url = baseURL(Astro);
 

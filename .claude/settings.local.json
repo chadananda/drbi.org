@@ -21,7 +21,8 @@
       "WebFetch(domain:vercel.com)",
       "WebFetch(domain:localhost)",
       "mcp__posthog__docs-search",
-      "Skill(webapp-testing)"
+      "Skill(webapp-testing)",
+      "WebFetch(domain:developer.paypal.com)"
     ],
     "deny": [],
     "ask": []
