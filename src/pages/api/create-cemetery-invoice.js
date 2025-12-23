@@ -46,7 +46,7 @@ async function getAccessToken() {
   if (!response.ok) {
     const error = await response.text();
     console.error('PayPal auth error:', error);
-    throw new Error('Failed to authenticate with PayPal');
+    throw new Error(`Failed to authenticate with PayPal: ${error}`);
   }
 
   const data = await response.json();
@@ -77,7 +77,12 @@ async function createInvoice(accessToken, formData) {
       invoice_date: invoiceDate,
       currency_code: 'USD',
       note: invoiceNote,
-      terms_and_conditions: 'Payment required to complete plot reservation. Plots are not held until payment is received.',
+      terms_and_conditions: `Payment required to complete plot reservation. Plots are not held until payment is received.
+
+FUNERAL SERVICES
+For caskets, headstones, and burial arrangements, please contact:
+J. Warren Funeral Home - (520) 374-2000
+J. Warren is familiar with Baha'i burial practices and exclusively manages burials at Desert Rose.`,
       payment_term: {
         term_type: 'DUE_ON_DATE_SPECIFIED',
         due_date: dueDateStr
@@ -88,7 +93,7 @@ async function createInvoice(accessToken, formData) {
         given_name: 'Desert Rose',
         surname: 'Baha\'i Institute'
       },
-      email_address: 'info@drbi.org',
+      // Note: email_address omitted - PayPal uses the account's default email
       phones: [{
         country_code: '1',
         national_number: '5204667961',
@@ -151,7 +156,7 @@ async function createInvoice(accessToken, formData) {
   if (!response.ok) {
     const error = await response.text();
     console.error('PayPal create invoice error:', error);
-    throw new Error('Failed to create invoice');
+    throw new Error(`Failed to create invoice: ${error}`);
   }
 
   return await response.json();
@@ -167,15 +172,15 @@ async function sendInvoice(accessToken, invoiceId) {
     },
     body: JSON.stringify({
       send_to_invoicer: true,
-      send_to_recipient: true,
-      additional_recipients: ['info@drbi.org'] // CC to organization
+      send_to_recipient: true
+      // Note: additional_recipients removed - would need valid PayPal-linked email
     })
   });
 
   if (!response.ok) {
     const error = await response.text();
     console.error('PayPal send invoice error:', error);
-    throw new Error('Failed to send invoice');
+    throw new Error(`Failed to send invoice: ${error}`);
   }
 
   return true;
