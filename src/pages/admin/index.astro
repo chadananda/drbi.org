@@ -196,12 +196,12 @@ if (posthogApiKey && posthogApiKey.trim()) {
       }),
 
       // Geographic data - Countries
-      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=person&breakdown=$geoip_country_name&date_from=' + startDate + '&date_to=' + endDate, {
+      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$geoip_country_name&date_from=' + startDate + '&date_to=' + endDate, {
         headers
       }),
 
       // Geographic data - US States (regions)
-      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=person&breakdown=$geoip_subdivision_1_name&date_from=' + startDate + '&date_to=' + endDate, {
+      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$geoip_subdivision_1_name&date_from=' + startDate + '&date_to=' + endDate, {
         headers
       })
     ]);

@@ -22,7 +22,8 @@
       "WebFetch(domain:localhost)",
       "mcp__posthog__docs-search",
       "Skill(webapp-testing)",
-      "WebFetch(domain:developer.paypal.com)"
+      "WebFetch(domain:developer.paypal.com)",
+      "mcp__posthog__query-run"
     ],
     "deny": [],
     "ask": []
