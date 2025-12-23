@@ -1,13 +1,29 @@
 echo "🔨 Running pre-commit checks..."
 
-# Run the build (which also generates analytics summary)
-echo "📦 Building project..."
-npm run build
+# Run Vercel build to catch production compatibility issues (ESM, serverless, etc.)
+# Falls back to npm build if vercel CLI has configuration issues
+echo "📦 Running Vercel build (production simulation)..."
 
-# Check if build succeeded
-if [ $? -ne 0 ]; then
-  echo "❌ Build failed! Please fix the errors before committing."
-  exit 1
+VERCEL_OUTPUT=$(vercel build 2>&1)
+VERCEL_EXIT=$?
+
+if [ $VERCEL_EXIT -ne 0 ]; then
+  # Check if it's a configuration error vs actual build error
+  if echo "$VERCEL_OUTPUT" | grep -q "Project Settings\|must be upgraded\|WARN.*not running on Vercel"; then
+    echo "⚠️  Vercel CLI config issue detected. Falling back to npm build..."
+    echo "   (Update Node.js version in Vercel dashboard to fix)"
+    npm run build
+    if [ $? -ne 0 ]; then
+      echo "❌ Build failed! Please fix the errors before committing."
+      exit 1
+    fi
+  else
+    echo "$VERCEL_OUTPUT" | tail -30
+    echo "❌ Vercel build failed! Please fix the errors before committing."
+    exit 1
+  fi
+else
+  echo "$VERCEL_OUTPUT" | tail -10
 fi
 
 echo "✅ Build passed!"
