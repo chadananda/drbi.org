@@ -19,12 +19,28 @@ const events = await Promise.all(
     })
 );
 
+// Parse date strings as Arizona time (UTC-7, no DST)
+// If no timezone is specified, assume Arizona time
+// This ensures consistent parsing regardless of where the build runs (local vs Vercel UTC)
+const parseArizonaDate = (dateStr: string): Date => {
+  if (!dateStr) return new Date();
+  // Check if the date string already has timezone info (Z, +XX:XX, -XX:XX)
+  const hasTimezone = dateStr.includes('Z') ||
+                      dateStr.includes('+') ||
+                      /[-]\d{2}:?\d{2}$/.test(dateStr);
+  if (!hasTimezone) {
+    // Arizona is always UTC-7 (no DST)
+    return new Date(dateStr + '-07:00');
+  }
+  return new Date(dateStr);
+};
+
 // Always use the real current date for filtering
 const referenceDate = new Date();
 
 let upcomingEvents = events
-  .filter(e => e.data.visible !== false && new Date(e.data.startDate) > referenceDate) // Only show visible events
-  .sort((a, b) => new Date(a.data.startDate).getTime() - new Date(b.data.startDate).getTime());
+  .filter(e => e.data.visible !== false && parseArizonaDate(e.data.startDate) > referenceDate) // Only show visible events
+  .sort((a, b) => parseArizonaDate(a.data.startDate).getTime() - parseArizonaDate(b.data.startDate).getTime());
 
 
 const { view = 'cards', limit } = Astro.props; // 'cards', 'list', or 'list-full', optional limit
@@ -35,17 +51,18 @@ if (limit) {
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', {
+  return parseArizonaDate(date).toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
+    timeZone: 'America/Phoenix'
   });
 };
 
 const formatDateRange = (startDate, endDate) => {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const start = parseArizonaDate(startDate);
+  const end = parseArizonaDate(endDate);
   const tz = 'America/Phoenix'; // Arizona timezone (no DST)
 
   const startDateStr = start.toLocaleDateString('en-US', {
@@ -70,7 +87,7 @@ const formatDateRange = (startDate, endDate) => {
 };
 
 const formatTime = (date) => {
-  return new Date(date).toLocaleTimeString('en-US', {
+  return parseArizonaDate(date).toLocaleTimeString('en-US', {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
@@ -114,8 +131,8 @@ const displayEvents = upcomingEvents.map(event => {
       dateRange: formatDateRange(d.startDate, d.endDate),
       time: formatTime(d.startDate),
       price: formatPrice(d.price),
-      month: new Date(d.startDate).toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Phoenix' }),
-      day: new Date(d.startDate).toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Phoenix' }),
+      month: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Phoenix' }),
+      day: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Phoenix' }),
       mainImage: transformS3Url(d.mainImage, 450, 300),
       mainImageLarge: transformS3Url(d.mainImage, 600, 400),
       teacherImage: d.teacherImage ? transformS3Url(d.teacherImage, 200) : null,
@@ -139,7 +156,7 @@ const displayEvents = upcomingEvents.map(event => {
       'events-list'
     }>
       {displayEvents.map(event => (
-        <div class={view === 'cards' ? 'relative' : 'event-container'} data-event-start={event.data.startDate}>
+        <div class={view === 'cards' ? 'relative' : 'event-container'} data-event-start={parseArizonaDate(event.data.startDate).toISOString()}>
           {view === 'cards' ? (
             <>
               <article class="relative overflow-hidden w-[450px] h-[300px] m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl">
