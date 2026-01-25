@@ -39,5 +39,10 @@
       }),
       (e.__SV = 1));
   })(document, window.posthog || []);
-  posthog.init('phc_VydDZl6MTJY4hwvo4zetAaJyJhJsu8vqoMLeb0j7S7w', { api_host: 'https://us.i.posthog.com', defaults: '2025-05-24' });
+  posthog.init('phc_VydDZl6MTJY4hwvo4zetAaJyJhJsu8vqoMLeb0j7S7w', {
+    api_host: 'https://us.i.posthog.com',
+    autocapture: true,
+    capture_pageview: true,
+    capture_pageleave: true
+  });
 </script>
