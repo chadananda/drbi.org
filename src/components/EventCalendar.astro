@@ -35,6 +35,14 @@ const parseArizonaDate = (dateStr: string): Date => {
   return new Date(dateStr);
 };
 
+// Check if registration URL is valid (not empty, not site homepage)
+const hasValidRegistrationUrl = (url: string): boolean => {
+  if (!url || url.trim() === '') return false;
+  const normalized = url.trim().toLowerCase();
+  // Consider invalid if it's just the site URL (with or without trailing slash, http or https)
+  return !normalized.match(/^https?:\/\/(www\.)?drbi\.org\/?$/);
+};
+
 // Always use the real current date for filtering
 const referenceDate = new Date();
 
@@ -250,12 +258,14 @@ const displayEvents = upcomingEvents.map(event => {
                       </div>
                     )}
                   </div>
-                  <div class="list-full-actions">
-                    <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="read-more-btn">
-                      <span class="btn-text">Read More</span>
-                      <span class="btn-icon">→</span>
-                    </a>
-                  </div>
+                  {hasValidRegistrationUrl(event.data.registrationUrl) && (
+                    <div class="list-full-actions">
+                      <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="read-more-btn">
+                        <span class="btn-text">Read More</span>
+                        <span class="btn-icon">→</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
               </article>
             </div>
