@@ -129,13 +129,19 @@ const curlyQuotes = (text: string): string => {
 // Prepare display data for each event
 const displayEvents = upcomingEvents.map(event => {
   const d = event.data;
+  const hasValidReg = hasValidRegistrationUrl(d.registrationUrl);
   return {
     ...event,
     display: {
       name: curlyQuotes(d.name),
       shortDescription: curlyQuotes(d.shortDescription || ''),
       fullDescription: curlyQuotes(d.fullDescription || ''),
-      preview: curlyQuotes(d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.'),
+      // Show full description if no external link, otherwise truncate
+      preview: curlyQuotes(
+        hasValidReg
+          ? (d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.')
+          : (d.fullDescription || d.shortDescription || 'Join us for this transformative learning experience.')
+      ),
       dateRange: formatDateRange(d.startDate, d.endDate),
       time: formatTime(d.startDate),
       price: formatPrice(d.price),
