@@ -170,11 +170,20 @@ const displayEvents = upcomingEvents.map(event => {
       'events-list'
     }>
       {displayEvents.map(event => (
-        <div class={view === 'cards' ? 'relative' : 'event-container'} data-event-start={parseArizonaDate(event.data.startDate).toISOString()}>
+        <div
+          id={`event-${event.id}`}
+          class={view === 'cards' ? 'relative' : 'event-container'}
+          data-event-start={parseArizonaDate(event.data.startDate).toISOString()}
+        >
           {view === 'cards' ? (
             <>
               <article class="relative overflow-hidden w-[450px] h-[300px] m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl">
-                <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="block no-underline text-inherit h-full">
+                <a
+                  href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events#event-${event.id}`}
+                  target={hasValidRegistrationUrl(event.data.registrationUrl) ? '_blank' : undefined}
+                  rel={hasValidRegistrationUrl(event.data.registrationUrl) ? 'noopener noreferrer' : undefined}
+                  class="block no-underline text-inherit h-full"
+                >
                   <div class="relative w-full h-full bg-contain bg-no-repeat bg-center rounded-lg overflow-hidden" style={`background-image: url(${event.display.mainImage})`}>
                     <div class="event-overlay">
                       <div class="event-content">
@@ -211,7 +220,11 @@ const displayEvents = upcomingEvents.map(event => {
               <article class="event-list-full-item">
                 <div class="card-title-header">
                   <h3 class="card-title">
-                    <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">
+                    <a
+                      href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events#event-${event.id}`}
+                      target={hasValidRegistrationUrl(event.data.registrationUrl) ? '_blank' : undefined}
+                      rel={hasValidRegistrationUrl(event.data.registrationUrl) ? 'noopener noreferrer' : undefined}
+                    >
                       {event.display.name}
                     </a>
                   </h3>
