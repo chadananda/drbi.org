@@ -1,0 +1,38 @@
+{
+  "id": "manual-1769314593630",
+  "url": "https://drbi.org",
+  "lastModified": "2026-01-25T04:18:18.663Z",
+  "name": "First Sunday Concert Series (#4)",
+  "shortDescription": "Artists for February are three doctoral candidates: pianists Sichum Gao and Jing Li, and violinist Ziqian Ye.",
+  "startDate": "2026-02-01T15:00",
+  "endDate": "2026-02-01T17:00",
+  "image": "https://drbi.s3.amazonaws.com/events/manual-1769314520180-main.png",
+  "teacherImage": "https://drbi.s3.amazonaws.com/events/manual-1769314541463-teacher.jpeg",
+  "fullDescription": "Featuring: Three internationally acclaimed performers from the School of Music, University of Arizona, and a fully restored A.B. Chase 1893 nine-foot concert grand piano with tonal qualities rivaling the best 2025 models.",
+  "highlights": [],
+  "location": {
+    "name": "Online",
+    "address": "",
+    "city": "",
+    "state": "",
+    "zip": ""
+  },
+  "price": null,
+  "registrationUrl": "https://drbi.org",
+  "organizer": "DRBI",
+  "categories": [],
+  "source": "manual",
+  "visible": true,
+  "scraped": {
+    "orgPageDate": "2026-01-25T04:16:33.631Z",
+    "detailPageDate": "2026-01-25T04:16:33.631Z"
+  },
+  "title": "First Sunday Concert Series (#4)",
+  "featured": false,
+  "onsite": false,
+  "mainImage": "https://drbi.s3.amazonaws.com/events/manual-1769314593630-main-1769314692153.jpg",
+  "isEventbrite": false,
+  "eventbriteId": null,
+  "manuallyEdited": true,
+  "lastManualEdit": "2026-01-25T04:18:18.656Z"
+}

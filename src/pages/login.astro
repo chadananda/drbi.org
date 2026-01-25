@@ -38,7 +38,7 @@ if (Astro.request.method === "POST") {
       // Validate against environment variables (single admin user)
       const envEmail = import.meta.env.SITE_ADMIN_EMAIL?.trim().toLowerCase();
       const envPassword = import.meta.env.SITE_ADMIN_PASS?.trim();
-      
+
       if (!envEmail || !envPassword) {
         console.error('Missing SITE_ADMIN_EMAIL or SITE_ADMIN_PASS environment variables');
         errorMsg = 'Server configuration error.';
