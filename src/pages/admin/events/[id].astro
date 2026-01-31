@@ -844,17 +844,43 @@ if (Astro.request.method === "POST" && event) {
       newRange.className = 'date-range-item grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 border-t border-gray-200 pt-4';
       newRange.dataset.index = dateRangeIndex;
 
-      // Get current date/time and set default to 4:00 PM
-      const now = new Date();
-      now.setHours(16, 0, 0, 0); // 4:00 PM
-      const defaultStart = formatDateTimeLocal(now);
-
-      // End time 2 hours later (6:00 PM)
-      const endTime = new Date(now);
-      endTime.setHours(18, 0, 0, 0);
-      const defaultEnd = formatDateTimeLocal(endTime);
-
       const currentIndex = dateRangeIndex;
+
+      // Get the previous date range to use as template
+      const lastIndex = currentIndex - 1;
+      const lastStartInput = document.getElementById(`startDate-${lastIndex}`);
+      const lastEndInput = document.getElementById(`endDate-${lastIndex}`);
+
+      let defaultStart, defaultEnd;
+
+      if (lastStartInput && lastStartInput.value) {
+        // Use the last date, add one month
+        const lastStart = new Date(lastStartInput.value);
+        const nextStart = new Date(lastStart);
+        nextStart.setMonth(nextStart.getMonth() + 1);
+        defaultStart = formatDateTimeLocal(nextStart);
+
+        // Set end date based on last entry's duration
+        if (lastEndInput && lastEndInput.value) {
+          const lastEnd = new Date(lastEndInput.value);
+          const duration = lastEnd.getTime() - lastStart.getTime();
+          const nextEnd = new Date(nextStart.getTime() + duration);
+          defaultEnd = formatDateTimeLocal(nextEnd);
+        } else {
+          const nextEnd = new Date(nextStart);
+          nextEnd.setHours(nextEnd.getHours() + 2);
+          defaultEnd = formatDateTimeLocal(nextEnd);
+        }
+      } else {
+        // Fallback to today at 4:00 PM
+        const now = new Date();
+        now.setHours(16, 0, 0, 0);
+        defaultStart = formatDateTimeLocal(now);
+
+        const endTime = new Date(now);
+        endTime.setHours(18, 0, 0, 0);
+        defaultEnd = formatDateTimeLocal(endTime);
+      }
 
       newRange.innerHTML = `
         <div class="mb-4">
@@ -882,10 +908,11 @@ if (Astro.request.method === "POST" && event) {
             <small class="text-gray-500 text-sm">Auto-fills to 2 hours after start</small>
             <button
               type="button"
-              class="remove-date-btn text-red-600 hover:text-red-700 text-sm font-medium"
+              class="remove-date-btn px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition-colors"
               data-index="${currentIndex}"
+              title="Remove this date"
             >
-              − Remove
+              🗑️ Remove
             </button>
           </div>
         </div>
