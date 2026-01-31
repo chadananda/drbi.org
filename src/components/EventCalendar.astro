@@ -58,13 +58,25 @@ let upcomingEvents = events
   .filter(e => e.data.visible !== false && parseArizonaDate(e.data.startDate) > referenceDate) // Only show visible events
   .sort((a, b) => parseArizonaDate(a.data.startDate).getTime() - parseArizonaDate(b.data.startDate).getTime());
 
+// Group recurring events by recurringGroupId
+const eventGroups = new Map();
+const standaloneEvents = [];
+
+upcomingEvents.forEach(event => {
+  if (event.data.recurringGroupId) {
+    if (!eventGroups.has(event.data.recurringGroupId)) {
+      eventGroups.set(event.data.recurringGroupId, []);
+    }
+    eventGroups.get(event.data.recurringGroupId).push(event);
+  } else {
+    standaloneEvents.push(event);
+  }
+});
 
 const { view = 'cards', limit } = Astro.props; // 'cards', 'list', or 'list-full', optional limit
 
-// Apply limit if provided
-if (limit) {
-  upcomingEvents = upcomingEvents.slice(0, limit);
-}
+// Apply limit if provided (note: limit applies to groups, not individual events)
+// We'll handle this after creating display groups
 
 const formatDate = (date) => {
   return parseArizonaDate(date).toLocaleDateString('en-US', {
@@ -134,8 +146,8 @@ const curlyQuotes = (text: string): string => {
     .replace(/(\w)'(\w)/g, '$1' + closeSingle + '$2');  // apostrophe
 };
 
-// Prepare display data for each event
-const displayEvents = upcomingEvents.map(event => {
+// Helper function to create display data for an event
+const createDisplayData = (event) => {
   const d = event.data;
   const hasValidReg = hasValidRegistrationUrl(d.registrationUrl);
   return {
@@ -166,7 +178,72 @@ const displayEvents = upcomingEvents.map(event => {
       teacherImageLarge: d.teacherImage ? transformS3Url(d.teacherImage, 180) : null,
     }
   };
+};
+
+// Create display groups: each group is either a single event or a recurring event group
+const displayGroups = [];
+
+// Add standalone events
+standaloneEvents.forEach(event => {
+  displayGroups.push({
+    type: 'single',
+    event: createDisplayData(event),
+    allEvents: [createDisplayData(event)],
+    datesSummary: '',
+    eventCount: 1,
+    groupId: null
+  });
 });
+
+// Add recurring event groups
+eventGroups.forEach((groupEvents, groupId) => {
+  // Sort events in the group by date
+  groupEvents.sort((a, b) => parseArizonaDate(a.data.startDate).getTime() - parseArizonaDate(b.data.startDate).getTime());
+
+  const firstEvent = groupEvents[0];
+  const displayData = createDisplayData(firstEvent);
+
+  // Create a summary of all dates
+  const datesSummary = groupEvents.map(e => {
+    const date = parseArizonaDate(e.data.startDate);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Phoenix' });
+  }).join(', ');
+
+  displayGroups.push({
+    type: 'recurring',
+    groupId,
+    event: displayData,
+    allEvents: groupEvents.map(createDisplayData),
+    datesSummary,
+    eventCount: groupEvents.length
+  });
+});
+
+// Sort all groups by their first event's date
+displayGroups.sort((a, b) => {
+  const aDate = parseArizonaDate(a.event.data.startDate).getTime();
+  const bDate = parseArizonaDate(b.event.data.startDate).getTime();
+  return aDate - bDate;
+});
+
+// Apply limit if provided
+let displayGroupsLimited = displayGroups;
+if (limit) {
+  displayGroupsLimited = displayGroups.slice(0, limit);
+}
+
+// Prepare flat display data with all needed properties
+const displayData = displayGroupsLimited.map(group => ({
+  ...group.event,
+  isRecurring: group.type === 'recurring',
+  groupId: group.groupId,
+  datesSummary: group.datesSummary,
+  eventCount: group.eventCount,
+  allEvents: group.allEvents
+}));
+
+// For backwards compatibility, create displayEvents from displayGroups
+const displayEvents = displayGroupsLimited.map(group => group.event);
 
 ---
 
@@ -182,8 +259,7 @@ const displayEvents = upcomingEvents.map(event => {
       view === 'list-full' ? 'events-list-full' :
       'events-list'
     }>
-      {displayEvents.map(event => (
-        <div
+      {displayData.map((event) => (<div
           id={`event-${event.id}`}
           class={view === 'cards' ? 'relative' : 'event-container'}
           data-event-start={parseArizonaDate(event.data.startDate).toISOString()}
@@ -191,6 +267,12 @@ const displayEvents = upcomingEvents.map(event => {
           {view === 'cards' ? (
             <>
               <article class="relative overflow-hidden w-[450px] h-[300px] m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl">
+                {event.isRecurring && (
+                  <div class="recurring-card-badge">
+                    <span class="badge-icon">🔄</span>
+                    <span class="badge-text">{event.eventCount} dates</span>
+                  </div>
+                )}
                 <a
                   href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events#event-${event.id}`}
                   target={hasValidRegistrationUrl(event.data.registrationUrl) ? '_blank' : undefined}
@@ -202,8 +284,16 @@ const displayEvents = upcomingEvents.map(event => {
                       <div class="event-content">
                         <h3 class="event-title">{event.display.name}</h3>
                         <div class="event-meta">
-                          <time class="event-date">{event.display.dateRange}</time>
-                          <span class="event-time">{event.display.time}</span>
+                          {event.isRecurring ? (
+                            <div class="recurring-dates-compact">
+                              <time class="event-date">{event.datesSummary}</time>
+                            </div>
+                          ) : (
+                            <>
+                              <time class="event-date">{event.display.dateRange}</time>
+                              <span class="event-time">{event.display.time}</span>
+                            </>
+                          )}
                           {event.data.price && (
                             <span class="event-price">{event.display.price}</span>
                           )}
@@ -241,10 +331,49 @@ const displayEvents = upcomingEvents.map(event => {
                       {event.display.name}
                     </a>
                   </h3>
-                  <div class="date-details">
-                    <div class="date-range">{event.display.dateRange}</div>
-                    <div class="time">{event.display.time}</div>
-                  </div>
+                  {event.isRecurring ? (
+                    <div class="recurring-dates-summary">
+                      <div class="recurring-badge">
+                        <span class="badge-icon">🔄</span>
+                        <span class="badge-text">Recurring event ({event.eventCount} dates)</span>
+                      </div>
+                      <div class="dates-collapsed" data-group-id={event.groupId}>
+                        <span class="dates-text">{event.datesSummary}</span>
+                        <button
+                          type="button"
+                          class="expand-dates-btn"
+                          onclick={`toggleRecurringDates('${event.groupId}')`}
+                        >
+                          <span class="expand-text">Show all dates</span>
+                          <span class="expand-icon">▼</span>
+                        </button>
+                      </div>
+                      <div class="dates-expanded" data-group-id={event.groupId} style="display: none;">
+                        <div class="expanded-dates-list">
+                          {event.allEvents.map((evt, idx) => (
+                            <div class="expanded-date-item">
+                              <span class="date-number">{idx + 1}.</span>
+                              <span class="date-text">{evt.display.dateRange}</span>
+                              <span class="time-text">{evt.display.time}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          class="collapse-dates-btn"
+                          onclick={`toggleRecurringDates('${event.groupId}')`}
+                        >
+                          <span class="collapse-text">Show less</span>
+                          <span class="collapse-icon">▲</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div class="date-details">
+                      <div class="date-range">{event.display.dateRange}</div>
+                      <div class="time">{event.display.time}</div>
+                    </div>
+                  )}
                 </div>
 
                 <div class="list-full-content">
@@ -321,11 +450,20 @@ const displayEvents = upcomingEvents.map(event => {
                 <div class="list-date">
                   <div class="month">{event.display.month}</div>
                   <div class="day">{event.display.day}</div>
+                  {event.isRecurring && (
+                    <div class="recurring-list-badge">🔄 {event.eventCount}</div>
+                  )}
                 </div>
                 <div class="list-content">
                   <h3 class="list-title">
                     <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">{event.display.name}</a>
                   </h3>
+                  {event.isRecurring && (
+                    <div class="list-recurring-dates">
+                      <span class="recurring-label">Multiple dates:</span>
+                      <span class="recurring-dates-text">{event.datesSummary}</span>
+                    </div>
+                  )}
                   <div class="list-meta">
                     <span class="time-icon">🕐&nbsp;</span><time>{event.display.time}</time>
                     {event.data.price && (
@@ -395,6 +533,26 @@ const displayEvents = upcomingEvents.map(event => {
       buttonEl.classList.add('expanded');
       buttonEl.querySelector('.btn-text').textContent = 'Show Less';
       buttonEl.querySelector('.btn-icon').textContent = '↑';
+    }
+  };
+
+  // Toggle recurring event dates
+  window.toggleRecurringDates = function(groupId) {
+    const collapsedEl = document.querySelector(`.dates-collapsed[data-group-id="${groupId}"]`);
+    const expandedEl = document.querySelector(`.dates-expanded[data-group-id="${groupId}"]`);
+
+    if (!collapsedEl || !expandedEl) return;
+
+    const isExpanded = expandedEl.style.display !== 'none';
+
+    if (isExpanded) {
+      // Collapse
+      collapsedEl.style.display = 'block';
+      expandedEl.style.display = 'none';
+    } else {
+      // Expand
+      collapsedEl.style.display = 'none';
+      expandedEl.style.display = 'block';
     }
   };
 </script>
@@ -1140,4 +1298,172 @@ const displayEvents = upcomingEvents.map(event => {
   border-radius: 12px;
   margin: 20px;
 }
+/* Recurring event styles */
+.recurring-card-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.recurring-card-badge .badge-icon {
+  font-size: 0.875rem;
+}
+
+.recurring-dates-summary {
+  margin-top: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-left: 3px solid #3b82f6;
+  border-radius: 6px;
+}
+
+.recurring-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: #1e40af;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.recurring-badge .badge-icon {
+  font-size: 1rem;
+}
+
+.dates-collapsed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.dates-text {
+  color: #475569;
+  font-size: 0.875rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.expand-dates-btn,
+.collapse-dates-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.expand-dates-btn:hover,
+.collapse-dates-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.expand-icon,
+.collapse-icon {
+  font-size: 0.75rem;
+}
+
+.dates-expanded {
+  margin-top: 8px;
+}
+
+.expanded-dates-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.expanded-date-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e0e7ff;
+}
+
+.date-number {
+  color: #3b82f6;
+  font-weight: 700;
+  font-size: 0.875rem;
+  min-width: 24px;
+}
+
+.date-text {
+  color: #1e293b;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex: 1;
+}
+
+.time-text {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.recurring-dates-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recurring-dates-compact .event-date {
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.recurring-list-badge {
+  margin-top: 4px;
+  font-size: 0.7rem;
+  color: #3b82f6;
+  font-weight: 700;
+  text-align: center;
+}
+
+.list-recurring-dates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-radius: 4px;
+  border-left: 2px solid #3b82f6;
+}
+
+.recurring-label {
+  color: #1e40af;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.recurring-dates-text {
+  color: #475569;
+  font-size: 0.75rem;
+}
+
 </style>
