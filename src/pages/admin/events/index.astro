@@ -43,7 +43,39 @@ try {
       })
   );
   
-  // Sort by date (upcoming first)
+  // Expand events with additionalDates into multiple display instances
+  const expandedEvents = [];
+  const now = new Date();
+
+  events.forEach(event => {
+    // Add primary event instance
+    expandedEvents.push({
+      ...event,
+      isPrimary: true,
+      instanceIndex: 0,
+      dateSource: 'primary'
+    });
+
+    // Add instances for each additional date
+    if (Array.isArray(event.data.additionalDates)) {
+      event.data.additionalDates.forEach((additionalDate, index) => {
+        expandedEvents.push({
+          ...event,
+          data: {
+            ...event.data,
+            startDate: additionalDate.startDate,
+            endDate: additionalDate.endDate
+          },
+          isPrimary: false,
+          instanceIndex: index + 1,
+          dateSource: 'additional'
+        });
+      });
+    }
+  });
+
+  // Sort all expanded events by date (upcoming first)
+  events = expandedEvents;
   events.sort((a, b) => new Date(a.data.startDate).getTime() - new Date(b.data.startDate).getTime());
 } catch (e) {
   error = e.message;
@@ -181,8 +213,14 @@ const getEventLocation = (event) => {
 
     <div id="events-list">
       {filteredEvents.map(event => (
-        <div class={`rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow mb-4 event-card ${getEventStatus(event) === 'past' ? 'bg-gray-50 border border-gray-200' : ''} ${event.data.visible === false ? 'bg-orange-50 border-2 border-orange-300 border-dashed opacity-60' : 'bg-white border border-gray-200'}`}>
+        <div class={`relative rounded-xl shadow-sm hover:shadow-md transition-shadow mb-4 event-card ${event.isPrimary ? 'p-6' : 'p-4 opacity-75'} ${getEventStatus(event) === 'past' ? 'bg-gray-50 border border-gray-200' : ''} ${event.data.visible === false ? 'bg-orange-50 border-2 border-orange-300 border-dashed opacity-60' : 'bg-white border border-gray-200'}`}>
           <div class="flex gap-6">
+            {!event.isPrimary && (
+              <div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
+                <span>🔄</span>
+                <span>Additional Date</span>
+              </div>
+            )}
             <!-- Left: Large Main Image -->
             <div class="flex-shrink-0">
               {event.data.mainImage ? (
@@ -334,7 +372,9 @@ const getEventLocation = (event) => {
     mainImage: event.data.mainImage,
     teacherImage: event.data.teacherImage,
     shortDescription: event.data.shortDescription,
-    fullDescription: event.data.fullDescription
+    fullDescription: event.data.fullDescription,
+    isPrimary: event.isPrimary,
+    highlights: event.data.highlights
   })))}></script>
 
   <script>
@@ -415,12 +455,14 @@ const getEventLocation = (event) => {
       container.innerHTML = events.map(event => {
         const status = getEventStatus(event);
         const eventLocation = getEventLocation(event);
-        const endDateStr = event.endDate && event.endDate !== event.startDate 
-          ? `<span class="text-base text-gray-600">to ${formatDate(event.endDate)}</span>` 
+        const endDateStr = event.endDate && event.endDate !== event.startDate
+          ? `<span class="text-base text-gray-600">to ${formatDate(event.endDate)}</span>`
           : '';
-        
+        const isPrimary = event.isPrimary !== false; // Default to true if not specified
+
         return `
-          <div class="${status === 'past' ? 'bg-gray-50' : 'bg-white'} border border-gray-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow mb-4 ${!event.visible ? 'opacity-75' : ''}">
+          <div class="relative ${status === 'past' ? 'bg-gray-50' : 'bg-white'} border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow mb-4 ${isPrimary ? 'p-6' : 'p-4 opacity-75'} ${!event.visible ? 'opacity-50' : ''}">
+            ${!isPrimary ? '<div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><span>🔄</span><span>Additional Date</span></div>' : ''}
             <div class="flex gap-6">
               <!-- Left: Large Main Image -->
               <div class="flex-shrink-0">

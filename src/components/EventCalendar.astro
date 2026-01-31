@@ -266,15 +266,31 @@ const displayEvents = upcomingEvents.map(event => {
             </>
           ) : view === 'list-full' ? (
             <div class="list-full-wrapper">
-              <div class={`date-badge-outside ${event.isMinimal ? 'opacity-70 text-sm' : ''}`}>
-                <div class="month">{event.display.month}</div>
-                <div class="day">{event.display.day}</div>
-                {event.isMinimal && <div class="recurring-indicator">🔄</div>}
-              </div>
-              {!event.isMinimal && event.display.teacherImageLarge && (
-                <div class="teacher-overlay-large">
-                  <img src={event.display.teacherImageLarge} alt="Teacher" class="teacher-image-large" />
-                </div>
+              {event.isMinimal ? (
+                event.display.teacherImageLarge ? (
+                  <div class="teacher-overlay-minimal">
+                    <img src={event.display.teacherImageLarge} alt="Teacher" class="teacher-image-minimal" />
+                    <div class="recurring-indicator-overlay">🔄</div>
+                  </div>
+                ) : (
+                  <div class="date-badge-outside opacity-70 text-sm">
+                    <div class="month">{event.display.month}</div>
+                    <div class="day">{event.display.day}</div>
+                    <div class="recurring-indicator">🔄</div>
+                  </div>
+                )
+              ) : (
+                <>
+                  <div class="date-badge-outside">
+                    <div class="month">{event.display.month}</div>
+                    <div class="day">{event.display.day}</div>
+                  </div>
+                  {event.display.teacherImageLarge && (
+                    <div class="teacher-overlay-large">
+                      <img src={event.display.teacherImageLarge} alt="Teacher" class="teacher-image-large" />
+                    </div>
+                  )}
+                </>
               )}
               <article class={`event-list-full-item ${event.isMinimal ? 'minimal-event' : ''}`}>
                 <div class="card-title-header">
@@ -293,43 +309,41 @@ const displayEvents = upcomingEvents.map(event => {
                   </div>
                 </div>
 
-                {!event.isMinimal && (
-                  <>
-                    <div class="list-full-content">
-                      <div class="list-full-left-column">
-                        <div class="list-full-image-container">
-                          <img src={event.display.mainImageLarge} alt={event.display.name} class="main-image" />
-                        </div>
+                <div class={`expandable-content ${event.isMinimal ? 'collapsed' : ''}`} data-event-id={event.id}>
+                  <div class="list-full-content">
+                    <div class="list-full-left-column">
+                      <div class="list-full-image-container">
+                        <img src={event.display.mainImageLarge} alt={event.display.name} class="main-image" />
                       </div>
-                      <div class="list-full-details">
-                        <div class="list-full-description" set:html={event.display.shortDescriptionHtml || '<p>No description available</p>'}></div>
+                    </div>
+                    <div class="list-full-details">
+                      <div class="list-full-description" set:html={event.display.shortDescriptionHtml || '<p>No description available</p>'}></div>
 
-                        <div class="list-full-meta">
-                          {event.data.price && (
-                            <div class="meta-item price">
-                              <span class="icon">💲</span>
-                              <span>{event.display.price}</span>
-                            </div>
-                          )}
-                          <div class="meta-item organizer">
-                            <span class="icon">👥</span>
-                            <span>{event.data.organizer}</span>
+                      <div class="list-full-meta">
+                        {event.data.price && (
+                          <div class="meta-item price">
+                            <span class="icon">💲</span>
+                            <span>{event.display.price}</span>
                           </div>
+                        )}
+                        <div class="meta-item organizer">
+                          <span class="icon">👥</span>
+                          <span>{event.data.organizer}</span>
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <div class="event-text-preview">
-                      <div
-                        class="event-preview-text"
-                        data-event-id={event.id}
-                        data-preview-html={event.display.previewHtml}
-                        data-full-html={event.display.fullDescriptionHtml}
-                        set:html={event.display.previewHtml}
-                      ></div>
-                    </div>
-                  </>
-                )}
+                  <div class="event-text-preview">
+                    <div
+                      class="event-preview-text"
+                      data-event-id={event.id}
+                      data-preview-html={event.display.previewHtml}
+                      data-full-html={event.display.fullDescriptionHtml}
+                      set:html={event.display.previewHtml}
+                    ></div>
+                  </div>
+                </div>
 
                 <div class="list-full-bottom">
                   <div class="bottom-left">
@@ -341,7 +355,19 @@ const displayEvents = upcomingEvents.map(event => {
                       </div>
                     )}
                   </div>
-                  {hasValidRegistrationUrl(event.data.registrationUrl) ? (
+                  {event.isMinimal ? (
+                    <div class="list-full-actions">
+                      <button
+                        type="button"
+                        class="show-more-btn"
+                        data-event-id={event.id}
+                        onclick={`toggleMinimalEvent('${event.id}')`}
+                      >
+                        <span class="btn-text">Show More</span>
+                        <span class="btn-icon">↓</span>
+                      </button>
+                    </div>
+                  ) : hasValidRegistrationUrl(event.data.registrationUrl) ? (
                     <div class="list-full-actions">
                       <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="read-more-btn">
                         <span class="btn-text">Read More</span>
@@ -449,6 +475,28 @@ const displayEvents = upcomingEvents.map(event => {
       buttonEl.classList.add('expanded');
       buttonEl.querySelector('.btn-text').textContent = 'Show Less';
       buttonEl.querySelector('.btn-icon').textContent = '↑';
+    }
+  };
+
+  // Toggle minimal event expansion
+  window.toggleMinimalEvent = function(eventId) {
+    const contentEl = document.querySelector(`.expandable-content[data-event-id="${eventId}"]`);
+    const buttonEl = document.querySelector(`[data-event-id="${eventId}"].show-more-btn`);
+
+    if (!contentEl || !buttonEl) return;
+
+    const isCollapsed = contentEl.classList.contains('collapsed');
+
+    if (isCollapsed) {
+      // Expand
+      contentEl.classList.remove('collapsed');
+      buttonEl.querySelector('.btn-text').textContent = 'Show Less';
+      buttonEl.querySelector('.btn-icon').textContent = '↑';
+    } else {
+      // Collapse
+      contentEl.classList.add('collapsed');
+      buttonEl.querySelector('.btn-text').textContent = 'Show More';
+      buttonEl.querySelector('.btn-icon').textContent = '↓';
     }
   };
 
@@ -855,6 +903,50 @@ const displayEvents = upcomingEvents.map(event => {
 
 .teacher-overlay-large:hover .teacher-image-large {
   transform: scale(1.1);
+}
+
+/* Teacher image for minimal recurring events - positioned like date badge */
+.teacher-overlay-minimal {
+  position: absolute;
+  top: 20px;
+  left: -60px;
+  z-index: 30;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+.teacher-image-minimal {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid white;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.teacher-overlay-minimal:hover .teacher-image-minimal {
+  transform: scale(1.1);
+}
+
+.recurring-indicator-overlay {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  background: linear-gradient(135deg, rgb(59, 130, 246), rgb(37, 99, 235));
+  color: white;
+  font-size: 1.2rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Expandable content for minimal events */
+.expandable-content.collapsed {
+  display: none;
 }
 
 .list-full-details {

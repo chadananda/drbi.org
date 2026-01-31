@@ -1,11 +1,11 @@
 {
   "id": "manual-1769883492652",
   "url": "https://drbi.org",
-  "lastModified": "2026-01-31T18:37:52.787Z",
+  "lastModified": "2026-01-31T19:22:19.446Z",
   "name": "Advent of Divine Justice by Shoghi Effendi,1939",
   "shortDescription": "Monthly deep-dive into Shoghi Effendi's prophetic 1939 letter *The Advent of Divine Justice*, facilitated by Professor William Maxwell, Ed.D. (Harvard). Paragraph-by-paragraph discussion exploring the American Bahá'í community's role.",
-  "startDate": "2026-02-01T09:00",
-  "endDate": "2026-02-01T10:00",
+  "startDate": "2026-02-01T16:00:00.000Z",
+  "endDate": "2026-02-01T18:00:00.000Z",
   "image": "https://drbi.s3.amazonaws.com/events/manual-1769883356226-main.jpg",
   "teacherImage": "https://drbi.s3.amazonaws.com/events/manual-1769883381258-teacher.jpg",
   "fullDescription": "In 1939, as fascism engulfed the world, Shoghi Effendi penned one of his most prophetic letters to the American Bahá'í community. This monthly study offers careful, paragraph-by-paragraph engagement with *The Advent of Divine Justice*.\r\n\r\n**What You'll Explore:**\r\n- Shoghi Effendi's extraordinary praise of the American Bahá'í community as a beacon of hope\r\n- Personal spiritual prerequisites for building global divine civilization\r\n- Prophetic analysis of empire's downfall and civilization's collapse\r\n- The \"theory of history\" later developed in *God Passes By* (1944)\r\n- Vision of a future civilization connected to Divine Will\r\n\r\n**Your Guide:**\r\nProfessor William Maxwell, a Bahá'í since 1952 with close connections to Shoghi Effendi and the Hands of the Cause. His service spans four National Spiritual Assemblies (chairing three), Auxiliary Board and Counselor appointments, and seventeen published books. Ed.D., Harvard University, 1967.",
@@ -36,5 +36,15 @@
   "isEventbrite": false,
   "eventbriteId": null,
   "manuallyEdited": true,
-  "lastManualEdit": "2026-01-31T18:37:52.782Z"
+  "lastManualEdit": "2026-01-31T19:22:19.421Z",
+  "additionalDates": [
+    {
+      "startDate": "2026-03-01T16:00:00.000Z",
+      "endDate": "2026-03-01T18:00:00.000Z"
+    },
+    {
+      "startDate": "2026-04-01T16:00:00.000Z",
+      "endDate": "2026-04-01T18:00:00.000Z"
+    }
+  ]
 }
