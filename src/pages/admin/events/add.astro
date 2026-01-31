@@ -201,17 +201,7 @@ if (Astro.request.method === "POST") {
       </div>
 
       <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-semibold text-gray-800">Date & Time</h2>
-          <button
-            type="button"
-            onclick="addDateRange()"
-            class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-1"
-          >
-            <span>+</span>
-            <span>Add Date</span>
-          </button>
-        </div>
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Date & Time</h2>
 
         <div id="dateRanges">
           <div class="date-range-item grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" data-index="0">
@@ -223,7 +213,6 @@ if (Astro.request.method === "POST") {
                 name="startDate"
                 value={formData.startDate || ''}
                 required
-                onchange="autoSetEndDate(0)"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               />
             </div>
@@ -242,7 +231,17 @@ if (Astro.request.method === "POST") {
           </div>
         </div>
 
-        <small class="block text-gray-600 text-sm mt-2">💡 Add multiple dates for recurring events. Each date will create a separate event instance.</small>
+        <div class="mt-4">
+          <button
+            type="button"
+            id="addDateBtn"
+            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-2"
+          >
+            <span>+</span>
+            <span>Add Date</span>
+          </button>
+          <small class="block text-gray-600 text-sm mt-2">💡 Add multiple dates for recurring events. Each date will create a separate event instance.</small>
+        </div>
       </div>
 
       <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
@@ -815,8 +814,18 @@ if (Astro.request.method === "POST") {
       }
     }
 
+    // Helper function to format date for datetime-local input
+    function formatDateTimeLocal(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
     // Auto-set end date to 2 hours after start date
-    window.autoSetEndDate = function(index) {
+    function autoSetEndDate(index) {
       const startInput = document.getElementById(`startDate-${index}`);
       const endInput = document.getElementById(`endDate-${index}`);
 
@@ -826,16 +835,16 @@ if (Astro.request.method === "POST") {
         endDate.setHours(endDate.getHours() + 2); // Add 2 hours
         endInput.value = formatDateTimeLocal(endDate);
       }
-    };
+    }
 
     // Add new date range
     let dateRangeIndex = 1;
-    window.addDateRange = function() {
+    function addDateRange() {
       const container = document.getElementById('dateRanges');
       const index = dateRangeIndex++;
 
       const div = document.createElement('div');
-      div.className = 'date-range-item grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 relative';
+      div.className = 'date-range-item grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 border-t border-gray-200 pt-4';
       div.setAttribute('data-index', index);
       div.innerHTML = `
         <div class="mb-4">
@@ -845,7 +854,6 @@ if (Astro.request.method === "POST") {
             id="startDate-${index}"
             name="startDate"
             required
-            onchange="autoSetEndDate(${index})"
             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -857,28 +865,43 @@ if (Astro.request.method === "POST") {
             name="endDate"
             class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
-          <small class="block text-gray-500 text-sm mt-1">Auto-fills to 2 hours after start</small>
+          <div class="flex items-center justify-between mt-1">
+            <small class="text-gray-500 text-sm">Auto-fills to 2 hours after start</small>
+            <button
+              type="button"
+              class="remove-date-btn text-red-600 hover:text-red-700 text-sm font-medium"
+              data-index="${index}"
+            >
+              − Remove
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          onclick="removeDateRange(${index})"
-          class="absolute -right-2 -top-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-sm transition-colors"
-          title="Remove this date"
-        >×</button>
       `;
 
       container.appendChild(div);
 
-      // Set default time to 4:00 PM
+      // Attach event listeners to new inputs
       const startInput = document.getElementById(`startDate-${index}`);
-      const today = new Date();
-      const defaultStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 0);
-      startInput.value = formatDateTimeLocal(defaultStart);
-      autoSetEndDate(index);
-    };
+      const removeBtn = div.querySelector('.remove-date-btn');
+
+      if (startInput) {
+        // Set default time to 4:00 PM
+        const today = new Date();
+        const defaultStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 0);
+        startInput.value = formatDateTimeLocal(defaultStart);
+        autoSetEndDate(index);
+
+        // Attach change listener
+        startInput.addEventListener('change', () => autoSetEndDate(index));
+      }
+
+      if (removeBtn) {
+        removeBtn.addEventListener('click', () => removeDateRange(index));
+      }
+    }
 
     // Remove date range
-    window.removeDateRange = function(index) {
+    function removeDateRange(index) {
       const dateRanges = document.querySelectorAll('.date-range-item');
       if (dateRanges.length > 1) {
         const item = document.querySelector(`[data-index="${index}"]`);
@@ -886,16 +909,21 @@ if (Astro.request.method === "POST") {
       } else {
         alert('You must have at least one date range.');
       }
-    };
-    
-    // Helper function to format date for datetime-local input
-    function formatDateTimeLocal(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
+
+    // Attach event listeners after DOM loads
+    document.addEventListener('DOMContentLoaded', function() {
+      // Attach add date button listener
+      const addDateBtn = document.getElementById('addDateBtn');
+      if (addDateBtn) {
+        addDateBtn.addEventListener('click', addDateRange);
+      }
+
+      // Attach auto-set listener to initial date input
+      const initialStartInput = document.getElementById('startDate-0');
+      if (initialStartInput) {
+        initialStartInput.addEventListener('change', () => autoSetEndDate(0));
+      }
+    });
   </script>
 </Layout>
