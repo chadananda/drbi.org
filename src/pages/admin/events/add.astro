@@ -32,16 +32,28 @@ if (Astro.request.method === "POST") {
   } else if (formData.isEventbrite === 'true' && !formData.eventbriteId?.trim()) {
     errorMsg = 'Eventbrite ID is required for Eventbrite events';
   } else {
-    // Create events via API (one for each date range)
+    // Create single event with additionalDates array
     try {
-      // Generate a unique recurring group ID if multiple dates
-      const recurringGroupId = startDates.length > 1 ? `recurring-${Date.now()}` : null;
+      // Build additionalDates array from any dates beyond the first
+      const additionalDates = [];
+      for (let i = 1; i < startDates.length; i++) {
+        const startDate = startDates[i];
+        const endDate = endDates[i] || startDate;
+        if (startDate) {
+          additionalDates.push({
+            startDate: new Date(startDate + '-07:00').toISOString(),
+            endDate: new Date(endDate + '-07:00').toISOString()
+          });
+        }
+      }
 
-      // Base event data (same for all instances)
-      const baseEventData = {
+      const eventData = {
         title: formData.title.trim(),
         shortDescription: formData.shortDescription?.trim() || '',
         fullDescription: formData.fullDescription?.trim() || '',
+        startDate: new Date(startDates[0] + '-07:00').toISOString(),
+        endDate: new Date((endDates[0] || startDates[0]) + '-07:00').toISOString(),
+        additionalDates: additionalDates.length > 0 ? additionalDates : [],
         registrationUrl: formData.isEventbrite === 'true'
           ? `https://www.eventbrite.com/e/${formData.eventbriteId.trim()}`
           : (formData.registrationUrl?.trim() || 'https://drbi.org'),
@@ -71,50 +83,28 @@ if (Astro.request.method === "POST") {
         mainImage: formData.mainImage?.trim() || null,
         teacherImage: formData.teacherImage?.trim() || null,
         isEventbrite: formData.isEventbrite === 'true',
-        eventbriteId: formData.isEventbrite === 'true' ? formData.eventbriteId?.trim() : null,
-        recurringGroupId
+        eventbriteId: formData.isEventbrite === 'true' ? formData.eventbriteId?.trim() : null
       };
 
-      // Create an event for each date range
-      let successCount = 0;
-      for (let i = 0; i < startDates.length; i++) {
-        const startDate = startDates[i];
-        const endDate = endDates[i] || startDate;
+      console.log('Creating event with sessionid:', sessionid);
+      const response = await fetch(new URL('/api/events', Astro.url), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          eventData,
+          sessionid
+        })
+      });
 
-        if (!startDate) continue; // Skip empty dates
-
-        const eventData = {
-          ...baseEventData,
-          startDate: new Date(startDate + '-07:00').toISOString(),
-          endDate: new Date(endDate + '-07:00').toISOString()
-        };
-
-        console.log(`Creating event ${i + 1}/${startDates.length} with sessionid:`, sessionid);
-        const response = await fetch(new URL('/api/events', Astro.url), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'create',
-            eventData,
-            sessionid
-          })
-        });
-
-        if (response.ok) {
-          successCount++;
-        } else {
-          const errorText = await response.text();
-          console.error(`Failed to create event ${i + 1}:`, errorText);
-        }
-      }
-
-      if (successCount > 0) {
-        return Astro.redirect(`/admin/events?created=${successCount}`);
+      if (response.ok) {
+        return Astro.redirect('/admin/events?created=true');
       } else {
-        errorMsg = 'Failed to create any events';
+        const errorText = await response.text();
+        errorMsg = `Failed to create event: ${errorText}`;
       }
     } catch (error) {
-      errorMsg = `Error creating events: ${error.message}`;
+      errorMsg = `Error creating event: ${error.message}`;
     }
   }
 }

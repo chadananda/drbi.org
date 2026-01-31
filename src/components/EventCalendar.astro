@@ -54,29 +54,54 @@ const hasValidRegistrationUrl = (url: string): boolean => {
 // Always use the real current date for filtering
 const referenceDate = new Date();
 
-let upcomingEvents = events
-  .filter(e => e.data.visible !== false && parseArizonaDate(e.data.startDate) > referenceDate) // Only show visible events
-  .sort((a, b) => parseArizonaDate(a.data.startDate).getTime() - parseArizonaDate(b.data.startDate).getTime());
+// Expand events with additionalDates into multiple display instances
+const expandedEvents = [];
 
-// Group recurring events by recurringGroupId
-const eventGroups = new Map();
-const standaloneEvents = [];
+events.forEach(event => {
+  if (!event.data.visible) return;
 
-upcomingEvents.forEach(event => {
-  if (event.data.recurringGroupId) {
-    if (!eventGroups.has(event.data.recurringGroupId)) {
-      eventGroups.set(event.data.recurringGroupId, []);
-    }
-    eventGroups.get(event.data.recurringGroupId).push(event);
-  } else {
-    standaloneEvents.push(event);
+  // Add the primary event instance
+  const primaryDate = parseArizonaDate(event.data.startDate);
+  if (primaryDate > referenceDate) {
+    expandedEvents.push({
+      ...event,
+      isPrimary: true,
+      instanceIndex: 0,
+      dateSource: 'primary'
+    });
+  }
+
+  // Add instances for each additional date
+  if (Array.isArray(event.data.additionalDates)) {
+    event.data.additionalDates.forEach((additionalDate, index) => {
+      const instanceDate = parseArizonaDate(additionalDate.startDate);
+      if (instanceDate > referenceDate) {
+        expandedEvents.push({
+          ...event,
+          data: {
+            ...event.data,
+            startDate: additionalDate.startDate,
+            endDate: additionalDate.endDate
+          },
+          isPrimary: false,
+          instanceIndex: index + 1,
+          dateSource: 'additional'
+        });
+      }
+    });
   }
 });
 
+// Sort all expanded events by date
+let upcomingEvents = expandedEvents
+  .sort((a, b) => parseArizonaDate(a.data.startDate).getTime() - parseArizonaDate(b.data.startDate).getTime());
+
 const { view = 'cards', limit } = Astro.props; // 'cards', 'list', or 'list-full', optional limit
 
-// Apply limit if provided (note: limit applies to groups, not individual events)
-// We'll handle this after creating display groups
+// Apply limit if provided
+if (limit) {
+  upcomingEvents = upcomingEvents.slice(0, limit);
+}
 
 const formatDate = (date) => {
   return parseArizonaDate(date).toLocaleDateString('en-US', {
@@ -146,12 +171,15 @@ const curlyQuotes = (text: string): string => {
     .replace(/(\w)'(\w)/g, '$1' + closeSingle + '$2');  // apostrophe
 };
 
-// Helper function to create display data for an event
-const createDisplayData = (event) => {
+// Prepare display data for all events
+const displayEvents = upcomingEvents.map(event => {
   const d = event.data;
   const hasValidReg = hasValidRegistrationUrl(d.registrationUrl);
+  const isMinimal = !event.isPrimary; // Show secondary instances in minimal form
+
   return {
     ...event,
+    isMinimal,
     display: {
       name: curlyQuotes(d.name),
       shortDescription: curlyQuotes(d.shortDescription || ''),
@@ -178,72 +206,7 @@ const createDisplayData = (event) => {
       teacherImageLarge: d.teacherImage ? transformS3Url(d.teacherImage, 180) : null,
     }
   };
-};
-
-// Create display groups: each group is either a single event or a recurring event group
-const displayGroups = [];
-
-// Add standalone events
-standaloneEvents.forEach(event => {
-  displayGroups.push({
-    type: 'single',
-    event: createDisplayData(event),
-    allEvents: [createDisplayData(event)],
-    datesSummary: '',
-    eventCount: 1,
-    groupId: null
-  });
 });
-
-// Add recurring event groups
-eventGroups.forEach((groupEvents, groupId) => {
-  // Sort events in the group by date
-  groupEvents.sort((a, b) => parseArizonaDate(a.data.startDate).getTime() - parseArizonaDate(b.data.startDate).getTime());
-
-  const firstEvent = groupEvents[0];
-  const displayData = createDisplayData(firstEvent);
-
-  // Create a summary of all dates
-  const datesSummary = groupEvents.map(e => {
-    const date = parseArizonaDate(e.data.startDate);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'America/Phoenix' });
-  }).join(', ');
-
-  displayGroups.push({
-    type: 'recurring',
-    groupId,
-    event: displayData,
-    allEvents: groupEvents.map(createDisplayData),
-    datesSummary,
-    eventCount: groupEvents.length
-  });
-});
-
-// Sort all groups by their first event's date
-displayGroups.sort((a, b) => {
-  const aDate = parseArizonaDate(a.event.data.startDate).getTime();
-  const bDate = parseArizonaDate(b.event.data.startDate).getTime();
-  return aDate - bDate;
-});
-
-// Apply limit if provided
-let displayGroupsLimited = displayGroups;
-if (limit) {
-  displayGroupsLimited = displayGroups.slice(0, limit);
-}
-
-// Prepare flat display data with all needed properties
-const displayData = displayGroupsLimited.map(group => ({
-  ...group.event,
-  isRecurring: group.type === 'recurring',
-  groupId: group.groupId,
-  datesSummary: group.datesSummary,
-  eventCount: group.eventCount,
-  allEvents: group.allEvents
-}));
-
-// For backwards compatibility, create displayEvents from displayGroups
-const displayEvents = displayGroupsLimited.map(group => group.event);
 
 ---
 
@@ -259,18 +222,18 @@ const displayEvents = displayGroupsLimited.map(group => group.event);
       view === 'list-full' ? 'events-list-full' :
       'events-list'
     }>
-      {displayData.map((event) => (<div
+      {displayEvents.map((event) => (<div
           id={`event-${event.id}`}
           class={view === 'cards' ? 'relative' : 'event-container'}
           data-event-start={parseArizonaDate(event.data.startDate).toISOString()}
         >
           {view === 'cards' ? (
             <>
-              <article class="relative overflow-hidden w-[450px] h-[300px] m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl">
-                {event.isRecurring && (
+              <article class={`relative overflow-hidden ${event.isMinimal ? 'w-[450px] h-[200px] opacity-80' : 'w-[450px] h-[300px]'} m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl`}>
+                {event.isMinimal && (
                   <div class="recurring-card-badge">
                     <span class="badge-icon">🔄</span>
-                    <span class="badge-text">{event.eventCount} dates</span>
+                    <span class="badge-text">Additional date</span>
                   </div>
                 )}
                 <a
@@ -282,19 +245,11 @@ const displayEvents = displayGroupsLimited.map(group => group.event);
                   <div class="relative w-full h-full bg-contain bg-no-repeat bg-center rounded-lg overflow-hidden" style={`background-image: url(${event.display.mainImage})`}>
                     <div class="event-overlay">
                       <div class="event-content">
-                        <h3 class="event-title">{event.display.name}</h3>
+                        <h3 class={`event-title ${event.isMinimal ? 'text-base' : ''}`}>{event.display.name}</h3>
                         <div class="event-meta">
-                          {event.isRecurring ? (
-                            <div class="recurring-dates-compact">
-                              <time class="event-date">{event.datesSummary}</time>
-                            </div>
-                          ) : (
-                            <>
-                              <time class="event-date">{event.display.dateRange}</time>
-                              <span class="event-time">{event.display.time}</span>
-                            </>
-                          )}
-                          {event.data.price && (
+                          <time class="event-date">{event.display.dateRange}</time>
+                          <span class="event-time">{event.display.time}</span>
+                          {!event.isMinimal && event.data.price && (
                             <span class="event-price">{event.display.price}</span>
                           )}
                         </div>
@@ -303,7 +258,7 @@ const displayEvents = displayGroupsLimited.map(group => group.event);
                   </div>
                 </a>
               </article>
-              {event.display.teacherImage && (
+              {!event.isMinimal && event.display.teacherImage && (
                 <div class="absolute top-0 -left-[90px] w-[150px] h-[160px] rounded-[30%] overflow-hidden border-[3px] border-white shadow-lg z-10 pointer-events-none">
                   <img src={event.display.teacherImage} alt="Teacher" class="w-full h-full object-cover" />
                 </div>
@@ -311,18 +266,19 @@ const displayEvents = displayGroupsLimited.map(group => group.event);
             </>
           ) : view === 'list-full' ? (
             <div class="list-full-wrapper">
-              <div class="date-badge-outside">
+              <div class={`date-badge-outside ${event.isMinimal ? 'opacity-70 text-sm' : ''}`}>
                 <div class="month">{event.display.month}</div>
                 <div class="day">{event.display.day}</div>
+                {event.isMinimal && <div class="recurring-indicator">🔄</div>}
               </div>
-              {event.display.teacherImageLarge && (
+              {!event.isMinimal && event.display.teacherImageLarge && (
                 <div class="teacher-overlay-large">
                   <img src={event.display.teacherImageLarge} alt="Teacher" class="teacher-image-large" />
                 </div>
               )}
-              <article class="event-list-full-item">
+              <article class={`event-list-full-item ${event.isMinimal ? 'minimal-event' : ''}`}>
                 <div class="card-title-header">
-                  <h3 class="card-title">
+                  <h3 class={`card-title ${event.isMinimal ? 'text-lg' : ''}`}>
                     <a
                       href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events#event-${event.id}`}
                       target={hasValidRegistrationUrl(event.data.registrationUrl) ? '_blank' : undefined}
@@ -331,85 +287,49 @@ const displayEvents = displayGroupsLimited.map(group => group.event);
                       {event.display.name}
                     </a>
                   </h3>
-                  {event.isRecurring ? (
-                    <div class="recurring-dates-summary">
-                      <div class="recurring-badge">
-                        <span class="badge-icon">🔄</span>
-                        <span class="badge-text">Recurring event ({event.eventCount} dates)</span>
+                  <div class="date-details">
+                    <div class="date-range">{event.display.dateRange}</div>
+                    <div class="time">{event.display.time}</div>
+                  </div>
+                </div>
+
+                {!event.isMinimal && (
+                  <>
+                    <div class="list-full-content">
+                      <div class="list-full-left-column">
+                        <div class="list-full-image-container">
+                          <img src={event.display.mainImageLarge} alt={event.display.name} class="main-image" />
+                        </div>
                       </div>
-                      <div class="dates-collapsed" data-group-id={event.groupId}>
-                        <span class="dates-text">{event.datesSummary}</span>
-                        <button
-                          type="button"
-                          class="expand-dates-btn"
-                          onclick={`toggleRecurringDates('${event.groupId}')`}
-                        >
-                          <span class="expand-text">Show all dates</span>
-                          <span class="expand-icon">▼</span>
-                        </button>
-                      </div>
-                      <div class="dates-expanded" data-group-id={event.groupId} style="display: none;">
-                        <div class="expanded-dates-list">
-                          {event.allEvents.map((evt, idx) => (
-                            <div class="expanded-date-item">
-                              <span class="date-number">{idx + 1}.</span>
-                              <span class="date-text">{evt.display.dateRange}</span>
-                              <span class="time-text">{evt.display.time}</span>
+                      <div class="list-full-details">
+                        <div class="list-full-description" set:html={event.display.shortDescriptionHtml || '<p>No description available</p>'}></div>
+
+                        <div class="list-full-meta">
+                          {event.data.price && (
+                            <div class="meta-item price">
+                              <span class="icon">💲</span>
+                              <span>{event.display.price}</span>
                             </div>
-                          ))}
+                          )}
+                          <div class="meta-item organizer">
+                            <span class="icon">👥</span>
+                            <span>{event.data.organizer}</span>
+                          </div>
                         </div>
-                        <button
-                          type="button"
-                          class="collapse-dates-btn"
-                          onclick={`toggleRecurringDates('${event.groupId}')`}
-                        >
-                          <span class="collapse-text">Show less</span>
-                          <span class="collapse-icon">▲</span>
-                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <div class="date-details">
-                      <div class="date-range">{event.display.dateRange}</div>
-                      <div class="time">{event.display.time}</div>
+
+                    <div class="event-text-preview">
+                      <div
+                        class="event-preview-text"
+                        data-event-id={event.id}
+                        data-preview-html={event.display.previewHtml}
+                        data-full-html={event.display.fullDescriptionHtml}
+                        set:html={event.display.previewHtml}
+                      ></div>
                     </div>
-                  )}
-                </div>
-
-                <div class="list-full-content">
-                  <div class="list-full-left-column">
-                    <div class="list-full-image-container">
-                      <img src={event.display.mainImageLarge} alt={event.display.name} class="main-image" />
-                    </div>
-                  </div>
-                  <div class="list-full-details">
-
-                    <div class="list-full-description" set:html={event.display.shortDescriptionHtml || '<p>No description available</p>'}></div>
-
-                    <div class="list-full-meta">
-                      {event.data.price && (
-                        <div class="meta-item price">
-                          <span class="icon">💲</span>
-                          <span>{event.display.price}</span>
-                        </div>
-                      )}
-                      <div class="meta-item organizer">
-                        <span class="icon">👥</span>
-                        <span>{event.data.organizer}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="event-text-preview">
-                  <div
-                    class="event-preview-text"
-                    data-event-id={event.id}
-                    data-preview-html={event.display.previewHtml}
-                    data-full-html={event.display.fullDescriptionHtml}
-                    set:html={event.display.previewHtml}
-                  ></div>
-                </div>
+                  </>
+                )}
 
                 <div class="list-full-bottom">
                   <div class="bottom-left">
@@ -445,35 +365,31 @@ const displayEvents = displayGroupsLimited.map(group => group.event);
               </article>
             </div>
           ) : (
-            <article class="event-list-item">
+            <article class={`event-list-item ${event.isMinimal ? 'opacity-70' : ''}`}>
               <div class="list-event">
                 <div class="list-date">
                   <div class="month">{event.display.month}</div>
                   <div class="day">{event.display.day}</div>
-                  {event.isRecurring && (
-                    <div class="recurring-list-badge">🔄 {event.eventCount}</div>
+                  {event.isMinimal && (
+                    <div class="recurring-list-badge">🔄</div>
                   )}
                 </div>
                 <div class="list-content">
-                  <h3 class="list-title">
+                  <h3 class={`list-title ${event.isMinimal ? 'text-base' : ''}`}>
                     <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">{event.display.name}</a>
                   </h3>
-                  {event.isRecurring && (
-                    <div class="list-recurring-dates">
-                      <span class="recurring-label">Multiple dates:</span>
-                      <span class="recurring-dates-text">{event.datesSummary}</span>
-                    </div>
-                  )}
                   <div class="list-meta">
                     <span class="time-icon">🕐&nbsp;</span><time>{event.display.time}</time>
-                    {event.data.price && (
+                    {!event.isMinimal && event.data.price && (
                       <>
                         <span class="separator">•</span>
                         <span class="price-icon">💰&nbsp;</span><span class="price">{event.display.price}</span>
                       </>
                     )}
                   </div>
-                  <div class="list-description" set:html={event.display.shortDescriptionHtml}></div>
+                  {!event.isMinimal && (
+                    <div class="list-description" set:html={event.display.shortDescriptionHtml}></div>
+                  )}
                 </div>
                 <div class="list-actions">
                   <a href={`/admin/events/${event.data.id}`} class="edit-btn">
@@ -1464,6 +1380,24 @@ const displayEvents = displayGroupsLimited.map(group => group.event);
 .recurring-dates-text {
   color: #475569;
   font-size: 0.75rem;
+}
+
+/* Minimal event styles (for secondary instances) */
+.minimal-event {
+  opacity: 0.85;
+}
+
+.minimal-event .card-title-header {
+  padding: 1rem 1.5rem 0.75rem 2.5rem;
+}
+
+.minimal-event:hover {
+  opacity: 1;
+}
+
+.recurring-indicator {
+  font-size: 0.875rem;
+  margin-top: 4px;
 }
 
 </style>
