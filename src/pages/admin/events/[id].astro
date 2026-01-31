@@ -72,30 +72,38 @@ if (Astro.request.method === "POST" && event) {
   const requestBody = await Astro.request.formData();
   const postData = Object.fromEntries(requestBody);
 
+  // Collect all date ranges
+  const startDates = requestBody.getAll('startDate');
+  const endDates = requestBody.getAll('endDate');
+
   // Basic validation
   if (!postData.title?.trim()) {
     errorMsg = 'Title is required';
-  } else if (!postData.startDate) {
-    errorMsg = 'Start date is required';
+  } else if (!startDates || startDates.length === 0 || !startDates[0]) {
+    errorMsg = 'At least one start date is required';
   } else if (postData.isEventbrite === 'true' && !postData.eventbriteId?.trim()) {
     errorMsg = 'Eventbrite ID is required for Eventbrite events';
   } else {
-    // Update event via API
+    // If only one date, update the existing event
+    // If multiple dates, update the first one and create new instances for others
     try {
-      const eventData = {
-        id: event.id,
+      // Generate or preserve recurring group ID
+      const recurringGroupId = startDates.length > 1
+        ? (event.recurringGroupId || `recurring-${Date.now()}`)
+        : event.recurringGroupId; // Preserve if exists, otherwise null
+
+      // Base event data (same for all instances)
+      const baseEventData = {
         name: postData.title.trim(),
-        title: postData.title.trim(), // Alias for compatibility
+        title: postData.title.trim(),
         shortDescription: postData.shortDescription?.trim() || '',
         fullDescription: postData.fullDescription?.trim() || '',
-        startDate: postData.startDate,
-        endDate: postData.endDate || postData.startDate,
         registrationUrl: postData.isEventbrite === 'true'
           ? `https://www.eventbrite.com/e/${postData.eventbriteId.trim()}`
           : (postData.registrationUrl?.trim() || 'https://drbi.org'),
         url: postData.isEventbrite === 'true'
           ? `https://www.eventbrite.com/e/${postData.eventbriteId.trim()}`
-          : (postData.registrationUrl?.trim() || 'https://drbi.org'), // Alias for compatibility
+          : (postData.registrationUrl?.trim() || 'https://drbi.org'),
         organizer: postData.organizer?.trim() || 'DRBI',
         visible: postData.visible === 'true',
         featured: postData.featured === 'true',
@@ -124,24 +132,67 @@ if (Astro.request.method === "POST" && event) {
         isEventbrite: postData.isEventbrite === 'true',
         eventbriteId: postData.isEventbrite === 'true' ? postData.eventbriteId?.trim() : null,
         manuallyEdited: true,
-        lastManualEdit: new Date().toISOString()
+        lastManualEdit: new Date().toISOString(),
+        recurringGroupId
       };
 
-      const response = await fetch(`${Astro.url.origin}/api/events`, {
+      let successCount = 0;
+
+      // Update first date (the existing event)
+      // Ensure dates are treated as Arizona time (UTC-7)
+      const firstEventData = {
+        ...baseEventData,
+        id: event.id,
+        startDate: new Date(startDates[0] + '-07:00').toISOString(),
+        endDate: new Date((endDates[0] || startDates[0]) + '-07:00').toISOString()
+      };
+
+      const updateResponse = await fetch(`${Astro.url.origin}/api/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'update',
-          eventData,
+          eventData: firstEventData,
           sessionid
         })
       });
 
-      if (response.ok) {
-        return Astro.redirect('/admin/events?updated=true');
+      if (updateResponse.ok) {
+        successCount++;
+      }
+
+      // Create new instances for additional dates
+      for (let i = 1; i < startDates.length; i++) {
+        const startDate = startDates[i];
+        const endDate = endDates[i] || startDate;
+
+        if (!startDate) continue;
+
+        const newEventData = {
+          ...baseEventData,
+          startDate: new Date(startDate + '-07:00').toISOString(),
+          endDate: new Date(endDate + '-07:00').toISOString()
+        };
+
+        const createResponse = await fetch(`${Astro.url.origin}/api/events`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create',
+            eventData: newEventData,
+            sessionid
+          })
+        });
+
+        if (createResponse.ok) {
+          successCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        return Astro.redirect(`/admin/events?updated=${successCount}`);
       } else {
-        const errorText = await response.text();
-        errorMsg = `Failed to update event: ${errorText}`;
+        errorMsg = 'Failed to update event';
       }
     } catch (error) {
       errorMsg = `Error updating event: ${error.message}`;
@@ -250,33 +301,48 @@ if (Astro.request.method === "POST" && event) {
         </div>
 
         <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
-          <h2 class="text-xl font-semibold text-gray-800 mb-6">Date & Time</h2>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="mb-4">
-              <label for="startDate" class="block font-medium text-gray-700 mb-1">Start Date & Time *</label>
-              <input 
-                type="datetime-local" 
-                id="startDate" 
-                name="startDate" 
-                value={formData.startDate} 
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-            </div>
+          <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-semibold text-gray-800">Date & Time</h2>
+            <button
+              type="button"
+              onclick="addDateRange()"
+              class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors flex items-center gap-1"
+            >
+              <span>+</span>
+              <span>Add Date</span>
+            </button>
+          </div>
 
-            <div class="mb-4">
-              <label for="endDate" class="block font-medium text-gray-700 mb-1">End Date & Time</label>
-              <input 
-                type="datetime-local" 
-                id="endDate" 
-                name="endDate" 
-                value={formData.endDate}
-                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-              />
-              <small class="block text-gray-500 text-sm mt-1">Leave blank if same as start date</small>
+          <div id="dateRanges">
+            <div class="date-range-item grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" data-index="0">
+              <div class="mb-4">
+                <label for="startDate-0" class="block font-medium text-gray-700 mb-1">Start Date & Time *</label>
+                <input
+                  type="datetime-local"
+                  id="startDate-0"
+                  name="startDate"
+                  value={formData.startDate}
+                  required
+                  onchange="autoSetEndDate(0)"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+              </div>
+
+              <div class="mb-4">
+                <label for="endDate-0" class="block font-medium text-gray-700 mb-1">End Date & Time</label>
+                <input
+                  type="datetime-local"
+                  id="endDate-0"
+                  name="endDate"
+                  value={formData.endDate}
+                  class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+                <small class="block text-gray-500 text-sm mt-1">Auto-fills to 2 hours after start</small>
+              </div>
             </div>
           </div>
+
+          <small class="block text-gray-600 text-sm mt-2">💡 Add multiple dates to create recurring event instances. Each date will create a separate event instance.</small>
         </div>
 
         <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
@@ -775,5 +841,117 @@ if (Astro.request.method === "POST" && event) {
         });
       }
     });
+
+    // Date range management functions
+    function formatDateTimeLocal(date) {
+      const pad = (num) => num.toString().padStart(2, '0');
+      const year = date.getFullYear();
+      const month = pad(date.getMonth() + 1);
+      const day = pad(date.getDate());
+      const hour = pad(date.getHours());
+      const minute = pad(date.getMinutes());
+      return `${year}-${month}-${day}T${hour}:${minute}`;
+    }
+
+    window.autoSetEndDate = function(index) {
+      const startInput = document.getElementById(`startDate-${index}`);
+      const endInput = document.getElementById(`endDate-${index}`);
+
+      if (startInput && startInput.value && endInput) {
+        const startDate = new Date(startInput.value);
+        const endDate = new Date(startDate);
+        endDate.setHours(endDate.getHours() + 2); // Add 2 hours
+        endInput.value = formatDateTimeLocal(endDate);
+      }
+    };
+
+    let dateRangeIndex = 1;
+    window.addDateRange = function() {
+      const container = document.getElementById('dateRanges');
+      const newRange = document.createElement('div');
+      newRange.className = 'date-range-item grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 border-t border-gray-200 pt-4';
+      newRange.dataset.index = dateRangeIndex;
+
+      // Get current date/time and set default to 4:00 PM
+      const now = new Date();
+      now.setHours(16, 0, 0, 0); // 4:00 PM
+      const defaultStart = formatDateTimeLocal(now);
+
+      // End time 2 hours later (6:00 PM)
+      const endTime = new Date(now);
+      endTime.setHours(18, 0, 0, 0);
+      const defaultEnd = formatDateTimeLocal(endTime);
+
+      newRange.innerHTML = `
+        <div class="mb-4">
+          <label for="startDate-${dateRangeIndex}" class="block font-medium text-gray-700 mb-1">Start Date & Time *</label>
+          <input
+            type="datetime-local"
+            id="startDate-${dateRangeIndex}"
+            name="startDate"
+            value="${defaultStart}"
+            required
+            onchange="autoSetEndDate(${dateRangeIndex})"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label for="endDate-${dateRangeIndex}" class="block font-medium text-gray-700 mb-1">End Date & Time</label>
+          <input
+            type="datetime-local"
+            id="endDate-${dateRangeIndex}"
+            name="endDate"
+            value="${defaultEnd}"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+          <div class="flex items-center justify-between mt-1">
+            <small class="text-gray-500 text-sm">Auto-fills to 2 hours after start</small>
+            <button
+              type="button"
+              onclick="removeDateRange(${dateRangeIndex})"
+              class="text-red-600 hover:text-red-700 text-sm font-medium"
+            >
+              − Remove
+            </button>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(newRange);
+      dateRangeIndex++;
+    };
+
+    window.removeDateRange = function(index) {
+      const ranges = document.querySelectorAll('.date-range-item');
+      if (ranges.length > 1) {
+        const range = document.querySelector(`.date-range-item[data-index="${index}"]`);
+        if (range) {
+          range.remove();
+        }
+      } else {
+        alert('Cannot remove the last date range. At least one date is required.');
+      }
+    };
+
+    // Setup defaults on page load
+    function setupDateTimeDefaults() {
+      const startInput = document.getElementById('startDate-0');
+      if (startInput && !startInput.value) {
+        const now = new Date();
+        now.setHours(16, 0, 0, 0); // Default to 4:00 PM
+        startInput.value = formatDateTimeLocal(now);
+
+        const endTime = new Date(now);
+        endTime.setHours(18, 0, 0, 0); // Default end to 6:00 PM
+        const endInput = document.getElementById('endDate-0');
+        if (endInput && !endInput.value) {
+          endInput.value = formatDateTimeLocal(endTime);
+        }
+      }
+    }
+
+    // Call setup when page loads (only for new events with no date)
+    setTimeout(setupDateTimeDefaults, 100);
   </script>
 </Layout>
