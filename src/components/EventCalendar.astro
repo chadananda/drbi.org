@@ -146,17 +146,15 @@ const displayEvents = upcomingEvents.map(event => {
       fullDescription: curlyQuotes(d.fullDescription || ''),
       shortDescriptionHtml: md.render(d.shortDescription || ''),
       fullDescriptionHtml: md.render(d.fullDescription || ''),
-      // Show full description if no external link, otherwise truncate
+      // Show truncated preview for all events
       preview: curlyQuotes(
-        hasValidReg
-          ? (d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.')
-          : (d.fullDescription || d.shortDescription || 'Join us for this transformative learning experience.')
+        d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.'
       ),
       previewHtml: md.render(
-        hasValidReg
-          ? (d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || '')
-          : (d.fullDescription || d.shortDescription || '')
+        d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || ''
       ),
+      // Flag if description is long enough to need expansion
+      isLongDescription: !hasValidReg && (d.fullDescription || '').length > 400,
       dateRange: formatDateRange(d.startDate, d.endDate),
       time: formatTime(d.startDate),
       price: formatPrice(d.price),
@@ -275,9 +273,15 @@ const displayEvents = upcomingEvents.map(event => {
                 </div>
 
                 <div class="event-text-preview">
-                  <div class="event-preview-text" set:html={event.display.previewHtml}></div>
+                  <div
+                    class="event-preview-text"
+                    data-event-id={event.id}
+                    data-preview-html={event.display.previewHtml}
+                    data-full-html={event.display.fullDescriptionHtml}
+                    set:html={event.display.previewHtml}
+                  ></div>
                 </div>
-                
+
                 <div class="list-full-bottom">
                   <div class="bottom-left">
                     {event.data.highlights && event.data.highlights.length > 0 && (
@@ -288,12 +292,24 @@ const displayEvents = upcomingEvents.map(event => {
                       </div>
                     )}
                   </div>
-                  {hasValidRegistrationUrl(event.data.registrationUrl) && (
+                  {hasValidRegistrationUrl(event.data.registrationUrl) ? (
                     <div class="list-full-actions">
                       <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="read-more-btn">
                         <span class="btn-text">Read More</span>
                         <span class="btn-icon">→</span>
                       </a>
+                    </div>
+                  ) : event.display.isLongDescription && (
+                    <div class="list-full-actions">
+                      <button
+                        type="button"
+                        class="show-more-btn"
+                        data-event-id={event.id}
+                        onclick={`toggleDescription('${event.id}')`}
+                      >
+                        <span class="btn-text">Show More</span>
+                        <span class="btn-icon">↓</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -355,6 +371,32 @@ const displayEvents = upcomingEvents.map(event => {
 
   // Run on page load
   hideExpiredEvents();
+
+  // Toggle description expansion
+  window.toggleDescription = function(eventId) {
+    const previewEl = document.querySelector(`[data-event-id="${eventId}"].event-preview-text`);
+    const buttonEl = document.querySelector(`[data-event-id="${eventId}"].show-more-btn`);
+
+    if (!previewEl || !buttonEl) return;
+
+    const isExpanded = buttonEl.classList.contains('expanded');
+    const previewHtml = previewEl.getAttribute('data-preview-html');
+    const fullHtml = previewEl.getAttribute('data-full-html');
+
+    if (isExpanded) {
+      // Collapse
+      previewEl.innerHTML = previewHtml;
+      buttonEl.classList.remove('expanded');
+      buttonEl.querySelector('.btn-text').textContent = 'Show More';
+      buttonEl.querySelector('.btn-icon').textContent = '↓';
+    } else {
+      // Expand
+      previewEl.innerHTML = fullHtml;
+      buttonEl.classList.add('expanded');
+      buttonEl.querySelector('.btn-text').textContent = 'Show Less';
+      buttonEl.querySelector('.btn-icon').textContent = '↑';
+    }
+  };
 </script>
 
 <style>
@@ -855,7 +897,53 @@ const displayEvents = upcomingEvents.map(event => {
   line-height: 1.7;
   color: rgb(55, 65, 81);
   margin: 0;
+}
+
+/* Markdown content styling */
+.event-preview-text p,
+.list-full-description p,
+.list-description p {
+  margin: 0.75rem 0;
+}
+
+.event-preview-text p:first-child,
+.list-full-description p:first-child,
+.list-description p:first-child {
+  margin-top: 0;
+}
+
+.event-preview-text p:last-child,
+.list-full-description p:last-child,
+.list-description p:last-child {
+  margin-bottom: 0;
+}
+
+.event-preview-text strong,
+.list-full-description strong,
+.list-description strong {
+  font-weight: 700;
+}
+
+.event-preview-text em,
+.list-full-description em,
+.list-description em {
   font-style: italic;
+}
+
+.event-preview-text ul,
+.event-preview-text ol,
+.list-full-description ul,
+.list-full-description ol,
+.list-description ul,
+.list-description ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.event-preview-text li,
+.list-full-description li,
+.list-description li {
+  margin: 0.25rem 0;
 }
 
 .list-full-bottom {
@@ -925,6 +1013,41 @@ const displayEvents = upcomingEvents.map(event => {
 
 .read-more-btn:hover .btn-icon {
   transform: translateX(2px);
+}
+
+.show-more-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgb(59, 130, 246), rgb(37, 99, 235));
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.show-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  background: linear-gradient(135deg, rgb(37, 99, 235), rgb(29, 78, 216));
+}
+
+.show-more-btn .btn-icon {
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.show-more-btn:hover .btn-icon {
+  transform: translateY(2px);
+}
+
+.show-more-btn.expanded:hover .btn-icon {
+  transform: translateY(-2px);
 }
 
 /* Animations */
