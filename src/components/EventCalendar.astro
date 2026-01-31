@@ -3,6 +3,14 @@ import { Image } from "astro:assets";
 import { transformS3Url } from '../utils/utils.js';
 import fs from 'fs/promises';
 import path from 'path';
+import MarkdownIt from 'markdown-it';
+
+// Initialize markdown renderer
+const md = new MarkdownIt({
+  html: false, // Disable HTML for security
+  linkify: true, // Auto-convert URLs to links
+  typographer: true // Enable smart quotes
+});
 
 // Read events directly from filesystem to ensure fresh data
 // (Astro's content collection cache doesn't invalidate on API-driven file changes)
@@ -136,11 +144,18 @@ const displayEvents = upcomingEvents.map(event => {
       name: curlyQuotes(d.name),
       shortDescription: curlyQuotes(d.shortDescription || ''),
       fullDescription: curlyQuotes(d.fullDescription || ''),
+      shortDescriptionHtml: md.render(d.shortDescription || ''),
+      fullDescriptionHtml: md.render(d.fullDescription || ''),
       // Show full description if no external link, otherwise truncate
       preview: curlyQuotes(
         hasValidReg
           ? (d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.')
           : (d.fullDescription || d.shortDescription || 'Join us for this transformative learning experience.')
+      ),
+      previewHtml: md.render(
+        hasValidReg
+          ? (d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || '')
+          : (d.fullDescription || d.shortDescription || '')
       ),
       dateRange: formatDateRange(d.startDate, d.endDate),
       time: formatTime(d.startDate),
@@ -242,9 +257,7 @@ const displayEvents = upcomingEvents.map(event => {
                   </div>
                   <div class="list-full-details">
 
-                    <p class="list-full-description">
-                      {event.display.shortDescription || 'No description available'}
-                    </p>
+                    <div class="list-full-description" set:html={event.display.shortDescriptionHtml || '<p>No description available</p>'}></div>
 
                     <div class="list-full-meta">
                       {event.data.price && (
@@ -262,9 +275,7 @@ const displayEvents = upcomingEvents.map(event => {
                 </div>
 
                 <div class="event-text-preview">
-                  <p class="event-preview-text">
-                    {event.display.preview}
-                  </p>
+                  <div class="event-preview-text" set:html={event.display.previewHtml}></div>
                 </div>
                 
                 <div class="list-full-bottom">
@@ -308,7 +319,7 @@ const displayEvents = upcomingEvents.map(event => {
                       </>
                     )}
                   </div>
-                  <p class="list-description">{event.display.shortDescription}</p>
+                  <div class="list-description" set:html={event.display.shortDescriptionHtml}></div>
                 </div>
                 <div class="list-actions">
                   <a href={`/admin/events/${event.data.id}`} class="edit-btn">
