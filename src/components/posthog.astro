@@ -2,6 +2,9 @@
 // src/components/posthog.astro
 ---
 <script is:inline type="text/javascript" id="posthog-js">
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    // Skip PostHog on local development
+  } else {
   !(function(t, e) {
     var o, n, p, r;
     e.__SV ||
@@ -45,4 +48,5 @@
     capture_pageview: true,
     capture_pageleave: true
   });
+  }
 </script>

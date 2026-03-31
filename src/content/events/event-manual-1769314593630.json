@@ -1,14 +1,14 @@
 {
   "id": "manual-1769314593630",
   "url": "https://drbi.org",
-  "lastModified": "2026-01-31T19:35:22.309Z",
-  "name": "First Sunday Concert Series",
-  "shortDescription": "Artists for February are three doctoral candidates: pianists Sichun Gao and Jing Li, and violinist Ziqian Ye.",
-  "startDate": "2026-02-01T22:00:00.000Z",
-  "endDate": "2026-02-02T00:00:00.000Z",
+  "lastModified": "2026-03-31T17:18:04.152Z",
+  "name": "First Sunday Concert Series: Lauren Hooker",
+  "shortDescription": "First Sunday Concert Series presents jazz vocalist and pianist Lauren Hooker at Hadden House on April 5 at 3:00 PM.",
+  "startDate": "2026-04-05T22:00:00.000Z",
+  "endDate": "2026-04-06T00:00:00.000Z",
   "image": "https://drbi.s3.amazonaws.com/events/manual-1769314520180-main.png",
-  "teacherImage": "https://drbi.s3.amazonaws.com/events/manual-1769314541463-teacher.jpeg",
-  "fullDescription": "Desert Rose Bahá'í Institute continues its acclaimed First Sunday Concert Series, bringing world-class artistry to Southern Arizona. On February 1 at 3:00 p.m., Hadden Hall hosts three exceptional doctoral candidates from the University of Arizona's School of Music: pianists Sichun Gao and Jing Li, and violinist Ziqian Ye.\r\n\r\n**A Historic Instrument:**\r\nThe pianists will perform on Desert Rose's recently acquired and fully restored 1893 A.B. Chase grand piano, showcasing the rich, warm tones that made these instruments treasured in the gilded age.\r\n\r\n**Music That Heals:**\r\nThe program features works by Brahms and Rachmaninoff—compositions recognized by music therapists for their capacity to heal emotional disorders such as depression and melancholy. These masterworks demonstrate music's power to lift the soul toward heaven.\r\n\r\n**Details:**\r\n- **When:** Sunday, February 1, 2025, 3:00 p.m.\r\n- **Where:** Hadden Hall, 1950 West William Sears Drive, Eloy, Arizona 85131\r\n- **Artists:** Sichun Gao (piano), Jing Li (piano), Ziqian Ye (violin)\r\n- **Admission:** Free\r\n\r\nAn afternoon of transcendent music and world-class artistry.",
+  "teacherImage": "https://drbi.s3.amazonaws.com/events/manual-1769314593630-teacher-1774228681279.jpeg",
+  "fullDescription": "Desert Rose Bahá’í Institute’s First Sunday Concert Series presents jazz vocalist and pianist Lauren Hooker on Sunday, April 5, 2026, at 3:00 PM in Hadden House, 1950 West William Sears Drive, Eloy, AZ 85131. All are warmly invited to attend.\r\n\r\nLauren Hooker is a vocalist, pianist, recording artist, and educator whose work spans performance, composition, and arts‑in‑education programs. She has developed and presented Musical Legends Arts in Education programs and brings a rich background in jazz performance and teaching to her appearances. Her concerts blend expressive vocals, inventive piano, and original compositions rooted in the jazz tradition.\r\n\r\nIf you are in the area, we invite you to join us for this First Sunday Concert at Desert Rose Bahá’í Institute and enjoy an afternoon of live jazz in the welcoming setting of Hadden House.\r\n\r\nThis performance is part of DRBI’s ongoing First Sunday Concert Series.",
   "highlights": [],
   "location": {
     "name": "Online",
@@ -27,22 +27,13 @@
     "orgPageDate": "2026-01-25T04:16:33.631Z",
     "detailPageDate": "2026-01-25T04:16:33.631Z"
   },
-  "title": "First Sunday Concert Series",
+  "title": "First Sunday Concert Series: Lauren Hooker",
   "featured": false,
   "onsite": false,
   "mainImage": "https://drbi.s3.amazonaws.com/events/manual-1769314593630-main-1769314692153.jpg",
   "isEventbrite": false,
   "eventbriteId": null,
   "manuallyEdited": true,
-  "lastManualEdit": "2026-01-31T19:35:22.296Z",
-  "additionalDates": [
-    {
-      "startDate": "2026-03-01T22:00:00.000Z",
-      "endDate": "2026-03-02T00:00:00.000Z"
-    },
-    {
-      "startDate": "2026-04-05T22:00:00.000Z",
-      "endDate": "2026-04-06T00:00:00.000Z"
-    }
-  ]
+  "lastManualEdit": "2026-03-31T17:18:04.132Z",
+  "additionalDates": []
 }

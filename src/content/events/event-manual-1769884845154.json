@@ -1,9 +1,9 @@
 {
   "id": "manual-1769884845154",
   "url": "https://drbi.org",
-  "lastModified": "2026-01-31T19:33:14.432Z",
+  "lastModified": "2026-03-31T17:19:04.232Z",
   "name": "The Bahá'í Fireside: A Sacred Tradition",
-  "shortDescription": "Traditional Bahá'í Fireside at Desert Rose Bahá'í Institute's Roundhouse, following the intimate teaching method originated by the Báb circa 1845. A warm, natural introduction to the Bahá'í Faith for seekers through scripture and discussion. Facilitator: Professor William Maxwell, Ed.D. First Tuesday monthly, 7:00 p.m. MST. All seekers welcome.",
+  "shortDescription": "Traditional Bahá'í Fireside at Desert Rose Bahá'í Institute's Roundhouse, following the intimate teaching method originated by the Báb circa 1845.",
   "startDate": "2026-02-04T02:00:00.000Z",
   "endDate": "2026-02-04T04:00:00.000Z",
   "image": "/images/event-placeholder.jpg",
@@ -34,15 +34,6 @@
   "isEventbrite": false,
   "eventbriteId": null,
   "manuallyEdited": true,
-  "lastManualEdit": "2026-01-31T19:33:14.420Z",
-  "additionalDates": [
-    {
-      "startDate": "2026-03-04T02:00:00.000Z",
-      "endDate": "2026-03-04T04:00:00.000Z"
-    },
-    {
-      "startDate": "2026-04-03T02:00:00.000Z",
-      "endDate": "2026-04-03T04:00:00.000Z"
-    }
-  ]
+  "lastManualEdit": "2026-03-31T17:19:04.228Z",
+  "additionalDates": []
 }
