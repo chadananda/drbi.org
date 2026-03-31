@@ -21,6 +21,15 @@ import EventCalendar from "@components/EventCalendar.astro";
       <SuperHero />
 
       <Container>
+        <div class="mt-24">
+          <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
+            Upcoming DRBI Events
+          </h2>
+          <EventCalendar view="timeline" />
+        </div>
+      </Container>
+
+      <Container>
         <DRBICategories />
       </Container>
 
@@ -38,15 +47,6 @@ import EventCalendar from "@components/EventCalendar.astro";
       <Container>
         <VideoPlayer video="https://youtu.be/Sb09jJe1HYA" />
       </Container> -->
-
-      <Container>
-        <div class="mt-24">
-          <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
-            Upcoming DRBI Events
-          </h2>
-          <EventCalendar view="cards" />
-        </div>
-      </Container>
 
       <!-- Tockify calendar section commented out - using EventCalendar instead
       <Container>

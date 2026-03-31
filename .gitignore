@@ -4,6 +4,7 @@ dist/
 .vercel/
 .vercel
 .aider*
+.claude/
 
 # dependencies
 node_modules/
