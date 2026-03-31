@@ -55,7 +55,6 @@
     "@fortawesome/svelte-fontawesome": "^0.2.4",
     "@nextlint/svelte": "^3.1.0",
     "@octokit/rest": "^22.0.0",
-    "@rollup/rollup-darwin-arm64": "^4.60.1",
     "@tailwindcss/vite": "^4.1.12",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
