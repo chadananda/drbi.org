@@ -32,7 +32,7 @@ const { posts, author, categories } = Astro.props;
 // console.log('[author].astro, posts/author:', posts.length, author_slug);
 ---
 
-<Layout pageTitle={author_slug}>
+<Layout title={author?.name || author_slug}>
   <Container>
 
      <AuthorCard slug={author_slug} size="md" author={author} />
