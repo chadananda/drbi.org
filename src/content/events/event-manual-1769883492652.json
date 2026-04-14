@@ -1,14 +1,14 @@
 {
   "id": "manual-1769883492652",
   "url": "https://drbi.org",
-  "lastModified": "2026-01-31T19:22:19.446Z",
-  "name": "Advent of Divine Justice by Shoghi Effendi,1939",
-  "shortDescription": "Monthly deep-dive into Shoghi Effendi's prophetic 1939 letter *The Advent of Divine Justice*, facilitated by Professor William Maxwell, Ed.D. (Harvard). Paragraph-by-paragraph discussion exploring the American Bahá'í community's role.",
-  "startDate": "2026-02-01T16:00:00.000Z",
-  "endDate": "2026-02-01T18:00:00.000Z",
+  "lastModified": "2026-04-13T00:00:00.000Z",
+  "name": "Advent of Divine Justice by Shoghi Effendi",
+  "shortDescription": "Monthly Zoom study of Shoghi Effendi's *The Advent of Divine Justice*, facilitated by Professor William Maxwell. First Tuesday of every month, 7:00 PM Arizona time. Read and discuss 2-3 pages per session.",
+  "startDate": "2026-05-06T02:00:00.000Z",
+  "endDate": "2026-05-06T03:00:00.000Z",
   "image": "https://drbi.s3.amazonaws.com/events/manual-1769883356226-main.jpg",
   "teacherImage": "https://drbi.s3.amazonaws.com/events/manual-1769883381258-teacher.jpg",
-  "fullDescription": "In 1939, as fascism engulfed the world, Shoghi Effendi penned one of his most prophetic letters to the American Bahá'í community. This monthly study offers careful, paragraph-by-paragraph engagement with *The Advent of Divine Justice*.\r\n\r\n**What You'll Explore:**\r\n- Shoghi Effendi's extraordinary praise of the American Bahá'í community as a beacon of hope\r\n- Personal spiritual prerequisites for building global divine civilization\r\n- Prophetic analysis of empire's downfall and civilization's collapse\r\n- The \"theory of history\" later developed in *God Passes By* (1944)\r\n- Vision of a future civilization connected to Divine Will\r\n\r\n**Your Guide:**\r\nProfessor William Maxwell, a Bahá'í since 1952 with close connections to Shoghi Effendi and the Hands of the Cause. His service spans four National Spiritual Assemblies (chairing three), Auxiliary Board and Counselor appointments, and seventeen published books. Ed.D., Harvard University, 1967.",
+  "fullDescription": "**The Author:** Shoghi Effendi became the fourth Central Figure of the Bahá'í Faith, The Guardian, in 1921 upon the passing of 'Abdu'l-Bahá, son of the Founder of the Bahá'í Faith. Bahá'u'lláh succeeded the Messenger of God, titled The Báb (The Gate), who closed the Adamic Cycle of religions — Abraham, Moses, Jesus, Muhammad.\n\n**The Theme:** Bahá'u'lláh Himself had explained in His Kitáb-i-Íqán why all the other religions had failed to establish \"The Kingdom of God on Earth\" as Jesus had prayed for. Those religions had been taken over by corrupt and spiritually blind priesthoods. Shoghi Effendi chose to expatiate at length on how the Bahá'ís, particularly the American Bahá'í community, can avoid such great errors of the past. Here is one quotation that captures the theme of this book:\n\n*\"A chaste and holy life must be made the controlling principle in the behavior and conduct of all Bahá'ís.\"*\n\nThat civilization-building principle, Shoghi Effendi assured us, is the fundamental building block of the coming Bahá'í culture and civilization. As intelligent people watch their old civilizations crumble, they will watch Bahá'í behavior and conduct and reach an independent conclusion.\n\n**Join on Zoom:** [https://us06web.zoom.us/j/86821180898](https://us06web.zoom.us/j/86821180898) (Meeting ID: 868 2118 0898)\n\n**Schedule:** First Tuesday of every month (May 5, June 2, July 7, 2026, etc.) at 7:00 PM Arizona Standard Time (10:00 PM Eastern, 9:00 PM Central, 8:00 PM Mountain, 7:00 PM Pacific).\n\nThe course lasts one hour per month until we finish the book. We will read and discuss two or three pages of the book and deepen ourselves on how we can lift humanity from savage and needless wars to the promise of \"Peace on Earth and Goodwill toward all men.\"\n\n**Your Facilitator:** Professor William Maxwell, who witnessed the beginning and the climax of Shoghi Effendi's glorious \"Ten Year Crusade\" (1953–1963) in Chicago and in London.\n\nIf you don't have the book, you can visit [Ocean 2.0 Interfaith Reader](https://oceanlibrary.com) online and read it on your screen with the rest of the class.",
   "highlights": [],
   "location": {
     "name": "Online",
@@ -18,7 +18,7 @@
     "zip": ""
   },
   "price": null,
-  "registrationUrl": "https://drbi.org",
+  "registrationUrl": "",
   "organizer": "DRBI",
   "categories": [],
   "source": "manual",
@@ -27,7 +27,7 @@
     "orgPageDate": "2026-01-31T18:18:12.654Z",
     "detailPageDate": "2026-01-31T18:18:12.654Z"
   },
-  "title": "Advent of Divine Justice by Shoghi Effendi,1939",
+  "title": "Advent of Divine Justice by Shoghi Effendi",
   "featured": false,
   "onsite": false,
   "mainImage": "https://drbi.s3.amazonaws.com/events/manual-1769883492652-main-1769883619176.webp",
@@ -37,12 +37,16 @@
   "lastManualEdit": "2026-01-31T19:22:19.421Z",
   "additionalDates": [
     {
-      "startDate": "2026-03-01T16:00:00.000Z",
-      "endDate": "2026-03-01T18:00:00.000Z"
+      "startDate": "2026-05-05T02:00:00.000Z",
+      "endDate": "2026-05-05T03:00:00.000Z"
     },
     {
-      "startDate": "2026-04-01T16:00:00.000Z",
-      "endDate": "2026-04-01T18:00:00.000Z"
+      "startDate": "2026-06-02T02:00:00.000Z",
+      "endDate": "2026-06-02T03:00:00.000Z"
+    },
+    {
+      "startDate": "2026-07-07T02:00:00.000Z",
+      "endDate": "2026-07-07T03:00:00.000Z"
     }
   ]
 }
