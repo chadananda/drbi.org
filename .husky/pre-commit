@@ -38,11 +38,11 @@ DEV_PID=$!
 # Wait for server to be ready (max 30 seconds)
 echo "⏳ Waiting for dev server..."
 for i in {1..30}; do
-  if curl -s -o /dev/null -w "" http://localhost:4321/ 2>/dev/null; then
+  if curl -s -o /dev/null -w "" http://localhost:4850/ 2>/dev/null; then
     break
   fi
-  if curl -s -o /dev/null -w "" http://localhost:4322/ 2>/dev/null; then
-    export BASE_URL=http://localhost:4322
+  if curl -s -o /dev/null -w "" http://localhost:4851/ 2>/dev/null; then
+    export BASE_URL=http://localhost:4851
     break
   fi
   sleep 1
@@ -50,7 +50,7 @@ done
 
 # Set BASE_URL if not already set
 if [ -z "$BASE_URL" ]; then
-  export BASE_URL=http://localhost:4321
+  export BASE_URL=http://localhost:4850
 fi
 
 # Run critical tests only (faster subset)

@@ -58,6 +58,7 @@ const minifyConfig = {
 
 // https://astro.build/config
 export default defineConfig({
+  server: { port: 4850 },
   devToolbar: {
     enabled: false
   },

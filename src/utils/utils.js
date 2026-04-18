@@ -841,13 +841,11 @@ export const deleteCategory = async (id) => {
 export const getTeam = async (filter = () => true) => {
   // Read team from JSON file during migration
   const { readFileSync } = await import('fs');
-  const { fileURLToPath } = await import('url');
   const path = await import('path');
-  
+
   try {
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const teamData = JSON.parse(readFileSync(path.join(__dirname, '../data/team.json'), 'utf8'));
+    const teamPath = path.join(process.cwd(), 'src/data/team.json');
+    const teamData = JSON.parse(readFileSync(teamPath, 'utf8'));
     
     const team = teamData
       .map(row => ({id: row.id, type: "file", collection: 'team', data: row}))
