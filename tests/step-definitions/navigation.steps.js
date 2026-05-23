@@ -25,9 +25,11 @@ When('I click on the events link in navigation', async function () {
     await menuToggle.click();
     await this.page.waitForTimeout(300);
   }
-  const eventsLink = this.page.getByRole('link', { name: /events/i }).first();
-  await eventsLink.click({ timeout: 10000 });
-  await this.page.waitForLoadState('networkidle');
+  const eventsLink = this.page.locator('nav a[href*="events"], a[href="/events"]').first();
+  await Promise.all([
+    this.page.waitForURL('**/events**', { timeout: 10000 }),
+    eventsLink.click(),
+  ]);
 });
 
 Then('I should be on the events page', async function () {
@@ -36,9 +38,11 @@ Then('I should be on the events page', async function () {
 });
 
 When('I click on the about link in navigation', async function () {
-  const aboutLink = this.page.getByRole('link', { name: /about/i }).first();
-  await aboutLink.click();
-  await this.page.waitForLoadState('networkidle');
+  const aboutLink = this.page.locator('nav a[href*="about"], a[href="/about-us"]').first();
+  await Promise.all([
+    this.page.waitForURL('**/about**', { timeout: 10000 }),
+    aboutLink.click(),
+  ]);
 });
 
 Then('I should be on the about page', async function () {

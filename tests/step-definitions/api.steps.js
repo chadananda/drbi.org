@@ -2,13 +2,17 @@ import { When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
 When('I make a GET request to {string}', async function (path) {
-  this.apiResponse = await this.page.request.get(`${this.baseURL}${path}`);
+  this.apiResponse = await this.page.request.get(`${this.baseURL}${path}`, {
+    maxRedirects: 0,
+    failOnStatusCode: false,
+  });
 });
 
 When('I make a POST request to {string} with sample content', async function (path) {
   this.apiResponse = await this.page.request.post(`${this.baseURL}${path}`, {
     data: { title: 'Test Post', body: 'This is test content for validation purposes with enough characters to pass minimum length requirements.' },
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 'Content-Type': 'application/json' },
+    failOnStatusCode: false,
   });
 });
 
@@ -23,10 +27,22 @@ Then('the response should be valid JSON', async function () {
 
 Then('the response should contain environment info', async function () {
   const body = await this.apiResponse.json();
-  expect(body).toHaveProperty('environment');
+  // Response shape: { success, status: { environment, ... } }
+  const env = body.environment ?? body.status?.environment;
+  expect(env).toBeTruthy();
 });
 
 Then('the response should contain a valid field', async function () {
   const body = await this.apiResponse.json();
   expect(body).toHaveProperty('valid');
+});
+
+Then('I should be redirected to login', async function () {
+  // After following redirect (or checking location header for 302)
+  const status = this.apiResponse.status();
+  const location = this.apiResponse.headers()['location'] ?? '';
+  const isRedirectToLogin = status === 302 || status === 301
+    ? location.includes('/login')
+    : this.page.url().includes('/login');
+  expect(isRedirectToLogin).toBeTruthy();
 });

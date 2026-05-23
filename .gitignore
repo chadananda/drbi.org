@@ -37,7 +37,11 @@ public/posts/
 work/
 
 # local test db
-tmpdata.db
+tmp/tmpdata.db
+cron-last-run.json
+tmp/cron-last-run.json
+tmp/sample-vercel-data.csv
+tmp/*.log
 
 # Playwright test outputs
 /test-results/

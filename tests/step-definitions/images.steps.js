@@ -178,8 +178,9 @@ Then('no images should return 403 or 404 errors', async function () {
     const img = allImages.nth(i);
     const src = await img.getAttribute('src');
 
-    // Skip data URLs and empty srcs
+    // Skip data URLs, empty srcs, and dev-mode local filesystem paths
     if (!src || src.startsWith('data:')) continue;
+    if (src.includes('/@fs/') || src.includes('%40fs')) continue;
 
     const naturalWidth = await img.evaluate(el => el.naturalWidth);
     if (naturalWidth === 0) {

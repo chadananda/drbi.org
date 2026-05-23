@@ -5,8 +5,8 @@
 export const selectors = {
   // Navigation
   navbar: 'nav, [role="navigation"]',
-  mobileMenuToggle: '[data-testid="mobile-menu-toggle"], button[aria-label*="menu"], .mobile-menu-toggle',
-  mobileNav: '[data-testid="mobile-nav"], [class*="mobile-nav"], [class*="mobile-menu"]',
+  mobileMenuToggle: '#astronav-menu, button[aria-label="Toggle Menu"], [data-testid="mobile-menu-toggle"]',
+  mobileNav: '[data-testid="mobile-nav"], .astronav-items, [class*="mobile-nav"]',
   navLinks: 'nav a, [role="navigation"] a',
 
   // Homepage sections
