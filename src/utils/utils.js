@@ -1,6 +1,5 @@
 // utils.js
 import slugifier from 'slugify';
-import { getCollection } from 'astro:content';
 // export a slugify function
 import path from 'path';
 import fs from 'fs';
@@ -295,18 +294,15 @@ export const getArticleHelpers = (article) => {
   }
 }
 export const getAllCollectionArticles = async (lang='', filter=()=>true) => {
-  const isBlank = (p) => p.data?.url?.toLowerCase().trim() === 'blank';
-  const isLangMatch = (p) => !!lang ? p.data?.language === lang : true;
-  // Load articles from the collection
-  let posts = (await getCollection('posts', (p) => isLangMatch(p) && !isBlank(p)))
-    .filter(filter);
-  return posts;
+  const { getAllContent } = await import('../lib/queries');
+  const all = await getAllContent();
+  return all.filter(p => (!lang || p.data.language === lang) && filter(p));
 }
 export const getAllArticles = async (lang = '', filter = () => true) => {
-  // make sure all collection posts are loadded into the database
-  await importAllPosts2DB(); // we'll move this to a cron job or build step later
-
-  const posts = (await getPosts_DB(lang, filter))
+  const { getAllContent } = await import('../lib/queries');
+  const all = await getAllContent();
+  const posts = all
+    .filter(p => (!lang || p.data.language === lang) && filter(p))
     .sort((a, b) => b.data.datePublished - a.data.datePublished)
     .map(post => ({ ...post, helpers: getArticleHelpers(post) })) // add helpers like images
 
@@ -846,22 +842,14 @@ export const getTeamWithRole = async () => {
 export const getTeamMember = async (slug) => { // formatted like data collection
  slug = slug?.id || `${slug}`; // handle either reference or string
  if (!slug) return null;
- 
  try {
-   const { readFileSync } = await import('fs');
-   const { fileURLToPath } = await import('url');
-   const path = await import('path');
-   
-   const __filename = fileURLToPath(import.meta.url);
-   const __dirname = path.dirname(__filename);
-   const teamData = JSON.parse(readFileSync(path.join(__dirname, '../data/team.json'), 'utf8'));
-   
-   const match = teamData.find(member => member.id === slug);
-   if (match) return { id: match.id, type: "file", collection: 'team', data: match };
+   const { getTeam: getTeamTurso } = await import('../lib/queries');
+   const team = await getTeamTurso();
+   const match = team.find(m => m.id === slug || m.data?.id === slug);
+   if (match) return { id: match.id, type: 'turso', collection: 'team', data: match.data ?? match };
  } catch (error) {
    console.error('Error loading team member:', error);
  }
- 
  return null;
 }
 export const getTeamMemberBySlug = async (slug) => {
