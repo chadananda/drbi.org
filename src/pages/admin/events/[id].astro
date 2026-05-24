@@ -3,12 +3,10 @@
 export const prerender = false;
 
 import Layout from '@layouts/AdminLayout.astro';
-import { getCollection } from 'astro:content';
-import fs from 'fs/promises';
-import path from 'path';
 import { lucia } from '@lib/auth';
 import { transformS3Url } from '@utils/utils.js';
 import site from '@data/site.json';
+import { getEventById } from '@lib/queries';
 
 // Helper function to format date for datetime-local input
 function formatDateTimeLocal(date) {
@@ -33,21 +31,19 @@ let event = null;
 let errorMsg = '';
 let formData = {};
 
-// Load existing event
+// Load existing event from Turso
 try {
-  const eventsDir = path.join(process.cwd(), 'src/content/events');
-  const filename = `event-${id}.json`;
-  const filePath = path.join(eventsDir, filename);
-  
-  const eventData = JSON.parse(await fs.readFile(filePath, 'utf8'));
-  event = eventData;
-  
+  const entry = await getEventById(id);
+  if (entry) {
+    event = entry.data;
+  }
+
   // Pre-populate form data
   formData = {
-    title: event.name || '',
-    shortDescription: event.shortDescription || '',
-    fullDescription: event.fullDescription || '',
-    startDate: event.startDate ? formatDateTimeLocal(new Date(event.startDate)) : '',
+    title: event?.name || event?.title || '',
+    shortDescription: event?.shortDescription || '',
+    fullDescription: event?.fullDescription || '',
+    startDate: event?.startDate ? formatDateTimeLocal(new Date(event.startDate)) : '',
     endDate: event.endDate ? formatDateTimeLocal(new Date(event.endDate)) : '',
     registrationUrl: event.registrationUrl || event.url || '',
     organizer: event.organizer || 'DRBI',

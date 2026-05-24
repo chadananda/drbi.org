@@ -3,83 +3,47 @@
 export const prerender = false;
 
 import Layout from '@layouts/AdminLayout.astro';
-import { getCollection } from 'astro:content';
 import { lucia } from '@lib/auth';
 import { transformS3Url } from '@utils/utils.js';
 import site from '@data/site.json';
+import { getEvents } from '@lib/queries';
 
-// Authentication check (same as articles)
-// Get the actual JWT token from the cookie (not the decoded session.id)
 const sessionid = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
 const user = Astro.locals?.user;
 if (!['admin', 'superadmin'].includes(user?.role)) {
   return Astro.redirect('/admin');
 }
 
-// Check for success message
 const url = new URL(Astro.request.url);
 const created = url.searchParams.get('created');
 const successMessage = created === 'true' ? 'Event created successfully!' : null;
 
-// Load all events directly from filesystem (always fresh)
+// Load all events from Turso (always live)
 let events = [];
 let error = null;
 
 try {
-  const fs = await import('fs/promises');
-  const path = await import('path');
-  
-  const eventsDir = path.join(process.cwd(), 'src/content/events');
-  const eventFiles = await fs.readdir(eventsDir);
-  
-  events = await Promise.all(
-    eventFiles
-      .filter(file => file.endsWith('.json'))
-      .map(async (file) => {
-        const filePath = path.join(eventsDir, file);
-        const content = await fs.readFile(filePath, 'utf-8');
-        const data = JSON.parse(content);
-        return { id: file.replace('.json', ''), data };
-      })
-  );
-  
+  const rawEvents = await getEvents();
+
   // Expand events with additionalDates into multiple display instances
   const expandedEvents = [];
-  const now = new Date();
-
-  events.forEach(event => {
-    // Add primary event instance
-    expandedEvents.push({
-      ...event,
-      isPrimary: true,
-      instanceIndex: 0,
-      dateSource: 'primary'
-    });
-
-    // Add instances for each additional date
+  rawEvents.forEach(event => {
+    expandedEvents.push({ ...event, isPrimary: true, instanceIndex: 0, dateSource: 'primary' });
     if (Array.isArray(event.data.additionalDates)) {
       event.data.additionalDates.forEach((additionalDate, index) => {
         expandedEvents.push({
           ...event,
-          data: {
-            ...event.data,
-            startDate: additionalDate.startDate,
-            endDate: additionalDate.endDate
-          },
-          isPrimary: false,
-          instanceIndex: index + 1,
-          dateSource: 'additional'
+          data: { ...event.data, startDate: additionalDate.startDate, endDate: additionalDate.endDate },
+          isPrimary: false, instanceIndex: index + 1, dateSource: 'additional'
         });
       });
     }
   });
 
-  // Sort all expanded events by date (upcoming first)
-  events = expandedEvents;
-  events.sort((a, b) => new Date(a.data.startDate).getTime() - new Date(b.data.startDate).getTime());
+  events = expandedEvents.sort((a, b) => new Date(a.data.startDate).getTime() - new Date(b.data.startDate).getTime());
 } catch (e) {
   error = e.message;
-  console.error('Error loading events:', e);
+  console.error('Error loading events from Turso:', e);
 }
 
 // Filter old events by default (more than 1 week past)

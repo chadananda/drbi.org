@@ -66,7 +66,7 @@ export default defineConfig({
   // markdown: {
   //   remarkPlugins: [remarkAttr],
   // },
-  output: 'static', // Static by default, use prerender: false for SSR pages
+  output: 'static', // static by default; pages with prerender=false use SSR
   site: site.url,
   adapter: vercel({
     imageService: false,

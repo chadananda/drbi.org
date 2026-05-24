@@ -314,10 +314,11 @@ export const getAllArticles = async (lang = '', filter = () => true) => {
   return posts;
 }
 export const getPublishedArticles = async (lang = 'en', max = 100) => {
-  // Use new Content Layer API instead of old database
-  const { getPublishedArticles_Content } = await import('./content-utils.js');
-  const allPosts = await getPublishedArticles_Content(lang);
-  return allPosts.slice(0, max);
+  const { getAllContent } = await import('../lib/queries');
+  const allPosts = await getAllContent();
+  return allPosts
+    .filter(p => !p.data.draft && p.data.language === lang)
+    .slice(0, max);
 }
 
 export const getPublishedPosts = async (type = '', lang = 'en', max = 100) => {
@@ -585,24 +586,13 @@ export const getArticleSlugFromURL = (url) => {
 
 
 // ***************** Topics
-export const getTopics = async (filter = ()=>true) => {
-  // first load topics from the data collection
-  let allTopics = (await getCollection('topics'))
-  let allFaqs = (await getCollection('faqs'))
-  let topics =  allTopics.map(topic => {
-    let {topic_slug: id, topic: name, description} = topic.data;
-    let {data} = allFaqs.find(f => f.id === id);
-    let {title, faqs} = data;
-    return {id, name, description, title, faqs, image:'', type:'collection' }
-  });
-  // Database removed - no database topics for now
-  let dbTopics = [];
-  // merge the two lists without duplications of id into a new array
-  let mergedMap = new Map(topics.map(topic => [topic.id, topic]));
-  dbTopics.forEach(dbTopic => mergedMap.set(dbTopic.id, dbTopic));
-  let merged = Array.from(mergedMap.values());
-  // filter the two lists & return result
-  return merged.filter(filter);
+export const getTopics = async (filter = () => true) => {
+  const { getTopics: getTopicsTurso } = await import('../lib/queries');
+  const topics = await getTopicsTurso();
+  // Normalize to flat { id, name, ... } shape for backward compatibility
+  return topics
+    .map(t => ({ id: t.id, name: t.data.topic, description: t.data.description, image: '', type: 'turso' }))
+    .filter(filter);
 }
 export const updateTopic = async (values) => {
   let {id, name, title, description, image, faqs} = values;
@@ -801,9 +791,9 @@ export const moderateComments_openai = async () => {
 
 // ***************** categories
 export const getCategories = async (filter = () => true) => {
-   // Database removed - return empty categories array
-   console.log('getCategories called but database removed, returning empty array');
-   return [];
+  const { getCategories: getCategoriesTurso } = await import('../lib/queries');
+  const cats = await getCategoriesTurso();
+  return cats.filter(filter);
 }
 export const getCategory = async (id) => {
   if (!id) return null;
@@ -839,23 +829,9 @@ export const deleteCategory = async (id) => {
 // ***************** Team
 // TODO: simplify formatting to not use data collection format
 export const getTeam = async (filter = () => true) => {
-  // Read team from JSON file during migration
-  const { readFileSync } = await import('fs');
-  const path = await import('path');
-
-  try {
-    const teamPath = path.join(process.cwd(), 'src/data/team.json');
-    const teamData = JSON.parse(readFileSync(teamPath, 'utf8'));
-    
-    const team = teamData
-      .map(row => ({id: row.id, type: "file", collection: 'team', data: row}))
-      .filter(filter);
-    
-    return team;
-  } catch (error) {
-    console.error('Error loading team data:', error);
-    return [];
-  }
+  const { getTeam: getTeamTurso } = await import('../lib/queries');
+  const team = await getTeamTurso();
+  return team.filter(filter);
 }
 export const getTeamWithRole = async () => {
   // Use JSON data and add admin role
