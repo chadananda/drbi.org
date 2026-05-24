@@ -1,0 +1,111 @@
+---
+export const prerender = false;
+
+import Layout from '@layouts/AdminLayout.astro';
+import { getUsers } from '@lib/queries';
+
+const user = Astro.locals?.user;
+if (!user || !['superadmin', 'admin'].includes(user.role)) return Astro.redirect('/admin');
+
+const users = await getUsers();
+
+const ROLE_COLORS: Record<string, string> = {
+  superadmin: 'bg-red-100 text-red-700',
+  admin: 'bg-purple-100 text-purple-700',
+  editor: 'bg-blue-100 text-blue-700',
+  author: 'bg-green-100 text-green-700',
+};
+---
+
+<Layout title="User Management" user={user}>
+  <div class="max-w-5xl mx-auto px-6 py-6">
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+            <span class="text-white text-xl">👤</span>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900">User Management</h1>
+        </div>
+        <a href="/admin/users/add" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700">
+          + Add User
+        </a>
+      </div>
+      <nav class="text-sm text-gray-500 mb-4">
+        <a href="/" class="hover:text-blue-600">home</a> /
+        <a href="/admin" class="hover:text-blue-600">admin</a> / users
+      </nav>
+      <div class="bg-blue-50 border-l-4 border-blue-400 p-4 text-sm text-gray-700">
+        Users can log in to the admin panel. Role controls what they can do:
+        <strong>superadmin</strong> — full access including user management |
+        <strong>admin</strong> — all content + team management |
+        <strong>editor</strong> — content + comments |
+        <strong>author</strong> — create/edit own content only
+      </div>
+    </div>
+
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th class="px-4 py-3 text-left font-medium text-gray-700">Name</th>
+            <th class="px-4 py-3 text-left font-medium text-gray-700">Email</th>
+            <th class="px-4 py-3 text-left font-medium text-gray-700">Role</th>
+            <th class="px-4 py-3 text-left font-medium text-gray-700">Status</th>
+            <th class="px-4 py-3 text-left font-medium text-gray-700">Created</th>
+            <th class="px-4 py-3 text-right font-medium text-gray-700">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {users.length === 0 && (
+            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">
+              No users yet. <a href="/admin/users/add" class="text-blue-600 hover:underline">Add the first one.</a>
+            </td></tr>
+          )}
+          {users.map(u => (
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 font-medium text-gray-900">{u.name}</td>
+              <td class="px-4 py-3 text-gray-600">{u.email}</td>
+              <td class="px-4 py-3">
+                <span class={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLE_COLORS[u.role] ?? 'bg-gray-100 text-gray-700'}`}>
+                  {u.role}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                {u.active
+                  ? <span class="text-green-600 text-xs font-medium">Active</span>
+                  : <span class="text-red-500 text-xs font-medium">Disabled</span>}
+              </td>
+              <td class="px-4 py-3 text-gray-400 text-xs">{new Date(u.created_at).toLocaleDateString()}</td>
+              <td class="px-4 py-3 text-right">
+                <a href={`/admin/users/${u.id}`} class="text-blue-600 hover:text-blue-800 font-medium mr-3">Edit</a>
+                {u.id !== user.id && (
+                  <button class="delete-user text-red-500 hover:text-red-700 font-medium" data-user-id={u.id} data-user-name={u.name}>
+                    Delete
+                  </button>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const sessionid = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('auth_session='))?.split('=')[1] ?? '';
+
+    document.querySelectorAll('.delete-user').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const el = btn as HTMLElement;
+        if (!confirm(`Delete user "${el.dataset.userName}"? This cannot be undone.`)) return;
+        const res = await fetch(`/api/users?id=${el.dataset.userId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${sessionid}` },
+        });
+        if (res.ok) location.reload();
+        else alert('Delete failed: ' + (await res.text()));
+      });
+    });
+  </script>
+</Layout>

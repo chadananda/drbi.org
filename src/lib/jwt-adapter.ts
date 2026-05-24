@@ -1,81 +1,57 @@
-// JWT Adapter for Lucia - Stateless session storage using JWT tokens
+// JWT Adapter for Lucia — stateless sessions, user data fetched from Turso on each request
 import jwt from 'jsonwebtoken';
-import type { Adapter, DatabaseSession, DatabaseUser, RegisteredDatabaseSessionAttributes } from "lucia";
-
-interface JWTSessionData {
-  id: string;
-  userId: string;
-  expiresAt: Date;
-  attributes: Record<string, any>;
-}
+import type { Adapter, DatabaseSession, DatabaseUser } from "lucia";
 
 export class JWTAdapter implements Adapter {
   private jwtSecret: string;
-  private adminUser: DatabaseUser;
+  private fallbackUser: DatabaseUser; // used if Turso is unavailable
 
-  constructor(jwtSecret: string, adminUser: DatabaseUser) {
+  constructor(jwtSecret: string, fallbackUser: DatabaseUser) {
     this.jwtSecret = jwtSecret;
-    this.adminUser = adminUser;
+    this.fallbackUser = fallbackUser;
   }
 
   async getSessionAndUser(sessionId: string): Promise<[DatabaseSession | null, DatabaseUser | null]> {
     try {
-      // Decode and verify JWT token (JWT library handles expiration automatically)
       const decoded = jwt.verify(sessionId, this.jwtSecret) as any;
-      
       const session: DatabaseSession = {
-        id: decoded.id,
+        id: decoded.id ?? sessionId,
         userId: decoded.userId,
-        expiresAt: new Date(decoded.exp * 1000), // JWT uses 'exp' claim in seconds, Date needs milliseconds
+        expiresAt: new Date(decoded.exp * 1000),
         attributes: decoded.attributes || {}
       };
 
-      // Only return the admin user for the correct userId
-      if (decoded.userId === this.adminUser.id) {
-        return [session, this.adminUser];
+      // Look up user from Turso for current role/active status
+      try {
+        const { getUserById } = await import('./queries');
+        const userRow = await getUserById(decoded.userId);
+        if (userRow && userRow.active) {
+          return [session, {
+            id: userRow.id,
+            attributes: { name: userRow.name, email: userRow.email, role: userRow.role }
+          }];
+        }
+      } catch {
+        // Turso unavailable — fall back to env-based admin
+        if (decoded.userId === this.fallbackUser.id) {
+          return [session, this.fallbackUser];
+        }
       }
-      
       return [null, null];
-    } catch (error) {
-      // Invalid token, expired, or verification failed
+    } catch {
       return [null, null];
     }
   }
 
-  async getUserSessions(userId: string): Promise<DatabaseSession[]> {
-    // For stateless JWT sessions, we can't enumerate active sessions
-    // This is a limitation of JWT approach but acceptable for single admin
-    return [];
-  }
+  async getUserSessions(_userId: string): Promise<DatabaseSession[]> { return []; }
+  async setSession(_session: DatabaseSession): Promise<void> {}
+  async updateSessionExpiration(_sessionId: string, _expiresAt: Date): Promise<void> {}
+  async deleteSession(_sessionId: string): Promise<void> {}
+  async deleteUserSessions(_userId: string): Promise<void> {}
+  async deleteExpiredSessions(): Promise<void> {}
 
-  async setSession(session: DatabaseSession): Promise<void> {
-    // Sessions are stored as JWT tokens, no storage needed
-    // The JWT token is created when needed
-  }
-
-  async updateSessionExpiration(sessionId: string, expiresAt: Date): Promise<void> {
-    // JWT tokens are immutable, can't update expiration
-    // This is a limitation but acceptable for our use case
-  }
-
-  async deleteSession(sessionId: string): Promise<void> {
-    // JWT tokens are stateless, deletion is handled by cookie removal
-  }
-
-  async deleteUserSessions(userId: string): Promise<void> {
-    // JWT tokens are stateless, deletion is handled by cookie removal
-  }
-
-  async deleteExpiredSessions(): Promise<void> {
-    // JWT tokens handle expiration automatically
-  }
-
-  // Helper method to create a JWT session token
   createSessionToken(sessionData: any): string {
-    // Remove expiresAt from payload since JWT creates its own 'exp' claim
-    const { expiresAt, ...dataWithoutExpiry } = sessionData;
-    return jwt.sign(dataWithoutExpiry, this.jwtSecret, {
-      expiresIn: '7d' // This creates the 'exp' claim automatically
-    });
+    const { expiresAt: _exp, ...payload } = sessionData;
+    return jwt.sign(payload, this.jwtSecret, { expiresIn: '7d' });
   }
 }

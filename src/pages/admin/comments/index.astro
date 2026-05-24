@@ -1,0 +1,181 @@
+---
+export const prerender = false;
+
+import Layout from "@layouts/AdminLayout.astro";
+import { getComments, getCommentStats } from '@lib/queries';
+
+const user = Astro.locals?.user;
+if (!user || !['superadmin', 'admin', 'editor'].includes(user.role)) return Astro.redirect('/admin');
+
+const [comments, stats] = await Promise.all([getComments(), getCommentStats()]);
+
+const starredComments = comments.filter(c => c.starred);
+const pendingComments = comments.filter(c => !c.approved);
+
+const commentsByPost: Record<string, typeof comments> = {};
+for (const c of comments) {
+  if (!commentsByPost[c.postid]) commentsByPost[c.postid] = [];
+  commentsByPost[c.postid].push(c);
+}
+---
+
+<Layout title="Comment Management" user={user}>
+  <div class="max-w-6xl mx-auto px-6 py-6">
+
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+          <span class="text-white text-xl">💬</span>
+        </div>
+        <h1 class="text-2xl font-bold text-gray-900">Comment Management</h1>
+      </div>
+      <nav class="text-sm text-gray-500 mb-6">
+        <a href="/" class="hover:text-blue-600">home</a> /
+        <a href="/admin" class="hover:text-blue-600">admin</a> / comments
+      </nav>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <p class="text-sm text-blue-700 font-medium">Total</p>
+          <p class="text-2xl font-bold text-blue-600">{stats.total}</p>
+        </div>
+        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+          <p class="text-sm text-yellow-700 font-medium">Starred</p>
+          <p class="text-2xl font-bold text-yellow-600">{stats.starred}</p>
+        </div>
+        <div class="bg-orange-50 p-4 rounded-lg border border-orange-200">
+          <p class="text-sm text-orange-700 font-medium">Pending</p>
+          <p class="text-2xl font-bold text-orange-600">{stats.pending}</p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+          <p class="text-sm text-green-700 font-medium">This week</p>
+          <p class="text-2xl font-bold text-green-600">{stats.recent}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <nav class="flex space-x-8 border-b border-gray-200">
+        <button class="tab-btn active py-2 px-1 border-b-2 border-blue-500 font-medium text-blue-600" data-tab="all">All ({comments.length})</button>
+        <button class="tab-btn py-2 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="pending">Pending ({pendingComments.length})</button>
+        <button class="tab-btn py-2 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="starred">Starred ({starredComments.length})</button>
+        <button class="tab-btn py-2 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700" data-tab="by-post">By Post</button>
+      </nav>
+    </div>
+
+    {[
+      { id: 'all', list: comments },
+      { id: 'pending', list: pendingComments },
+      { id: 'starred', list: starredComments },
+    ].map(({ id, list }) => (
+      <div class={`tab-content${id !== 'all' ? ' hidden' : ''}`} id={`${id}-tab`}>
+        <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+          <div class="divide-y divide-gray-200">
+            {list.length === 0 && <p class="p-6 text-gray-500">No comments.</p>}
+            {list.map((comment) => (
+              <div class="comment-item p-4" data-comment-id={comment.id}>
+                <div class="flex items-start gap-4">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                      <span class="font-semibold text-gray-900">{comment.name}</span>
+                      <span class="text-xs text-gray-400">{new Date(comment.date).toLocaleDateString()}</span>
+                      <a href={`/${comment.postid}`} class="text-xs text-blue-600 hover:underline truncate max-w-xs">{comment.postid}</a>
+                      {!comment.approved && <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Pending</span>}
+                      {comment.starred && <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">⭐ Starred</span>}
+                    </div>
+                    <p class="text-sm text-gray-700 mb-2">{comment.content}</p>
+                    <div class="flex gap-3 text-sm">
+                      <button class="star-btn text-yellow-600 hover:text-yellow-800 font-medium"
+                              data-comment-id={comment.id} data-starred={comment.starred ? 'true' : 'false'}>
+                        {comment.starred ? 'Unstar' : 'Star'}
+                      </button>
+                      {!comment.approved && (
+                        <button class="approve-btn text-green-600 hover:text-green-800 font-medium"
+                                data-comment-id={comment.id}>Approve</button>
+                      )}
+                      <button class="delete-btn text-red-500 hover:text-red-700 font-medium"
+                              data-comment-id={comment.id}>Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    ))}
+
+    <div class="tab-content hidden" id="by-post-tab">
+      <div class="space-y-4">
+        {Object.entries(commentsByPost).map(([postid, postComments]) => (
+          <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+            <div class="px-4 py-3 border-b border-gray-200 flex justify-between">
+              <a href={`/${postid}`} class="text-blue-600 hover:underline font-medium">{postid}</a>
+              <span class="text-sm text-gray-500">{postComments.length} comment{postComments.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div class="divide-y divide-gray-100">
+              {postComments.map(c => (
+                <div class="p-3 text-sm">
+                  <span class="font-medium text-gray-800">{c.name}</span>
+                  <span class="text-gray-400 ml-2 text-xs">{new Date(c.date).toLocaleDateString()}</span>
+                  <p class="text-gray-600 mt-1">{c.content}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sessionid = document.cookie.split(';').map(c => c.trim()).find(c => c.startsWith('auth_session='))?.split('=')[1] ?? '';
+
+    async function commentAction(action: string, commentId: string, extra?: Record<string, any>) {
+      const res = await fetch('/api/admin/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sessionid}` },
+        body: JSON.stringify({ action, commentId, ...extra }),
+      });
+      return res.ok;
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tab = (btn as HTMLElement).dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => {
+          b.classList.remove('active', 'border-blue-500', 'text-blue-600');
+          b.classList.add('border-transparent', 'text-gray-500');
+        });
+        btn.classList.add('active', 'border-blue-500', 'text-blue-600');
+        btn.classList.remove('border-transparent', 'text-gray-500');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.getElementById(`${tab}-tab`)?.classList.remove('hidden');
+      });
+    });
+
+    document.querySelectorAll('.star-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const el = btn as HTMLElement;
+        const id = el.dataset.commentId!;
+        const isStarred = el.dataset.starred === 'true';
+        if (await commentAction('star', id, { starred: !isStarred })) location.reload();
+      });
+    });
+
+    document.querySelectorAll('.approve-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = (btn as HTMLElement).dataset.commentId!;
+        if (await commentAction('approve', id, { approved: true })) location.reload();
+      });
+    });
+
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this comment?')) return;
+        const id = (btn as HTMLElement).dataset.commentId!;
+        if (await commentAction('delete', id)) btn.closest('.comment-item')?.remove();
+      });
+    });
+  </script>
+</Layout>

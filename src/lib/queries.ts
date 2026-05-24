@@ -478,7 +478,39 @@ export async function getTeamMember(id: string) {
   const result = await db.execute({ sql: 'SELECT * FROM team WHERE id = ?', args: [id] });
   const row = result.rows[0] as unknown as TeamRow | undefined;
   if (!row) return null;
-  return { id: row.id, data: { name: row.name, role: row.role ?? '', bio: row.bio ?? '', image: row.image ?? '', email: row.email ?? '' } };
+  return { id: row.id, data: { name: row.name, role: row.role ?? '', title: row.title ?? '', bio: row.bio ?? '', image: row.image ?? '', email: row.email ?? '', website: row.website ?? '', twitter: row.twitter ?? '' } };
+}
+
+export async function getTeamMemberByEmail(email: string) {
+  const result = await db.execute({ sql: 'SELECT * FROM team WHERE email = ? LIMIT 1', args: [email] });
+  const row = result.rows[0] as unknown as TeamRow | undefined;
+  if (!row) return null;
+  return { id: row.id, data: { name: row.name, role: row.role ?? '', title: row.title ?? '', bio: row.bio ?? '', image: row.image ?? '', email: row.email ?? '', website: row.website ?? '', twitter: row.twitter ?? '' } };
+}
+
+export async function createTeamMember(data: Record<string, any>) {
+  const id = data.id ?? data.name.toLowerCase().replace(/\s+/g, '-');
+  await db.execute({
+    sql: `INSERT INTO team (id, name, role, title, bio, image, email, website, twitter, sort_order)
+          VALUES (?,?,?,?,?,?,?,?,?,?)`,
+    args: [id, data.name, data.role ?? 'author', data.title ?? '', data.bio ?? '', data.image ?? '', data.email ?? '', data.website ?? '', data.twitter ?? '', data.sort_order ?? 0]
+  });
+  return getTeamMember(id);
+}
+
+export async function updateTeamMember(id: string, data: Record<string, any>) {
+  await db.execute({
+    sql: `UPDATE team SET name=COALESCE(?,name), role=COALESCE(?,role), title=COALESCE(?,title),
+          bio=COALESCE(?,bio), image=COALESCE(?,image), email=COALESCE(?,email),
+          website=COALESCE(?,website), twitter=COALESCE(?,twitter)
+          WHERE id=?`,
+    args: [data.name ?? null, data.role ?? null, data.title ?? null, data.bio ?? null, data.image ?? null, data.email ?? null, data.website ?? null, data.twitter ?? null, id]
+  });
+  return getTeamMember(id);
+}
+
+export async function deleteTeamMember(id: string) {
+  await db.execute({ sql: 'DELETE FROM team WHERE id = ?', args: [id] });
 }
 
 // ─── Categories ──────────────────────────────────────────────────────────────
@@ -503,7 +535,28 @@ export async function getCategoryBySlug(slug: string) {
   const result = await db.execute({ sql: 'SELECT * FROM categories WHERE slug = ? LIMIT 1', args: [slug] });
   const row = result.rows[0] as unknown as CategoryRow | undefined;
   if (!row) return null;
-  return { id: row.id, data: { category: row.name, category_slug: row.slug, description: row.description ?? '', topics: parseJson(row.topics, {}) } };
+  return { id: row.id, data: { category: row.name, category_slug: row.slug, description: row.description ?? '', image: row.image ?? '', topics: parseJson(row.topics, {}) } };
+}
+
+export async function createCategory(data: Record<string, any>) {
+  const id = data.id ?? data.slug;
+  await db.execute({
+    sql: `INSERT INTO categories (id, name, slug, description, image, topics) VALUES (?,?,?,?,?,?)`,
+    args: [id, data.name, data.slug, data.description ?? '', data.image ?? '', JSON.stringify(data.topics ?? {})]
+  });
+  return getCategoryBySlug(data.slug);
+}
+
+export async function updateCategory(id: string, data: Record<string, any>) {
+  await db.execute({
+    sql: `UPDATE categories SET name=COALESCE(?,name), slug=COALESCE(?,slug), description=COALESCE(?,description), image=COALESCE(?,image), topics=COALESCE(?,topics) WHERE id=?`,
+    args: [data.name ?? null, data.slug ?? null, data.description ?? null, data.image ?? null, data.topics != null ? JSON.stringify(data.topics) : null, id]
+  });
+  return getCategoryBySlug(data.slug ?? id);
+}
+
+export async function deleteCategory(id: string) {
+  await db.execute({ sql: 'DELETE FROM categories WHERE id = ?', args: [id] });
 }
 
 // ─── Topics ──────────────────────────────────────────────────────────────────
@@ -529,6 +582,34 @@ export async function getTopicBySlug(slug: string) {
   return { id: row.id, data: { topic: row.topic, topic_slug: row.slug, category: row.category ?? '', description: row.description ?? '', traffic: row.traffic } };
 }
 
+export async function createTopic(data: Record<string, any>) {
+  const id = data.id ?? data.slug;
+  await db.execute({
+    sql: `INSERT INTO topics (id, topic, slug, category, description, traffic) VALUES (?,?,?,?,?,?)`,
+    args: [id, data.topic, data.slug, data.category ?? '', data.description ?? '', data.traffic ?? 0]
+  });
+  return getTopicBySlug(data.slug);
+}
+
+export async function updateTopic(id: string, data: Record<string, any>) {
+  await db.execute({
+    sql: `UPDATE topics SET topic=COALESCE(?,topic), slug=COALESCE(?,slug), category=COALESCE(?,category), description=COALESCE(?,description), traffic=COALESCE(?,traffic) WHERE id=?`,
+    args: [data.topic ?? null, data.slug ?? null, data.category ?? null, data.description ?? null, data.traffic ?? null, id]
+  });
+  return getTopicBySlug(data.slug ?? id);
+}
+
+export async function deleteTopic(id: string) {
+  await db.execute({ sql: 'DELETE FROM topics WHERE id = ?', args: [id] });
+}
+
+export async function updateFaq(topic: string, questions: Array<{ q: string; a: string }>) {
+  await db.execute({
+    sql: `INSERT INTO faqs (id, topic, questions) VALUES (?,?,?) ON CONFLICT(id) DO UPDATE SET questions=excluded.questions`,
+    args: [topic, topic, JSON.stringify(questions)]
+  });
+}
+
 // ─── FAQs ────────────────────────────────────────────────────────────────────
 
 export async function getFaqs() {
@@ -540,4 +621,151 @@ export async function getFaqs() {
       questions: parseJson<Array<{ q: string; a: string }>>(row.questions, []),
     }
   }));
+}
+
+// ─── Users ───────────────────────────────────────────────────────────────────
+
+export interface UserRow {
+  id: string;
+  email: string;
+  hashed_password: string;
+  name: string;
+  role: string;
+  active: number;
+  created_at: string;
+  updated_at: string;
+}
+
+function shapeUser(row: UserRow) {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    role: row.role,
+    active: row.active === 1,
+    created_at: row.created_at,
+  };
+}
+
+export async function getUsers() {
+  const result = await db.execute('SELECT id, email, name, role, active, created_at, updated_at FROM users ORDER BY created_at ASC');
+  return (result.rows as unknown as UserRow[]).map(shapeUser);
+}
+
+export async function getUserById(id: string) {
+  const result = await db.execute({ sql: 'SELECT * FROM users WHERE id = ? LIMIT 1', args: [id] });
+  const row = result.rows[0] as unknown as UserRow | undefined;
+  return row ? row : null;
+}
+
+export async function getUserByEmail(email: string) {
+  const result = await db.execute({ sql: 'SELECT * FROM users WHERE email = ? LIMIT 1', args: [email.toLowerCase()] });
+  const row = result.rows[0] as unknown as UserRow | undefined;
+  return row ? row : null;
+}
+
+export async function createUser(data: { id: string; email: string; hashed_password: string; name: string; role: string }) {
+  await db.execute({
+    sql: `INSERT INTO users (id, email, hashed_password, name, role) VALUES (?,?,?,?,?)`,
+    args: [data.id, data.email.toLowerCase(), data.hashed_password, data.name, data.role]
+  });
+  return getUserById(data.id);
+}
+
+export async function updateUser(id: string, data: Record<string, any>) {
+  const now = new Date().toISOString();
+  const fields: string[] = ['updated_at = ?'];
+  const args: any[] = [now];
+  if (data.email != null) { fields.unshift('email = ?'); args.unshift(data.email.toLowerCase()); }
+  if (data.name != null) { fields.unshift('name = ?'); args.unshift(data.name); }
+  if (data.role != null) { fields.unshift('role = ?'); args.unshift(data.role); }
+  if (data.active != null) { fields.unshift('active = ?'); args.unshift(data.active ? 1 : 0); }
+  if (data.hashed_password != null) { fields.unshift('hashed_password = ?'); args.unshift(data.hashed_password); }
+  args.push(id);
+  await db.execute({ sql: `UPDATE users SET ${fields.join(', ')} WHERE id = ?`, args });
+  return getUserById(id);
+}
+
+export async function deleteUser(id: string) {
+  await db.execute({ sql: 'DELETE FROM users WHERE id = ?', args: [id] });
+}
+
+// ─── Comments ────────────────────────────────────────────────────────────────
+
+export interface CommentRow {
+  id: string;
+  post_id: string;
+  parent_id: string | null;
+  name: string;
+  email: string | null;
+  content: string;
+  starred: number;
+  approved: number;
+  ai_score: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+function shapeComment(row: CommentRow) {
+  return {
+    id: row.id,
+    postid: row.post_id,
+    parentid: row.parent_id,
+    name: row.name,
+    email: row.email ?? '',
+    content: row.content,
+    starred: row.starred === 1,
+    approved: row.approved === 1,
+    ai_score: row.ai_score,
+    date: row.created_at,
+  };
+}
+
+export async function getComments(postId?: string) {
+  if (postId) {
+    const result = await db.execute({ sql: 'SELECT * FROM comments WHERE post_id = ? ORDER BY created_at ASC', args: [postId] });
+    return (result.rows as unknown as CommentRow[]).map(shapeComment);
+  }
+  const result = await db.execute('SELECT * FROM comments ORDER BY created_at DESC');
+  return (result.rows as unknown as CommentRow[]).map(shapeComment);
+}
+
+export async function getApprovedComments(postId: string) {
+  const result = await db.execute({ sql: 'SELECT * FROM comments WHERE post_id = ? AND approved = 1 ORDER BY created_at ASC', args: [postId] });
+  return (result.rows as unknown as CommentRow[]).map(shapeComment);
+}
+
+export async function createComment(data: { id: string; post_id: string; parent_id?: string; name: string; email?: string; content: string; approved?: boolean; ai_score?: number }) {
+  await db.execute({
+    sql: `INSERT INTO comments (id, post_id, parent_id, name, email, content, approved, ai_score) VALUES (?,?,?,?,?,?,?,?)`,
+    args: [data.id, data.post_id, data.parent_id ?? null, data.name, data.email ?? null, data.content, data.approved !== false ? 1 : 0, data.ai_score ?? null]
+  });
+}
+
+export async function updateComment(id: string, data: { starred?: boolean; approved?: boolean; content?: string }) {
+  const now = new Date().toISOString();
+  const fields: string[] = ['updated_at = ?'];
+  const args: any[] = [now];
+  if (data.starred != null) { fields.unshift('starred = ?'); args.unshift(data.starred ? 1 : 0); }
+  if (data.approved != null) { fields.unshift('approved = ?'); args.unshift(data.approved ? 1 : 0); }
+  if (data.content != null) { fields.unshift('content = ?'); args.unshift(data.content); }
+  args.push(id);
+  await db.execute({ sql: `UPDATE comments SET ${fields.join(', ')} WHERE id = ?`, args });
+}
+
+export async function deleteComment(id: string) {
+  await db.execute({ sql: 'DELETE FROM comments WHERE id = ?', args: [id] });
+}
+
+export async function getCommentStats() {
+  const result = await db.execute(`
+    SELECT
+      COUNT(*) as total,
+      SUM(starred) as starred,
+      SUM(CASE WHEN approved = 0 THEN 1 ELSE 0 END) as pending,
+      SUM(CASE WHEN created_at > datetime('now', '-7 days') THEN 1 ELSE 0 END) as recent
+    FROM comments
+  `);
+  const row = result.rows[0] as any;
+  return { total: Number(row?.total ?? 0), starred: Number(row?.starred ?? 0), pending: Number(row?.pending ?? 0), recent: Number(row?.recent ?? 0) };
 }

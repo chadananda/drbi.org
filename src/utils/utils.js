@@ -870,21 +870,21 @@ export const getTeamMemberByEmail = async (email) => {
   return null;
 }
 export const deleteTeamMember = async (slug) => {
-  // Team management disabled - using JSON data
-  console.log('deleteTeamMember: Function disabled - using static JSON data');
-  return null;
+  const { deleteTeamMember: deleteTurso } = await import('../lib/queries');
+  await deleteTurso(slug);
+  return true;
 }
 
-export const syncMemberUserEntry = async (member) => {
-  // User management disabled - using environment variables for admin
-  console.log('syncMemberUserEntry: Function disabled - using static admin configuration');
-}
+export const syncMemberUserEntry = async (_member) => {}
 
-// TODO: query for user id instead of using 'isNew'
 export const updateTeamMember = async (member, isNew) => {
-  // Team management disabled - using JSON data
-  console.log('updateTeamMember: Function disabled - using static JSON data');
-  return false;
+  const { createTeamMember, updateTeamMember: updateTurso } = await import('../lib/queries');
+  if (isNew) {
+    await createTeamMember(member);
+  } else {
+    await updateTurso(member.id, member);
+  }
+  return true;
 }
 
 
