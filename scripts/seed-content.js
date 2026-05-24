@@ -1,12 +1,11 @@
-// Seed articles/memorial/news from markdown files into Turso content table.
+// Seed articles/memorial/news/posts from markdown files into Turso content table.
 // Safe to re-run: uses INSERT OR REPLACE.
 import { createClient } from '@libsql/client';
-import { readFileSync, readdirSync } from 'fs';
+import { readFileSync, readdirSync, statSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import matter from 'gray-matter';
 import dotenv from 'dotenv';
-import { randomUUID } from 'crypto';
 
 dotenv.config();
 
@@ -21,26 +20,50 @@ const db = createClient({
 if (!process.env.TURSO_URL) throw new Error('TURSO_URL required');
 if (!process.env.TURSO_TOKEN) throw new Error('TURSO_TOKEN required');
 
-const COLLECTIONS = ['articles', 'memorial', 'news'];
+// Collect {filePath, collection, slug} entries from flat or subdirectory layouts
+function collectEntries(collection, targetCollection) {
+  const dir = join(root, 'src/content', collection);
+  const entries = [];
+  let items;
+  try { items = readdirSync(dir); } catch { return entries; }
+  for (const item of items) {
+    const itemPath = join(dir, item);
+    const stat = statSync(itemPath);
+    if (stat.isDirectory()) {
+      // Subdirectory layout: posts/my-slug/index.md(oc)
+      for (const ext of ['.md', '.mdx', '.mdoc']) {
+        const candidate = join(itemPath, `index${ext}`);
+        try { statSync(candidate); entries.push({ filePath: candidate, collection: targetCollection, slug: item }); break; } catch {}
+      }
+    } else if (/\.(md|mdx|mdoc)$/.test(item)) {
+      entries.push({ filePath: itemPath, collection: targetCollection, slug: item.replace(/\.(md|mdx|mdoc)$/, '') });
+    }
+  }
+  return entries;
+}
+
+const COLLECTION_MAP = [
+  ['articles', 'articles'],
+  ['memorial', 'memorial'],
+  ['news', 'news'],
+  ['posts', 'news'], // posts/ subdirectory layout → news collection
+];
+
 let total = 0, errors = 0;
 
-for (const collection of COLLECTIONS) {
-  const dir = join(root, 'src/content', collection);
-  let files;
-  try {
-    files = readdirSync(dir).filter(f => f.endsWith('.md') || f.endsWith('.mdx'));
-  } catch {
-    console.log(`  (no ${collection} directory, skipping)`);
-    continue;
-  }
+for (const [srcDir, targetCollection] of COLLECTION_MAP) {
+  const entries = collectEntries(srcDir, targetCollection);
+  if (!entries.length) { console.log(`  (no ${srcDir} content, skipping)`); continue; }
+  console.log(`Seeding ${entries.length} from ${srcDir} → ${targetCollection}...`);
 
-  console.log(`Seeding ${files.length} ${collection}...`);
-
-  for (const file of files) {
-    const raw = readFileSync(join(dir, file), 'utf-8');
+  for (const { filePath, collection, slug: defaultSlug } of entries) {
+    const raw = readFileSync(filePath, 'utf-8');
     const { data: fm, content: body } = matter(raw);
 
-    const slug = fm.url ?? file.replace(/\.(md|mdx)$/, '');
+    // Fix known image URL typos (missing extension dot)
+    if (fm.image?.src) fm.image.src = fm.image.src.replace(/newsletterpng$/, 'newsletter.png');
+
+    const slug = fm.post_slug ?? fm.url ?? defaultSlug;
     const lang = fm.language ?? 'en';
     const id = `${collection}/${slug}/${lang}`;
 
@@ -92,7 +115,7 @@ for (const collection of COLLECTIONS) {
       errors++;
     }
   }
-  console.log(`  ✓ ${collection} done`);
+  console.log(`  ✓ ${srcDir} done`);
 }
 
 console.log(`\nTotal: ${total} inserted, ${errors} errors.`);
