@@ -1,0 +1,87 @@
+---
+const quotes = [
+  { text: "The earth is but one country, and mankind its citizens.", source: "Bahá'u'lláh", work: "Gleanings from the Writings of Bahá'u'lláh" },
+  { text: "So powerful is the light of unity that it can illuminate the whole earth.", source: "Bahá'u'lláh", work: "Epistle to the Son of the Wolf" },
+  { text: "Regard man as a mine rich in gems of inestimable value. Education can, alone, cause it to reveal its treasures, and enable mankind to benefit therefrom.", source: "Bahá'u'lláh", work: "Gleanings from the Writings of Bahá'u'lláh" },
+  { text: "Let your vision be world-embracing, rather than confined to your own self.", source: "Bahá'u'lláh", work: "Gleanings from the Writings of Bahá'u'lláh" },
+  { text: "The betterment of the world can be accomplished through pure and goodly deeds, through commendable and seemly conduct.", source: "Bahá'u'lláh", work: "Tablets of Bahá'u'lláh" },
+  { text: "Be anxiously concerned with the needs of the age ye live in, and center your deliberations on its exigencies and requirements.", source: "Bahá'u'lláh", work: "Gleanings from the Writings of Bahá'u'lláh" },
+  { text: "Blessed is he who preferreth his brother before himself.", source: "Bahá'u'lláh", work: "Tablets of Bahá'u'lláh" },
+  { text: "Knowledge is as wings to man's life, and a ladder for his ascent.", source: "Bahá'u'lláh", work: "Epistle to the Son of the Wolf" },
+  { text: "Turn thy sight unto thyself, that thou mayest find Me standing within thee, mighty, powerful and self-subsisting.", source: "Bahá'u'lláh", work: "The Hidden Words" },
+  { text: "This is worship: to serve mankind and to minister to the needs of the people.", source: "'Abdu'l-Bahá", work: "Paris Talks" },
+  { text: "In the world of existence there is nothing so important as service to humanity.", source: "'Abdu'l-Bahá", work: "The Promulgation of Universal Peace" },
+  { text: "Let your heart burn with loving kindness for all who may cross your path.", source: "'Abdu'l-Bahá", work: "Paris Talks" },
+  { text: "The spiritual life of the soul is a life of service. Service is the very foundation of the spiritual life.", source: "'Abdu'l-Bahá", work: "Paris Talks" },
+  { text: "The fundamental basis of the community is agriculture, tillage of the soil. All must be producers.", source: "'Abdu'l-Bahá", work: "The Promulgation of Universal Peace" },
+  { text: "Music is one of the arts that is of benefit and will be approved — a cause of the exaltation of the human spirit.", source: "'Abdu'l-Bahá", work: "The Promulgation of Universal Peace" },
+  { text: "Religion without science is superstition and science without religion is materialism.", source: "'Abdu'l-Bahá", work: "The Promulgation of Universal Peace" },
+  { text: "Words must be supported by deeds, for deeds are the true test of words.", source: "'Abdu'l-Bahá", work: "The Promulgation of Universal Peace" },
+];
+---
+
+<section class="py-16 md:py-28 bg-stone-800 text-white relative overflow-hidden border-y border-amber-900/40">
+  <div class="absolute inset-0 opacity-8 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-600 via-transparent to-transparent"></div>
+
+  <div class="relative z-10 max-w-3xl mx-auto text-center px-6">
+    <p class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-10">Words to live by</p>
+
+    <div class="min-h-[200px] flex flex-col items-center justify-center">
+      <blockquote class="text-lg md:text-2xl lg:text-3xl font-serif font-light leading-relaxed text-white/90 max-w-2xl mx-auto">
+        "<span id="typewriter-text"></span><span id="typewriter-cursor" class="inline-block w-0.5 h-7 bg-amber-400 ml-1 align-middle animate-pulse"></span>"
+      </blockquote>
+      <div id="typewriter-attr" class="mt-8 flex flex-col items-center gap-1 opacity-0 transition-opacity duration-700">
+        <div class="w-8 h-px bg-amber-500 mb-4"></div>
+        <cite id="typewriter-source" class="not-italic text-amber-300 text-sm tracking-wide font-medium"></cite>
+        <span id="typewriter-work" class="text-stone-500 text-xs tracking-wide italic"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline define:vars={{ quotes }}>
+  const textEl   = document.getElementById('typewriter-text');
+  const attrEl   = document.getElementById('typewriter-attr');
+  const sourceEl = document.getElementById('typewriter-source');
+  const workEl   = document.getElementById('typewriter-work');
+
+  let current = Math.floor(Math.random() * quotes.length);
+
+  function type(text, index, onDone) {
+    if (index < text.length) {
+      textEl.textContent += text[index];
+      setTimeout(() => type(text, index + 1, onDone), 28 + Math.random() * 40);
+    } else {
+      onDone();
+    }
+  }
+
+  function erase(onDone) {
+    const text = textEl.textContent;
+    if (text.length > 0) {
+      textEl.textContent = text.slice(0, -1);
+      setTimeout(() => erase(onDone), 12);
+    } else {
+      onDone();
+    }
+  }
+
+  function showQuote(index) {
+    const q = quotes[index];
+    attrEl.classList.add('opacity-0');
+    erase(() => {
+      sourceEl.textContent = q.source;
+      workEl.textContent   = q.work;
+      type(q.text, 0, () => {
+        attrEl.classList.remove('opacity-0');
+        setTimeout(() => {
+          current = (current + 1) % quotes.length;
+          showQuote(current);
+        }, 9000);
+      });
+    });
+  }
+
+  // Start after a short pause so page feels settled
+  setTimeout(() => showQuote(current), 600);
+</script>

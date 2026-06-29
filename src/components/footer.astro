@@ -6,123 +6,91 @@ const { margin } = Astro.props;
 import brand from "@data/site.json";
 import SiteLogo from "@components/siteLogo.astro";
 
-import {companyLinks, productLinks, resourceLinks} from "@data/siteLinks.json";
-import Donate from "@components/donate-button.astro";
+import {companyLinks, resourceLinks} from "@data/siteLinks.json";
 ---
 
-<footer class:list={[ "py-8 bg-slate-100 border-t border-slate-100 noprint relative", margin && "mt-10" ]}>
-
-  <Donate />
+<footer class:list={[ "py-8 bg-slate-100 border-t border-slate-200 noprint relative", margin && "mt-10" ]}>
 
   <Container>
-    <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
 
-      <div class="sm:col-span-1 md:col-span-3 lg:col-span-3 ">
+      <!-- Brand column -->
+      <div class="md:col-span-2">
         <SiteLogo />
-        <p class="mt-2 text-sm text-slate-700 max-w-xs"> {brand.description_long} </p>
-
-        <p class="mt-2 text-sm text-slate-700 max-w-xs"> {brand.address} <br>
-          <a href={`tel:${brand.phone}`} target="_blank">{brand.phone}</a>,
-          <a href={`mailto:${brand.email}`} target="_blank">{brand.email}</a>
+        <p class="mt-2 text-sm text-slate-600 max-w-xs leading-relaxed">{brand.description_long}</p>
+        <p class="mt-3 text-sm text-slate-600">
+          {brand.address}<br>
+          <a href={`tel:${brand.phone}`} class="hover:text-amber-700 transition">{brand.phone}</a>
+          &middot;
+          <a href={`mailto:${brand.email}`} class="hover:text-amber-700 transition">{brand.email}</a>
         </p>
 
-
+        {/* Social links — uncomment and update URLs when DRBI social profiles are ready
         <div class="flex gap-3 mt-4 items-center">
-
-          <a href="https://twitter.com/" name="Twitter link"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="bg-slate-200 hover:bg-slate-300 rounded w-6 h-6 inline-flex items-center justify-center text-slate-500">
-            <!-- <Icon name="bx:bxl-twitter" class="w-4 h-4" /> -->
-            <span class="sr-only">TwitterX</span></a>
-
-            <a href="https://facebook.com/" transition:name=""
-            target="_blank"
-            rel="noopener noreferrer"
-            class="bg-slate-200 hover:bg-slate-300 rounded w-6 h-6 inline-flex items-center justify-center text-slate-500">
-            <!-- <Icon name="bx:bxl-facebook-circle" class="w-4 h-4" /> -->
-            <span
-              class="sr-only">Facebook</span></a>
-
-          <a href="https://linkedin.com/" name="Linkedin link"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="bg-slate-200 hover:bg-slate-300 rounded w-6 h-6 inline-flex items-center justify-center text-slate-500">
-            <!-- <Icon name="bx:bxl-linkedin-square" class="w-4 h-4" /> -->
-            <span
-              class="sr-only">Linkedin</span></a>
-
+          <a href="https://x.com/drbi" target="_blank" rel="noopener noreferrer"
+            class="bg-slate-200 hover:bg-amber-100 rounded w-7 h-7 inline-flex items-center justify-center text-slate-600 hover:text-amber-700 transition"
+            aria-label="X (Twitter)">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.742l7.74-8.855L1.254 2.25H8.08l4.259 5.629 5.904-5.629zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://facebook.com/drbi" target="_blank" rel="noopener noreferrer"
+            class="bg-slate-200 hover:bg-amber-100 rounded w-7 h-7 inline-flex items-center justify-center text-slate-600 hover:text-amber-700 transition"
+            aria-label="Facebook">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://linkedin.com/company/drbi" target="_blank" rel="noopener noreferrer"
+            class="bg-slate-200 hover:bg-amber-100 rounded w-7 h-7 inline-flex items-center justify-center text-slate-600 hover:text-amber-700 transition"
+            aria-label="LinkedIn">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
         </div>
+        */}
       </div>
 
-
-
-
-    { !!companyLinks.length && (
-
-      <div>
-        <h3 class="font-medium text-sm text-slate-800 underline">DRBI</h3>
-        <div class="flex flex-col mt-1">
-          {companyLinks.map((item) => (
-              <a href={item.path || "#"} aria-label="Company link"
-                class="py-1 text-sm text-slate-600 hover:text-indigo-600">
+      <!-- DRBI links -->
+      { !!companyLinks.length && (
+        <div>
+          <h3 class="font-semibold text-xs uppercase tracking-widest text-slate-500 mb-3">DRBI</h3>
+          <div class="flex flex-col gap-1">
+            {companyLinks.map((item) => (
+              <a href={item.path || "#"} class="text-sm text-slate-600 hover:text-amber-700 transition py-0.5">
                 {item.title}
               </a>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    )}
-
-    { !!productLinks.length && (
-      <div>
-        <h3 class="font-medium text-sm text-slate-800 underline">Tools</h3>
-        <div class="flex flex-col mt-1">
-          {productLinks.map((item) => (
-              <a href={item.path || "#"} aria-label="Product link"
-                class="py-1 text-sm text-slate-600 hover:text-indigo-600">
-                {item.title}
-              </a>
-          ))}
-        </div>
-      </div>
       )}
 
-   { !!resourceLinks.length && (
-      <div>
-        <h3 class="font-medium text-sm text-slate-800 underline">Resources</h3>
-        <div class="flex flex-col mt-1">
-          {resourceLinks.map((item) => (
-              <a
-                href={item.path || "#"} aria-label="Resource link"
-                class="py-1 text-sm text-slate-600 hover:text-indigo-600">
+      <!-- Resources -->
+      { !!resourceLinks.length && (
+        <div>
+          <h3 class="font-semibold text-xs uppercase tracking-widest text-slate-500 mb-3">Resources</h3>
+          <div class="flex flex-col gap-1">
+            {resourceLinks.map((item) => (
+              <a href={item.path || "#"} class="text-sm text-slate-600 hover:text-amber-700 transition py-0.5"
+                target={item.path?.startsWith('http') ? '_blank' : undefined}
+                rel={item.path?.startsWith('http') ? 'noopener noreferrer' : undefined}>
                 {item.title}
               </a>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
     </div>
   </Container>
 
-  <div class="mt-8 pt-8 px-5 border-t border-slate-200">
+  <div class="mt-8 pt-5 px-5 border-t border-slate-200">
     <Container>
-      <p class="text-center text-sm text-slate-600 [text-wrap:balance]">
-        Copyright © {new Date().getFullYear()} {brand.site} &mdash; All rights reserved.
-      </p>
-      <p class="text-center text-xs text-slate-600 mt-2">
-        <a href="/terms" class="hover:text-indigo-500" aria-label="Terms" rel="nofollow"> Terms</a> &middot;
-        <a href="/privacy" class="hover:text-indigo-500" aria-label="Privacy" rel="nofollow"> Privacy</a> &middot;
-        <a href="/login" class="hover:text-indigo-500" aria-label="Login" rel="nofollow"> Admin</a> &middot;
-        <a href="/sitemap-articles.xml" class="hover:text-indigo-500" aria-label="Sitemap" rel="nofollow"> Articles</a> &middot;
-        <a href={brand.vercel_project_dashboard} aria-label="Vercel Dashboard" target="_blank" class="hover:text-indigo-500" rel="nofollow"> Vercel Dashboard</a> &middot;
-
-        <a href={brand.imgix_dashboard} aria-label="Vercel Dashboard" target="_blank" class="hover:text-indigo-500" rel="nofollow"> Imgix Dashboard</a>
+      <p class="text-center text-xs text-slate-400">
+        &copy; {new Date().getFullYear()} {brand.site} &mdash; All rights reserved.
+        &nbsp;&middot;&nbsp;
+        <a href="/terms" class="hover:text-amber-600 transition" rel="nofollow">Terms</a>
+        &nbsp;&middot;&nbsp;
+        <a href="/privacy" class="hover:text-amber-600 transition" rel="nofollow">Privacy</a>
+        &nbsp;&middot;&nbsp;
+        <a href="/login" class="hover:text-amber-600 transition" rel="nofollow">Admin</a>
       </p>
     </Container>
   </div>
 
 </footer>
-
-
-

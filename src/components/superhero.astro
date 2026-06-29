@@ -1,72 +1,120 @@
 ---
-
-// astro component to display a hero video background for the home page
+const quotes = [
+  {
+    text: "Regard man as a mine rich in gems of inestimable value. Education can, alone, cause it to reveal its treasures.",
+    source: "Bahá'u'lláh",
+  },
+  {
+    text: "The earth is but one country, and mankind its citizens.",
+    source: "Bahá'u'lláh",
+  },
+  {
+    text: "Knowledge is as wings to man's life, and a ladder for his ascent.",
+    source: "Bahá'u'lláh",
+  },
+  {
+    text: "The fundamental basis of the community is agriculture, tillage of the soil. All must be producers.",
+    source: "'Abdu'l-Bahá",
+  },
+  {
+    text: "Music is one of the arts that is of benefit — a cause of the exaltation of the human spirit.",
+    source: "'Abdu'l-Bahá",
+  },
+  {
+    text: "In the world of existence there is nothing so important as service to humanity.",
+    source: "'Abdu'l-Bahá",
+  },
+];
 ---
 
-<div id="superhero" class="h-full w-full p-0 m-0 bg-white flex items-center justify-center relative shadow-2xl mb-48 sm:mb-8">
- <!-- video -->
- <video loop muted autoplay preload="auto" class="w-full h-full absolute top-0 left-0 z-5 object-cover"><source src="/drbi-open_md.mp4" type="video/mp4"></video>
- <!-- caption -->
- <!-- <div class="caption absolute bottom-0 pb-2 z-20 text-center text-white opacity-50">
-   <h1 class="uppercase text-2xl mb-1 leading-9">Welcome to Desert Rose</h1>
-   <h2 class="font-normal text-xl m-0 font-pt-sans">Come help us build the future...</h2>
- </div> -->
+<div id="superhero" class="relative w-full overflow-hidden flex flex-col">
 
+  <!-- Video background -->
+  <video loop muted autoplay playsinline preload="auto"
+    class="w-full h-full absolute inset-0 z-0 object-cover">
+    <source src="/drbi-open_md.mp4" type="video/mp4">
+  </video>
 
+  <!-- Gradient overlay — heavier at bottom for quote legibility -->
+  <div class="absolute inset-0 z-10 bg-gradient-to-b from-black/45 via-black/20 to-black/80"></div>
 
- <div class="missioncards absolute -bottom-64 sm:-bottom-12 inset-x-0 px-4 py-2 flex flex-col sm:flex-row justify-center items-center w-full z-60">
-  <div class="mission bg-white p-4 rounded-lg mb-4 sm:mb-0 sm:mr-4 border-2 border-gray-200 max-w-[500px] shadow-md">
-    <h1 class="text-xl font-bold">Our Mission</h1>
-    <p class="text-sm">Desert Rose Bahá'í Institute aims to serve communities through diverse educational programs, fostering spiritual, artistic, intellectual, and agricultural development for all ages and backgrounds.</p>
+  <!-- Main headline — upper portion -->
+  <div class="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-6 pt-16 pb-8">
+    <p class="text-white/55 text-xs uppercase tracking-[0.3em] mb-7">
+      Desert Rose Bahá'í Institute &mdash; Eloy, Arizona
+    </p>
+    <h1 class="text-white text-4xl md:text-6xl lg:text-7xl font-serif font-light leading-tight tracking-wide drop-shadow-lg max-w-4xl">
+      Study deeply.<br>Grow food.<br>Build a better world.
+    </h1>
+    <p class="text-white/65 mt-8 text-base md:text-lg font-light tracking-wide max-w-xl leading-relaxed">
+      An institute for arts, agriculture, and Bahá'í education —<br class="hidden md:block">
+      open to anyone who believes the world can be transformed.
+    </p>
+    <a href="#programs"
+      class="mt-10 inline-block border border-white/35 text-white/80 px-10 py-3.5 rounded-full text-xs tracking-[0.2em] uppercase hover:bg-white/15 transition duration-300">
+      Explore Programs
+    </a>
   </div>
-  <div class="vision bg-white p-4 rounded-lg mb-4 sm:mb-0 sm:ml-4 border-2 border-gray-200 max-w-[500px] shadow-md">
-    <h1 class="text-xl font-bold">Our Vision</h1>
-    <p class="text-sm">Desert Rose aspires to be a center of learning guided by Bahá'í principles, creating a spiritually enriching environment that nurtures artistic and educational growth.</p>
+
+  <!-- Rotating quote — lower portion -->
+  <div class="relative z-20 w-full text-center px-6 pb-14">
+    <div class="w-12 h-px bg-amber-400/50 mx-auto mb-8"></div>
+    <div class="max-w-2xl mx-auto min-h-[90px] flex flex-col items-center justify-center">
+      <p id="hero-quote"
+        class="text-white/75 text-base md:text-xl font-serif font-light italic leading-relaxed transition-opacity duration-700 opacity-0">
+      </p>
+      <span id="hero-source"
+        class="mt-4 block text-amber-300/70 text-xs uppercase tracking-[0.25em] transition-opacity duration-700 opacity-0">
+      </span>
+    </div>
   </div>
+
 </div>
-
-<!-- <div class="missioncards absolute -bottom-64 sm:-bottom-12 inset-x-0 px-4 py-2 flex flex-col sm:flex-row justify-between items-center w-full z-60">
-  <div class="mission bg-white p-4 rounded-lg mb-4 sm:mb-0 sm:mr-4 border-2 border-gray-200 shadow-md max-w-[500px]">
-    <h1 class="text-xl font-bold">Our Mission</h1>
-    <p class="text-sm">Desert Rose Bahá'í Institute aims to serve communities through diverse educational programs, fostering spiritual, artistic, intellectual, and agricultural development for all ages and backgrounds.</p>
-  </div>
-  <div class="vision bg-white p-4 rounded-lg mb-4 sm:mb-0 sm:ml-4 border-2 border-gray-200 shadow-md max-w-[500px]">
-    <h1 class="text-xl font-bold">Our Vision</h1>
-    <p class="text-sm">Desert Rose aspires to be a center of learning guided by Bahá'í principles, creating a spiritually enriching environment that nurtures artistic and educational growth.</p>
-  </div>
-</div> -->
-
-
-
-
-
-</div>
-
-
-
-
-
 
 <style>
-@font-face {
-  font-family: 'Merri';
-  src: url('/fonts/Merriweather/Merriweather-Black.ttf') format('truetype');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
- #superhero {
-   height: 80vh;
- }
- #superhero .caption h1 {
-   font-family: 'merri', sans-serif;
- }
- #superhero .caption h2 {
-   font-family: 'PT Sans', sans-serif;
- }
+  #superhero {
+    height: 94vh;
+    min-height: 600px;
+  }
 </style>
 
+<script is:inline define:vars={{ quotes }}>
+  const quoteEl  = document.getElementById('hero-quote');
+  const sourceEl = document.getElementById('hero-source');
+  let current = Math.floor(Math.random() * quotes.length);
 
+  function fadeIn() {
+    quoteEl.style.opacity  = '1';
+    sourceEl.style.opacity = '1';
+  }
+  function fadeOut(cb) {
+    quoteEl.style.opacity  = '0';
+    sourceEl.style.opacity = '0';
+    setTimeout(cb, 700);
+  }
 
+  function showQuote(index) {
+    const q = quotes[index];
+    fadeOut(() => {
+      quoteEl.textContent  = '“' + q.text + '”';
+      sourceEl.textContent = '— ' + q.source;
+      fadeIn();
+      setTimeout(() => {
+        current = (current + 1) % quotes.length;
+        showQuote(current);
+      }, 8000);
+    });
+  }
 
-
+  // First quote fades in after the page settles
+  setTimeout(() => {
+    const q = quotes[current];
+    quoteEl.textContent  = '“' + q.text + '”';
+    sourceEl.textContent = '— ' + q.source;
+    fadeIn();
+    setTimeout(() => {
+      current = (current + 1) % quotes.length;
+      showQuote(current);
+    }, 8000);
+  }, 1200);
+</script>

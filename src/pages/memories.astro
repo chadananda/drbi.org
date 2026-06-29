@@ -1,0 +1,196 @@
+---
+export const prerender = true;
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import PageHero from "@components/PageHero.astro";
+import { Image } from "astro:assets";
+
+import heroImg    from "../assets/drbi/memories.webp";
+import billMar    from "./history/_bill_and_mar.webp";
+import david      from "./history/_David-Hadden.webp";
+import marguerite from "./history/_marguerite.webp";
+import alai       from "./history/_alai.webp";
+import hall       from "./history/_hall.webp";
+import casas      from "./history/_casas.webp";
+import adminBldg  from "./history/_admin_bldg.webp";
+import guestHouse from "./history/_guest_house.webp";
+import artGallery from "./history/_art_gallery.webp";
+import pavilion   from "./history/_pavilion.webp";
+import roundHouse from "./history/_Round-House.webp";
+import farm       from "./history/_farm.webp";
+import agr1       from "./agriculture/_agr1.webp";
+const photos = [
+  { src: billMar,    caption: "Bill and Marguerite Sears" },
+  { src: marguerite, caption: "Marguerite Sears, DRBI Founder" },
+  { src: david,      caption: "David Hadden, Co-Founder" },
+  { src: alai,       caption: "Desert Rose community" },
+  { src: hall,       caption: "Eleanor Hadden Hall" },
+  { src: casas,      caption: "Our Casa Suites" },
+  { src: pavilion,   caption: "William Sears Pavilion" },
+  { src: roundHouse, caption: "The Round House" },
+  { src: artGallery, caption: "The Art Gallery" },
+  { src: adminBldg,  caption: "Administration Building" },
+  { src: guestHouse, caption: "Guest House" },
+  { src: farm,       caption: "Our Farm" },
+  { src: agr1,       caption: "Working the desert soil" },
+];
+---
+
+<Layout
+  title="Memories — Desert Rose"
+  description="A collection of photographs from Desert Rose Bahá'í Institute — past and present. Add your own.">
+
+  <PageHero
+    label="A living archive"
+    title="Memories of Desert Rose"
+    subtitle="Moments from decades of learning, service, and community in the Sonoran Desert."
+    image={heroImg}
+    imageAlt="Desert Rose Bahá'í Institute"
+    imagePosition="object-center"
+  />
+
+  <!-- Photo grid -->
+  <section class="py-16 md:py-24 bg-white">
+    <Container>
+      <div class="text-center mb-12">
+        <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Our history in pictures</p>
+        <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800">
+          Desert Rose through the years
+        </h2>
+      </div>
+
+      <div class="columns-2 sm:columns-3 lg:columns-4 gap-3">
+        {photos.map((photo) => (
+          <div class="break-inside-avoid mb-3 group">
+            <div class="overflow-hidden rounded-xl bg-stone-100">
+              <Image
+                src={photo.src}
+                alt={photo.caption}
+                class="w-full h-auto object-cover transition duration-500 group-hover:scale-105"
+              />
+            </div>
+            {photo.caption && (
+              <p class="text-xs text-slate-400 mt-1.5 px-1 leading-snug">{photo.caption}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </Container>
+  </section>
+
+  <!-- Contribute section -->
+  <section class="py-20 bg-stone-50 border-t border-stone-100">
+    <Container>
+      <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-12">
+          <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Share your memories</p>
+          <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800 mb-5">
+            Were you here?
+          </h2>
+          <p class="text-slate-500 leading-relaxed">
+            If you attended a class, volunteered, served on the board, or simply visited —
+            we'd love to add your photos to this archive. Old or new, every picture helps
+            tell the story of Desert Rose.
+          </p>
+        </div>
+
+        <form id="memory-form" class="bg-white rounded-2xl border border-stone-100 p-8 shadow-sm space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label for="mem-name" class="block text-sm font-medium text-slate-700 mb-1">Your name</label>
+              <input type="text" id="mem-name" name="name" required placeholder="Full name"
+                class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-white placeholder:text-slate-400" />
+            </div>
+            <div>
+              <label for="mem-email" class="block text-sm font-medium text-slate-700 mb-1">Email address</label>
+              <input type="email" id="mem-email" name="email" required placeholder="you@example.com"
+                class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-white placeholder:text-slate-400" />
+            </div>
+          </div>
+
+          <div>
+            <label for="mem-caption" class="block text-sm font-medium text-slate-700 mb-1">Caption or story <span class="text-slate-400 font-normal">(optional)</span></label>
+            <textarea id="mem-caption" name="caption" rows="3" placeholder="When was this taken? Who is in it? What was happening?"
+              class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-white placeholder:text-slate-400 resize-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Photos</label>
+            <label for="mem-files"
+              class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-stone-200 rounded-xl cursor-pointer hover:border-amber-400 hover:bg-amber-50/30 transition duration-200 group">
+              <svg class="w-8 h-8 text-stone-300 group-hover:text-amber-400 mb-2 transition duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span class="text-sm text-slate-400 group-hover:text-amber-700 transition duration-200">Click to select photos</span>
+              <span class="text-xs text-slate-300 mt-1">JPG, PNG, WEBP — up to 10 files</span>
+              <input type="file" id="mem-files" name="photos" accept="image/*" multiple class="hidden" />
+            </label>
+            <p id="file-list" class="text-xs text-slate-400 mt-2"></p>
+          </div>
+
+          <button type="submit"
+            class="w-full bg-amber-700 hover:bg-amber-600 text-white py-3.5 rounded-full text-sm tracking-[0.12em] uppercase transition duration-200 font-medium">
+            Submit My Photos
+          </button>
+
+          <div id="mem-result" class="hidden text-center py-4"></div>
+        </form>
+
+        <p class="text-center text-slate-400 text-xs mt-6">
+          You can also email photos directly to
+          <a href="mailto:info@drbi.org" class="text-amber-700 hover:underline">info@drbi.org</a>
+        </p>
+      </div>
+    </Container>
+  </section>
+
+</Layout>
+
+<script is:inline>
+  const fileInput = document.getElementById('mem-files');
+  const fileList  = document.getElementById('file-list');
+  const form      = document.getElementById('memory-form');
+  const result    = document.getElementById('mem-result');
+
+  fileInput.addEventListener('change', () => {
+    const names = Array.from(fileInput.files).map(f => f.name);
+    fileList.textContent = names.length
+      ? `${names.length} file${names.length > 1 ? 's' : ''} selected: ${names.join(', ')}`
+      : '';
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const data = new FormData(form);
+
+    try {
+      const res = await fetch('/api/submit-memory', { method: 'POST', body: data });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        form.classList.add('hidden');
+        result.classList.remove('hidden');
+        result.innerHTML = `
+          <div class="text-center py-6">
+            <div class="inline-flex items-center justify-center w-14 h-14 bg-amber-100 rounded-full mb-4">
+              <svg class="w-7 h-7 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <p class="font-serif text-slate-800 text-xl mb-2">Thank you!</p>
+            <p class="text-slate-500 text-sm">We received your photos and will add them to the archive soon.</p>
+          </div>`;
+      } else {
+        throw new Error(json.error || 'Upload failed');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Submit My Photos';
+      result.classList.remove('hidden');
+      result.innerHTML = `<p class="text-red-500 text-sm">${err.message}. Please try emailing <a href="mailto:info@drbi.org" class="underline">info@drbi.org</a> directly.</p>`;
+    }
+  });
+</script>

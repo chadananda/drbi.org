@@ -4,9 +4,10 @@ export const prerender = true;
 import Layout from "@layouts/Layout.astro";
 import PostThumb from "src/components/article/postThumb.astro";
 import Container from "src/components/container.astro";
-import Sectionhead from "src/components/sectionhead.astro";
+import PageHero from "@components/PageHero.astro";
 import TopicFAQ from 'src/components/article/topicFAQ.astro';
 import { getCategories, getTopics, getPublishedArticles, getTeam } from "@utils/utils.js";
+import studyImg from "../../assets/drbi/study.webp";
 
 export async function getStaticPaths() {
   // const allTopics = await getDataCollection("topics");
@@ -32,17 +33,21 @@ export async function getStaticPaths() {
 
 const slug = Astro.params.topic;
 const { topic, posts, authors, categories } = Astro.props;
+const topicSubtitle = topic?.description || 'Explore articles and teachings on this theme.';
 ---
 
-<Layout title={slug} description={topic?.description}>
-  <div class="max-w-screen-xl mx-auto">
+<Layout title={topic?.name ?? slug} description={topic?.description}>
+
+  <PageHero
+    label=”Articles by topic”
+    title={topic?.name ?? slug}
+    subtitle={topicSubtitle}
+    image={studyImg}
+    imageAlt={topic?.name ?? slug}
+  />
+
+  <div class=”max-w-screen-xl mx-auto”>
    { !!topic?.faqs && (<TopicFAQ faqs={topic?.faqs} max=8 />)}
-   { !topic?.faqs && (
-     <Sectionhead>
-       <Fragment slot="title"> Article Topics </Fragment>
-       <Fragment slot="desc"> Posts associated with “{slug}” </Fragment>
-     </Sectionhead>
-   )}
   <Container class="w-full mx-5 sm:mx-15">
     <main class="flex flex-wrap justify-center gap-20 mt-5">
       {Array.isArray(posts) && posts.map((post) => {

@@ -3,14 +3,13 @@
    {"title": "Events", "path": "/events", "children": null},
    {"title": "Arts", "path": "/arts", "children": null},
    {"title": "Agriculture", "path": "/agriculture", "children": null},
+   {"title": "Volunteer", "path": "/working-with-us", "children": null},
    {"title": "Our Facilities", "path": "/facilities-and-rentals", "children": null},
-   {"title": "Cemetery", "path": "/memorial", "children": null},
+   {"title": "Memories", "path": "/memories", "children": null},
    {"title": "Contact", "path": "/contact-us", "children": null}
  ],
   "companyLinks": [
     {"title": "About", "path": "/about-us", "children": null},
-    {"title": "Privacy", "path": "/privacy", "children": null},
-    {"title": "Terms", "path": "/terms", "children": null},
     {"title": "DRBI History", "path": "/history", "children": null},
     {"title": "Working with Us", "path": "/working-with-us", "children": null},
     {"title": "Contact", "path": "/contact-us", "children": null}
@@ -18,13 +17,9 @@
  "productLinks": [
  ],
  "resourceLinks": [
-  {"title": "Email Newsletter", "path": "http://eepurl.com/gTGwNH", "children": null},
-  {"title": "Events", "path": "/events", "children": null},
-  {"title": "Facility", "path": "/facilities-and-rentals", "children": null},
+  {"title": "Facility Rentals", "path": "/facilities-and-rentals", "children": null},
+  {"title": "Memorial Gardens", "path": "/memorial", "children": null},
   {"title": "Contributions", "path": "/contribute", "children": null},
-  {"title": "The Bahá’í Faith", "path": "/the-bahai-faith", "children": null}
+  {"title": "The Bahá'í Faith", "path": "/the-bahai-faith", "children": null}
  ]
 }
-
-
-

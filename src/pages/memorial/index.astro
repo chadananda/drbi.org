@@ -2,55 +2,89 @@
 export const prerender = true;
 
 import Layout from "@layouts/Layout.astro";
-import Container from "@components/container.astro"; // some padding
-// import Sectionhead from "@components/sectionhead.astro";
-import PostThumb from "@components/article/postThumb.astro";
-import { getPublishedPostsByType_Content } from "@utils/content-utils.js";
+import Container from "@components/container.astro";
+import PageHero from "@components/PageHero.astro";
+import { getCollection } from 'astro:content';
 import cemeteryImage from "./_memorial-garden-front.jpg";
-import divider from "./_divider.svg";
-import { Image } from 'astro:assets';
 
-
-/**
- * @type {any}
- */
-
-const posts = await getPublishedPostsByType_Content('Memorial');
-console.log('Memorial Posts:', posts.length);
+let residents: any[] = [];
+try {
+  const allPosts = await getCollection('memorial');
+  residents = allPosts
+    .filter((p) => !p.data.draft && p.data.language === 'en')
+    .sort((a, b) =>
+      new Date(b.data.datePublished).getTime() - new Date(a.data.datePublished).getTime()
+    );
+} catch (_e) {
+  // renders empty state gracefully if collection unavailable
+}
 ---
 
-<Layout title="Permanent Residents: Our Guardian Angels" description="The Desert Rose Memorial Cemetery is a place of rest for the bodies of our loved ones who have passed on. It is a place of peace and tranquility, where the living can come to remember and honor the dead.">
+<Layout
+  title="Desert Rose Memorial Cemetery"
+  description="The Desert Rose Memorial Cemetery is a place of peace and tranquility in the Sonoran Desert, where loved ones rest and the living come to remember.">
 
-<Container>
+  <PageHero
+    label="Desert Rose Memorial Gardens"
+    title="A Place of Peace & Rest"
+    subtitle="An oasis of tranquility in the Sonoran Desert — where the lives of those who served are honored and remembered."
+    image={cemeteryImage}
+    imageAlt="Desert Rose Memorial Cemetery"
+    imagePosition="object-center"
+  />
 
+  <section class="py-20 bg-white">
+    <Container>
+      <div class="max-w-3xl mx-auto text-center mb-14">
+        <p class="text-slate-600 leading-relaxed text-lg italic">
+          The Memorial Garden honors the dignity and celebrates the lives of dedicated service
+          led by those who rest at Desert Rose. Founder Marguerite Sears and many past residents are interred here.
+        </p>
 
- <h1 class="text-center w-full text-5xl py-6"> The Desert Rose Memorial Cemetery </h1>
+        <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/the-bahai-faith"
+             class="inline-block border border-amber-700 text-amber-800 px-8 py-3 rounded-full text-sm tracking-wide hover:bg-amber-50 transition duration-200">
+            The Bahá'í Faith
+          </a>
+          <a href="/how-to-purchase-a-plot"
+             class="inline-block bg-amber-700 text-white px-8 py-3 rounded-full text-sm tracking-wide hover:bg-amber-600 transition duration-200">
+            Purchase a Plot
+          </a>
+        </div>
+      </div>
 
- <Image src={cemeteryImage} alt="The Desert Rose Memorial Cemetery"
-        class="w-full h-auto rounded-lg shadow-lg" />
+      <div class="w-16 h-px bg-stone-200 mx-auto mb-16"></div>
 
- <p class="prose italic text-center mx-auto pt-2">The Memorial Garden is an oasis of desert tranquility, respecting the dignity and celebrating the lives of dedicated service led by those who rest at Desert Rose. Founder Marguerite Sears and many other supporters and past residents of DRBI are interred here.</p>
+      <h2 class="text-center text-3xl md:text-4xl font-serif font-light text-slate-800 mb-14">
+        Permanent Residents
+      </h2>
 
- <!-- todo  -->
- <h3 class="text-center w-full text-3xl pt-10 text-blue-800 hover:underline"><a href="/the-bahai-perspective-on-death-and-burial-a-journey-of-the-soul">Bahá’í Beliefs on Death and Burial</a></h3>
+      {residents.length > 0 ? (
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+          {residents.map((post) => (
+            <a href={`/${post.data.url}`}
+               class="group text-center hover:opacity-90 transition duration-200">
+              {post.data.image?.src && (
+                <div class="overflow-hidden rounded-lg aspect-square mb-3 bg-stone-100">
+                  <img
+                    src={post.data.image.src}
+                    alt={post.data.image.alt || post.data.title}
+                    class="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition duration-500"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <p class="text-sm font-serif text-slate-700 leading-snug">{post.data.title}</p>
+              {post.data.abstract && (
+                <p class="text-xs text-slate-400 mt-1 leading-snug line-clamp-2">{post.data.abstract}</p>
+              )}
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p class="text-center text-slate-400 text-sm">Memorial entries coming soon.</p>
+      )}
+    </Container>
+  </section>
 
- <!-- todo  -->
- <h3 class="text-center w-full text-3xl pt-8 text-blue-800 hover:underline"><a href="/how-to-purchase-a-plot">How to Purchase a Plot</a></h3>
-
- <!-- hr  -->
- <div class="flex justify-center mt-10">
-   <Image src={divider} alt="Divider" class="h-4 mx-auto opacity-50" />
- </div>
-
- <h2 class="text-center w-full text-4xl pt-10">Permanent Residents: <i>Our Guardian Angels</i></h2>
- <main class="mt-16">
-   <div class="flex flex-wrap justify-center gap-20">
-     {Array.isArray(posts) && posts.map((post) => (
-       <PostThumb post={post} hideDetails />
-     ))}
-   </div>
- </main>
-
-
-</Container>
 </Layout>

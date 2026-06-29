@@ -1,66 +1,80 @@
 ---
 export const prerender = true;
-import Container from "@components/container.astro";
-import Sectionhead from "@components/sectionhead.astro";
 import Layout from "./Layout.astro";
-// import { transformS3Url } from '@utils/utils.js';
+import PageHero from "@components/PageHero.astro";
+import Container from "@components/container.astro";
+
+import artsImg from "../assets/drbi/arts.webp";
+import cemeteryImg from "../assets/drbi/cemetery.webp";
+import studyImg from "../assets/drbi/study.webp";
+import soilImg from "../assets/drbi/soil.webp";
+import kureImg from "../assets/drbi/kure.webp";
+import memoriesImg from "../assets/drbi/memories.webp";
+import contributeImg from "../assets/drbi/contribute.webp";
+import eventsImg from "../assets/drbi/events.webp";
+import faithImg from "../assets/drbi/faith.webp";
+import newsImg from "../assets/drbi/news.webp";
+import casasImg from "../pages/history/_casas.webp";
+import hallImg from "../pages/history/_hall.webp";
+import pavilionImg from "../pages/history/_pavilion.webp";
+import roundhouseImg from "../pages/history/_Round-House.webp";
+import guesthouseImg from "../pages/history/_guest_house.webp";
+import farmImg from "../pages/history/_farm.webp";
 
 const { frontmatter } = Astro.props;
 
-import { Image } from "astro:assets";
-// DRBI category images - downloaded from production site
-import artsImg from "../assets/drbi/arts.webp"
-import cemeteryImg from "../assets/drbi/cemetery.webp"
-import studyImg from "../assets/drbi/study.webp"
-import soilImg from "../assets/drbi/soil.webp"
-import kureImg from "../assets/drbi/kure.webp"
-
-// const heroImage = () => {
-//   const width = 1200;
-//   const height = 900;
-//   const src = transformS3Url(frontmatter.image, width, height);
-//   const alt = frontmatter.title;
-//   return { src, width, height, alt, class: 'mx-auto mt-10 mb-10' }
-// }
-
-let heroImage = undefined;
-if (frontmatter.image === 'arts') heroImage = artsImg;
-  else if (frontmatter.image === 'cemetery')  heroImage = cemeteryImg;
-  else if (frontmatter.image === 'study')  heroImage = studyImg;
-  else if (frontmatter.image === 'soil')  heroImage = soilImg;
-  else if (frontmatter.image === 'kure')  heroImage = kureImg;
-
+const imageMap = {
+  arts: artsImg,
+  cemetery: cemeteryImg,
+  study: studyImg,
+  soil: soilImg,
+  kure: kureImg,
+  casas: casasImg,
+  hall: hallImg,
+  pavilion: pavilionImg,
+  roundhouse: roundhouseImg,
+  guesthouse: guesthouseImg,
+  farm: farmImg,
+  memories: memoriesImg,
+  contribute: contributeImg,
+  events: eventsImg,
+  faith: faithImg,
+  news: newsImg,
+};
+const heroImage = (imageMap as Record<string, any>)[frontmatter.image] ?? undefined;
+const heroPosition = frontmatter.imagePosition ?? "object-center";
 ---
 
 <Layout title={frontmatter.title} description={frontmatter.description} image={frontmatter.image}>
 
-  <Container>
-    <Sectionhead>
-      <Fragment slot="title">{frontmatter.title}</Fragment>
-      {frontmatter.date && (
-        // add astro transition
-        <Fragment slot="desc"  >
-          Last updated on {frontmatter.date}
-        </Fragment>
-      )}
-    </Sectionhead>
+  <PageHero
+    label={frontmatter.label}
+    title={frontmatter.title}
+    subtitle={frontmatter.subtitle}
+    image={heroImage}
+    imageAlt={frontmatter.title}
+    imagePosition={heroPosition}
+  />
 
-    {!!heroImage && (  <Image src={heroImage} alt={frontmatter.title} class="mx-auto max-h-[32rem] object-cover" />  )}
+  <div class="py-16 bg-white">
+    <Container>
+      <div class="mx-auto prose prose-lg prose-slate
+        prose-headings:font-serif prose-headings:font-light prose-headings:text-slate-800
+        prose-h2:text-3xl prose-h2:mt-14 prose-h2:mb-5
+        prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-3
+        prose-p:text-slate-600 prose-p:leading-relaxed
+        prose-a:text-amber-700 prose-a:no-underline hover:prose-a:underline
+        prose-blockquote:border-amber-400 prose-blockquote:text-slate-500 prose-blockquote:italic
+        prose-strong:text-slate-700
+        max-w-[80ch]">
+        <slot />
+      </div>
+    </Container>
+  </div>
 
-
-
-    <div class="mx-auto prose prose-lg mt-10" style="max-width: 80ch !important;" >
-      <slot />
-    </div>
-  </Container>
 </Layout>
 
 <style is:global>
-  @media screen {
-    .printonly { display: none !important; }
-  }
-  @media print {
-    .printonly { display: block !important; }
-    .noprint { display: none !important; }
-  }
+  @media screen { .printonly { display: none !important; } }
+  @media print  { .printonly { display: block !important; } .noprint { display: none !important; } }
 </style>

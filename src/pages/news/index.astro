@@ -3,36 +3,34 @@ export const prerender = true;
 
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
-import Sectionhead from "@components/sectionhead.astro";
+import PageHero from "@components/PageHero.astro";
 import PostThumb from "@components/article/postThumb.astro";
 import { getPublishedPostsByType_Content } from "@utils/content-utils.js";
-// Legacy Astro DB import - removed during Content Layer migration
-// import Pagination from "@components/pagination.astro";
-
-/**
- * @type {any}
- */
+import newsImg from "../../assets/drbi/news.webp";
 
 const posts = await getPublishedPostsByType_Content('News');
 ---
 
-<Layout title="Desert Rose News">
-  <Container>
-    <Sectionhead>
-      <Fragment slot="title"> Desert Rose News </Fragment>
-      <Fragment slot="desc">
-      </Fragment>
-    </Sectionhead>
+<Layout title="Desert Rose News" description="News and updates from Desert Rose Bahá'í Institute.">
 
-    <main class="mt-16">
-      <div class="flex flex-wrap justify-center gap-20">
+  <PageHero
+    label="From the community"
+    title="Desert Rose News"
+    subtitle="Updates, reflections, and stories from our community of learners and servants."
+    image={newsImg}
+    imageAlt="Desert Rose Bahá'í Institute"
+  />
+
+  <section class="py-24 bg-white">
+    <Container>
+      <div class="flex flex-wrap justify-center gap-14">
         {Array.isArray(posts) && posts.map((post) => (
           <div class="flex-none" style={{ width: '300px' }}>
             <PostThumb post={post} />
           </div>
         ))}
       </div>
-    </main>
+    </Container>
+  </section>
 
-  </Container>
 </Layout>

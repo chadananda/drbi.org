@@ -1,0 +1,62 @@
+---
+import { Image } from "astro:assets";
+
+interface Props {
+  label?: string;
+  title: string;
+  subtitle?: string;
+  quote?: string;
+  quoteAttrib?: string;
+  image?: any;
+  imageAlt?: string;
+  imagePosition?: string;
+}
+
+const {
+  label,
+  title,
+  subtitle,
+  quote,
+  quoteAttrib,
+  image,
+  imageAlt = title,
+  imagePosition = "object-center",
+} = Astro.props;
+---
+
+<div class="relative w-full overflow-hidden bg-stone-900">
+  {image && (
+    <Image
+      src={image}
+      alt={imageAlt}
+      class={`w-full h-[40vh] md:h-[52vh] min-h-[260px] object-cover opacity-40 ${imagePosition}`}
+    />
+  )}
+  {!image && <div class="h-[28vh] md:h-[36vh] min-h-[200px]"></div>}
+
+  <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+    {label && (
+      <p class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-5">{label}</p>
+    )}
+    <h1 class="text-white text-3xl md:text-5xl lg:text-6xl font-serif font-light leading-tight max-w-3xl">
+      {title}
+    </h1>
+    {subtitle && (
+      <p class="mt-6 text-white/70 text-base md:text-lg max-w-xl leading-relaxed font-light">
+        {subtitle}
+      </p>
+    )}
+    {quote && (
+      <>
+        <p class="mt-8 text-amber-200 text-base md:text-lg font-serif font-light italic max-w-xl leading-relaxed">
+          "{quote}"
+        </p>
+        {quoteAttrib && (
+          <p class="mt-2 text-amber-400/70 text-xs tracking-widest uppercase">
+            — {quoteAttrib}
+          </p>
+        )}
+      </>
+    )}
+  </div>
+</div>
