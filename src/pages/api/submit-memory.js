@@ -5,8 +5,7 @@ export const prerender = false;
 // Until PocketBase is configured this returns success so the UI works.
 export async function POST({ request }) {
   // Temporarily disabled: memory submissions accept user-uploaded images with no
-  // moderation. Re-enable once an image-approval workflow exists. The /memories page
-  // is hidden too (redirects home; removed from nav).
+  // moderation. Re-enable once an image-approval workflow exists.
   return new Response(
     JSON.stringify({ success: false, error: 'Memory submissions are temporarily closed.' }),
     { status: 403, headers: { 'Content-Type': 'application/json' } }
