@@ -1,44 +1,91 @@
 ---
 export const prerender = true;
-// import { Icon } from 'astro-icon/components'
 import Layout from "@layouts/Layout.astro";
 import Container from "src/components/container.astro";
-import Sectionhead from "src/components/sectionhead.astro";
+import PageHero from "@components/PageHero.astro";
 import Contactform from "src/components/contactform.astro";
 import site from "@data/site.json";
+import adminImg from "./history/_admin_bldg.webp";
 ---
 
-<Layout title="Contact">
-  <Container>
-    <Sectionhead>
-      <Fragment slot="title">Contact</Fragment>
-      <Fragment slot="desc">Got Questions? We are here to help.</Fragment>
-    </Sectionhead>
+<Layout title="Contact Us" description="Get in touch with Desert Rose Bahá'í Institute.">
 
-    <div class="grid md:grid-cols-2 gap-10 mx-auto max-w-4xl mt-16">
-      <div>
-        <h2 class="font-medium text-2xl text-gray-800">Contact {site.site}</h2>
-        <p class="text-lg leading-relaxed text-slate-500 mt-3">
-          Have something to say? We are here to help. Fill up the form or send
-          email or call phone.
-        </p>
-        <div class="mt-5">
-          <div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <!-- <Icon class="text-gray-400 w-4 h-4" name="uil:map-marker" /> -->
-            <span>{site.address}</span>
-          </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <!-- <Icon class="text-gray-400 w-4 h-4" name="uil:envelope" />-->
-            <a href={`mailto:${site.email}`}>{site.email}</a>
-          </div><div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <!-- <Icon class="text-gray-400 w-4 h-4" name="uil:phone" /> -->
-            <a href={`tel:${site.phone}`}>{site.phone}</a>
+  <PageHero
+    label="We'd love to hear from you"
+    title="Contact Desert Rose"
+    subtitle="Questions, inquiries, volunteer interest, or just wanting to learn more — reach out."
+    image={adminImg}
+    imageAlt="Desert Rose Bahá'í Institute campus"
+  />
+
+  <section class="py-24 bg-white">
+    <Container>
+      <div class="grid md:grid-cols-2 gap-10 md:gap-16 max-w-5xl mx-auto">
+
+        <!-- Contact info -->
+        <div>
+          <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-5">Find us</p>
+          <h2 class="text-2xl md:text-3xl font-serif font-light text-slate-800 mb-8">
+            Desert Rose Bahá'í Institute
+          </h2>
+
+          <div class="space-y-6 text-slate-600">
+            <div>
+              <p class="text-xs uppercase tracking-widest text-slate-400 mb-1">Address</p>
+              <p class="leading-relaxed">{site.address}</p>
+              <p class="text-sm text-slate-400 mt-1">Between Phoenix and Tucson, in Eloy, Arizona.</p>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-widest text-slate-400 mb-1">Email</p>
+              <a href={`mailto:${site.email}`} class="text-amber-700 hover:underline">{site.email}</a>
+            </div>
+            <div>
+              <p class="text-xs uppercase tracking-widest text-slate-400 mb-1">Phone</p>
+              <a href={`tel:${site.phone}`} class="text-amber-700 hover:underline">{site.phone}</a>
+            </div>
+          </div>
+
+          <div class="mt-12 pt-10 border-t border-stone-100 space-y-4">
+            <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-5">Quick links</p>
+            <a href="/working-with-us" class="flex items-center gap-3 text-slate-600 hover:text-amber-700 transition group">
+              <span class="w-8 h-px bg-stone-300 group-hover:bg-amber-400 transition"></span>
+              Volunteer opportunities
+            </a>
+            <a href="/facilities-and-rentals" class="flex items-center gap-3 text-slate-600 hover:text-amber-700 transition group">
+              <span class="w-8 h-px bg-stone-300 group-hover:bg-amber-400 transition"></span>
+              Facilities & rentals
+            </a>
+            <a href="/events" class="flex items-center gap-3 text-slate-600 hover:text-amber-700 transition group">
+              <span class="w-8 h-px bg-stone-300 group-hover:bg-amber-400 transition"></span>
+              Upcoming programs & events
+            </a>
+            <a href="/contribute" class="flex items-center gap-3 text-slate-600 hover:text-amber-700 transition group">
+              <span class="w-8 h-px bg-stone-300 group-hover:bg-amber-400 transition"></span>
+              Make a contribution
+            </a>
           </div>
         </div>
-      </div>
-      <div class="bg-slate-100 p-5 md:p-8 rounded-xl mb-5">
-        <Contactform />
-      </div>
-    </div>
-  </Container>
-</Layout>
 
+        <!-- Contact form -->
+        <div class="bg-stone-50 rounded-2xl p-8 md:p-10 border border-stone-100">
+          <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-5">Send a message</p>
+          <Contactform />
+        </div>
+
+      </div>
+    </Container>
+  </section>
+
+  <!-- Map placeholder / closing -->
+  <section class="py-20 bg-slate-800 text-white text-center">
+    <Container>
+      <p class="text-xs uppercase tracking-[0.25em] text-amber-400 mb-4">Newsletter</p>
+      <h2 class="text-2xl md:text-4xl font-serif font-light mb-5">Stay connected with DRBI</h2>
+      <a href="http://eepurl.com/gTGwNH" target="_blank"
+        class="inline-block bg-amber-600 hover:bg-amber-500 text-white px-8 py-3.5 rounded-full text-sm tracking-[0.15em] uppercase transition duration-200">
+        Join Our Newsletter
+      </a>
+    </Container>
+  </section>
+
+</Layout>

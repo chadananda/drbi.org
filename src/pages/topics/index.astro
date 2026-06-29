@@ -3,38 +3,52 @@ export const prerender = true;
 
 import Layout from "@layouts/Layout.astro";
 import Container from "src/components/container.astro";
-import Sectionhead from "src/components/sectionhead.astro";
+import PageHero from "@components/PageHero.astro";
 import { getPublishedArticles, getTopics } from "@utils/utils.js";
+import studyImg from "../../assets/drbi/study.webp";
 
 const allPosts = await getPublishedArticles();
-// const allTopics = await getDataCollection("topics");
 const allTopics = await getTopics();
 
 const usedTopics = new Map();
 allPosts.forEach(({data}) => {
-  if (data.topics) data.topics.map((topic) => usedTopics.set(topic, true));
+  if (data.topics) data.topics.map((topic: string) => usedTopics.set(topic, true));
 });
 
 const topicLinks = allTopics.map((topic) => ({
   name: topic.name,
   href: `/topics/${topic.id}`,
-  text: topic.name,
   id: topic.id,
   used: !!usedTopics.get(topic.id),
-  classes: usedTopics.get(topic.id) ? 'underline text-blue-700' : 'text-gray-300'
 }));
 ---
 
-<Layout title="The Big Ideas">
-  <Container>
-    <Sectionhead>
-      <Fragment slot="title"> The Big Ideas </Fragment>
-      <Fragment slot="desc">   </Fragment>
-    </Sectionhead>
-      <div class="text-center">
-         {topicLinks.map((tag) => (
-              <a href={tag.href} aria-label={tag.name} data-astro-prefetch="false" class={tag.classes}>{tag.name}</a> <span class="text-gray-200"> | </span>
-          ))}
+<Layout title="The Big Ideas" description="Explore the big ideas behind Bahá'í education, service, agriculture, and community at Desert Rose.">
+
+  <PageHero
+    label="Explore the ideas"
+    title="The Big Ideas"
+    subtitle="Themes of unity, service, agriculture, spiritual transformation, and the examined life — the ideas that shape what we do here."
+    image={studyImg}
+    imageAlt="Studying the big ideas at Desert Rose"
+  />
+
+  <section class="py-20 bg-white">
+    <Container>
+      <div class="max-w-3xl mx-auto text-center flex flex-wrap justify-center gap-3">
+        {topicLinks.map((tag) => (
+          <a href={tag.href}
+            data-astro-prefetch="false"
+            class={`px-5 py-2 rounded-full text-sm border transition duration-200 ${
+              tag.used
+                ? 'border-amber-700 text-amber-800 hover:bg-amber-50'
+                : 'border-stone-200 text-stone-400 cursor-default pointer-events-none'
+            }`}>
+            {tag.name}
+          </a>
+        ))}
       </div>
-  </Container>
+    </Container>
+  </section>
+
 </Layout>

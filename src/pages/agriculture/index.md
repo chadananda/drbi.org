@@ -3,6 +3,7 @@ layout: "@layouts/MDLayout.astro"
 title: "The Soil: Agriculture at DRBI"
 description: "Explore our sustainable agriculture initiatives at Desert Rose Bahá'í Institute. Learn about our organic market gardens, desert farming techniques, and community-focused approach to growing food in the Sonoran Desert of Arizona."
 image: "soil"
+imagePosition: "object-center"
 
 ---
 

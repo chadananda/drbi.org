@@ -1,7 +1,10 @@
 ---
 layout: "@layouts/MDLayout.astro"
-title: "DRBI Facilities and Rental"
-description: "Desert Rose Institute facilities and rental information"
+title: "Facilities & Rentals"
+label: "Come stay with us"
+subtitle: "A retreat center, private apartments, a dormitory, a pavilion, a pool — in the heart of the Sonoran Desert."
+description: "Desert Rose Institute facilities and rental information — retreat center, casas, dormitory, pavilion, pool, RV park, campsite."
+image: casas
 ---
 
 import { Image } from "astro:assets";
@@ -63,33 +66,11 @@ import pp2 from "./history/_pavilion.webp";
 import pp3 from "./history/_hall.webp";
 import pp4 from "../../public/drbi-landscape.webp";
 
-{/* Pool pictures */}
-import pl1 from "../../public/drbi-landscape.webp";
-import pl2 from "./history/_guest_house.webp";
-import pl3 from "./history/_art_gallery.webp";
-import pl4 from "./history/_farm.webp";
+{/* Pool — TODO: add actual pool photos */}
+import poolImg from "../../public/drbi-landscape.webp";
 
-{/* Campsite */}
-import camp1 from "./agriculture/_agr1.webp";
-
-{/* RV Park */}
+{/* RV Park — TODO: add actual RV park photos */}
 import dronerv from "../../public/drbi-landscape.webp";
-
-
-<div class="full-bleed">
-  <Image src={drbiimg} alt="Desert Rose Institute"
-         class="w-full h-96 md:h-[28rem] lg:h-[32rem] object-cover object-[center_60%]" />
-</div>
-
-<style>{`
-  .full-bleed {
-    width: 100vw;
-    position: relative;
-    left: 50%;
-    margin-left: -50vw;
-    margin-bottom: 2rem;
-  }
-`}</style>
 
 
 ## Desert Rose is a great Venue for Retreats and Events
@@ -103,7 +84,7 @@ We use AirBnb to rent our facilities and apartments when not in use. This provid
 
 Groups wanting a retreat center can book this complete package. Note: we do not yet provide cooking and cleaning services during events. You will be responsible for running the kitchen or catering in meals.
 
-<a class="text-lg text-white bg-green-700 rounded-md p-3 hover:text-white hover:bold no-underline hover:underline ml-12 float-right" href="https://www.airbnb.com/rooms/784712974810930244?guests=1&adults=1&s=67&unique_share_id=4ec9c928-c71c-4db1-969d-761dc1003bc3" target="_blank"> Check Facilities Availability &nbsp; 📅 </a>
+<a class="text-sm text-white bg-amber-700 hover:bg-amber-600 rounded-full px-6 py-2.5 no-underline transition duration-200 ml-8 float-right" href="https://www.airbnb.com/rooms/784712974810930244?guests=1&adults=1&s=67&unique_share_id=4ec9c928-c71c-4db1-969d-761dc1003bc3" target="_blank"> Check Facilities Availability &nbsp; 📅 </a>
 
 <br/><br/>
 
@@ -114,23 +95,23 @@ Some participants will not want to sleep in a dormitory and they can book a priv
 
 **Long-term Rentals:** For stays of 30 days or more, we offer approximately 50% discount on our standard rates. These extended stays are managed through [Evolve](https://www.evolve.com/). Contact us for availability and pricing.
 
-<a class="text-lg text-white bg-green-700 rounded-md p-3 hover:text-white hover:bold no-underline hover:underline ml-12 float-right" href="https://bit.ly/drbi-rentals" target="_blank"> Check Casa Availability &nbsp; 📅 </a>
+<a class="text-sm text-white bg-amber-700 hover:bg-amber-600 rounded-full px-6 py-2.5 no-underline transition duration-200 ml-8 float-right" href="https://bit.ly/drbi-rentals" target="_blank"> Check Casa Availability &nbsp; 📅 </a>
 
 <br/><br/>
 
 
 <ImgBlock title="Eleanor Hadden Hall" id="ehh"
-  description="Eleanor Hadden Hall was the first structure to be built at Desert Rose and is named after the mother of David Hadden, one of DRBI’s founding members.  It is fully air-conditioned with a large meeting area with 20' projection screen, two breakout rooms, a full commercial kitchen, bathrooms, showers, and two covered patios. Seating for meals: 125, for presentations: 200."
+  description="Eleanor Hadden Hall was the first structure to be built at Desert Rose and is named after the mother of David Hadden, one of DRBI’s founding members.  It is fully air-conditioned with a large meeting area with 20’ projection screen, two breakout rooms, a full commercial kitchen, bathrooms, showers, and two covered patios. Seating for meals: 125, for presentations: 200."
   image={hallbell}
-  images={ [ehh1,ehh2,ehh4,ehh5,ehh6,ehh7,ehh8,ehh9,ehh10,ehh11] } />
+  images={[]} />
 
 
 <ImgBlock title="Our Casa Suites" id="casas"
   description="Not every participant will be excited to sleep in a dormitory. For such cases, we have a dozen comfortable little apartment units which can be rented independently. These units each share a green central courtyard with gurgling fountains and a complimentary laundry facility."
   image={casas} flip
-  images={ [casa1,casa2,casa3,casa4,casa5,casa6,casa7,casa8,casa9,casa10,casa11,casa12,casa13,casa14] } >
+  images={[]} >
 
-<a class="text-lg text-white bg-green-700 rounded-md p-3 hover:text-white hover:bold no-underline hover:underline ml-12 float-right" href="https://bit.ly/drbi-rentals" target="_blank"> Check Casa Availability &nbsp; 📅 </a>
+<a class="text-sm text-white bg-amber-700 hover:bg-amber-600 rounded-full px-6 py-2.5 no-underline transition duration-200 ml-8 float-right" href="https://bit.ly/drbi-rentals" target="_blank"> Check Casa Availability &nbsp; 📅 </a>
 
  </ImgBlock>
 
@@ -157,22 +138,21 @@ Some participants will not want to sleep in a dormitory and they can book a priv
 
 <ImgBlock title="Take a Dip in our Pool" id="pool"
   description="Every oasis in the desert needs a watering hole. In our case we were required to have a large fire suppression reservoir onsite, so the creative architects decided to fulfill the requirement with a large beautiful swimming pool (connected, of course, to the fire suppression system). Our pool is wheelchair accessible and a fun additional activity for any event."
-  image={poolwide} flip
-  images={ [pl1,pl2,pl3,pl4] } />
-
-
-
-<ImgBlock title="Campsite" id="camp"
-  description="This year we will be developing an experimental campsite to provide overflow housing for appropriate events. Our initial camp will have a dozen sites spread out in a Mesquite grove near the guffy center."
-  image={camp1}
+  image={poolImg} flip
 />
 
+{/*
+<ImgBlock title="Campsite" id="camp"
+  description="This year we will be developing an experimental campsite to provide overflow housing for appropriate events. Our initial camp will have a dozen sites spread out in a Mesquite grove near the guffy center."
+  image={poolImg}
+/>
+*/}
 
 <ImgBlock title="RV Park" id="rv"
   description="Our new 5-acre RV Park is in the early stages, with only boondocking capabilities (which means parking, water and dump-station only). We hope to expand this in the future to provide a destination for snowbirding winter participants and volunteers."
   flip
   image={dronerv}
-   />
+/>
 <hr/>
 
 

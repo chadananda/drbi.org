@@ -1,63 +1,108 @@
 ---
-import Card from "@components/card.astro";
-import Container from "@components/container.astro";
-import Review from "@components/review.astro";
-
 const testimonials = [
   {
-    name: "Olivia Turner",
-    image: "https://source.unsplash.com/random",
-    text: "The insights and resources on bahai-education.org have deeply enriched my understanding of Baha'i educational principles. It's a treasure trove of wisdom and guidance.",
+    text: "I came not knowing what to expect, and left with a sense of purpose I hadn't felt in years. The depth of study here is unlike anything available elsewhere.",
+    name: "A Participant",
+    location: "Phoenix, AZ",
+    initials: "AP",
+    color: "bg-amber-100 text-amber-800",
+    placeholder: true,
   },
   {
-    name: "Ethan Murphy",
-    image: "https://source.unsplash.com/random",
-    text: "This website has become a crucial part of my daily learning. The reflections on Baha'i education have opened new horizons in my personal and professional life.",
+    text: "Working the land alongside the community changed how I think about service. It is one thing to read about it — it is another to live it.",
+    name: "A Volunteer",
+    location: "Tucson, AZ",
+    initials: "AV",
+    color: "bg-stone-200 text-stone-700",
+    placeholder: true,
   },
   {
-    name: "Ava Patel",
-    image: "https://source.unsplash.com/random",
-    text: "I'm consistently impressed by the depth and clarity of content on bahai-education.org. It's an invaluable resource for anyone interested in the spiritual aspects of education.",
+    text: "The quiet of the desert, the depth of the classes, the warmth of the people — I brought my family back the following year and we are planning to return again.",
+    name: "A Returning Guest",
+    location: "California",
+    initials: "RG",
+    color: "bg-emerald-100 text-emerald-800",
+    placeholder: true,
   },
   {
-    name: "Jackson Lee",
-    image: "https://source.unsplash.com/random",
-    text: "The thoughtful exploration of Baha'i educational concepts on this site has been enlightening. It's a brilliant guide for integrating spiritual values into education.",
+    text: "I had studied the Bahá'í writings for years on my own. Coming to DRBI was like finally having a real conversation with them.",
+    name: "A Student",
+    location: "New Mexico",
+    initials: "AS",
+    color: "bg-sky-100 text-sky-800",
+    placeholder: true,
   },
   {
-    name: "Sophia Nguyen",
-    image: "https://source.unsplash.com/random",
-    text: "Discovering bahai-education.org has been a revelation. The resources and reflections have significantly enhanced my approach to spiritual education.",
+    text: "We held our family reunion here. The facilities, the setting, the staff — everything made it a gathering we will talk about for the rest of our lives.",
+    name: "An Event Host",
+    location: "Texas",
+    initials: "EH",
+    color: "bg-violet-100 text-violet-800",
+    placeholder: true,
   },
   {
-    name: "Liam Roberts",
-    image: "https://source.unsplash.com/random",
-    text: "This website is a fantastic source of inspiration and knowledge on Baha'i education. It's helped me incorporate spiritual principles into my teaching methods.",
+    text: "I came to volunteer for a week and stayed for a month. There is something about this place that makes you not want to leave.",
+    name: "A Long-Term Volunteer",
+    location: "Colorado",
+    initials: "LV",
+    color: "bg-rose-100 text-rose-800",
+    placeholder: true,
   },
 ];
-
 ---
 
-<Container>
-  <div class="mt-24">
-    <h2 class="text-4xl lg:text-5xl font-bold lg:tracking-tight text-center">
-      Some Favorite <span class="text-indigo-600">Testimonials</span>
+<section class="py-24 bg-white overflow-hidden">
+  <div class="text-center mb-14 px-6">
+    <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Voices from the community</p>
+    <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800">
+      What people say about DRBI
     </h2>
-    <p class="text-lg mt-4 text-slate-600 text-center">
-      Trusted and cherished by learners and educators in the Baha'i community.
+    <p class="mt-4 text-slate-400 text-sm max-w-md mx-auto italic">
+      These are placeholder testimonials. Real voices from real visitors will replace them —
+      if you've attended a program at DRBI, we'd love to hear from you at
+      <a href="mailto:info@drbi.org" class="text-amber-700 hover:underline">info@drbi.org</a>.
     </p>
   </div>
-</Container>
 
-<div class="mt-10 relative overflow-x-clip">
-  <div class="absolute w-96 h-96 blur-2xl -z-10 bg-gradient-radial from-indigo-100 right-1/3 -top-10"></div>
-  <div class="absolute w-96 h-96 blur-2xl -z-10 bg-gradient-radial from-purple-100 right-1/3 translate-x-2/3 top-10"></div>
-  <div class="relative md:flex gap-10 overflow-hidden py-5 group">
-    <div class="md:motion-safe:animate-marquee w-auto py-5 overflow-x-auto flex flex-nowrap min-w-full shrink-0 items-stretch gap-10 snap-x snap-mandatory px-5">
-      {testimonials.map((item) => <Review {...item} />)}
+  <!-- Scrolling marquee -->
+  <div class="relative md:flex gap-8 overflow-hidden group">
+    <div class="md:motion-safe:animate-marquee flex min-w-full shrink-0 items-stretch gap-8 snap-x snap-mandatory px-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0">
+      {testimonials.map(t => (
+        <div class="w-80 shrink-0 snap-start bg-stone-50 border border-stone-100 rounded-2xl p-8 flex flex-col justify-between">
+          <blockquote class="text-slate-600 text-sm leading-relaxed font-serif italic">
+            "{t.text}"
+          </blockquote>
+          <div class="flex items-center gap-3 mt-8">
+            <div class={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-xs font-medium ${t.color}`}>
+              {t.initials}
+            </div>
+            <div>
+              <p class="text-slate-800 text-sm font-medium">{t.name}</p>
+              <p class="text-slate-400 text-xs">{t.location}</p>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
-    <div class="md:motion-safe:animate-marquee hidden md:motion-reduce:hidden md:flex min-w-full shrink-0 items-center gap-10">
-      {testimonials.map((item) => <Review {...item} />)}
+
+    <!-- Duplicate for seamless loop on desktop -->
+    <div class="hidden md:flex md:motion-safe:animate-marquee min-w-full shrink-0 items-stretch gap-8 px-6 md:motion-reduce:hidden">
+      {testimonials.map(t => (
+        <div class="w-80 shrink-0 bg-stone-50 border border-stone-100 rounded-2xl p-8 flex flex-col justify-between">
+          <blockquote class="text-slate-600 text-sm leading-relaxed font-serif italic">
+            "{t.text}"
+          </blockquote>
+          <div class="flex items-center gap-3 mt-8">
+            <div class={`w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-xs font-medium ${t.color}`}>
+              {t.initials}
+            </div>
+            <div>
+              <p class="text-slate-800 text-sm font-medium">{t.name}</p>
+              <p class="text-slate-400 text-xs">{t.location}</p>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   </div>
-</div>
+</section>

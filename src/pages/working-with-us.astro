@@ -1,29 +1,10 @@
 ---
 export const prerender = true;
-// import { Icon } from 'astro-icon/components'
 import Layout from "@layouts/Layout.astro";
 import Container from "src/components/container.astro";
-import Sectionhead from "src/components/sectionhead.astro";
-import site from "@data/site.json";
-import { transformS3Url } from "@utils/utils";
-
 import { Image } from "astro:assets";
-// import { Pexels } from "simple-icons-astro";
-
-const profile = (src, alt, size='lg') => {
-  const px = (size==='lg') ? 200 : 150
-  // translate px to rem
-  const rem = px / 16
-  return {
-    src: transformS3Url(src, { w: px, h: px, fit: "fill" }),
-    width: px, height: px,
-    alt,
-    class: `rounded-full w-[${rem}] h-[${rem}] object-cover object-center border-4 border-gray-200 float-right -mt-4`
-  }
-}
 
 import aboutusimg from "./_about_us.webp"
-// Team member images - downloaded from production site
 import rasmussen from "../assets/people/rasmussen.webp"
 import viva from "../assets/people/viva.webp"
 import bonnie from "../assets/people/bonnie.webp"
@@ -33,107 +14,364 @@ import robprater from "../assets/people/rob-prater.webp"
 import johnhanke from "../assets/people/john-hanke.webp"
 import bettie from "../assets/people/bettie-johnston.webp"
 
+const opportunities = [
+  {
+    category: "The Land",
+    color: "bg-green-50 border-green-200",
+    badge: "bg-green-100 text-green-800",
+    roles: [
+      {
+        title: "Agricultural Volunteer",
+        duration: "Long-term (1 month+)",
+        tag: "long-term",
+        description: "Work alongside our team to grow food on DRBI's desert land. Tasks include planting, watering, composting, soil preparation, and learning desert-adapted farming practices. No prior experience needed — just a willingness to get your hands in the soil.",
+        skills: "Physical ability to work outdoors. Desert farming knowledge is a bonus but not required.",
+        ideal: "Someone who wants to learn sustainable agriculture while living in community.",
+      },
+      {
+        title: "Grounds & Landscaping",
+        duration: "Short-term or Long-term",
+        tag: "both",
+        description: "Help maintain and beautify DRBI's grounds — the paths, the trees, the common spaces. Weekend volunteers are welcome for specific projects like planting or clearing. Longer-term volunteers help shape the look and feel of the campus.",
+        skills: "Basic gardening. Enthusiasm for outdoor work.",
+        ideal: "People who find peace working outside and want to leave a place more beautiful than they found it.",
+      },
+    ]
+  },
+  {
+    category: "The Kitchen",
+    color: "bg-orange-50 border-orange-200",
+    badge: "bg-orange-100 text-orange-800",
+    roles: [
+      {
+        title: "Cook & Kitchen Support",
+        duration: "Short-term (events) or Long-term",
+        tag: "both",
+        description: "Prepare meals for classes, retreats, and visiting guests. DRBI has a large professional kitchen. Short-term volunteers are especially needed during events and weekend programs. Longer-term volunteers help establish a regular meal rhythm for the community.",
+        skills: "Cooking experience preferred. Ability to prepare for groups of 10–50 people.",
+        ideal: "Someone who sees feeding people as a form of hospitality and service.",
+      },
+    ]
+  },
+  {
+    category: "Buildings & Maintenance",
+    color: "bg-stone-50 border-stone-200",
+    badge: "bg-stone-200 text-stone-800",
+    roles: [
+      {
+        title: "Maintenance & Repair",
+        duration: "Short-term or Long-term",
+        tag: "both",
+        description: "DRBI's campus includes meeting spaces, dormitories, a library, an art gallery, rental units, and a swimming pool. There is always work to be done — painting, plumbing, electrical, carpentry, general repairs. Both skilled tradespeople and general helpers are welcome.",
+        skills: "Any construction, plumbing, electrical, or carpentry skills are very valuable. General helpers welcome too.",
+        ideal: "People who are good with their hands and enjoy practical problem-solving.",
+      },
+      {
+        title: "Renovation Project Volunteer",
+        duration: "Short-term (project-based)",
+        tag: "short-term",
+        description: "Specific renovation projects arise throughout the year — renovating a dormitory room, updating a space, building new infrastructure. These are great opportunities for skilled volunteers who can commit to a focused project over a week or two.",
+        skills: "Construction or renovation skills. Ability to work independently and follow a plan.",
+        ideal: "Skilled builders or craftspeople who want to leave something lasting.",
+      },
+    ]
+  },
+  {
+    category: "Education & Programs",
+    color: "bg-blue-50 border-blue-200",
+    badge: "bg-blue-100 text-blue-800",
+    roles: [
+      {
+        title: "Teacher or Workshop Leader",
+        duration: "Short-term (1–3 days)",
+        tag: "short-term",
+        description: "Share your expertise by leading a class, workshop, or intensive session. DRBI welcomes teachers in Bahá'í scripture, arts, agriculture, music, crafts, permaculture, language, history, or any field aligned with our mission. We handle logistics — you bring the teaching.",
+        skills: "Deep knowledge in your area. Ability to engage a small group of serious learners.",
+        ideal: "Scholars, practitioners, artists, or experts who want to teach in an intimate setting.",
+      },
+      {
+        title: "Event Coordinator",
+        duration: "Short-term (per event)",
+        tag: "short-term",
+        description: "Help plan and run DRBI events — coordinating logistics, welcoming guests, managing schedules, communicating with attendees. This can be done partly remotely in advance and on-site during the event itself.",
+        skills: "Organizational skills. Good communication. Experience with event logistics helpful.",
+        ideal: "Detail-oriented people who enjoy making experiences run smoothly for others.",
+      },
+    ]
+  },
+  {
+    category: "Arts & Creative",
+    color: "bg-purple-50 border-purple-200",
+    badge: "bg-purple-100 text-purple-800",
+    roles: [
+      {
+        title: "Artist in Residence",
+        duration: "Long-term (2 weeks to 3 months)",
+        tag: "long-term",
+        description: "Live and create at DRBI. In exchange for contributing to the life of the community — teaching a workshop, performing, or sharing your work — you receive time, space, and quiet to create. Painters, musicians, writers, potters, weavers, and other artists are all welcome.",
+        skills: "A serious creative practice in any medium.",
+        ideal: "Artists who want to create in a spiritually meaningful environment and give back through their art.",
+      },
+      {
+        title: "Music & Performance Support",
+        duration: "Short-term (events)",
+        tag: "short-term",
+        description: "DRBI events often include music, devotionals, and performances. Musicians, sound technicians, and performers who can contribute to events and concerts are warmly welcomed.",
+        skills: "Musical skill or sound/AV technical ability.",
+        ideal: "Musicians and performers who see their art as a form of service.",
+      },
+    ]
+  },
+  {
+    category: "Media & Technology",
+    color: "bg-indigo-50 border-indigo-200",
+    badge: "bg-indigo-100 text-indigo-800",
+    roles: [
+      {
+        title: "KURE Radio Volunteer",
+        duration: "Short-term or Long-term",
+        tag: "both",
+        description: "KURE-LP 106.1 FM is DRBI's community radio station. Volunteers are needed for programming, on-air hosting, production, content curation, and station operations. If you have broadcast or media experience, we'd love to hear from you.",
+        skills: "Radio, broadcasting, audio production, or media experience.",
+        ideal: "People who believe in the power of community media to spread ideas.",
+      },
+      {
+        title: "Web & Technology",
+        duration: "Remote or On-site",
+        tag: "remote",
+        description: "DRBI's website and digital systems need ongoing care and improvement. If you have web development, design, or digital media skills, there is meaningful work to contribute — even from a distance.",
+        skills: "Web development, graphic design, photography, video editing, or social media.",
+        ideal: "Tech-minded people who want their skills to serve a mission-driven organization.",
+      },
+      {
+        title: "Photographer / Videographer",
+        duration: "Short-term (events)",
+        tag: "short-term",
+        description: "DRBI events, programs, and campus life deserve to be documented well. We need photographers and videographers who can capture the spirit of what happens here — for our website, our newsletter, and our history.",
+        skills: "Photography or video skills. An eye for authentic, human moments.",
+        ideal: "Visual storytellers who want to help DRBI share its story with the world.",
+      },
+    ]
+  },
+  {
+    category: "Administration & Operations",
+    color: "bg-teal-50 border-teal-200",
+    badge: "bg-teal-100 text-teal-800",
+    roles: [
+      {
+        title: "Office & Administration",
+        duration: "Long-term",
+        tag: "long-term",
+        description: "Help keep DRBI running — correspondence, scheduling, record-keeping, donor communications, and general office support. This is the backbone that allows everything else to happen.",
+        skills: "Organizational ability. Computer proficiency. MBA or nonprofit administration experience valued.",
+        ideal: "Detail-oriented people who thrive in a support role and understand that good administration is itself a form of service.",
+      },
+      {
+        title: "Grant Writing & Fundraising",
+        duration: "Remote or On-site",
+        tag: "remote",
+        description: "DRBI depends on grants and donations to fund its programs and infrastructure. Volunteers with experience writing grant proposals or developing fundraising strategies can make an enormous difference to our long-term sustainability.",
+        skills: "Grant writing, fundraising, nonprofit finance, or communications.",
+        ideal: "People with development experience who want to help a worthy cause secure the resources it needs.",
+      },
+    ]
+  },
+];
 
+const tagLabel = { "short-term": "Short-term", "long-term": "Long-term", "both": "Short or Long-term", "remote": "Remote possible" };
+const tagColor = { "short-term": "bg-sky-100 text-sky-700", "long-term": "bg-violet-100 text-violet-700", "both": "bg-emerald-100 text-emerald-700", "remote": "bg-amber-100 text-amber-700" };
 
-
-
+const volunteers = [
+  { name: "Roger and Doris Rasmussen", img: rasmussen },
+  { name: "The late Viva Tomlin", img: viva },
+  { name: "Bonnie Tozer and grandchildren", img: bonnie },
+  { name: "Lamont Baker", img: lamont },
+  { name: "Gayle Hanke", img: gayle },
+  { name: "Rob Prater", img: robprater },
+  { name: "John Hanke", img: johnhanke },
+  { name: "Bettie Johnston", img: bettie },
+];
 ---
 
-<Layout title="Working with Us" description="">
-  <Container>
-    <Sectionhead>
-      <Fragment slot="title">Working with US</Fragment>
-      <Fragment slot="desc">Come join the family</Fragment>
-    </Sectionhead>
+<Layout title="Volunteer at DRBI" description="Serve at Desert Rose Bahá'í Institute — short-term, long-term, and remote volunteer opportunities in education, agriculture, arts, and more.">
 
-    <br>
-
-<Image src={aboutusimg} alt="Desert Rose Institute"
-       class="h-auto max-h-128 w-full md:w-4/5 mx-auto object-cover object-center rounded-lg mb-8" />
-
-
-<div class="prose prose-lg mx-auto">
-
-
-<h2> Desert Rose Bahá’í Institute </h2>
-
-<p>DRBI is found in the middle of a rural oasis in the Arizona Sonoran Desert outside Eloy, midway between Phoenix and Tucson. It is comprised of meeting spaces, a large professional kitchen, dormitories, a bookstore, a library, an art gallery, a swimming pool, and rental units. DRBI is a charitable, not-for-profit 501(c)3 organization that is inspired by the peaceful and unifying teachings of the Bahá’í Faith.
-
-
-<h2> Volunteering at DRBI  </h2>
-
-<aside>
-  “This is worship, to serve mankind and to minister to the needs of the people”. –‘Abdu’l- Bahá
-</aside>
-
-<p> In the Bahá’í Faith, being of service is an extremely important and blessed gift, but you don’t have to be a Bahá’í to offer it.  At DRBI you can assist the Institute through a variety of volunteer positions:
-
-<ul>
-  <li> Event planning and coordination</li>
-  <li> Cooking, cleaning and kitchen</li>
-  <li> Online sharing </li>
-  <li> Maintenance </li>
-  <li> Landscaping and gardens </li>
-  <li> Office Administration (Must have MBA) </li>
-</ul>
-
-<h3> A few of the wonderful volunteers at DRBI, past and present: </h3>
-
-<!-- <p>  Top Row, l-r:  Roger and Doris Rasmussen, Viva Tomlin, Bonnie Tozer and her grandchildren, Lamont Baker
-
-<p>  Bottom Row, l-r: Gayle Hanke, Rob Prater, John Hanke, and Bettie Johnston. -->
-
-  <div class="flex flex-wrap w-full justify-evenly">
-
-    <div class="card w-64 text-center mx-2">
-        <img {...rasmussen} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" /> <h3 class="name mb-0 mt-0">Roger and Doris Rasmussen</h3>
+  <!-- Hero -->
+  <div class="relative w-full overflow-hidden bg-stone-900">
+    <Image src={aboutusimg} alt="Desert Rose Bahá'í Institute"
+      class="w-full h-[50vh] object-cover object-center opacity-40" />
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+      <p class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-5">Come and Serve</p>
+      <h1 class="text-white text-4xl md:text-6xl font-serif font-light leading-tight max-w-3xl">
+        Volunteer at<br>Desert Rose
+      </h1>
+      <p class="mt-6 text-white/70 text-base md:text-lg max-w-xl leading-relaxed font-light">
+        "This is worship, to serve mankind and to minister to the needs of the people."
+      </p>
+      <p class="mt-2 text-amber-400/80 text-xs tracking-widest uppercase">— 'Abdu'l-Bahá</p>
     </div>
+  </div>
 
-<!-- import viva from "../assets/people/viva.webp"
-import bonnie from "../assets/people/bonnie.webp"
-import lamont from "../assets/people/lamont.webp"
-import gayle from "../assets/people/gayle.webp"
-import robprater from "../assets/people/rob-prater.webp"
-import johnhanke from "../assets/people/john-hanke.webp"
-import bettie from "../assets/people/bettie.webp" -->
+  <!-- Why volunteer here -->
+  <section class="py-24 bg-white">
+    <Container>
+      <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-16">
+          <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Why come here</p>
+          <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800">
+            Service is not what we do on the side.<br>It is the point.
+          </h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-slate-600 leading-relaxed">
+          <div>
+            <p>
+              In the Bahá'í tradition, work done in a spirit of service is a form of worship.
+              You don't need to be Bahá'í to experience this — you just need to believe that
+              showing up and giving your time and skill to something larger than yourself matters.
+            </p>
+            <p class="mt-5">
+              DRBI is a real place with real needs. We are not a polished institution with
+              a professional staff for everything. We are a community that runs on the generosity
+              of people who care. When you volunteer here, your contribution is felt immediately
+              and directly.
+            </p>
+          </div>
+          <div>
+            <p>
+              Volunteers at DRBI become part of the community for as long as they are here.
+              You share meals, conversations, devotionals, and the daily rhythm of life on the campus.
+              Many people come for a week and return for years.
+            </p>
+            <p class="mt-5">
+              We are located in Eloy, Arizona — between Phoenix and Tucson — on a hundred acres
+              of Sonoran Desert. Accommodation is available on the grounds for volunteers staying
+              longer than a few days. We ask that you reach out so we can welcome you properly.
+            </p>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </section>
 
-      <div class="card w-64 text-center  px-2 ">
-        <img {...viva} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />  <h3 class="name mb-0 mt-0"> The late Viva Tomlin </h3>
+  <!-- What we offer volunteers -->
+  <section class="py-16 bg-amber-50 border-y border-amber-100">
+    <Container>
+      <div class="max-w-4xl mx-auto">
+        <h3 class="text-center text-xl font-serif font-light text-slate-700 mb-10">What DRBI offers volunteers</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+          <div class="px-6">
+            <div class="w-8 h-px bg-amber-400 mx-auto mb-5"></div>
+            <h4 class="font-serif text-slate-800 mb-3">A Place to Stay</h4>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              On-site accommodation available for longer-term volunteers. A roof, a bed, and a community to come home to.
+            </p>
+          </div>
+          <div class="px-6">
+            <div class="w-8 h-px bg-amber-400 mx-auto mb-5"></div>
+            <h4 class="font-serif text-slate-800 mb-3">Meals & Community</h4>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              Shared meals, shared work, shared purpose. You will not be alone here. You will be part of something.
+            </p>
+          </div>
+          <div class="px-6">
+            <div class="w-8 h-px bg-amber-400 mx-auto mb-5"></div>
+            <h4 class="font-serif text-slate-800 mb-3">Meaningful Work</h4>
+            <p class="text-slate-500 text-sm leading-relaxed">
+              Every task here — whether it is cooking, farming, teaching, or painting — contributes
+              to something that will outlast your visit.
+            </p>
+          </div>
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <!-- Opportunity listings -->
+  <section class="py-24 bg-white">
+    <Container>
+      <div class="text-center mb-16">
+        <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Open Positions</p>
+        <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800">What we need help with</h2>
+        <p class="mt-5 text-slate-400 max-w-lg mx-auto text-base">
+          Each opportunity below describes what you would actually do, how long a commitment is typical,
+          and what kind of person tends to thrive in that role.
+        </p>
       </div>
 
-      <div class="card w-64 text-center  px-2 ">
-        <img {...bonnie} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Bonnie Tozer and grandchildren </h3>
+      <div class="space-y-16 max-w-5xl mx-auto">
+        {opportunities.map(section => (
+          <div>
+            <div class={`inline-block px-4 py-1.5 rounded-full text-xs font-medium tracking-widest uppercase mb-6 border ${section.badge} ${section.color}`}>
+              {section.category}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {section.roles.map(role => (
+                <div class={`rounded-2xl border p-8 ${section.color}`}>
+                  <div class="flex items-start justify-between gap-4 mb-4">
+                    <h3 class="text-lg font-serif text-slate-800">{role.title}</h3>
+                    <span class={`shrink-0 text-xs px-3 py-1 rounded-full font-medium ${tagColor[role.tag]}`}>
+                      {tagLabel[role.tag]}
+                    </span>
+                  </div>
+                  <p class="text-slate-600 text-sm leading-relaxed mb-4">{role.description}</p>
+                  <div class="border-t border-black/5 pt-4 mt-4 space-y-2">
+                    <p class="text-xs text-slate-500"><span class="font-semibold text-slate-700">Skills:</span> {role.skills}</p>
+                    <p class="text-xs text-slate-500"><span class="font-semibold text-slate-700">Ideal for:</span> {role.ideal}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
+    </Container>
+  </section>
 
-      <div class="card w-64 text-center  mx-2 ">
-        <img {...lamont} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Lamont Baker </h3>
+  <!-- Past volunteers -->
+  <section class="py-24 bg-stone-50">
+    <Container>
+      <div class="text-center mb-14">
+        <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Our People</p>
+        <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800">
+          Those who have served here
+        </h2>
+        <p class="mt-4 text-slate-400 max-w-md mx-auto text-base">
+          These are some of the people who have given their time and love to DRBI.
+          Their names and faces are part of this place's story.
+        </p>
       </div>
-
-      <div class="card w-64 text-center  mx-2 ">
-        <img {...gayle} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Gayle Hanke </h3>
+      <div class="flex flex-wrap justify-center gap-10 max-w-4xl mx-auto">
+        {volunteers.map(v => (
+          <div class="text-center w-36">
+            <Image src={v.img}
+              alt={v.name}
+              class="rounded-full w-28 h-28 mx-auto object-cover object-center border-4 border-white shadow-md mb-3" />
+            <p class="text-sm text-slate-600 leading-snug">{v.name}</p>
+          </div>
+        ))}
       </div>
+    </Container>
+  </section>
 
-      <div class="card w-64 text-center  mx-2 ">
-        <img {...robprater} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Rob Prater </h3>
-      </div>
+  <!-- CTA -->
+  <section class="py-28 bg-slate-800 text-white text-center">
+    <Container>
+      <p class="text-xs uppercase tracking-[0.25em] text-amber-400 mb-5">Ready to come?</p>
+      <h2 class="text-3xl md:text-5xl font-serif font-light leading-snug max-w-xl mx-auto">
+        Tell us who you are<br>and how you want to help.
+      </h2>
+      <p class="mt-7 text-slate-300 max-w-md mx-auto text-base leading-relaxed">
+        Reach out and introduce yourself. Tell us which role interests you,
+        when you're available, and what you'd like to bring. We will respond personally.
+      </p>
+      <a href="/contact-us?subject=Volunteer"
+        class="mt-10 inline-block bg-amber-600 hover:bg-amber-500 text-white px-10 py-4 rounded-full text-sm tracking-[0.15em] uppercase transition duration-200">
+        Get in Touch
+      </a>
+      <p class="mt-5 text-slate-400 text-sm">
+        Or email us directly at
+        <a href="mailto:info@drbi.org" class="text-amber-400 hover:underline">info@drbi.org</a>
+      </p>
+    </Container>
+  </section>
 
-      <div class="card w-64 text-center  mx-2 ">
-        <img {...johnhanke} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> John Hanke </h3>
-      </div>
-
-      <div class="card w-64 text-center  mx-2 ">
-        <img {...bettie} class="rounded-full w-48 h-48 mx-auto object-cover object-center mb-2 border-b-4 border-r-4 border-orange-300" />        <h3 class="name mb-0 mt-0"> Bettie Johnston </h3>
-      </div>
-
-    </div>
-
-
-<p>Through Volunteering you acquire new skills, help build the skills of those around you, and participate in delivering services and programs to the broader community.
-
-<p>If you have questions or are interested in providing Volunteer service, please visit the <a href="/contribute">Contribute</a> page.
-
-</div>
-
-
-  </Container>
 </Layout>

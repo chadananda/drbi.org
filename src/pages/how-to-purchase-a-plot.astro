@@ -3,68 +3,69 @@ export const prerender = false;
 
 import Layout from "@layouts/Layout.astro";
 import Container from "src/components/container.astro";
-import Sectionhead from "src/components/sectionhead.astro";
+import PageHero from "@components/PageHero.astro";
 import Button from "src/components/ui/button.astro";
 import site from "@data/site.json";
+import cemeteryImg from "./memorial/_memorial-garden-front.jpg";
 
 const PLOT_PRICE = 1500;
 ---
 
-<Layout title="Purchase a Cemetery Plot">
-  <Container>
-    <Sectionhead>
-      <Fragment slot="title">Purchase a Cemetery Plot</Fragment>
-      <Fragment slot="desc">Desert Rose Memorial Gardens - Request a plot reservation</Fragment>
-    </Sectionhead>
+<Layout title="Purchase a Cemetery Plot" description="Reserve a burial plot at Desert Rose Memorial Gardens in Eloy, Arizona.">
 
-    <div class="grid md:grid-cols-2 gap-10 mx-auto max-w-4xl mt-16">
+  <PageHero
+    label="Desert Rose Memorial Gardens"
+    title="Purchase a Cemetery Plot"
+    subtitle="A place of peace in the Sonoran Desert — request your plot reservation below."
+    image={cemeteryImg}
+    imageAlt="Desert Rose Memorial Gardens"
+  />
+
+  <section class="py-24 bg-white">
+  <Container>
+    <div class="grid md:grid-cols-2 gap-12 mx-auto max-w-5xl">
       <!-- Left side: Info -->
       <div>
-        <h2 class="font-medium text-2xl text-gray-800">Plot Purchase Information</h2>
-        <p class="text-lg leading-relaxed text-slate-500 mt-3">
+        <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Plot Reservations</p>
+        <h2 class="text-2xl md:text-3xl font-serif font-light text-slate-800 mb-5">
+          Reserve your place at Desert Rose
+        </h2>
+        <p class="text-slate-500 leading-relaxed">
           Complete this form to request a cemetery plot at Desert Rose Memorial Gardens.
-          We'll send you a PayPal invoice that you can pay online or by phone.
+          We will send you a PayPal invoice that you can pay online or by phone.
         </p>
 
-        <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <h3 class="font-semibold text-amber-800">Current Pricing</h3>
-          <p class="text-2xl font-bold text-amber-900 mt-2">$1,500 per plot</p>
-          <p class="text-sm text-amber-700 mt-1">Invoice will be sent via PayPal</p>
+        <div class="mt-8 p-6 bg-amber-50 border border-amber-100 rounded-2xl">
+          <p class="text-xs uppercase tracking-widest text-amber-700 mb-2">Current Pricing</p>
+          <p class="text-3xl font-serif font-light text-slate-800">$1,500 <span class="text-lg text-slate-400">per plot</span></p>
+          <p class="text-sm text-amber-700 mt-2">Invoice sent via PayPal — pay now or pay later</p>
         </div>
 
-        <div class="mt-6">
-          <h3 class="font-semibold text-gray-800 mb-2">Questions?</h3>
-          <div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <span>{site.address}</span>
-          </div>
-          <div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <a href={`mailto:${site.email}`} class="text-indigo-600 hover:underline">{site.email}</a>
-          </div>
-          <div class="flex items-center mt-2 space-x-2 text-gray-600">
-            <a href={`tel:${site.phone}`} class="text-indigo-600 hover:underline">{site.phone}</a>
-          </div>
+        <div class="mt-8 space-y-3 text-slate-600">
+          <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-3">Questions?</p>
+          <p>{site.address}</p>
+          <a href={`mailto:${site.email}`} class="block text-amber-700 hover:underline">{site.email}</a>
+          <a href={`tel:${site.phone}`} class="block text-amber-700 hover:underline">{site.phone}</a>
         </div>
 
-        <div class="mt-6 p-4 bg-slate-100 rounded-lg">
-          <h3 class="font-semibold text-gray-800 mb-2">Funeral Services</h3>
-          <p class="text-sm text-gray-600">
+        <div class="mt-8 p-6 bg-stone-50 border border-stone-100 rounded-2xl">
+          <p class="text-xs uppercase tracking-widest text-slate-500 mb-3">Funeral Services</p>
+          <p class="text-sm text-slate-600 leading-relaxed mb-3">
             For caskets, headstones, and burial arrangements, please contact:
           </p>
-          <p class="mt-2">
-            <a href="https://www.jwarrenfuneral.com/" target="_blank" class="text-indigo-600 hover:underline font-medium">
-              J. Warren Funeral Home
-            </a>
-            <br />
-            <a href="tel:5203742000" class="text-gray-600">(520) 374-2000</a>
-          </p>
-          <p class="text-xs text-gray-500 mt-2">
-            J. Warren is familiar with Baha'i burial practices and exclusively manages burials at Desert Rose.
+          <a href="https://www.jwarrenfuneral.com/" target="_blank" class="font-serif text-slate-800 hover:text-amber-700 transition">
+            J. Warren Funeral Home
+          </a>
+          <br />
+          <a href="tel:5203742000" class="text-sm text-slate-500 hover:text-amber-700 transition">(520) 374-2000</a>
+          <p class="text-xs text-slate-400 mt-3">
+            J. Warren is familiar with Bahá'í burial practices and exclusively manages burials at Desert Rose.
           </p>
         </div>
       </div>
 
       <!-- Right side: Form -->
-      <div class="bg-slate-100 p-5 md:p-8 rounded-xl mb-5">
+      <div class="bg-stone-50 border border-stone-100 p-8 rounded-2xl">
         <form id="purchase-form" class="needs-validation" novalidate>
           <!-- Full Name -->
           <div class="mb-5">
@@ -175,7 +176,7 @@ const PLOT_PRICE = 1500;
           <div class="mb-6 p-4 bg-white rounded-lg border border-slate-200">
             <div class="flex justify-between items-center">
               <span class="text-gray-700 font-medium">Total Amount:</span>
-              <span id="totalAmount" class="text-2xl font-bold text-indigo-600">$0.00</span>
+              <span id="totalAmount" class="text-2xl font-serif font-light text-amber-700">$0.00</span>
             </div>
           </div>
 
@@ -190,6 +191,7 @@ const PLOT_PRICE = 1500;
       </div>
     </div>
   </Container>
+  </section>
 </Layout>
 
 <style>

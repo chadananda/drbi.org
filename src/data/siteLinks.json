@@ -5,6 +5,8 @@
    {"title": "Agriculture", "path": "/agriculture", "children": null},
    {"title": "Volunteer", "path": "/working-with-us", "children": null},
    {"title": "Our Facilities", "path": "/facilities-and-rentals", "children": null},
+   {"title": "Radio", "path": "/radio", "children": null},
+   {"title": "Cemetery", "path": "/memorial", "children": null},
    {"title": "Memories", "path": "/memories", "children": null},
    {"title": "Contact", "path": "/contact-us", "children": null}
  ],
@@ -17,6 +19,7 @@
  "productLinks": [
  ],
  "resourceLinks": [
+  {"title": "KURE Radio 106.1 FM", "path": "/radio", "children": null},
   {"title": "Facility Rentals", "path": "/facilities-and-rentals", "children": null},
   {"title": "Memorial Gardens", "path": "/memorial", "children": null},
   {"title": "Contributions", "path": "/contribute", "children": null},

@@ -4,26 +4,16 @@ echo "🔨 Running pre-commit checks..."
 # Falls back to npm build if vercel CLI has configuration issues
 echo "📦 Running Vercel build (production simulation)..."
 
-VERCEL_OUTPUT=$(vercel build 2>&1)
-VERCEL_EXIT=$?
-
-if [ $VERCEL_EXIT -ne 0 ]; then
-  # Check if it's a configuration error vs actual build error
-  if echo "$VERCEL_OUTPUT" | grep -q "Project Settings\|must be upgraded\|WARN.*not running on Vercel"; then
-    echo "⚠️  Vercel CLI config issue detected. Falling back to npm build..."
-    echo "   (Update Node.js version in Vercel dashboard to fix)"
-    npm run build
-    if [ $? -ne 0 ]; then
-      echo "❌ Build failed! Please fix the errors before committing."
-      exit 1
-    fi
-  else
-    echo "$VERCEL_OUTPUT" | tail -30
-    echo "❌ Vercel build failed! Please fix the errors before committing."
-    exit 1
-  fi
-else
+if VERCEL_OUTPUT=$(vercel build 2>&1); then
   echo "$VERCEL_OUTPUT" | tail -10
+elif echo "$VERCEL_OUTPUT" | grep -q "Project Settings\|must be upgraded\|WARN.*not running on Vercel\|command not found\|No Project Settings"; then
+  echo "⚠️  Vercel CLI config issue detected. Falling back to npm build..."
+  echo "   (Update Node.js version in Vercel dashboard to fix)"
+  npm run build || { echo "❌ Build failed! Please fix the errors before committing."; exit 1; }
+else
+  echo "$VERCEL_OUTPUT" | tail -30
+  echo "❌ Vercel build failed! Please fix the errors before committing."
+  exit 1
 fi
 
 echo "✅ Build passed!"
@@ -55,7 +45,6 @@ fi
 
 # Run critical tests only (faster subset)
 npx playwright test tests/homepage.spec.js tests/build-integrity.spec.js --reporter=line
-
 TEST_EXIT_CODE=$?
 
 # Kill dev server
