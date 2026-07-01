@@ -13,7 +13,7 @@ status: PLANNING → ready to start Phase 1
 
 ## blogworks relationship (IMPORTANT for Phases 3 + 9)
 - The existing CF resources were provisioned/populated BY blogworks:
-  - **D1 `drbi-db`** already has blogworks' data → decide in Phase 3: reuse it as-is, or fresh schema. Do NOT clobber without reconciling.
+  - **D1 `drbi-db`** already has content migrated in it — stored in **EmDash's content schema** (blogworks runs on EmDash under the hood). So Phase 3 is NOT "Turso→D1 in this repo's schema"; content already lives in D1 in EmDash format. Phase 3 = adapt this repo's data-access layer (src/lib/db.ts + utils/content-utils.js + all callers) to read/write the EmDash schema, OR reconcile. INSPECT the EmDash schema first (D1 read granted). Do NOT clobber.
   - **R2 `cdn-assets/drbi.org/`** holds `events/`, `team/`, `uploads/` (event images, team photos, user uploads). Reuse in place.
 - Cutover risk: blogworks may still write to drbi-db/cdn-assets. Confirm blogworks is decommissioned for drbi (or read-only) before/at cutover.
 
@@ -58,14 +58,20 @@ status: PLANNING → ready to start Phase 1
 - NOTE: Astro 7 has a persistent background dev server (`astro dev start/stop/status/logs`) — currently running on :4850.
 - Kept @astrojs/vercel adapter (host swap is Phase 2).
 
-### Phase 2 — Host: Vercel → Cloudflare Workers
-- [ ] Remove @astrojs/vercel + @vercel/*; add @astrojs/cloudflare
-- [ ] wrangler.jsonc (name drbi-preview), nodejs_compat, output:'server', prerender=true on static pages
-- [ ] Bind D1 (drbi-db) + R2 (cdn-assets) + KV(session) via runtime; astro locals.runtime.env typing
-- [ ] Replace uploads (formidable/S3 → R2), fs reads, Vercel cron → CF Cron Triggers
-- [ ] Env: Vercel envs → wrangler secrets / .dev.vars (TURSO/D1, JWT, ZEPTO_*, Google client id, SITE_ADMIN_EMAIL)
-- [ ] Deploy to drbi-preview.*.workers.dev; parity smoke test
+### Phase 2 — Host: Vercel → Cloudflare Workers  [IN PROGRESS]
+- [x] Add @astrojs/cloudflare@14; swap adapter in astro.config.js (vercel→cloudflare, imageService:'compile')
+- [x] wrangler.jsonc: name drbi-preview, compatibility_date, nodejs_compat, D1 binding (DB→drbi-db), R2 binding (R2→cdn-assets). NOTE: do NOT set `main`/`assets` — the @cloudflare/vite-plugin validates `main` during astro sync before dist exists → build error. Adapter owns the entry.
+- [x] nodejs_compat resolves the Node-builtin bundling errors (http/https/net/tls/argon2 node:util etc). Build now transforms 3120 modules.
+- [ ] BLOCKER: argon2 native binary (@node-rs/argon2-*.node) can't bundle into Worker → must do the Phase 4 argon2→Web Crypto PBKDF2 swap to get a green worker build. (Phase 2 ↔ Phase 4 intersect here.)
+- [ ] adapter auto-enables Sessions via a **SESSION KV binding** → need `wrangler kv namespace create` (KV-create perm) + add to wrangler.jsonc
+- [ ] Replace aws-sdk/formidable uploads → R2 (needs R2 perm), fs reads, Vercel cron → CF Cron Triggers
+- [ ] Replace Vercel-specific .husky/pre-commit (runs `vercel build`; fights Dropbox) with astro build + E2E
+- [ ] Env: Vercel envs → wrangler secrets / .dev.vars
+- [ ] Deploy to drbi-preview.*.workers.dev (needs Worker-deploy perm); parity smoke test
 - Exit: full site served from Workers on temp domain.
+- PERMS STILL NEEDED: R2 cdn-assets (drbi.org/ prefix), Worker deploy (drbi-preview), KV namespace create (SESSION).
+
+### DECISION (2026-07-01): keep EmDash as the content storage layer in drbi-db (bidirectional blogworks compat / migrate-back). This repo adapts to EmDash schema. Also: build repo-local .claude/skills/ for content mgmt, shared with Telahoun (task #7).
 
 ### Phase 3 — DB: Turso → D1
 - [ ] Inspect drbi-db (schema/data already there?). Reconcile with Turso schema.

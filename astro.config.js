@@ -3,7 +3,7 @@ import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
-import vercel from '@astrojs/vercel';
+import cloudflare from '@astrojs/cloudflare';
 
 import remarkAttr from 'remark-attr';
 
@@ -68,9 +68,8 @@ export default defineConfig({
   // },
   output: 'static', // static by default; pages with prerender=false use SSR
   site: site.url,
-  adapter: vercel({
-    imageService: false,
-    webAnalytics: { enabled: false } // Disabled to prevent console errors in dev
+  adapter: cloudflare({
+    imageService: 'compile',
   }),
   integrations: [
     // { hooks: { 'astro:server:setup': ({ app }) => {  app.use(authMiddleware);  },}, },

@@ -1,0 +1,24 @@
+{
+  // Cloudflare Workers config for drbi.org (migration target; replaces blogworks-hosted drbi.org).
+  // Temp preview Worker → *.workers.dev until Phase 9 cutover. Scope: drbi-* resources only.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "drbi-preview",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "drbi-db",
+      "database_id": "cc53feb7-5a9f-4754-9256-4a4c53edd4a2"
+    }
+  ],
+  "r2_buckets": [
+    {
+      // access granted only under the drbi.org/ prefix; wired in Phase 2 uploads work
+      "binding": "R2",
+      "bucket_name": "cdn-assets"
+    }
+  ]
+  // KV session namespace added in Phase 4 (auth) — needs `wrangler kv namespace create`.
+}
