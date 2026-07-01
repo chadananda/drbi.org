@@ -7,7 +7,7 @@ export const prerender = false;
  */
 
 import AdminLayout from '../../layouts/AdminLayout.astro';
-import { getAllPostsByType } from '../../utils/cms-utils.js';
+import { getContentByCollection } from '../../lib/queries';
 // Import analytics utilities
 import { combineAnalyticsData } from '../../utils/analytics-utils.js';
 import { loadAnalyticsSummary } from '../../utils/analytics-cache.js';
@@ -20,9 +20,9 @@ let error = null;
 
 try {
   [memorial, news, articles] = await Promise.all([
-    getAllPostsByType('memorial'),
-    getAllPostsByType('news'),
-    getAllPostsByType('article')
+    getContentByCollection('memorial'),
+    getContentByCollection('news'),
+    getContentByCollection('articles')
   ]);
 } catch (e) {
   error = e.message;
