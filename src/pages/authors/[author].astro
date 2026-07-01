@@ -1,5 +1,5 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
@@ -7,27 +7,14 @@ import PostThumb from "@components/article/postThumb.astro";
 import AuthorCard from "@components/article/authorCard.astro";
 import { getCategories, getPublishedArticles, getTeam } from "@utils/utils.js";
 
-// export paths for all the authors
-export async function getStaticPaths() {
-  const allAuthors = await getTeam();
-  const allArticles = await getPublishedArticles();
-  const allCategories = await getCategories();
-  return allAuthors.map((author) => {
-    const match = ({data}) => data.author===author.id;
-    return {
-      params: { author: author.id},
-      props: {
-        posts: allArticles.filter(match),
-        author,
-        categories: allCategories
-      }
-    };
-  });
-};
-
 // this author param
 const author_slug = Astro.params.author;
-const { posts, author, categories } = Astro.props;
+const allAuthors = await getTeam();
+const author = allAuthors.find((a) => a.id === author_slug);
+if (!author) return Astro.rewrite('/404');
+const allArticles = await getPublishedArticles();
+const posts = allArticles.filter(({ data }) => data.author === author_slug);
+const categories = await getCategories();
 
 // console.log('[author].astro, posts/author:', posts.length, author_slug);
 ---

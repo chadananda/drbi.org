@@ -66,7 +66,7 @@ export default defineConfig({
   // markdown: {
   //   remarkPlugins: [remarkAttr],
   // },
-  output: 'static', // static by default; pages with prerender=false use SSR
+  output: 'server', // SSR by default (DB access at request time via D1 binding); truly static pages set prerender=true
   site: site.url,
   adapter: cloudflare({
     imageService: 'compile',

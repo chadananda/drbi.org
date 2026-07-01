@@ -1,4 +1,4 @@
-export const prerender = true;
+export const prerender = false;
 
 import site from '@data/site.json';
 import rss from '@astrojs/rss';
@@ -29,12 +29,6 @@ const mainLanguages = siteLanguages();
 //   tr: { flag: "🇹🇷", name: "Türkçe", dir: "ltr", en_name: "Turkish" }
 //  };
 
-
-export async function getStaticPaths() {
-  const languageList = await getUsedLanguages();
-  const paths = languageList.map((language) =>  ({params: { language }}));
-  return paths;
-}
 
 const iso8601DurToBytes = (duration, bitrate = 64) => {
   const [_, hours, minutes, seconds] = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/).map(t => parseInt(t) || 0);

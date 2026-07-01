@@ -1,5 +1,5 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 import Layout from "@layouts/Layout.astro";
 import PostThumb from "src/components/article/postThumb.astro";
@@ -9,30 +9,14 @@ import TopicFAQ from 'src/components/article/topicFAQ.astro';
 import { getCategories, getTopics, getPublishedArticles, getTeam } from "@utils/utils.js";
 import studyImg from "../../assets/drbi/study.webp";
 
-export async function getStaticPaths() {
-  // const allTopics = await getDataCollection("topics");
-  // const allFAQs = await getDataCollection("faqs");
-  const allTopics = await getTopics();
-  const allArticles = await getPublishedArticles();
-  const authors = await getTeam()
-  const categories = await getCategories();
-  return allTopics.map((topic) => {
-    const articleTopicsHasMatch = (ar) => ar.data?.topics?.includes(topic.id);
-    return {
-      params: {topic: topic.id},
-      props: {
-        topic,
-        // faqs: allFAQs.find(faq => faq.id === topic.id),
-        posts: allArticles.filter(articleTopicsHasMatch),
-        authors, categories
-      }
-    }
-  });
-}
-
-
 const slug = Astro.params.topic;
-const { topic, posts, authors, categories } = Astro.props;
+const allTopics = await getTopics();
+const topic = allTopics.find((t) => t.id === slug);
+if (!topic) return Astro.rewrite('/404');
+const allArticles = await getPublishedArticles();
+const posts = allArticles.filter((ar) => ar.data?.topics?.includes(slug));
+const authors = await getTeam();
+const categories = await getCategories();
 const topicSubtitle = topic?.description || 'Explore articles and teachings on this theme.';
 ---
 
