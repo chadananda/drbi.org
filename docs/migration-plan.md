@@ -73,13 +73,19 @@ status: PLANNING → ready to start Phase 1
 
 ### DECISION (2026-07-01): keep EmDash as the content storage layer in drbi-db (bidirectional blogworks compat / migrate-back). This repo adapts to EmDash schema. Also: build repo-local .claude/skills/ for content mgmt, shared with Telahoun (task #7).
 
-### Phase 3 — DB: Turso → D1
-- [ ] Inspect drbi-db (schema/data already there?). Reconcile with Turso schema.
-- [ ] Export Turso schema+data; import to D1 (wrangler d1 execute --file / migrations)
-- [ ] Rewrite src/lib/db.ts + callers: libsql client → D1 binding (env.DB.prepare) via locals.runtime
-- [ ] Port seed scripts (db:seed:*) to D1
-- [ ] Verify all reads/writes (content, admin CRUD)
-- Exit: D1 is sole datastore; Turso removed.
+### Phase 3 — DB: adapt to EmDash schema in D1 (drbi-db)  [content already migrated]
+DECISION: keep EmDash storage (blogworks compat / migrate-back). Adapt repo to it; do not import into a custom schema.
+- drbi-db EmDash tables (discovered): `_emdash_collections`, `_emdash_fields`, `_emdash_sections`, `_emdash_bylines`, `_emdash_content_bylines`, `_emdash_taxonomy_defs`, `_emdash_menus`/`_emdash_menu_items`, `_emdash_widgets`/`_emdash_widget_areas`, `_emdash_seo`, `_emdash_redirects`, `_emdash_comments`, `_emdash_oauth_*`/`_emdash_api_tokens`/`_emdash_authorization_codes`/`_emdash_device_codes`, `_emdash_cron_tasks`, `_emdash_rate_limits`, `_emdash_404_log`, FTS: `_emdash_fts_pages*` + `_emdash_fts_posts*` (→ content tables `pages`, `posts`). Plus `_cf_KV`, `_plugin_*`, `allowed_domains`, `audit_logs`, `auth_challenges`. (list truncated at 40 — enumerate fully next.)
+- [ ] Fully enumerate tables + dump schema of `posts`,`pages`,`_emdash_collections`,`_emdash_fields`,`_emdash_bylines`,`_emdash_taxonomy_defs`,`_emdash_comments`,users/auth tables
+- [ ] **BLOCKER for Phase 2 build**: src/lib/db.ts creates Turso client at MODULE scope → Workers forbids I/O in global scope ("get static paths" prerender 500). Rewrite to request-scoped D1 binding (locals.runtime.env.DB), lazy/no top-level I/O.
+- [ ] Rewrite src/lib/db.ts + src/lib/queries.ts + utils/content-utils.js + all callers to read/write EmDash schema via D1 binding
+- [ ] getStaticPaths for dynamic routes must fetch via D1 without global-scope I/O
+- [ ] Port seed scripts to D1/EmDash (or drop if EmDash owns content)
+- [ ] Verify content renders from EmDash + admin CRUD writes to EmDash
+- Exit: repo reads/writes EmDash schema in drbi-db; module-scope-I/O gone; worker build green.
+
+### Current build state (branch migration/cf-astro7, commit 5e49b19)
+Worker build: node-compat ✅, argon2 ✅ → NOW blocked on module-scope Turso I/O (needs Phase 3 db rewrite). Then: SESSION KV create, R2 upload wiring, deploy. All 3 grants approved.
 
 ### Phase 4 — Auth: One Tap + email + passwords (Workers-native)
 - [ ] jose sessions (JWT) + session store (D1/KV); replace Lucia
