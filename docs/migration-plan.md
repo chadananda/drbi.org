@@ -9,12 +9,22 @@ status: PLANNING → ready to start Phase 1
 - **DB:** Migrate Turso → **Cloudflare D1**.
 - **Auth:** Google One Tap + email + **keep passwords** (needs Workers-native hash).
   - Email mechanism: default **magic link** primary; OTP optional later.
-- **Host:** drbi.org is ALREADY on Cloudflare; this repo replaces that code.
-  Build on a temp `*.workers.dev` domain, cut the real route over at the end.
+- **Host:** drbi.org is ALREADY on Cloudflare — served by the **blogworks platform** (a parallel multi-tenant impl). This standalone repo REPLACES the blogworks-hosted drbi.org so Chad + Telahoun can co-own it (Telahoun isn't on blogworks). Build on a temp `*.workers.dev` domain; Phase 9 cutover = repoint the drbi.org route from blogworks → this Worker.
+
+## blogworks relationship (IMPORTANT for Phases 3 + 9)
+- The existing CF resources were provisioned/populated BY blogworks:
+  - **D1 `drbi-db`** already has blogworks' data → decide in Phase 3: reuse it as-is, or fresh schema. Do NOT clobber without reconciling.
+  - **R2 `cdn-assets/drbi.org/`** holds `events/`, `team/`, `uploads/` (event images, team photos, user uploads). Reuse in place.
+- Cutover risk: blogworks may still write to drbi-db/cdn-assets. Confirm blogworks is decommissioned for drbi (or read-only) before/at cutover.
+
+## Environment gotchas (this machine)
+- Repo is in **Dropbox** → node_modules now marked `com.dropbox.ignored` (xattr) so Dropbox stops locking it. Also ignored: dist/.astro/.vercel.
+- **npm cache `~/.npm/_cacache` has root-owned files** (past `sudo npm`) → EACCES. Workaround in use: `npm install --cache /Users/chad/.npm-migration-cache`. Permanent fix (user, when convenient): `sudo chown -R $(whoami) ~/.npm`.
+- `npx` is mangled by rtk hook; call binaries directly (`./node_modules/.bin/astro`, global `wrangler`).
 
 ## Existing Cloudflare resources (account b750d0f7…, chadananda@gmail.com — SHARED, scope to drbi-* only)
 - **D1 `drbi-db`** (uuid cc53feb7-5a9f-4754-9256-4a4c53edd4a2, ~1.3MB) — migration target already provisioned; contents not yet inspected (needs user OK).
-- **R2 `cdn-assets`** — likely already holds site images ("images might already be on r2"). Verify contents.
+- **R2 `cdn-assets`** — site images/storage already live here under the **`drbi.org/`** folder (shared bucket). Phase 2: point image URLs at the CDN domain fronting `cdn-assets/drbi.org/…` — no re-upload needed. Scope writes to the `drbi.org/` prefix only.
 - Wrangler 4.100 authed; scopes: workers/kv/d1 write. `wrangler` is on PATH (global fnm); `npx` is mangled by rtk — call `wrangler` directly or `rtk proxy npx …`.
 - PERMISSION NEEDED: explicit user OK to read/write `drbi-db` and `cdn-assets` (classifier blocks shared-prod reads otherwise).
 

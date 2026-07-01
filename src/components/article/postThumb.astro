@@ -46,7 +46,7 @@ const isPublished = pubdate <= new Date() && !post.data.draft;
       )}
       {small ? (
         <h2 class="text-sm font-semibold leading-snug tracking-tight -mt-2 mb-10" transition:persist> {post.data.title}
-          <span><a href={authorURL} aria-label={author_name} class="text-xs font-extralight text-gray-600 ml-2">{author_name}</span>
+          <span><a href={authorURL} aria-label={author_name} class="text-xs font-extralight text-gray-600 ml-2">{author_name}</a></span>
         </h2>
       ) : (
         <h2 class="text-xl font-semibold leading-snug tracking-tight mt-1" transition:persist> {post.data.title}
@@ -57,8 +57,10 @@ const isPublished = pubdate <= new Date() && !post.data.draft;
         <div class="text-sm mt-3 flex gap-2">
           <span class="text-gray-600"><a href={authorURL} aria-label={author_name}>{author_name} </a></span>
           {!hideDetails && (
-            <span class="text-gray-600">• </span>
-            <time class="text-gray-600" datetime={datePublished}> {datePublished} </time>
+            <Fragment>
+              <span class="text-gray-600">• </span>
+              <time class="text-gray-600" datetime={datePublished}> {datePublished} </time>
+            </Fragment>
           )}
         </div>
       )}

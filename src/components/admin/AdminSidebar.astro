@@ -99,10 +99,9 @@ const navigationItems = [
       {navigationItems.map((item) => (
         <li class="px-2">
           {item.items ? (
-            <!-- Collapsible section -->
             <div>
-              <button 
-                class="w-full flex items-center py-3 px-4 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 rounded-lg group-[.collapsed]:justify-center group-[.collapsed]:px-3" 
+              <button
+                class="w-full flex items-center py-3 px-4 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 rounded-lg group-[.collapsed]:justify-center group-[.collapsed]:px-3"
                 data-section={item.title.toLowerCase()}
                 aria-expanded="false"
               >
@@ -119,8 +118,8 @@ const navigationItems = [
               <ul class="nav-submenu ml-4 mt-1 space-y-1 max-h-0 overflow-hidden transition-all duration-300" data-submenu={item.title.toLowerCase()}>
                 {item.items.map((subItem) => (
                   <li>
-                    <a 
-                      href={subItem.href} 
+                    <a
+                      href={subItem.href}
                       class={`block py-2 px-4 pl-12 text-sm text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all duration-200 rounded-lg ${subItem.active ? 'text-blue-600 bg-blue-50' : ''}`}
                     >
                       {subItem.title}
@@ -130,9 +129,8 @@ const navigationItems = [
               </ul>
             </div>
           ) : (
-            <!-- Direct link -->
-            <a 
-              href={item.href} 
+            <a
+              href={item.href}
               class={`flex items-center py-3 px-4 text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-200 rounded-lg relative ${item.active ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-500' : ''}`}
             >
               <span class="nav-icon w-8 h-8 flex items-center justify-center text-xl flex-shrink-0">

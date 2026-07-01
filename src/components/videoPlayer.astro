@@ -86,7 +86,8 @@ const playerID = 'id-' + uniqueID;
 ---
 
 {thumbnail ? (
-  <!-- Thumbnail mode: small preview that opens fullscreen modal -->
+  <Fragment>
+  {/* Thumbnail mode: small preview that opens fullscreen modal */}
   <div id={playerID} class="video-player-thumbnail my-20 noprint">
     <button
       type="button"
@@ -100,7 +101,7 @@ const playerID = 'id-' + uniqueID;
         class="w-full h-auto"
         loading="lazy"
       />
-      <!-- Play button overlay -->
+      {/* Play button overlay */}
       <div class="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/40 transition-colors">
         <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
           <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
@@ -108,7 +109,7 @@ const playerID = 'id-' + uniqueID;
           </svg>
         </div>
       </div>
-      <!-- Title caption -->
+      {/* Title caption */}
       <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
         <p class="text-white text-sm font-medium">{title}</p>
         <p class="text-white/70 text-xs mt-1">Click to play fullscreen</p>
@@ -116,7 +117,7 @@ const playerID = 'id-' + uniqueID;
     </button>
   </div>
 
-  <!-- Fullscreen modal -->
+  {/* Fullscreen modal */}
   <div id={`${playerID}-modal`} class="video-modal fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-4">
     <button
       type="button"
@@ -128,7 +129,7 @@ const playerID = 'id-' + uniqueID;
       </svg>
     </button>
     <div class="video-modal-content w-full max-w-5xl aspect-video">
-      <!-- iframe inserted by JS on open -->
+      {/* iframe inserted by JS on open */}
     </div>
   </div>
 
@@ -180,11 +181,14 @@ const playerID = 'id-' + uniqueID;
       }
     }
   </script>
+  </Fragment>
 ) : (
-  <!-- Standard full-width embed -->
+  <Fragment>
+  {/* Standard full-width embed */}
   <div id={playerID} class="video-player w-full my-20 border-4 border-gray-400 p-3 relative overflow-hidden shadow-lg rounded-xl noprint" style="padding-top: 56%">
     <iframe class="absolute top-0 left-0 w-full h-full" src={embedURL} title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;" allowfullscreen></iframe>
   </div>
+  </Fragment>
 )}
 <!-- <script type="application/ld+json" set:html={JSON.stringify(schema)} /> -->
 

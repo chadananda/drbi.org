@@ -1,7 +1,7 @@
 ---
 export const prerender = true;
 
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import Sectionhead from "@components/sectionhead.astro";
@@ -22,7 +22,7 @@ const categories = await getCategories()
         {Array.isArray(categories) && categories.map((cat) => (
            <div class="flex-none"> <CategoryCard slug={cat.id} size="md" category={cat} /> </div>
         ))}
-        <ViewTransitions/>
+        <ClientRouter/>
       </main>
 
   </Container>
