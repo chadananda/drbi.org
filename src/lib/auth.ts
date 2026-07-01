@@ -53,7 +53,7 @@ lucia.createSession = async (userId: string, attributes?: Record<string, any>) =
 	};
 	
 	// Create JWT token
-	const jwtToken = adapter.createSessionToken(sessionData);
+	const jwtToken = await adapter.createSessionToken(sessionData);
 	
 	// Return session with JWT token as ID
 	return {
