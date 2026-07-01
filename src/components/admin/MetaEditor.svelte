@@ -16,19 +16,8 @@
   const wordCount = (text) => !!text ? `Words: ${text?.trim().split(/\s+/).filter(Boolean).length} | Characters: ${text?.length}` : '';
   const unSlugify = (slug) => slug.split('-').map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
   const generateS3Key = (filename) => `uploads/${post.id.split('/')[0] || slugify(post.title)}/${slugify(filename)}`;
-  const transformS3Url = (url='', width=300, height=200, format='webp', quality=90) => {
-    if (!url || !url.includes('.s3.')) return url;
-    try {
-      const imagePath = new URL(url).pathname;
-      let params = [];
-      if (width) params.push(`w=${width}`);
-      if (height) params.push(`h=${height}`);
-      params.push(`fm=${format}`, `q=${quality}`, `fit=crop`, `crop=faces`);
-      if (width && width < 400) params.push('usm=20&usmrad=20');
-      else params.push('sharp=20');
-      return `${site.img_base_url}${imagePath}?${params.join('&')}`;
-    } catch { return url; }
-  };
+  // Images on R2/CDN — pass through as-is; extra args ignored for compat
+  const transformS3Url = (url='') => url || '';
 
   $: isSimplified = post.language != 'en';
 
@@ -78,7 +67,7 @@
       {event.preventDefault(); if (dirty) savePost(); dirty = false;}
   };
 
-  const uploadS3_API = async (dataURL, s3key) => {
+  const uploadImage = async (dataURL, s3key) => {
     const base64Data = dataURL.split(',')[1];
     const mimeType = dataURL.substring(5, dataURL.indexOf(';base64'));
     const res = await fetch('/api/upload_s3', {
@@ -87,7 +76,7 @@
       body: JSON.stringify({ filedata: base64Data, mimeType, s3key, sessionid })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Failed to upload to S3');
+    if (!res.ok) throw new Error(data.message || 'Failed to upload image');
     return data.s3url;
   };
 
@@ -97,8 +86,8 @@
     const reader = new FileReader();
     reader.onload = async e => {
       try {
-        const s3URL = await uploadS3_API(e.target.result, generateS3Key(file.name));
-        if (s3URL) handleChange(key, s3URL);
+        const imageUrl = await uploadImage(e.target.result, generateS3Key(file.name));
+        if (imageUrl) handleChange(key, imageUrl);
       } catch (error) {
         console.error('Failed to upload media:', error);
       }

@@ -69,6 +69,7 @@ export default defineConfig({
   output: 'server', // SSR by default (DB access at request time via D1 binding); truly static pages set prerender=true
   site: site.url,
   adapter: cloudflare({
+    platformProxy: { enabled: true }, // local D1/R2/KV bindings during astro dev
     imageService: 'compile',
   }),
   integrations: [

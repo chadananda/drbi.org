@@ -8,12 +8,8 @@ import site from '../data/site.json' with { type: 'json' };
 import { getImage } from "astro:assets";
 // Legacy Astro DB import - temporarily disabled during migration
 // import { db, Categories, eq, Team, Users, Topics, Comments, inArray, NOW, Cron, Posts, count, lte, and } from 'astro:db';
-import AWS from 'aws-sdk';
 import { Buffer } from 'buffer';
-import dotenv from 'dotenv';  dotenv.config();
 // import { moderateComments } from './openai_request';
-import createDOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
 import { marked } from 'marked';
 import { create } from "domain";
 // import { date } from "zod";
@@ -622,7 +618,7 @@ export const getTopic = async (id) => {
 // console.log('getTopic, from collection:', result);
   } else { // db
     result = (await db.select().from(Topics).where(eq(Topics.id, topic)))?.pop();
-    // there are some bugs in drizzle/libsql wherein json objects are returned as strings. Deal with it:
+    // json fields may be returned as strings — parse if needed:
     if (result && typeof result.faqs === 'string') try {
       result.faqs = JSON.parse(result.faqs);
     } catch (e) {
@@ -950,71 +946,8 @@ export const guessContentType = (filename) => {
     default: return 'application/octet-stream';
   }
 }
-export const uploadS3 = async (base64Data, Key, ContentType='', Bucket='') => {
-  // Configuring the AWS region and credentials
-  const region = process.env.AWS_BUCKET_REGION; // 'us-east-1'
-  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-  ContentType = ContentType || guessContentType(Key)
-  Bucket = process.env.AWS_BUCKET_NAME;
-
-
-  if (!region) throw new Error('AWS_BUCKET_REGION not set');
-  if (!accessKeyId) throw new Error('AWS_ACCESS_KEY_ID not set');
-  if (!secretAccessKey) throw new Error('AWS_SECRET_ACCESS_KEY not set');
-  if (!Bucket) throw new Error('AWS_BUCKET_NAME not set');
-  if (!Key) throw new Error('Key not set');
-  if (!ContentType) throw new Error('ContentType could not be determined');
-
-
-  AWS.config.update({ region, accessKeyId, secretAccessKey });
-
-
-// console.log('uploadS3 process.env.AWS_BUCKET_REGION', process.env.AWS_BUCKET_REGION);
-// console.log('uploadS3 process.env.AWS_ACCESS_KEY_ID', process.env.AWS_ACCESS_KEY_ID);
-// console.log('uploadS3 process.env.AWS_BUCKET_NAME', process.env.AWS_BUCKET_NAME);
-
-  // Convert base64 string to binary buffer
-  const Body = Buffer.from(base64Data, 'base64');
-  // Create an S3 instance
-  const s3 = new AWS.S3();
-  // Setting up S3 upload parameters
-  const params = {  Bucket, Key, Body, ContentType };
-  try {
-    const data = await s3.upload(params).promise();
-    console.log(`File uploaded successfully at ${data.Location}`);
-    return data.Location;
-  } catch (err) {
-   console.error('Error uploading file:', err);
-    throw err;
-  }
-}
-export const transformS3Url = (url = '', width = null, height = null, format = 'webp', quality=0) => {
-  url = url || '';
-  if (!url.includes('.s3.')) return url;
-  const imagePath = new URL(url).pathname;
-  // Ensure width and height are numbers, not objects
-  width = width ? parseInt(width, 10) : null;
-  height = height ? parseInt(height, 10) : null;
-  let params = [];
-  if (width && !isNaN(width)) params.push(`w=${width}`);
-  if (height && !isNaN(height)) params.push(`h=${height}`);
-  // set default quality
-  if (quality===0 && width<400) quality = 100; else if (quality===0) quality = 80;
-  params.push(`fm=${format}`, `q=${quality}`, `fit=crop`, `crop=faces`);
-  // sharpen small images
-  if (width<400) params.push('usm=20&usmrad=20'); else params.push('sharp=20')
-  // add watermark ??
-  // if (site.logo.includes('.s3.')) {
-    // url encode site.logo to make a watermark
-  // const watermark = Buffer.from(site.logo).toString('base64')
-  // Base64.urlsafe_encode64(site.logo).delete('=')
-  // params.push(`mark64=${watermark}`);//, `mark-alpha=10`, `mark-scale=10`);
-
-  //  &mark64=aHR0cHM6Ly9iYWhhaS1lZHVjYXRpb24ub3JnL2Zhdmljb24uc3Zn&mark-scale=10&mark-alpha=10
-  // }
-  return `${site.img_base_url}${imagePath}?${params.join('&')}`;
-}
+// Images are served from R2 at cdn.shrtr.com — no resizing transform needed
+export const transformS3Url = (url = '') => url || '';
 export const displayImageObj = (url, alt='', width=0, height=0, format='webp', quality=80) => {
   // Ensure width and height are numbers, not objects
   width = width ? parseInt(width, 10) : 0;
@@ -1097,9 +1030,11 @@ export const slugify = (text) => {
   })
 }
 export const sanitizeHTML = (rawHTML) => {
-  const window = new JSDOM('').window;
-  const DOMPurify = createDOMPurify(window);
-  return DOMPurify.sanitize(rawHTML);
+  if (!rawHTML || typeof rawHTML !== 'string') return '';
+  return rawHTML
+    .replace(/<\s*(script|style)[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '')
+    .replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/(href|src)\s*=\s*("|')\s*javascript:[^"']*\2/gi, '$1=$2#$2');
 }
 export const renderMarkdown = (md) => {
   const rawHTML = marked(md);

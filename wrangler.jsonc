@@ -19,6 +19,12 @@
       "binding": "R2",
       "bucket_name": "cdn-assets"
     }
+  ],
+  "kv_namespaces": [
+    {
+      // adapter auto-enables Astro sessions on this binding; reuse existing SESSION namespace
+      "binding": "SESSION",
+      "id": "7f25aeca4da74de38f5cde68b5bac874"
+    }
   ]
-  // KV session namespace added in Phase 4 (auth) — needs `wrangler kv namespace create`.
 }

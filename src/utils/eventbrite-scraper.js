@@ -159,138 +159,52 @@ const extractCategories = (html) => {
 // Sleep function for rate limiting
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Upload images to S3 instead of local storage
+// Return event image URLs as-is (upload to R2 handled separately)
+// TODO: R2 — wire up R2 upload here to persist images beyond CDN scrape URLs
 const downloadEventImages = async (event, details) => {
   try {
-    const { uploadS3 } = await import('./s3-upload.js');
-    
-    console.log(`📸 Downloading images for event ${event.id}`);
-    
-    // Find working direct CDN URLs
+    console.log(`📸 Resolving images for event ${event.id}`);
     let mainImageUrl = null;
     let teacherImageUrl = null;
-    
-    // Priority 1: Use the main event image from organization page (already optimized to w=2000, h=1000)
+    // Priority 1: main event image from org page
     if (event.image && (event.image.includes('cdn.evbuc.com') || event.image.includes('img.evbuc.com'))) {
       if (event.image.includes('img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com')) {
-        // Decode proxy URL
         mainImageUrl = decodeURIComponent(event.image.replace('https://img.evbuc.com/', ''));
       } else if (event.image.startsWith('https://cdn.evbuc.com')) {
-        // Direct CDN URL
         mainImageUrl = event.image;
       } else {
-        // Try the original URL as-is
         mainImageUrl = event.image;
       }
       console.log(`Using main event image: ${mainImageUrl}`);
     }
-    
-    // Priority 2: Look for teacher image in the images array (skip first if it matches main)
+    // Priority 2: teacher image from images array (different from main)
     if (details.images && details.images.length > 0) {
-      // Decode all available images
       const decodedUrls = details.images
         .map(url => {
-          if (url.includes('img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com')) {
-            return decodeURIComponent(url.replace('https://img.evbuc.com/', ''));
-          } else if (url.startsWith('https://cdn.evbuc.com')) {
-            return url;
-          }
+          if (url.includes('img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com')) return decodeURIComponent(url.replace('https://img.evbuc.com/', ''));
+          if (url.startsWith('https://cdn.evbuc.com')) return url;
           return null;
         })
         .filter(url => url);
-      
-      // Find a teacher image that's different from the main image
       for (const url of decodedUrls) {
-        // Skip if this is the same as main image (check base URL without query params)
-        const mainImageBase = mainImageUrl ? mainImageUrl.split('?')[0] : '';
-        const urlBase = url.split('?')[0];
-        
-        if (urlBase !== mainImageBase) {
-          teacherImageUrl = url;
-          console.log(`Using teacher image: ${teacherImageUrl}`);
-          break;
-        }
+        if (url.split('?')[0] !== (mainImageUrl || '').split('?')[0]) { teacherImageUrl = url; break; }
       }
     }
-    
-    // Fallback: if no main image found, use first available image
+    // Fallback: first available image
     if (!mainImageUrl && details.images && details.images.length > 0) {
-      const firstImage = details.images[0];
-      if (firstImage.includes('img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com')) {
-        mainImageUrl = decodeURIComponent(firstImage.replace('https://img.evbuc.com/', ''));
-      } else if (firstImage.startsWith('https://cdn.evbuc.com')) {
-        mainImageUrl = firstImage;
-      }
-      console.log(`Fallback main image: ${mainImageUrl}`);
+      const first = details.images[0];
+      if (first.includes('img.evbuc.com/https%3A%2F%2Fcdn.evbuc.com')) mainImageUrl = decodeURIComponent(first.replace('https://img.evbuc.com/', ''));
+      else if (first.startsWith('https://cdn.evbuc.com')) mainImageUrl = first;
     }
-    
-    let mainImageS3Url = null;
-    let teacherImageS3Url = null;
-    
-    // Download and upload main image to S3
-    if (mainImageUrl) {
-      try {
-        console.log(`📥 Downloading main image from: ${mainImageUrl}`);
-        const response = await fetch(mainImageUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-          }
-        });
-        
-        if (response.ok) {
-          const buffer = await response.arrayBuffer();
-          const base64Data = Buffer.from(buffer).toString('base64');
-          const s3Key = `events/${event.id}-main.jpg`;
-          
-          mainImageS3Url = await uploadS3(base64Data, s3Key, 'image/jpeg');
-          console.log(`✅ Uploaded main image to S3: ${mainImageS3Url} (${buffer.byteLength} bytes)`);
-        } else {
-          console.log(`⚠️ Failed to download main image: ${response.status}`);
-        }
-      } catch (error) {
-        console.log(`⚠️ Error downloading/uploading main image: ${error.message}`);
-      }
-    }
-    
-    // Download and upload teacher image to S3
-    if (teacherImageUrl) {
-      try {
-        console.log(`📥 Downloading teacher image from: ${teacherImageUrl}`);
-        const response = await fetch(teacherImageUrl, {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-          }
-        });
-        
-        if (response.ok) {
-          const buffer = await response.arrayBuffer();
-          const base64Data = Buffer.from(buffer).toString('base64');
-          const s3Key = `events/${event.id}-teacher.jpg`;
-          
-          teacherImageS3Url = await uploadS3(base64Data, s3Key, 'image/jpeg');
-          console.log(`✅ Uploaded teacher image to S3: ${teacherImageS3Url} (${buffer.byteLength} bytes)`);
-        } else {
-          console.log(`⚠️ Failed to download teacher image: ${response.status}`);
-        }
-      } catch (error) {
-        console.log(`⚠️ Error downloading/uploading teacher image: ${error.message}`);
-      }
-    }
-    
     return {
-      mainImage: mainImageS3Url || null,
-      teacherImage: teacherImageS3Url || null,
-      downloadedMain: !!mainImageS3Url,
-      downloadedTeacher: !!teacherImageS3Url
+      mainImage: mainImageUrl || null,
+      teacherImage: teacherImageUrl || null,
+      downloadedMain: !!mainImageUrl,
+      downloadedTeacher: !!teacherImageUrl
     };
   } catch (error) {
-    console.error(`❌ Error processing images for event ${event.id}:`, error.message);
-    return {
-      mainImage: null,
-      teacherImage: null,
-      downloadedMain: false,
-      downloadedTeacher: false
-    };
+    console.error(`Error resolving images for event ${event.id}:`, error.message);
+    return { mainImage: null, teacherImage: null, downloadedMain: false, downloadedTeacher: false };
   }
 };
 
@@ -552,7 +466,7 @@ export const updateEvents = async (forceRefresh = false) => {
           visible: true,
           featured: false,
           
-          // Images (now S3 URLs)
+          // Images (CDN URLs as scraped)
           mainImage: localMainImage,
           teacherImage: localTeacherImage,
           

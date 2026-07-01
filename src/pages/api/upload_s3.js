@@ -1,50 +1,18 @@
-// post /api/upload_s3
+// post /api/upload_s3 — receives base64 file data, uploads to R2, returns public path
 export const prerender = false;
 
-import { uploadS3, getTeamMemberBySlug, guessContentType } from '@utils/utils.js';
+import { uploadR2 } from '../../utils/r2-upload.js';
+import { getTeamMemberBySlug, guessContentType } from '@utils/utils.js';
 import { lucia } from "../../lib/auth";
-
-// console.log('Just entered /api/upload_s3')
-
-// export const POST = async ({ request }) => {
-//   if (request.headers.get("Content-Type") === "application/json") {
-//     const body = await request.json();
-//     let {filedata, s3key} = body;
-
-//     // validate user has team role
-//     const { user } = Astro.locals || {};
-//     console.log('user:', Astro.locals);
-//     if (!['superadmin', 'admin','editor','writer'].includes(user.role)) {
-//       return new Response('User verification failed', { status: 400 });
-//     }
-
-//     // validate user is valid team member
-//     let member = await getTeamMember(user.email);
-//     console.log('member:', member);
-//     if (!member) return new Response('User not found', { status: 400 });
-
-//     // validate filedata
-//     if (!filedata) return new Response('No filedata provided', { status: 400 });
-
-//     // upload to S3
-//     let s3url = await upload_s3(filedata, s3key);
-
-//     if (s3url) return new Response(JSON.stringify({s3url}), { status: 200 });
-//       else return new Response('S3 upload failed', { status: 400 });
-//   }
-//   return new Response(null, { status: 400 });
-// }
+import { env } from 'cloudflare:workers';
 
 export const POST = async ({ request }) => {
-  // console.log('upload_s3 post handler', context.request.headers.get("Content-Type"));
-  // Handling different content types
   if (request.headers.get("Content-Type").includes("application/json")) {
     try {
       const body = await request.json();
       let {filedata, mimeType, s3key, sessionid} = body;
       mimeType = mimeType || guessContentType(s3key);
 
-      //console.log('Attempting to upload: ', s3key, sessionid, filedata.length);
       // verify session and role
       const { user } = await lucia.validateSession(sessionid);
       if (!user || !['superadmin', 'admin', 'editor', 'writer'].includes(user.role)) {
@@ -55,12 +23,17 @@ export const POST = async ({ request }) => {
       // make sure we have file data
       if (!filedata) return new Response('No filedata provided', { status: 400 });
 
-      console.log('uploading to s3:', s3key, mimeType, filedata.length);
-      const s3url = await uploadS3(filedata, s3key, mimeType);
+      // decode base64 → Uint8Array for R2
+      const binaryStr = atob(filedata.includes(',') ? filedata.split(',')[1] : filedata);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
 
-      //console.log('s3url:', s3url);
+      const r2 = env.R2;
+      console.log('uploading to R2:', s3key, mimeType, filedata.length);
+      const s3url = await uploadR2(r2, s3key, bytes, mimeType);
+
       return s3url ? new Response(JSON.stringify({s3url}), { status: 200 })
-                   : new Response('S3 upload failed', { status: 500 });
+                   : new Response('R2 upload failed', { status: 500 });
 
     } catch (error) {
       console.error('Error processing request:', error);
@@ -70,5 +43,3 @@ export const POST = async ({ request }) => {
     return new Response('Invalid Content-Type', { status: 415 });
   }
 };
-
-

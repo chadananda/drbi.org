@@ -1,13 +1,12 @@
 // src/middleware.ts
 import { lucia } from "./lib/auth";
 import { verifyRequestOrigin as verifyOrig } from "lucia";
-import { setD1 } from "./lib/db";
 // import { defineMiddleware } from "astro:middleware";
 
 
 export const onRequest = async (context, next) => {
-  // Inject the request-scoped Cloudflare D1 binding for all DB access (no module-scope I/O).
-  setD1((context.locals as any)?.runtime?.env?.DB);
+  // DB bindings are read directly from `cloudflare:workers` env in src/lib/db.ts
+  // (Astro v6+ removed Astro.locals.runtime.env).
   const path = new URL(context.request.url).pathname;
   // Skip admin auth for non-admin paths
   if (!path.startsWith('/admin')) return next();
