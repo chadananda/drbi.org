@@ -625,49 +625,64 @@ export async function getFaqs() {
 
 // ─── Users ───────────────────────────────────────────────────────────────────
 
+// EmDash users schema: role is an INTEGER level, `disabled` (not `active`), no password.
+// NOTE: confirm these level values match blogworks/EmDash's role convention.
+const ROLE_TO_LEVEL: Record<string, number> = { superadmin: 100, admin: 40, editor: 30, author: 20 };
+function levelToRole(level: number): string {
+  if (level >= 100) return 'superadmin';
+  if (level >= 40) return 'admin';
+  if (level >= 30) return 'editor';
+  return 'author';
+}
+function roleToLevel(role: string): number { return ROLE_TO_LEVEL[role] ?? 20; }
+
 export interface UserRow {
   id: string;
   email: string;
-  hashed_password: string;
-  name: string;
-  role: string;
-  active: number;
+  name: string | null;
+  avatar_url: string | null;
+  role: number;             // EmDash integer level
+  email_verified: number;
+  data: string | null;
   created_at: string;
   updated_at: string;
+  disabled: number;
 }
 
 function shapeUser(row: UserRow) {
   return {
     id: row.id,
     email: row.email,
-    name: row.name,
-    role: row.role,
-    active: row.active === 1,
+    name: row.name ?? '',
+    role: levelToRole(Number(row.role)),
+    active: Number(row.disabled) === 0,
+    email_verified: Number(row.email_verified) === 1,
     created_at: row.created_at,
   };
 }
 
 export async function getUsers() {
-  const result = await db.execute('SELECT id, email, name, role, active, created_at, updated_at FROM users ORDER BY created_at ASC');
+  const result = await db.execute("SELECT id, email, name, role, disabled, email_verified, created_at FROM users ORDER BY created_at ASC");
   return (result.rows as unknown as UserRow[]).map(shapeUser);
 }
 
 export async function getUserById(id: string) {
   const result = await db.execute({ sql: 'SELECT * FROM users WHERE id = ? LIMIT 1', args: [id] });
   const row = result.rows[0] as unknown as UserRow | undefined;
-  return row ? row : null;
+  return row ? shapeUser(row) : null;
 }
 
 export async function getUserByEmail(email: string) {
   const result = await db.execute({ sql: 'SELECT * FROM users WHERE email = ? LIMIT 1', args: [email.toLowerCase()] });
   const row = result.rows[0] as unknown as UserRow | undefined;
-  return row ? row : null;
+  return row ? shapeUser(row) : null;
 }
 
-export async function createUser(data: { id: string; email: string; hashed_password: string; name: string; role: string }) {
+// Whitelist entry. Passwordless — EmDash users have no password column (hashed_password ignored).
+export async function createUser(data: { id: string; email: string; name: string; role: string; hashed_password?: string }) {
   await db.execute({
-    sql: `INSERT INTO users (id, email, hashed_password, name, role) VALUES (?,?,?,?,?)`,
-    args: [data.id, data.email.toLowerCase(), data.hashed_password, data.name, data.role]
+    sql: `INSERT INTO users (id, email, name, role, email_verified, disabled) VALUES (?,?,?,?,0,0)`,
+    args: [data.id, data.email.toLowerCase(), data.name, roleToLevel(data.role)]
   });
   return getUserById(data.id);
 }
@@ -678,9 +693,8 @@ export async function updateUser(id: string, data: Record<string, any>) {
   const args: any[] = [now];
   if (data.email != null) { fields.unshift('email = ?'); args.unshift(data.email.toLowerCase()); }
   if (data.name != null) { fields.unshift('name = ?'); args.unshift(data.name); }
-  if (data.role != null) { fields.unshift('role = ?'); args.unshift(data.role); }
-  if (data.active != null) { fields.unshift('active = ?'); args.unshift(data.active ? 1 : 0); }
-  if (data.hashed_password != null) { fields.unshift('hashed_password = ?'); args.unshift(data.hashed_password); }
+  if (data.role != null) { fields.unshift('role = ?'); args.unshift(roleToLevel(data.role)); }
+  if (data.active != null) { fields.unshift('disabled = ?'); args.unshift(data.active ? 0 : 1); }
   args.push(id);
   await db.execute({ sql: `UPDATE users SET ${fields.join(', ')} WHERE id = ?`, args });
   return getUserById(id);
