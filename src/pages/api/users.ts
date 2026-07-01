@@ -41,8 +41,10 @@ export const POST: import('astro').APIRoute = async ({ request }) => {
 
   const body = await request.json();
   const { name, email, password, role } = body;
-  if (!name || !email || !password) {
-    return new Response(JSON.stringify({ error: 'name, email and password required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
+  // Whitelist model: password is OPTIONAL — a whitelisted user signs in via Google
+  // One Tap or an email magic-link. Only name + email + role are required.
+  if (!name || !email) {
+    return new Response(JSON.stringify({ error: 'name and email required' }), { status: 400, headers: { 'Content-Type': 'application/json' } });
   }
   const validRole = ROLES.includes(role) ? role : 'author';
   // superadmin can only be set by superadmin
@@ -50,7 +52,7 @@ export const POST: import('astro').APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Only superadmin can create superadmin' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
   }
 
-  const hashed_password = await hashPassword(password);
+  const hashed_password = password ? await hashPassword(password) : '';
   const id = email.toLowerCase().replace(/[^a-z0-9]/g, '-');
   try {
     await createUser({ id, email, hashed_password, name, role: validRole });
