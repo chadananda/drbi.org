@@ -3,7 +3,7 @@ export const prerender = false;
 
 import Layout from '@layouts/AdminLayout.astro';
 import { getUserById, createUser, updateUser } from '@lib/queries';
-import { Argon2id } from 'oslo/password';
+import { hashPassword } from '@lib/password';
 
 const currentUser = Astro.locals?.user;
 if (!currentUser || !['superadmin', 'admin'].includes(currentUser.role)) return Astro.redirect('/admin');
@@ -36,8 +36,7 @@ if (Astro.request.method === 'POST') {
       if (isNew) {
         if (!password) { errorMsg = 'Password is required for new users.'; }
         else {
-          const argon = new Argon2id();
-          const hashed_password = await argon.hash(password);
+          const hashed_password = await hashPassword(password);
           const newId = email.replace(/[^a-z0-9]/g, '-');
           await createUser({ id: newId, email, hashed_password, name, role });
           return Astro.redirect('/admin/users');
@@ -45,8 +44,7 @@ if (Astro.request.method === 'POST') {
       } else {
         const updates: Record<string, any> = { name, email, role, active };
         if (password) {
-          const argon = new Argon2id();
-          updates.hashed_password = await argon.hash(password);
+          updates.hashed_password = await hashPassword(password);
         }
         await updateUser(id!, updates);
         successMsg = 'User updated successfully.';

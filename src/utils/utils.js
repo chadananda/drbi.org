@@ -8,7 +8,6 @@ import site from '../data/site.json' with { type: 'json' };
 import { getImage } from "astro:assets";
 // Legacy Astro DB import - temporarily disabled during migration
 // import { db, Categories, eq, Team, Users, Topics, Comments, inArray, NOW, Cron, Posts, count, lte, and } from 'astro:db';
-import * as argon2 from 'argon2';
 import AWS from 'aws-sdk';
 import { Buffer } from 'buffer';
 import dotenv from 'dotenv';  dotenv.config();

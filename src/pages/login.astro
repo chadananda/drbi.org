@@ -3,7 +3,7 @@ export const prerender = false;
 export const ssr = true;
 
 import { lucia, adminUser } from '@lib/auth';
-import { Argon2id } from "oslo/password";
+import { verifyPassword } from '@lib/password';
 import Layout from "@layouts/Layout.astro";
 import { logoutUser } from '@utils/utils';
 import { getUserByEmail } from '@lib/queries';
@@ -45,8 +45,7 @@ if (Astro.request.method === "POST") {
         if (!dbUser.active) {
           errorMsg = 'Account is disabled.';
         } else {
-          const argon = new Argon2id();
-          const valid = await argon.verify(dbUser.hashed_password, password);
+          const valid = await verifyPassword(dbUser.hashed_password, password);
           if (valid) { userId = dbUser.id; userRole = dbUser.role; }
           else errorMsg = 'Invalid email or password.';
         }

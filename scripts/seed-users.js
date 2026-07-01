@@ -1,6 +1,6 @@
 // Seed superadmin user from env vars. Safe to re-run — skips if user already exists.
 import { createClient } from '@libsql/client';
-import { Argon2id } from 'oslo/password';
+import { hashPassword } from '../src/lib/password.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -21,8 +21,7 @@ const existing = await db.execute({ sql: 'SELECT id FROM users WHERE email = ?',
 if (existing.rows.length > 0) {
   console.log(`Superadmin already exists: ${email}`);
 } else {
-  const argon = new Argon2id();
-  const hashed_password = await argon.hash(password);
+  const hashed_password = await hashPassword(password);
   await db.execute({
     sql: 'INSERT INTO users (id, email, hashed_password, name, role) VALUES (?,?,?,?,?)',
     args: [id, email, hashed_password, name, 'superadmin']

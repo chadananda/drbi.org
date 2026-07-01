@@ -3,7 +3,7 @@ export const prerender = false;
 
 import { lucia } from '../../lib/auth';
 import { getUsers, getUserById, createUser, updateUser, deleteUser } from '../../lib/queries';
-import { Argon2id } from 'oslo/password';
+import { hashPassword } from '../../lib/password';
 
 const ROLES = ['superadmin', 'admin', 'editor', 'author'];
 
@@ -50,8 +50,7 @@ export const POST: import('astro').APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Only superadmin can create superadmin' }), { status: 403, headers: { 'Content-Type': 'application/json' } });
   }
 
-  const argon = new Argon2id();
-  const hashed_password = await argon.hash(password);
+  const hashed_password = await hashPassword(password);
   const id = email.toLowerCase().replace(/[^a-z0-9]/g, '-');
   try {
     await createUser({ id, email, hashed_password, name, role: validRole });
@@ -82,8 +81,7 @@ export const PUT: import('astro').APIRoute = async ({ request }) => {
   }
   if (body.active != null) updates.active = body.active;
   if (body.password) {
-    const argon = new Argon2id();
-    updates.hashed_password = await argon.hash(body.password);
+    updates.hashed_password = await hashPassword(body.password);
   }
 
   await updateUser(id, updates);
