@@ -44,7 +44,7 @@ function normalizePageUrl(url) {
 function normalizeReferrer(referrer) {
   if (!referrer) return 'direct';
 
-  // Handle special PostHog direct traffic markers
+  // Handle direct traffic markers (including $direct from imported data)
   if (referrer === '$direct' || referrer === 'direct' || referrer === '') {
     return '$direct';
   }
@@ -304,95 +304,6 @@ function combineImportedData(imports) {
   return combined;
 }
 
-/**
- * Combine imported data with live PostHog data (avoiding date overlaps)
- */
-export function combineAnalyticsData(importedData, posthogData) {
-  // If no imported data, return PostHog data as-is
-  if (!importedData) {
-    return posthogData;
-  }
-
-  // If no PostHog data, return imported data as-is
-  if (!posthogData || posthogData.isDemo) {
-    return {
-      ...importedData,
-      isHybrid: true,
-      dataSource: 'imported'
-    };
-  }
-
-  // Determine date boundaries to avoid double-counting
-  const importedEndDate = new Date(importedData.dateRange.endDate || importedData.dateRange.end);
-  const posthogStartDate = new Date(posthogData.dateRange.startDate || posthogData.dateRange.start);
-  
-  console.log(`🔄 Merging data: Imported ends ${importedEndDate.toISOString().split('T')[0]}, PostHog starts ${posthogStartDate.toISOString().split('T')[0]}`);
-  
-  // Check for overlap and decide merge strategy
-  // Only consider overlap if PostHog has meaningful data (more than minimal tracking)
-  const hasOverlap = importedEndDate >= posthogStartDate && 
-                     (posthogData.totalPageViews > 50);
-  
-  if (hasOverlap) {
-    console.log('⚠️  Date overlap detected with real PostHog data - using PostHog for recent data, imported for historical');
-    
-    // Use PostHog for current period, imported for historical period only
-    // Filter daily stats to avoid overlap
-    const combinedDailyStats = combineNonOverlappingDailyStats(
-      importedData.dailyStats || [], 
-      posthogData.pageViews || [], 
-      posthogData.uniqueVisitors || [],
-      importedEndDate,
-      posthogStartDate
-    );
-    
-    // For aggregated data (top pages, referrers), give preference to PostHog for overlapping periods
-    return {
-      pageViews: combinedDailyStats.pageViews,
-      topPages: combineTopPages(importedData.topPages, posthogData.topPages),
-      referrers: combineReferrers(importedData.referrers, posthogData.referrers),
-      countries: posthogData.countries || importedData.countries || [],
-      states: posthogData.states || importedData.states || [],
-      uniqueVisitors: combinedDailyStats.uniqueVisitors,
-      dateRange: {
-        startDate: getEarlierDate(importedData.dateRange.startDate || importedData.dateRange.start, 
-                                 posthogData.dateRange.startDate || posthogData.dateRange.start),
-        endDate: getLaterDate(importedData.dateRange.endDate || importedData.dateRange.end, 
-                             posthogData.dateRange.endDate || posthogData.dateRange.end)
-      },
-      totalPageViews: combinedDailyStats.totalPageViews,
-      totalUniqueVisitors: combinedDailyStats.totalUniqueVisitors,
-      isHybrid: true,
-      dataSource: 'date-aware-combined',
-      sources: importedData.sources,
-      isDemo: false
-    };
-  } else {
-    console.log('✅ No date overlap - safe to combine all data');
-    
-    // No overlap, safe to combine everything
-    return {
-      pageViews: [...(importedData.pageViews || []), ...(posthogData.pageViews || [])],
-      topPages: combineTopPages(importedData.topPages, posthogData.topPages),
-      referrers: combineReferrers(importedData.referrers, posthogData.referrers),
-      countries: [...(importedData.countries || []), ...(posthogData.countries || [])],
-      states: posthogData.states || importedData.states || [],
-      uniqueVisitors: [...(importedData.uniqueVisitors || []), ...(posthogData.uniqueVisitors || [])],
-      dateRange: {
-        startDate: getEarlierDate(importedData.dateRange.startDate || importedData.dateRange.start, 
-                                 posthogData.dateRange.startDate || posthogData.dateRange.start),
-        endDate: getLaterDate(importedData.dateRange.endDate || importedData.dateRange.end, 
-                             posthogData.dateRange.endDate || posthogData.dateRange.end)
-      },
-      totalPageViews: (importedData.totalPageViews || 0) + (posthogData.totalPageViews || 0),
-      totalUniqueVisitors: (importedData.totalUniqueVisitors || 0) + (posthogData.totalUniqueVisitors || 0),
-      isHybrid: true,
-      dataSource: 'non-overlapping-combined',
-      sources: importedData.sources,
-      isDemo: false
-    };
-  }
-}
 
 /**
  * Combine top pages from different sources with URL normalization
@@ -492,62 +403,3 @@ function combineReferrers(imported, live) {
     .slice(0, 20);
 }
 
-/**
- * Get the earlier of two dates
- */
-function getEarlierDate(date1, date2) {
-  if (!date1) return date2;
-  if (!date2) return date1;
-  return date1 < date2 ? date1 : date2;
-}
-
-/**
- * Get the later of two dates
- */
-function getLaterDate(date1, date2) {
-  if (!date1) return date2;
-  if (!date2) return date1;
-  return date1 > date2 ? date1 : date2;
-}
-
-/**
- * Combine daily stats avoiding overlapping dates
- * Uses imported data for historical period, PostHog for current period
- */
-function combineNonOverlappingDailyStats(importedDailyStats, posthogPageViews, posthogUniqueVisitors, cutoffDate, posthogStartDate) {
-  const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-  const posthogStartStr = posthogStartDate.toISOString().split('T')[0];
-  
-  // Filter imported data to only include dates before PostHog starts
-  // Use <= instead of < to include the last day of imported data if PostHog has no data for it
-  const historicalStats = importedDailyStats.filter(day => day.date < posthogStartStr);
-  
-  // Create PostHog daily stats from the arrays (assumes they're aligned by day)
-  const posthogStats = [];
-  const posthogDays = Math.min(posthogPageViews.length, posthogUniqueVisitors.length);
-  
-  for (let i = 0; i < posthogDays; i++) {
-    const date = new Date(posthogStartDate);
-    date.setDate(date.getDate() + i);
-    posthogStats.push({
-      date: date.toISOString().split('T')[0],
-      pageViews: posthogPageViews[i] || 0,
-      uniqueVisitors: posthogUniqueVisitors[i] || 0
-    });
-  }
-  
-  // Combine non-overlapping periods
-  const combinedStats = [...historicalStats, ...posthogStats];
-  
-  // Calculate totals
-  const totalPageViews = combinedStats.reduce((sum, day) => sum + (day.pageViews || 0), 0);
-  const totalUniqueVisitors = combinedStats.reduce((sum, day) => sum + (day.uniqueVisitors || 0), 0);
-  
-  return {
-    dailyStats: combinedStats,
-    pageViews: combinedStats.map(day => day.pageViews || 0),
-    uniqueVisitors: combinedStats.map(day => day.uniqueVisitors || 0),
-    totalPageViews,
-    totalUniqueVisitors
-  };
-}

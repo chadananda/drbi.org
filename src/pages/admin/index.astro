@@ -9,7 +9,6 @@ export const prerender = false;
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import { getContentByCollection } from '../../lib/queries';
 // Import analytics utilities
-import { combineAnalyticsData } from '../../utils/analytics-utils.js';
 import { loadAnalyticsSummary } from '../../utils/analytics-cache.js';
 
 // Get all posts for dashboard overview
@@ -37,12 +36,7 @@ const selectedPeriod = parseInt(url.searchParams.get('period') || '30', 10);
 const validPeriods = [30, 60, 90, 365, 730];
 const period = validPeriods.includes(selectedPeriod) ? selectedPeriod : 30;
 
-// PostHog API integration
-const posthogApiKey = process.env.POSTHOG_API_SERVER_KEY || import.meta.env.POSTHOG_API_SERVER_KEY || process.env.POSTHOG_API_KEY || import.meta.env.POSTHOG_API_KEY;
-const posthogHost = process.env.POSTHOG_HOST || import.meta.env.POSTHOG_HOST || 'https://us.i.posthog.com';
-
 let analyticsData = null;
-let analyticsError = null;
 
 // Helper function to create demo data
 function createDemoData() {
@@ -141,179 +135,16 @@ function createDemoData() {
 
 
 
-// Determine if we're in development
-const isDevelopment = import.meta.env.DEV ||
-                     import.meta.env.APP_ENV === 'dev' ||
-                     process.env.NODE_ENV === 'development';
-
-// Load imported analytics data (if any) - use fast cached summary  
+// Load imported analytics data (historical/archived) — use fast cached summary
 const importedAnalytics = await loadAnalyticsSummary();
-
-// Initialize with imported data as fallback
-if (importedAnalytics) {
-  analyticsData = importedAnalytics;
-}
-
-if (posthogApiKey && posthogApiKey.trim()) {
-  // Try to get real PostHog data and combine with imported data
-  console.log('PostHog API key found, fetching real analytics data to combine with imported data...');
-  try {
-    // Get current date and calculate start date based on selected period
-    const now = new Date();
-    const periodStart = new Date(now.getTime() - (period * 24 * 60 * 60 * 1000));
-
-    // Format dates for PostHog API
-    const endDate = now.toISOString().split('T')[0];
-    const startDate = periodStart.toISOString().split('T')[0];
-
-    console.log(`Fetching PostHog data for ${period} days: ${startDate} to ${endDate}`);
-
-    const headers = {
-      'Authorization': 'Bearer ' + posthogApiKey,
-      'Content-Type': 'application/json'
-    };
-
-    // Multiple API calls to get comprehensive data
-    const apiCalls = await Promise.allSettled([
-      // Page views over time
-      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0}]&date_from=' + startDate + '&date_to=' + endDate + '&interval=day', {
-        headers
-      }),
-
-      // Top pages
-      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$current_url&date_from=' + startDate + '&date_to=' + endDate, {
-        headers
-      }),
-
-      // Referrer sources
-      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$referrer&date_from=' + startDate + '&date_to=' + endDate, {
-        headers
-      }),
-
-      // Unique visitors
-      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"math":"dau"}]&date_from=' + startDate + '&date_to=' + endDate + '&interval=day', {
-        headers
-      }),
-
-      // Geographic data - Countries
-      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$geoip_country_name&date_from=' + startDate + '&date_to=' + endDate, {
-        headers
-      }),
-
-      // Geographic data - US States (regions)
-      fetch(posthogHost + '/api/projects/@current/insights/trend/?events=[{"id":"$pageview","name":"$pageview","type":"events","order":0,"properties":[]}]&breakdown_type=event&breakdown=$geoip_subdivision_1_name&date_from=' + startDate + '&date_to=' + endDate, {
-        headers
-      })
-    ]);
-
-    console.log('PostHog API calls completed:', apiCalls.map(call => call.status));
-
-    const responses = await Promise.all(
-      apiCalls.map(async (result, index) => {
-        if (result.status === 'fulfilled' && result.value.ok) {
-          const data = await result.value.json();
-          console.log('PostHog API call ' + index + ' successful:', !!data.result);
-          return data;
-        } else if (result.status === 'fulfilled') {
-          console.error('PostHog API call ' + index + ' failed with status:', result.value.status, await result.value.text());
-        } else {
-          console.error('PostHog API call ' + index + ' rejected:', result.reason);
-        }
-        return null;
-      })
-    );
-
-    const [pageViewsData, topPagesData, referrerData, uniqueVisitorsData, countriesData, statesData] = responses;
-
-    console.log('PostHog API results: pageViews=', !!pageViewsData?.result, 'topPages=', !!topPagesData?.result, 'referrers=', !!referrerData?.result, 'visitors=', !!uniqueVisitorsData?.result, 'countries=', !!countriesData?.result, 'states=', !!statesData?.result);
-
-    // Check if we got any real data
-    const hasRealData = pageViewsData?.result || topPagesData?.result || referrerData?.result || uniqueVisitorsData?.result || countriesData?.result || statesData?.result;
-
-    console.log('Has real PostHog data:', hasRealData);
-    console.log('Countries data length:', countriesData?.result?.length || 0);
-    console.log('States data length:', statesData?.result?.length || 0);
-
-    if (hasRealData) {
-      console.log('Using real PostHog analytics data');
-
-      // Helper function to transform PostHog breakdown results to have count field
-      const transformBreakdownResult = (result) => {
-        if (!result || !Array.isArray(result)) return [];
-        try {
-          return result.map(item => {
-            if (!item) return null;
-            const count = item.count || item.aggregated_value ||
-              (Array.isArray(item.data) ? item.data.reduce((sum, val) => sum + (val || 0), 0) : 0);
-            return {
-              ...item,
-              breakdown_value: item.breakdown_value || '',
-              label: item.label || item.breakdown_value || '',
-              count: count
-            };
-          }).filter(item => item !== null);
-        } catch (e) {
-          console.error('Error transforming breakdown result:', e);
-          return [];
-        }
-      };
-
-      const posthogData = {
-        pageViews: pageViewsData?.result?.[0]?.data || [],
-        topPages: transformBreakdownResult(topPagesData?.result)?.slice(0, 20) || [],
-        referrers: transformBreakdownResult(referrerData?.result)?.slice(0, 20) || [],
-        uniqueVisitors: uniqueVisitorsData?.result?.[0]?.data || [],
-        countries: transformBreakdownResult(countriesData?.result)?.slice(0, 15) || [],
-        states: transformBreakdownResult(statesData?.result)?.slice(0, 25) || [],
-        dateRange: { startDate, endDate },
-        totalPageViews: pageViewsData?.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || 0,
-        totalUniqueVisitors: uniqueVisitorsData?.result?.[0]?.data?.reduce((sum, day) => sum + day, 0) || 0,
-        isDemo: false
-      };
-
-      // Combine with imported data if available
-      analyticsData = combineAnalyticsData(importedAnalytics, posthogData);
-
-    } else {
-      console.log('No real data received from PostHog, checking imported data');
-      if (importedAnalytics) {
-        console.log('Using imported analytics data');
-        analyticsData = importedAnalytics;
-      } else {
-        console.log('No imported data available, falling back to demo data');
-        analyticsError = 'PostHog API returned no data - using demo data';
-        analyticsData = createDemoData();
-      }
-    }
-
-  } catch (e) {
-    console.error('PostHog API error:', e);
-    analyticsError = 'PostHog API failed: ' + e.message;
-
-    // Fallback to imported data if available
-    if (importedAnalytics) {
-      console.log('PostHog failed, using imported analytics data');
-      analyticsData = importedAnalytics;
-    } else {
-      analyticsData = createDemoData();
-    }
-  }
-} else {
-  // No PostHog API key - use imported data or demo data
-  if (!analyticsData) {
-    console.log('No PostHog API key and no imported data, using demo data');
-    analyticsData = createDemoData();
-  }
-}
-
-// Analytics data ready
+// Fall back to demo data if no imported analytics available
+analyticsData = importedAnalytics || createDemoData();
 
 // Create debug info for client-side logging
 const debugInfo = {
   isDemo: analyticsData.isDemo,
   countriesCount: analyticsData.countries?.length || 0,
   statesCount: analyticsData.states?.length || 0,
-  hasPosthogKey: !!posthogApiKey,
   countries: analyticsData.countries?.slice(0, 3) || [],
   states: analyticsData.states?.slice(0, 3) || []
 };
@@ -443,16 +274,6 @@ const debugInfo = {
                   </p>
                 </div>
               ))}
-              {analyticsData.dataSource === 'combined' && (
-                <div class="bg-white border border-green-200 rounded-lg p-4">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="w-3 h-3 bg-green-500 rounded-full"></span>
-                    <h4 class="font-medium text-gray-900">PostHog Live</h4>
-                  </div>
-                  <p class="text-sm text-gray-600">Real-time analytics data</p>
-                  <p class="text-xs text-gray-500">Current session</p>
-                </div>
-              )}
             </div>
           </div>
         )}
@@ -605,28 +426,6 @@ const debugInfo = {
               </div>
             </div>
           )}
-        </div>
-      </div>
-    )}
-
-    {!analyticsData && posthogApiKey && (
-      <div class="mb-12">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Website Analytics <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">PostHog</span></h2>
-        <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <div class="text-4xl mb-4">🔄</div>
-          <p class="text-gray-600">Loading analytics data...</p>
-        </div>
-      </div>
-    )}
-
-    {!posthogApiKey && (
-      <div class="mb-12">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Website Analytics</h2>
-        <div class="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <div class="text-6xl mb-4">📊</div>
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">Analytics Not Configured</h3>
-          <p class="text-gray-600 mb-6">To view website analytics, configure your PostHog API key in the environment variables.</p>
-          <a href="/admin/settings" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">Configure Analytics</a>
         </div>
       </div>
     )}
@@ -1020,9 +819,7 @@ const debugInfo = {
 
   // Check status when page loads
   document.addEventListener('DOMContentLoaded', function() {
-    // Client-side debug logging for PostHog data
-    console.log('🔍 DRBI Analytics Debug Info - Simple Check');
-    console.log('Page loaded successfully');
+    console.log('DRBI Admin Dashboard loaded');
 
     checkCMSStatus();
     initTrafficChart();
@@ -1033,9 +830,8 @@ const debugInfo = {
 
 <!-- Debug Info Script -->
 <script is:inline define:vars={{debugInfo}}>
-  console.log('🔍 DRBI Analytics Debug Info:', debugInfo);
+  console.log('DRBI Analytics Debug Info:', debugInfo);
   console.log('Analytics data isDemo:', debugInfo.isDemo);
-  console.log('PostHog API key present:', debugInfo.hasPosthogKey);
   console.log('Total countries:', debugInfo.countriesCount);
   console.log('Total states:', debugInfo.statesCount);
   console.log('Countries data:', debugInfo.countries);

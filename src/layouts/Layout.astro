@@ -10,7 +10,6 @@ import "../styles/tailwind.css";
 import { SEO } from "astro-seo";
 import Footer from "@components/footer.astro";
 import Navbar from "@components/navbar/navbar.astro";
-import PostHog from "@components/posthog.astro";
 
 import site from "@data/site.json";
 import { currentURL } from '@utils/utils.js';
@@ -63,8 +62,12 @@ const { title, footerMargin = true } = Astro.props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <PostHog />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Cloudflare Web Analytics — set PUBLIC_CF_BEACON_TOKEN in .env from the CF dashboard -->
+    {import.meta.env.PUBLIC_CF_BEACON_TOKEN && (
+      <script is:inline defer src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token": "${import.meta.env.PUBLIC_CF_BEACON_TOKEN}"}`}></script>
+    )}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="sitemap" href="/sitemap-articles.xml" />

@@ -85,8 +85,11 @@ DECISION: keep EmDash storage (blogworks compat / migrate-back). Adapt repo to i
 - [ ] Verify content renders from EmDash + admin CRUD writes to EmDash
 - Exit: repo reads/writes EmDash schema in drbi-db; module-scope-I/O gone; worker build green.
 
-### Current build state (branch migration/cf-astro7, commit 5e49b19)
-Worker build: node-compat ✅, argon2 ✅ → NOW blocked on module-scope Turso I/O (needs Phase 3 db rewrite). Then: SESSION KV create, R2 upload wiring, deploy. All 3 grants approved.
+### Current state (LIVE on preview: https://drbi-preview.chadananda.workers.dev)
+DONE & DEPLOYED: Astro 7 + CF Workers + D1 (EmDash schema) + R2 assets. Public site + full admin render from D1, images from R2 (cdn.shrtr.com/drbi.org). Auth: whitelist model (env superadmin + D1 users table, integer roles) with Google One Tap + email magic-link (ZeptoMail) + break-glass password; sessions via jose. Secrets moved to Cloudflare secret store (13 secrets; NOTHING baked into bundle) — auth + process.env (PayPal/PostHog/etc) all verified reading from CF env. Dead env keys removed (VERCEL/TURSO/POCKETBASE/AWS).
+IN PROGRESS (bg agents): (A) remove PostHog + add Cloudflare Web Analytics (data harvested to data/analytics-archive/); (B) build BDD test framework + pre-deploy gate (baseline 53/63 pass).
+REMAINING: finish analytics swap, BDD gate, admin UX improvements, Humanitix event sync, content-mgmt skills, cutover (repoint drbi.org route from blogworks).
+KEY FILES: src/lib/{db,auth,jwt-adapter,whitelist,session,email,runtime-env}.ts, src/pages/api/auth/*, src/pages/login.astro. Deploy: `wrangler deploy -c dist/server/wrangler.json`. Secrets: wrangler secret. Local dev secrets: .dev.vars.
 
 ### Phase 4 — Auth: One Tap + email + passwords (Workers-native)
 - [ ] jose sessions (JWT) + session store (D1/KV); replace Lucia

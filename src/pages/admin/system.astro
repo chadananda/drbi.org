@@ -2,16 +2,17 @@
 export const prerender = false;
 
 import AdminLayout from '@layouts/AdminLayout.astro';
-import { getAllPostsByType } from '@utils/cms-utils';
+import { getContentByCollection, getEvents } from '@lib/queries';
 
 const user = Astro.locals.user;
 
-// System status checks
+// System status — process.* is limited on Workers; guard each call.
+const safe = (fn, fallback) => { try { return fn(); } catch { return fallback; } };
 const systemStatus = {
-  uptime: process.uptime(),
-  memory: process.memoryUsage(),
-  nodeVersion: process.version,
-  env: import.meta.env.NODE_ENV || 'development',
+  uptime: safe(() => process.uptime(), 0),
+  memory: safe(() => process.memoryUsage(), { rss: 0, heapUsed: 0, heapTotal: 0 }),
+  nodeVersion: safe(() => process.version, 'workerd'),
+  env: import.meta.env.NODE_ENV || 'production',
   timestamp: new Date().toISOString()
 };
 
@@ -24,17 +25,18 @@ let contentStats = {
 };
 
 try {
-  const [articles, news, memorial] = await Promise.all([
-    getAllPostsByType('articles'),
-    getAllPostsByType('news'),
-    getAllPostsByType('memorial')
+  const [articles, news, memorial, events] = await Promise.all([
+    getContentByCollection('articles'),
+    getContentByCollection('news'),
+    getContentByCollection('memorial'),
+    getEvents()
   ]);
-  
+
   contentStats = {
     articles: articles.length,
     news: news.length,
     memorial: memorial.length,
-    events: 0 // Would need to implement event counting
+    events: events.length
   };
 } catch (error) {
   console.error('Error loading content stats:', error);

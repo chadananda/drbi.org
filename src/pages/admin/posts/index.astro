@@ -6,21 +6,24 @@ export const prerender = false;
  */
 
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import { getAllPostsByType } from '../../../utils/cms-utils.js';
+import { getContentByCollection } from '@lib/queries';
 import { transformS3Url } from '../../../utils/utils.js';
 
-// Get all posts for management
+// Get all posts from D1. Adapt shapeContent → the file-based post shape this
+// template expects (.frontmatter = data, .id = slug).
 let memorial = [];
 let news = [];
 let articles = [];
 let error = null;
 
 try {
-  [memorial, news, articles] = await Promise.all([
-    getAllPostsByType('memorial'),
-    getAllPostsByType('news'),
-    getAllPostsByType('articles')
+  const [m, n, a] = await Promise.all([
+    getContentByCollection('memorial'),
+    getContentByCollection('news'),
+    getContentByCollection('articles')
   ]);
+  const adapt = (arr) => arr.map(c => ({ ...c, frontmatter: c.data, id: c.baseid ?? c.id }));
+  memorial = adapt(m); news = adapt(n); articles = adapt(a);
 } catch (e) {
   error = e.message;
   console.error('Error loading posts for admin posts page:', e);
