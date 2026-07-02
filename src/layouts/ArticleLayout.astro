@@ -23,7 +23,9 @@ const {footerMargin = true, post, author, category, language } = Astro.props;
 
   <body>
     <Navbar />
+    <main>
       <slot />
+    </main>
     <Footer margin={footerMargin} />
     <!-- <ViewTransitions /> -->
     <script type="module" src="/js/hidePosts.js"     client:idle></script>

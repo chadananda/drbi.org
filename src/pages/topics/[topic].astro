@@ -33,7 +33,7 @@ const topicSubtitle = topic?.description || 'Explore articles and teachings on t
   <div class=”max-w-screen-xl mx-auto”>
    { !!topic?.faqs && (<TopicFAQ faqs={topic?.faqs} max=8 />)}
   <Container class="w-full mx-5 sm:mx-15">
-    <main class="flex flex-wrap justify-center gap-20 mt-5">
+    <div class="flex flex-wrap justify-center gap-20 mt-5">
       {Array.isArray(posts) && posts.map((post) => {
         // console.log('postThumb: ', post.id);
         const author = authors.find(author => author.id === post.data.author);
@@ -48,7 +48,7 @@ const topicSubtitle = topic?.description || 'Explore articles and teachings on t
           </div>
         );
       })}
-    </main>
+    </div>
   </Container>
 </div>
 </Layout>

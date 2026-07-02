@@ -105,7 +105,9 @@ const { title, footerMargin = true } = Astro.props;
   </head>
   <body class="max-w-screen">
     <Navbar />
-    <slot />
+    <main>
+      <slot />
+    </main>
     <Footer margin={footerMargin} />
     <!-- <ViewTransitions /> -->
     <script type="module" src="/api/crontasks" client:idle></script>

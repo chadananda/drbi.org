@@ -24,7 +24,7 @@ const categories = await getCategories();
 
      <AuthorCard slug={author_slug} size="md" author={author} />
 
-      <main class="mt-16">
+      <div class="mt-16">
         <div class="flex flex-wrap justify-center gap-20">
           {Array.isArray(posts) && posts.map((post) => {
             const category = categories.find(c => c.id === post.data.category);
@@ -39,7 +39,7 @@ const categories = await getCategories();
             );
           })}
         </div>
-      </main>
+      </div>
 
 
 

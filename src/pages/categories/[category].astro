@@ -27,7 +27,7 @@ const authors = await getTeam();
 
     <CategoryCard slug={slug} size="lg" category={category} />
 
-    <main class="flex flex-wrap justify-center gap-20 mt-10">
+    <div class="flex flex-wrap justify-center gap-20 mt-10">
       {Array.isArray(posts) && posts.map((post) => {
         const author = authors.find((a) => a.data.id === post.data.author);
         const notEnglish = post.data.language && post.data.language !== 'en';
@@ -40,7 +40,7 @@ const authors = await getTeam();
           </div>
         );
       })}
-    </main>
+    </div>
 
   </Container>
 </Layout>

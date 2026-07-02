@@ -11,7 +11,7 @@ Feature: Memorial Page
     When I visit "/memorial"
     Then I should see the page title containing "Desert Rose Memorial Cemetery"
 
-  @known-bug
+  @smoke
   Scenario: View memorial entries
     When I visit "/memorial"
     Then I should see the page title containing "Desert Rose Memorial Cemetery"

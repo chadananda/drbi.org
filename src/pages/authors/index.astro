@@ -18,11 +18,11 @@ const authors = await getTeam(({data}) => !data.draft);
       <Fragment slot="desc"> found in the knowledge base </Fragment>
     </Sectionhead>
 
-    <main class="flex flex-wrap justify-center gap-5 mt-5">
+    <div class="flex flex-wrap justify-center gap-5 mt-5">
       {Array.isArray(authors) && authors.map(author => (
         <div class="flex-none"> <AuthorCard size="sm" author={author}/> </div>
       ))}
-    </main>
+    </div>
 
   </Container>
 </Layout>
