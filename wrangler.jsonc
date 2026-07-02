@@ -1,11 +1,15 @@
 {
-  // Cloudflare Workers config for drbi.org (migration target; replaces blogworks-hosted drbi.org).
-  // Temp preview Worker → *.workers.dev until Phase 9 cutover. Scope: drbi-* resources only.
+  // Cloudflare Workers config for drbi.org (replaced the blogworks-hosted site at cutover).
+  // Serves the live drbi.org + www via custom domains. Scope: drbi-* resources only.
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "drbi-preview",
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  "routes": [
+    { "pattern": "drbi.org", "custom_domain": true },
+    { "pattern": "www.drbi.org", "custom_domain": true }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
