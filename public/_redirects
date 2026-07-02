@@ -1,0 +1,2 @@
+# Cloudflare static redirects (served from dist/client). Migrated from vercel.json.
+/kure-lp-fm  /radio  301
