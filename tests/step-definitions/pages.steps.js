@@ -197,8 +197,21 @@ Then('I should see an email input field', async function () {
 });
 
 Then('I should see a password input field', async function () {
-  const field = this.page.locator('input[type="password"]');
+  // Password field is inside the break-glass <details> — open it first
+  const summary = this.page.locator('details summary');
+  if (await summary.count() > 0) await summary.first().click();
+  const field = this.page.locator('details input[type="password"]');
   await expect(field.first()).toBeVisible({ timeout: 5000 });
+});
+
+Then('I should see the break-glass {string} button', async function (text) {
+  // Ensure break-glass <details> is open before checking button
+  const summary = this.page.locator('details summary');
+  if (await summary.count() > 0 && !(await summary.first().evaluate(el => el.parentElement.open))) {
+    await summary.first().click();
+  }
+  const button = this.page.locator('details').getByRole('button', { name: new RegExp(text, 'i') });
+  await expect(button.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('the email field should have type {string} or {string}', async function (type1, type2) {

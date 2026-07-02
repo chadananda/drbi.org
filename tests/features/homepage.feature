@@ -13,7 +13,7 @@ Feature: Homepage
     And I should see the hero section
     And I should see the categories section
     And I should see the video player
-    And I should see the "Upcoming DRBI Events" section
+    And I should see the "Upcoming Programs" section
 
   Scenario: Events display correctly
     When I visit the homepage

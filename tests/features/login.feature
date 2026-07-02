@@ -12,7 +12,7 @@ Feature: Login Page
     Then I should see the page title containing "Login"
     And I should see an email input field
     And I should see a password input field
-    And I should see a "Sign In" button
+    And I should see the break-glass "Sign In" button
 
   Scenario: Login page has proper form attributes
     When I visit "/login"

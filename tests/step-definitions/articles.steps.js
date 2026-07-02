@@ -1,24 +1,22 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import fs from 'fs/promises';
-import path from 'path';
 
 Given('there is at least one published article', async function () {
-  const articlesDir = path.join(process.cwd(), 'src/content/articles');
-  try {
-    const files = await fs.readdir(articlesDir);
-    const mdFiles = files.filter(f => f.endsWith('.md') || f.endsWith('.mdx') || f.endsWith('.mdoc'));
-    if (mdFiles.length === 0) return 'pending';
-    this.testData.articleSlug = mdFiles[0].replace(/\.(md|mdx|mdoc)$/, '');
-  } catch {
-    return 'pending';
-  }
+  // Content is in Turso DB; find article links from the news listing page
+  await this.page.goto(`${this.baseURL}/news`);
+  const links = await this.page.evaluate(() =>
+    Array.from(document.querySelectorAll('a[href]'))
+      .map(a => a.getAttribute('href'))
+      .filter(h => h && (h.includes('/news/') || h.includes('/articles/')))
+  );
+  if (links.length === 0) return 'pending'; // News page not listing articles yet
+  this.testData.articleUrl = links[0].startsWith('http') ? links[0] : `${this.baseURL}${links[0]}`;
 });
 
 When('I navigate to the first article', async function () {
-  const slug = this.testData.articleSlug;
-  if (!slug) return 'pending';
-  await this.page.goto(`${this.baseURL}/${slug}`);
+  const url = this.testData.articleUrl;
+  if (!url) return 'pending';
+  await this.page.goto(url);
   await this.page.waitForLoadState('domcontentloaded');
 });
 

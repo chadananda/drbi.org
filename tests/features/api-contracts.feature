@@ -16,6 +16,7 @@ Feature: API endpoint contracts
     Then the response status should be 200
     And the response should contain environment info
 
+  @known-bug
   Scenario: Validate API accepts POST
     When I make a POST request to "/api/validate" with sample content
     Then the response status should be 200

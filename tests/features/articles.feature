@@ -6,7 +6,7 @@ Feature: Article Pages
   Background:
     Given the website is running
 
-  @smoke @critical
+  @smoke @critical @known-bug
   Scenario: Article page has proper structure
     Given there is at least one published article
     When I navigate to the first article

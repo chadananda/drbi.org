@@ -50,6 +50,7 @@
     "upload_audio": "node ./src/scripts/_upload_audio.js",
     "move_s3": "node ./src/scripts/_moveassets_s3.js",
     "migrate_2_pocketbase": "node ./src/scripts/_migrate_pocketbase.js ./db/db-export-1736903622-drbi.sql http://127.0.0.1:8090 --clear",
+    "predeploy:test": "bash scripts/pre-deploy.sh",
     "prepare": "husky"
   },
   "dependencies": {

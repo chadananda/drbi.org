@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import selectors from '../support/selectors.js';
@@ -20,20 +21,26 @@ Then('I should see the login form', async function () {
 });
 
 Then('the form should be functional', async function () {
+  // Email field (magic-link form) is always visible
   const usernameField = this.page.locator(selectors.usernameField);
+  await expect(usernameField.first()).toBeVisible({ timeout: 5000 });
+  // Open break-glass <details> to check password + submit
+  const summary = this.page.locator(selectors.breakGlassSummary);
+  if (await summary.count() > 0) await summary.first().click();
   const passwordField = this.page.locator(selectors.passwordField);
   const submitButton = this.page.locator(selectors.submitButton);
-
-  await expect(usernameField.first()).toBeVisible({ timeout: 5000 });
   await expect(passwordField.first()).toBeVisible({ timeout: 5000 });
   await expect(submitButton.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see username and password fields', async function () {
+  // Email field in the magic-link form is always visible
   const usernameField = this.page.locator(selectors.usernameField);
-  const passwordField = this.page.locator(selectors.passwordField);
-
   await expect(usernameField.first()).toBeVisible({ timeout: 5000 });
+  // Password field lives inside the break-glass <details> — open it first
+  const summary = this.page.locator(selectors.breakGlassSummary);
+  if (await summary.count() > 0) await summary.first().click();
+  const passwordField = this.page.locator(selectors.passwordField);
   await expect(passwordField.first()).toBeVisible({ timeout: 5000 });
 });
 
@@ -62,24 +69,26 @@ Then('I should remain on the login page', async function () {
 });
 
 Given('I am logged in as an admin', async function () {
-  const { username, password } = testCredentials.valid;
-
-  if (!username || !password) {
-    return 'pending'; // Skip if no test credentials configured
-  }
-
+  const email = process.env.SITE_ADMIN_EMAIL || testCredentials.valid.username;
+  const pass = process.env.SITE_ADMIN_PASS || testCredentials.valid.password;
+  if (!email || !pass) return 'pending';
   await this.page.goto(`${this.baseURL}/login`);
-
-  const usernameField = this.page.locator(selectors.usernameField).first();
-  const passwordField = this.page.locator(selectors.passwordField).first();
-
-  await usernameField.fill(username);
-  await passwordField.fill(password);
-
-  const button = this.page.locator(selectors.submitButton).first();
-  await button.click();
-
-  await this.page.waitForURL(/admin/, { timeout: 10000 });
+  // Open the break-glass <details> form (contains email + password fields)
+  const summary = this.page.locator(selectors.breakGlassSummary).first();
+  await summary.waitFor({ timeout: 5000 });
+  await summary.click();
+  // Fill credentials in the break-glass form
+  await this.page.locator(selectors.breakGlassEmailField).fill(email);
+  await this.page.locator(selectors.breakGlassPasswordField).fill(pass);
+  // Submit and wait for redirect to /admin
+  await Promise.all([
+    this.page.waitForNavigation({ timeout: 15000 }),
+    this.page.locator(selectors.breakGlassSubmit).first().click()
+  ]);
+  // Verify session is valid — not redirected back to /login
+  const url = this.page.url();
+  if (url.includes('/login')) throw new Error(`Admin login failed — ended up at ${url}`);
+  if (!url.includes('/admin')) throw new Error(`Login redirected to unexpected URL: ${url}`);
 });
 
 When('I click the logout button', async function () {

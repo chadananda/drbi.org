@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -80,8 +81,8 @@ export const testCredentials = {
     password: 'wrongpassword123'
   },
   valid: {
-    username: process.env.TEST_ADMIN_USER || null,
-    password: process.env.TEST_ADMIN_PASS || null
+    username: process.env.SITE_ADMIN_EMAIL || process.env.TEST_ADMIN_USER || null,
+    password: process.env.SITE_ADMIN_PASS || process.env.TEST_ADMIN_PASS || null
   }
 };
 

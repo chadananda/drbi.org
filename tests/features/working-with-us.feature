@@ -9,6 +9,6 @@ Feature: Working With Us Page
   @smoke
   Scenario: View working with us page
     When I visit "/working-with-us"
-    Then I should see the page title containing "Working with Us"
+    Then I should see the page title containing "Volunteer at DRBI"
     And I should see information about DRBI partnerships
     And I should see the footer section

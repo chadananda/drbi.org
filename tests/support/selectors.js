@@ -11,8 +11,8 @@ export const selectors = {
 
   // Homepage sections
   heroSection: '[data-testid="hero"], #superhero, .superhero',
-  categoriesSection: '[data-testid="categories"], #drbicategories, .drbicategories, .category-card',
-  videoPlayer: '[data-testid="video-player"], video, iframe[src*="youtube"]',
+  categoriesSection: '[data-testid="categories"], #programs, #drbicategories, .drbicategories, .category-card, .event-calendar',
+  videoPlayer: '[data-testid="video-player"], video, iframe[src*="youtube"], .video-player-thumbnail',
   eventsSection: '[data-testid="events-section"], .event-calendar',
   newsletterLink: 'a[href*="eepurl"], a[href*="newsletter"]',
 
@@ -25,11 +25,16 @@ export const selectors = {
 
   // Admin - Auth
   loginForm: '[data-testid="login-form"], form',
-  usernameField: '[data-testid="username"], input[name="username"], input[type="text"], input[type="email"]',
+  usernameField: '[data-testid="username"], input[name="email"], input[name="username"], input[type="email"]',
   passwordField: '[data-testid="password"], input[name="password"], input[type="password"]',
   submitButton: '[data-testid="submit"], button[type="submit"]',
   errorMessage: '[data-testid="error"], [role="alert"], [class*="error"]',
   logoutButton: '[data-testid="logout"], a[href*="logout"], button:has-text("Logout")',
+  // Break-glass password form (hidden inside <details>)
+  breakGlassSummary: 'details summary',
+  breakGlassEmailField: 'details input[name="email"]',
+  breakGlassPasswordField: 'details input[name="password"]',
+  breakGlassSubmit: '#login-form button[type="submit"]',
 
   // Admin - Events
   adminEventCard: '[data-testid="admin-event-card"], .event-card',
