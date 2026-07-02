@@ -4,7 +4,7 @@ export const prerender = false;
 import { lucia } from "../../lib/auth";
 import { getContentById, updateContent, createContent } from "../../lib/queries";
 import { isGitHubConfigured } from '../../utils/github-cms.js';
-import { createPost, updatePostById } from '../../utils/cms-utils.js';
+// cms-utils is Node-only (uses __dirname); import dynamically inside the GitHub-guarded block only
 import { generateCmsId, generateUrlSlug, extractPostType, convertTimestamp, splitCommaSeparated, validateDbPost } from '../../utils/post-conversion.js';
 
 // GET - fetch post by id for editor
@@ -107,6 +107,7 @@ export const POST = async ({ request }) => {
         isNewPost: !result.post.data?.datePublished,
       };
 
+      const { createPost, updatePostById } = await import('../../utils/cms-utils.js');
       if (postData.isNewPost) {
         result.github = await createPost(postData);
       } else {
