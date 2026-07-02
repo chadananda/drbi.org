@@ -326,6 +326,70 @@ export async function toggleEventVisibility(id: string) {
   return getEventById(id);
 }
 
+// Upsert an externally-synced event (e.g. Humanitix). NEVER publishes: new rows land as
+// DRAFT (visible=0); existing visibility is preserved. Rows a human has manually edited are
+// NOT overwritten — only sync bookkeeping (last_synced) updates. Humans own publish + edits.
+// See memory [[humanitix-drbi-events]]. Returns { id, action }.
+export async function upsertSyncedEvent(data: Record<string, any>) {
+  const now = new Date().toISOString();
+  const source = data.source ?? 'external';
+  const id = data.id ?? `event-${source}-${data.externalId}`;
+  const existing = await getEventById(id);
+
+  // Human has taken ownership of this row — touch only sync metadata, never content/visibility.
+  if (existing && existing.data.manuallyEdited) {
+    await db.execute({
+      sql: 'UPDATE events SET last_synced = ?, last_modified = COALESCE(?, last_modified), updated_at = ? WHERE id = ?',
+      args: [now, data.lastModified ?? null, now, id]
+    });
+    return { id, action: 'skipped-manual' as const };
+  }
+
+  if (existing) {
+    // Refresh content from the source, but leave `visible` and `manually_edited` untouched.
+    await db.execute({
+      sql: `UPDATE events SET
+        title = ?, short_description = ?, full_description = ?, start_date = ?, end_date = ?,
+        additional_dates = ?, location = ?, price = ?, registration_url = ?, url = ?,
+        main_image = ?, images = ?, organizer = ?, categories = ?, source = ?, external_id = ?,
+        last_synced = ?, last_modified = ?, updated_at = ?
+        WHERE id = ?`,
+      args: [
+        data.title ?? '', data.shortDescription ?? '', data.fullDescription ?? '',
+        data.startDate ?? '', data.endDate ?? '',
+        JSON.stringify(data.additionalDates ?? []), JSON.stringify(data.location ?? {}),
+        data.price ? JSON.stringify(data.price) : null,
+        data.registrationUrl ?? '', data.url ?? '', data.mainImage ?? '',
+        JSON.stringify(data.images ?? []), data.organizer ?? 'DRBI',
+        JSON.stringify(data.categories ?? []), source, data.externalId ?? null,
+        now, data.lastModified ?? null, now, id,
+      ]
+    });
+    return { id, action: 'updated' as const };
+  }
+
+  // New synced row — DRAFT (visible=0), not manually edited.
+  await db.execute({
+    sql: `INSERT INTO events (id, title, short_description, full_description, start_date, end_date,
+      additional_dates, location, price, registration_url, url, main_image, teacher_image,
+      images, highlights, event_schedule, refund_policy, organizer, categories, source,
+      external_id, visible, featured, onsite, is_eventbrite, eventbrite_id,
+      manually_edited, last_manual_edit, last_synced, last_modified, updated_at)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,0,1,0,NULL,0,NULL,?,?,?)`,
+    args: [
+      id, data.title ?? '', data.shortDescription ?? '', data.fullDescription ?? '',
+      data.startDate ?? '', data.endDate ?? '',
+      JSON.stringify(data.additionalDates ?? []), JSON.stringify(data.location ?? {}),
+      data.price ? JSON.stringify(data.price) : null,
+      data.registrationUrl ?? '', data.url ?? '', data.mainImage ?? '', '',
+      JSON.stringify(data.images ?? []), JSON.stringify([]), JSON.stringify([]), '',
+      data.organizer ?? 'DRBI', JSON.stringify(data.categories ?? []), source,
+      data.externalId ?? null, now, data.lastModified ?? null, now,
+    ]
+  });
+  return { id, action: 'created' as const };
+}
+
 // ─── Content ─────────────────────────────────────────────────────────────────
 
 export async function getContentByCollection(collection: string) {

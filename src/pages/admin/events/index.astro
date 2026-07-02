@@ -162,8 +162,8 @@ const getEventLocation = (event) => {
         <p class="text-gray-600 font-medium">Upcoming Events</p>
       </div>
       <div class="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
-        <h3 class="text-3xl font-bold text-blue-600 mb-2">{events.filter(e => e.data.source === 'external').length}</h3>
-        <p class="text-gray-600 font-medium">External Events</p>
+        <h3 class="text-3xl font-bold text-blue-600 mb-2">{events.filter(e => e.data.source !== 'manual').length}</h3>
+        <p class="text-gray-600 font-medium">Synced Events</p>
       </div>
       <div class="bg-white border border-gray-200 rounded-xl p-6 text-center shadow-sm">
         <h3 class="text-3xl font-bold text-blue-600 mb-2">{events.filter(e => e.data.source === 'manual').length}</h3>
@@ -220,9 +220,14 @@ const getEventLocation = (event) => {
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-3 mb-2">
                     <h3 class="text-2xl font-bold text-gray-900 leading-tight">{event.data.name}</h3>
+                    {event.data.source && event.data.source !== 'manual' && (
+                      <span class="inline-flex items-center px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 border border-blue-300 rounded capitalize" title="Synced from an external source — publish is manual">
+                        🔗 {event.data.source}
+                      </span>
+                    )}
                     {event.data.visible === false && (
                       <span class="hidden-badge inline-flex items-center px-2 py-1 text-xs font-bold text-orange-700 bg-orange-100 border border-orange-300 rounded">
-                        🙈 HIDDEN
+                        🙈 DRAFT
                       </span>
                     )}
                   </div>
