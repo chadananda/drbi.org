@@ -1,53 +1,18 @@
-echo "Running pre-commit checks..."
+echo "🔍 Pre-commit checks"
 
-echo "Building..."
-npm run build || { echo "Build failed"; exit 1; }
+# Fast, reliable gate for every commit: the code must build and unit tests must pass.
+# (Behavioral/E2E tests need real D1 content and run in the pre-push gate against the
+# live site — a local dev server serves an empty local D1, so they can't run here.)
 
-echo "Build passed!"
+echo "📦 Building..."
+if ! npm run build > /tmp/drbi-precommit-build.log 2>&1; then
+  echo "❌ Build failed. Commit aborted."; tail -20 /tmp/drbi-precommit-build.log; exit 1
+fi
+echo "✅ Build OK"
 
-# Run E2E tests (start dev server, run tests, stop server)
-echo "🧪 Running E2E tests..."
-
-# Start dev server in background
-npm run dev > /tmp/astro-test-server.log 2>&1 &
-DEV_PID=$!
-
-# Wait for server to be ready (max 30 seconds)
-echo "⏳ Waiting for dev server..."
-for i in {1..30}; do
-  if curl -s -o /dev/null -w "" http://localhost:4850/ 2>/dev/null; then
-    break
-  fi
-  if curl -s -o /dev/null -w "" http://localhost:4851/ 2>/dev/null; then
-    export BASE_URL=http://localhost:4851
-    break
-  fi
-  sleep 1
-done
-
-# Set BASE_URL if not already set
-if [ -z "$BASE_URL" ]; then
-  export BASE_URL=http://localhost:4850
+echo "🧪 Unit tests..."
+if ! npm run test:unit; then
+  echo "❌ Unit tests failed. Commit aborted."; exit 1
 fi
 
-# Run critical tests only (faster subset)
-npx playwright test tests/homepage.spec.js tests/build-integrity.spec.js --reporter=line
-TEST_EXIT_CODE=$?
-
-# Kill dev server
-kill $DEV_PID 2>/dev/null || true
-
-# Check if tests succeeded
-if [ $TEST_EXIT_CODE -ne 0 ]; then
-  echo "❌ E2E tests failed! Please fix the issues before committing."
-  exit 1
-fi
-
-echo "✅ E2E tests passed!"
-
-# Add any modified analytics files to the commit
-if [ -f "src/data/analytics-summary.json" ]; then
-  git add src/data/analytics-summary.json 2>/dev/null || true
-fi
-
-echo "✅ All checks passed! Proceeding with commit..."
+echo "✅ Pre-commit checks passed."
