@@ -7,6 +7,7 @@ import Layout from "@layouts/Layout.astro";
 import { logoutUser } from '@utils/utils';
 import { resolveUserByEmail } from '@lib/whitelist';
 import { startSession } from '@lib/session';
+import { getEnv } from '@lib/runtime-env';
 
 // If already signed in, log out and land back on a clean login.
 if (Astro.locals?.user) {
@@ -26,7 +27,7 @@ if (Astro.request.method === "POST") {
   const email = (formData.get('email') as string || '').trim().toLowerCase();
   const password = (formData.get('password') as string || '').trim();
   const envEmail = import.meta.env.SITE_ADMIN_EMAIL?.trim().toLowerCase();
-  const envPassword = import.meta.env.SITE_ADMIN_PASS?.trim();
+  const envPassword = getEnv('SITE_ADMIN_PASS')?.trim();
   if (envEmail && envPassword && email === envEmail && password === envPassword) {
     const user = await resolveUserByEmail(email);
     if (user) {

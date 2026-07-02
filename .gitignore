@@ -49,3 +49,4 @@ tmp/*.log
 /blob-report/
 /playwright/.cache/
 tests/reports/
+.dev.vars

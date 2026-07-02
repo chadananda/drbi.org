@@ -14,13 +14,9 @@ const adminUser: DatabaseUser = {
 	}
 };
 
-// Initialize JWT adapter with admin user
-const jwtSecret = import.meta.env.PRIVATE_JWT_SECRET;
-if (!jwtSecret) {
-	throw new Error('PRIVATE_JWT_SECRET environment variable is required');
-}
-
-const adapter = new JWTAdapter(jwtSecret, adminUser);
+// Initialize JWT adapter with admin user. The signing secret is read lazily at
+// request time from the Cloudflare env (see runtime-env.ts) — not at module scope.
+const adapter = new JWTAdapter(adminUser);
 
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {

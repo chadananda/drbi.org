@@ -5,8 +5,9 @@ import type { APIRoute } from 'astro';
 import { jwtVerify } from 'jose';
 import { resolveUserByEmail } from '@lib/whitelist';
 import { startSession } from '@lib/session';
+import { requireEnv } from '@lib/runtime-env';
 
-const secret = () => new TextEncoder().encode(import.meta.env.PRIVATE_JWT_SECRET);
+const secret = () => new TextEncoder().encode(requireEnv('PRIVATE_JWT_SECRET'));
 
 export const GET: APIRoute = async (context) => {
   const { request } = context;

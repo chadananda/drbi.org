@@ -7,8 +7,9 @@ import type { APIRoute } from 'astro';
 import { SignJWT } from 'jose';
 import { resolveUserByEmail } from '@lib/whitelist';
 import { sendEmail } from '@lib/email';
+import { requireEnv } from '@lib/runtime-env';
 
-const secret = () => new TextEncoder().encode(import.meta.env.PRIVATE_JWT_SECRET);
+const secret = () => new TextEncoder().encode(requireEnv('PRIVATE_JWT_SECRET'));
 
 export const POST: APIRoute = async ({ request }) => {
   try {

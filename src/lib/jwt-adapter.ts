@@ -1,20 +1,24 @@
 // JWT Adapter for Lucia — stateless sessions, user fetched from D1 per request.
-// Uses `jose` (Web Crypto, Workers-native) instead of jsonwebtoken (Node-only).
+// Uses `jose` (Web Crypto, Workers-native). The signing secret is read at request
+// time from the Cloudflare env (never baked into the bundle).
 import { SignJWT, jwtVerify } from 'jose';
 import type { Adapter, DatabaseSession, DatabaseUser } from "lucia";
+import { requireEnv } from './runtime-env';
 
 export class JWTAdapter implements Adapter {
-  private secretKey: Uint8Array;
   private fallbackUser: DatabaseUser; // env-based admin, used when D1 has no matching user
 
-  constructor(jwtSecret: string, fallbackUser: DatabaseUser) {
-    this.secretKey = new TextEncoder().encode(jwtSecret);
+  constructor(fallbackUser: DatabaseUser) {
     this.fallbackUser = fallbackUser;
+  }
+
+  private secretKey(): Uint8Array {
+    return new TextEncoder().encode(requireEnv('PRIVATE_JWT_SECRET'));
   }
 
   async getSessionAndUser(sessionId: string): Promise<[DatabaseSession | null, DatabaseUser | null]> {
     try {
-      const { payload } = await jwtVerify(sessionId, this.secretKey);
+      const { payload } = await jwtVerify(sessionId, this.secretKey());
       const decoded = payload as any;
       const session: DatabaseSession = {
         id: decoded.id ?? sessionId,
@@ -23,7 +27,6 @@ export class JWTAdapter implements Adapter {
         attributes: decoded.attributes || {}
       };
 
-      // Look up user from D1 for current role/active status.
       try {
         const { getUserById } = await import('./queries');
         const userRow = await getUserById(decoded.userId);
@@ -37,7 +40,6 @@ export class JWTAdapter implements Adapter {
         // D1 unavailable — fall through to env-admin fallback below.
       }
 
-      // No matching/active D1 user (e.g. users table empty) — allow the env-based admin.
       if (decoded.userId === this.fallbackUser.id) {
         return [session, this.fallbackUser];
       }
@@ -60,6 +62,6 @@ export class JWTAdapter implements Adapter {
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('7d')
-      .sign(this.secretKey);
+      .sign(this.secretKey());
   }
 }
