@@ -11,7 +11,7 @@ Feature: News Page
     When I visit "/news"
     Then I should see the page title containing "News"
 
-  @known-bug
+  @smoke
   Scenario: View news article thumbnails
     When I visit "/news"
     Then I should see the page title containing "News"

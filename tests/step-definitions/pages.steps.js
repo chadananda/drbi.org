@@ -174,7 +174,8 @@ Then("I should see links about Bahá'í beliefs on death", async function () {
 
 // News
 Then('I should see news article thumbnails', async function () {
-  const articles = this.page.locator('main a[href], main article, .post-thumb');
+  // News items render as linked cards with thumbnail images (redesign uses no <main> wrapper).
+  const articles = this.page.locator('article, .post-thumb, a:has(img)');
   const count = await articles.count();
   expect(count).toBeGreaterThan(0);
 });

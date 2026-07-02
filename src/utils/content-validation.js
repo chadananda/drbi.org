@@ -8,13 +8,24 @@ import matter from 'gray-matter';
 import MarkdownIt from 'markdown-it';
 import fs from 'fs/promises';
 import path from 'path';
-import { exec as execCallback } from 'child_process';
-import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const exec = promisify(execCallback);
+// import.meta.url is undefined in the bundled Worker — guard it (only used by the
+// Node-only build-check functions, never on Workers).
+const __filename = (() => { try { return fileURLToPath(import.meta.url); } catch { return ''; } })();
+const __dirname = __filename ? path.dirname(__filename) : '';
+
+// child_process is Node-only (not available on Cloudflare Workers) — load it lazily
+// so importing this module (e.g. for quickValidate in /api/validate) never crashes.
+let _exec;
+async function exec(cmd, opts) {
+  if (!_exec) {
+    const { exec: execCallback } = await import('child_process');
+    const { promisify } = await import('util');
+    _exec = promisify(execCallback);
+  }
+  return _exec(cmd, opts);
+}
 
 // Initialize markdown parser
 const md = new MarkdownIt();
