@@ -16,11 +16,12 @@ export const GET: APIRoute = async (context) => {
     const { payload } = await jwtVerify(token, secret());
     if (payload.purpose !== 'magic' || !payload.email) throw new Error('bad token');
 
-    const user = await resolveUserByEmail(String(payload.email));
-    if (!user) return context.redirect('/login?error=not-authorized', 303);
+    const user = await resolveUserByEmail(String(payload.email), { name: payload.name ? String(payload.name) : '' });
+    if (!user) return context.redirect('/login?error=account-disabled', 303);
 
     await startSession(context, user.id, user.role);
-    return context.redirect('/admin', 303);
+    // Staff land in the admin; base `user` accounts have no admin access, so send them home.
+    return context.redirect(user.role === 'user' ? '/' : '/admin', 303);
   } catch (e) {
     console.error('verify error:', e);
     return context.redirect('/login?error=invalid-or-expired', 303);

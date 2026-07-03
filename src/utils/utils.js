@@ -6,6 +6,7 @@ import fs from 'fs';
 import matter from 'gray-matter';
 import site from '../data/site.json' with { type: 'json' };
 import { getImage } from "astro:assets";
+import { getEnv } from '../lib/runtime-env';
 // Legacy Astro DB import - temporarily disabled during migration
 // import { db, Categories, eq, Team, Users, Topics, Comments, inArray, NOW, Cron, Posts, count, lte, and } from 'astro:db';
 import { Buffer } from 'buffer';
@@ -827,7 +828,7 @@ export const getTeam = async (filter = () => true) => {
 export const getTeamWithRole = async () => {
   // Use JSON data and add admin role
   const team = await getTeam();
-  const adminEmail = import.meta.env.SITE_ADMIN_EMAIL?.trim().toLowerCase();
+  const adminEmail = getEnv('SITE_ADMIN_EMAIL')?.trim().toLowerCase();
   
   return team.map(member => ({
     ...member.data,
@@ -853,7 +854,7 @@ export const getTeamMemberBySlug = async (slug) => {
 }
 export const getTeamMemberByEmail = async (email) => {
   // Use JSON data instead of database - simplified for single admin
-  const adminEmail = import.meta.env.SITE_ADMIN_EMAIL?.trim().toLowerCase();
+  const adminEmail = getEnv('SITE_ADMIN_EMAIL')?.trim().toLowerCase();
   if (email === adminEmail) {
     return {
       id: site.author.toLowerCase().replace(/\s+/g, '-'),

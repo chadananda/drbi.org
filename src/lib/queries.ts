@@ -691,14 +691,18 @@ export async function getFaqs() {
 
 // EmDash users schema: role is an INTEGER level, `disabled` (not `active`), no password.
 // NOTE: confirm these level values match blogworks/EmDash's role convention.
-const ROLE_TO_LEVEL: Record<string, number> = { superadmin: 100, admin: 40, editor: 30, author: 20 };
+// `user` = signed-in non-anonymous visitor (can comment; NO admin-panel access).
+// Staff roles (author+) are granted by the whitelist. Admin access gate lives in
+// middleware.ts (['superadmin','admin','editor','author']) — 'user' is intentionally excluded.
+const ROLE_TO_LEVEL: Record<string, number> = { superadmin: 100, admin: 40, editor: 30, author: 20, user: 10 };
 function levelToRole(level: number): string {
   if (level >= 100) return 'superadmin';
   if (level >= 40) return 'admin';
   if (level >= 30) return 'editor';
-  return 'author';
+  if (level >= 20) return 'author';
+  return 'user';
 }
-function roleToLevel(role: string): number { return ROLE_TO_LEVEL[role] ?? 20; }
+function roleToLevel(role: string): number { return ROLE_TO_LEVEL[role] ?? 10; }
 
 export interface UserRow {
   id: string;

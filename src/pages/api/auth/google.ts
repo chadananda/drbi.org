@@ -28,11 +28,13 @@ export const POST: APIRoute = async (context) => {
       return new Response(JSON.stringify({ ok: false, error: 'email not verified' }), { status: 403 });
     }
 
-    const user = await resolveUserByEmail(String(payload.email));
-    if (!user) return new Response(JSON.stringify({ ok: false, error: 'not-authorized' }), { status: 403 });
+    const user = await resolveUserByEmail(String(payload.email), { name: payload.name ? String(payload.name) : '' });
+    if (!user) return new Response(JSON.stringify({ ok: false, error: 'account-disabled' }), { status: 403 });
 
     await startSession(context, user.id, user.role);
-    return new Response(JSON.stringify({ ok: true, redirect: '/admin' }), { status: 200 });
+    // Staff land in the admin; base `user` accounts have no admin access, so send them home.
+    const redirect = user.role === 'user' ? '/' : '/admin';
+    return new Response(JSON.stringify({ ok: true, redirect }), { status: 200 });
   } catch (e) {
     console.error('google auth error:', e);
     return new Response(JSON.stringify({ ok: false, error: 'invalid credential' }), { status: 401 });
