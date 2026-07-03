@@ -1,0 +1,206 @@
+---
+// Impressive analytics dashboard. Live Cloudflare Web Analytics when configured, else a
+// rich labelled sample. Bespoke inline-SVG charts (no client deps). See src/lib/analytics.ts.
+export const prerender = false;
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { getAnalytics } from '@lib/analytics';
+
+const url = new URL(Astro.request.url);
+const rangeParam = parseInt(url.searchParams.get('range') || '30', 10);
+const days = [7, 30, 90].includes(rangeParam) ? rangeParam : 30;
+const a = await getAnalytics(days);
+
+const fmt = (n: number) => Math.round(n).toLocaleString('en-US');
+const fmtMs = (n: number) => (n >= 1000 ? (n / 1000).toFixed(2) + 's' : Math.round(n) + 'ms');
+const dLabel = (d: number) => (d >= 0 ? '+' : '') + d.toFixed(1) + '%';
+const dGood = (d: number) => d >= 0; // for load time we invert at call site
+
+// ── Area chart geometry ──
+const W = 920, H = 260, PADX = 30, PADT = 22, PADB = 36;
+const n = Math.max(1, a.series.length);
+const maxPv = Math.max(1, ...a.series.map((p) => p.pageviews));
+const xAt = (i: number) => PADX + (i * (W - 2 * PADX)) / Math.max(1, n - 1);
+const yAt = (v: number) => H - PADB - (v / maxPv) * (H - PADT - PADB);
+const linePts = a.series.map((p, i) => `${xAt(i).toFixed(1)},${yAt(p.pageviews).toFixed(1)}`);
+const linePath = 'M' + linePts.join(' L');
+const areaPath = `M${xAt(0).toFixed(1)},${(H - PADB).toFixed(1)} L` + linePts.join(' L') + ` L${xAt(n - 1).toFixed(1)},${(H - PADB).toFixed(1)} Z`;
+const gridYs = [0.25, 0.5, 0.75, 1].map((f) => ({ y: yAt(maxPv * f), v: Math.round(maxPv * f) }));
+const labelIdx = Array.from(new Set([0, Math.floor(n / 4), Math.floor(n / 2), Math.floor((3 * n) / 4), n - 1]));
+const shortDate = (s: string) => { const d = new Date(s + 'T00:00:00'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+
+// ── Sparkline helper (KPI cards) ──
+function spark(vals: number[], w = 132, h = 40) {
+  const mx = Math.max(1, ...vals), mn = Math.min(...vals), rng = Math.max(1, mx - mn);
+  const pts = vals.map((v, i) => `${((i * w) / Math.max(1, vals.length - 1)).toFixed(1)},${(h - 4 - ((v - mn) / rng) * (h - 8)).toFixed(1)}`);
+  return { line: 'M' + pts.join(' L'), area: `M0,${h} L` + pts.join(' L') + ` L${w},${h} Z` };
+}
+const pvSpark = spark(a.series.map((p) => p.pageviews));
+const visSpark = spark(a.series.map((p) => p.visits));
+
+// ── Devices donut ──
+const devTotal = Math.max(1, a.devices.reduce((s, d) => s + d.views, 0));
+const donutColors = ['#b45309', '#d97706', '#f59e0b', '#fbbf24', '#fcd34d'];
+let acc = 0;
+const C = 2 * Math.PI * 52;
+const donut = a.devices.map((d, i) => {
+  const frac = d.views / devTotal;
+  const seg = { color: donutColors[i % donutColors.length], dash: `${(frac * C).toFixed(1)} ${(C - frac * C).toFixed(1)}`, offset: (-acc * C).toFixed(1), label: d.label, pct: d.pct };
+  acc += frac; return seg;
+});
+
+const kpis = [
+  { label: 'Page views', value: fmt(a.totals.pageviews), delta: a.deltas.pageviews, good: a.deltas.pageviews >= 0, spark: pvSpark, accent: '#b45309' },
+  { label: 'Visits', value: fmt(a.totals.visits), delta: a.deltas.visits, good: a.deltas.visits >= 0, spark: visSpark, accent: '#d97706' },
+  { label: 'Pages / visit', value: a.totals.pagesPerVisit.toFixed(1), delta: a.deltas.pagesPerVisit, good: a.deltas.pagesPerVisit >= 0, spark: null, accent: '#0f766e' },
+  { label: 'Avg. load', value: a.totals.avgLoadMs ? fmtMs(a.totals.avgLoadMs) : '—', delta: a.deltas.avgLoadMs, good: a.deltas.avgLoadMs <= 0, spark: null, accent: '#4338ca' },
+];
+const ranges = [ { d: 7, l: '7 days' }, { d: 30, l: '30 days' }, { d: 90, l: '90 days' } ];
+const panels = [
+  { title: 'Top pages', rows: a.topPages, kind: 'path' },
+  { title: 'Referrers', rows: a.referrers, kind: 'text' },
+  { title: 'Top countries', rows: a.countries, kind: 'text' },
+  { title: 'Browsers', rows: a.browsers, kind: 'text' },
+];
+---
+
+<AdminLayout title="Analytics" user={Astro.locals?.user}>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <!-- Header -->
+    <div class="flex flex-wrap items-end justify-between gap-4 mb-8">
+      <div>
+        <div class="flex items-center gap-3">
+          <h1 class="text-3xl font-bold text-gray-900">Analytics</h1>
+          {a.source === 'cloudflare' ? (
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live · Cloudflare
+            </span>
+          ) : (
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-full" title="Set CF_ANALYTICS_API_TOKEN, CF_ACCOUNT_ID and CF_WEB_ANALYTICS_TAG to show live data">
+              Sample data
+            </span>
+          )}
+        </div>
+        <p class="text-sm text-gray-500 mt-1">{shortDate(a.from)} – {shortDate(a.to)} · Cloudflare Web Analytics</p>
+      </div>
+      <div class="inline-flex p-1 bg-gray-100 rounded-full">
+        {ranges.map((r) => (
+          <a href={`/admin/analytics?range=${r.d}`}
+            class:list={["px-4 py-1.5 text-sm font-medium rounded-full transition", days === r.d ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-800"]}>
+            {r.l}
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {kpis.map((k) => (
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <div class="flex items-start justify-between">
+            <p class="text-sm font-medium text-gray-500">{k.label}</p>
+            <span class:list={["inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full", k.good ? "text-emerald-700 bg-emerald-50" : "text-rose-700 bg-rose-50"]}>
+              {k.good ? '▲' : '▼'} {dLabel(k.delta)}
+            </span>
+          </div>
+          <p class="mt-2 text-3xl font-bold text-gray-900 tabular-nums">{k.value}</p>
+          {k.spark && (
+            <svg viewBox="0 0 132 40" class="w-full h-10 mt-3" preserveAspectRatio="none" aria-hidden="true">
+              <path d={k.spark.area} fill={k.accent} opacity="0.08" />
+              <path d={k.spark.line} fill="none" stroke={k.accent} stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          )}
+          {!k.spark && <p class="mt-3 text-xs text-gray-400">vs. previous {days} days</p>}
+        </div>
+      ))}
+    </div>
+
+    <!-- Main trend chart -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">Page views</h2>
+        <div class="flex items-center gap-4 text-sm text-gray-500">
+          <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-600"></span>Page views</span>
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} class="w-full" style="height:auto" role="img" aria-label={`Page views over the last ${days} days`}>
+        <defs>
+          <linearGradient id="area" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#d97706" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#d97706" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+        {gridYs.map((g) => (
+          <g>
+            <line x1={PADX} y1={g.y} x2={W - PADX} y2={g.y} stroke="#f1f5f9" stroke-width="1" />
+            <text x={W - PADX + 2} y={g.y + 3} font-size="10" fill="#94a3b8" text-anchor="start">{fmt(g.v)}</text>
+          </g>
+        ))}
+        <path d={areaPath} fill="url(#area)" />
+        <path d={linePath} fill="none" stroke="#b45309" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        {a.series.map((p, i) => (
+          <g>
+            <rect x={xAt(i) - (W - 2 * PADX) / n / 2} y={PADT} width={(W - 2 * PADX) / n} height={H - PADT - PADB} fill="transparent">
+              <title>{shortDate(p.date)} · {fmt(p.pageviews)} views · {fmt(p.visits)} visits</title>
+            </rect>
+          </g>
+        ))}
+        {labelIdx.map((i) => (
+          <text x={xAt(i)} y={H - 12} font-size="10" fill="#94a3b8" text-anchor="middle">{shortDate(a.series[i].date)}</text>
+        ))}
+      </svg>
+    </div>
+
+    <!-- Breakdown panels -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {panels.map((panel) => (
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">{panel.title}</h2>
+          <div class="space-y-3">
+            {panel.rows.length === 0 && <p class="text-sm text-gray-400">No data yet.</p>}
+            {panel.rows.slice(0, 8).map((row) => (
+              <div>
+                <div class="flex items-center justify-between text-sm mb-1">
+                  <span class="text-gray-700 truncate pr-3">{panel.kind === 'path' ? row.label : row.label}</span>
+                  <span class="text-gray-500 tabular-nums shrink-0">{fmt(row.views)} <span class="text-gray-400">· {row.pct}%</span></span>
+                </div>
+                <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                  <div class="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400" style={`width:${Math.max(2, row.pct)}%`}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      <!-- Devices donut -->
+      <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Devices</h2>
+        <div class="flex items-center gap-6">
+          <svg viewBox="0 0 120 120" class="w-32 h-32 shrink-0 -rotate-90" role="img" aria-label="Device type breakdown">
+            <circle cx="60" cy="60" r="52" fill="none" stroke="#f1f5f9" stroke-width="14" />
+            {donut.map((s) => (
+              <circle cx="60" cy="60" r="52" fill="none" stroke={s.color} stroke-width="14" stroke-dasharray={s.dash} stroke-dashoffset={s.offset} />
+            ))}
+          </svg>
+          <div class="space-y-2 flex-1">
+            {a.devices.map((d, i) => (
+              <div class="flex items-center justify-between text-sm">
+                <span class="inline-flex items-center gap-2 text-gray-700">
+                  <span class="w-2.5 h-2.5 rounded-full" style={`background:${donutColors[i % donutColors.length]}`}></span>{d.label}
+                </span>
+                <span class="text-gray-500 tabular-nums">{d.pct}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {a.source !== 'cloudflare' && (
+      <p class="text-xs text-gray-400 mt-6 text-center">
+        Showing representative sample data. Add <code class="text-gray-500">CF_ANALYTICS_API_TOKEN</code>,
+        <code class="text-gray-500">CF_ACCOUNT_ID</code> and <code class="text-gray-500">CF_WEB_ANALYTICS_TAG</code> as Worker secrets to show live Cloudflare Web Analytics.
+      </p>
+    )}
+  </div>
+</AdminLayout>
