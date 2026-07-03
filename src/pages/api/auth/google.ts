@@ -28,7 +28,10 @@ export const POST: APIRoute = async (context) => {
       return new Response(JSON.stringify({ ok: false, error: 'email not verified' }), { status: 403 });
     }
 
-    const user = await resolveUserByEmail(String(payload.email), { name: payload.name ? String(payload.name) : '' });
+    const user = await resolveUserByEmail(String(payload.email), {
+      name: payload.name ? String(payload.name) : '',
+      picture: payload.picture ? String(payload.picture) : '',
+    });
     if (!user) return new Response(JSON.stringify({ ok: false, error: 'account-disabled' }), { status: 403 });
 
     await startSession(context, user.id, user.role);

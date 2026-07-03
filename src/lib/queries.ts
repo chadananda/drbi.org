@@ -722,6 +722,7 @@ function shapeUser(row: UserRow) {
     id: row.id,
     email: row.email,
     name: row.name ?? '',
+    avatar: row.avatar_url ?? '',
     role: levelToRole(Number(row.role)),
     active: Number(row.disabled) === 0,
     email_verified: Number(row.email_verified) === 1,
@@ -747,10 +748,10 @@ export async function getUserByEmail(email: string) {
 }
 
 // Whitelist entry. Passwordless — EmDash users have no password column (hashed_password ignored).
-export async function createUser(data: { id: string; email: string; name: string; role: string; hashed_password?: string }) {
+export async function createUser(data: { id: string; email: string; name: string; role: string; avatar?: string; hashed_password?: string }) {
   await db.execute({
-    sql: `INSERT INTO users (id, email, name, role, email_verified, disabled) VALUES (?,?,?,?,0,0)`,
-    args: [data.id, data.email.toLowerCase(), data.name, roleToLevel(data.role)]
+    sql: `INSERT INTO users (id, email, name, avatar_url, role, email_verified, disabled) VALUES (?,?,?,?,?,0,0)`,
+    args: [data.id, data.email.toLowerCase(), data.name, data.avatar ?? null, roleToLevel(data.role)]
   });
   return getUserById(data.id);
 }
@@ -761,6 +762,7 @@ export async function updateUser(id: string, data: Record<string, any>) {
   const args: any[] = [now];
   if (data.email != null) { fields.unshift('email = ?'); args.unshift(data.email.toLowerCase()); }
   if (data.name != null) { fields.unshift('name = ?'); args.unshift(data.name); }
+  if (data.avatar != null) { fields.unshift('avatar_url = ?'); args.unshift(data.avatar); }
   if (data.role != null) { fields.unshift('role = ?'); args.unshift(roleToLevel(data.role)); }
   if (data.active != null) { fields.unshift('disabled = ?'); args.unshift(data.active ? 0 : 1); }
   args.push(id);

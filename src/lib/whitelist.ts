@@ -17,20 +17,24 @@ function newUserId(): string {
  * Resolve a verified email to a user, provisioning one if needed.
  * @returns the user (base `user` role if not whitelisted), or null only if explicitly disabled.
  */
-export async function resolveUserByEmail(rawEmail: string, profile: { name?: string } = {}): Promise<Resolved | null> {
+export async function resolveUserByEmail(rawEmail: string, profile: { name?: string; picture?: string } = {}): Promise<Resolved | null> {
   const email = (rawEmail || '').trim().toLowerCase();
   if (!email) return null;
   const name = (profile.name || '').trim();
+  const avatar = (profile.picture || '').trim();
 
   // Superadmin is defined by config (secret read at request time), always superadmin.
   const envEmail = getEnv('SITE_ADMIN_EMAIL')?.trim().toLowerCase();
   const isSuperadmin = !!envEmail && email === envEmail;
 
-  // Existing row: honor its role (unless superadmin), block if disabled, capture name if missing.
+  // Existing row: honor its role (unless superadmin), block if disabled, capture name/avatar.
   const existing = await getUserByEmail(email).catch(() => null);
   if (existing) {
     if (!existing.active) return null; // disabled = explicitly revoked → blocked
-    if (name && !existing.name) await updateUser(existing.id, { name }).catch(() => {});
+    const patch: Record<string, any> = {};
+    if (name && !existing.name) patch.name = name;
+    if (avatar) patch.avatar = avatar; // refresh the profile photo on each Google sign-in
+    if (Object.keys(patch).length) await updateUser(existing.id, patch).catch(() => {});
     return {
       id: existing.id,
       email: existing.email,
@@ -42,7 +46,7 @@ export async function resolveUserByEmail(rawEmail: string, profile: { name?: str
   // No row yet: provision. Superadmin → superadmin; everyone else → base `user`.
   const role = isSuperadmin ? 'superadmin' : 'user';
   const id = newUserId();
-  const created = await createUser({ id, email, name, role }).catch(() => null);
+  const created = await createUser({ id, email, name, role, avatar }).catch(() => null);
   if (created) return { id: created.id, email: created.email, role, name: created.name || name };
 
   // DB write failed — never lock out the superadmin over an infra hiccup.

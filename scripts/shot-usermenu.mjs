@@ -1,0 +1,24 @@
+// Log in (break-glass), then open the navbar user menu on a public page and screenshot it.
+import 'dotenv/config';
+import { chromium } from 'playwright';
+const BASE = 'https://drbi.org';
+const b = await chromium.launch();
+const p = await b.newPage({ viewport: { width: 1280, height: 820 } });
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+await p.waitForTimeout(1300);
+if (await p.evaluate(() => document.getElementById('account-menu').classList.contains('hidden'))) await p.click('#account-btn');
+await p.waitForTimeout(300);
+await p.click('#account-menu details summary');
+await p.fill('#nav-pass-form input[name="email"]', process.env.SITE_ADMIN_EMAIL);
+await p.fill('#nav-pass-form input[name="password"]', process.env.SITE_ADMIN_PASS);
+await Promise.all([p.waitForNavigation({ timeout: 20000 }).catch(() => {}), p.click('#nav-pass-form button[type="submit"]')]);
+await p.waitForTimeout(800);
+console.log('after login:', p.url());
+await p.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+await p.waitForTimeout(700);
+await p.click('#account-btn');
+await p.waitForTimeout(400);
+const open = await p.evaluate(() => { const m = document.getElementById('account-menu'); return m && !m.classList.contains('hidden'); });
+console.log('user menu open:', open);
+await p.screenshot({ path: 'tmp/usermenu-1280.png', clip: { x: 760, y: 0, width: 520, height: 430 } });
+await b.close();

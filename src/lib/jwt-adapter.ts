@@ -33,7 +33,7 @@ export class JWTAdapter implements Adapter {
         if (userRow && userRow.active) {
           return [session, {
             id: userRow.id,
-            attributes: { name: userRow.name, email: userRow.email, role: userRow.role }
+            attributes: { name: userRow.name, email: userRow.email, role: userRow.role, avatar: (userRow as any).avatar }
           }];
         }
       } catch {
