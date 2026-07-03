@@ -1,6 +1,7 @@
 // src/middleware.ts
 import { lucia } from "./lib/auth";
 import { verifyRequestOrigin as verifyOrig } from "lucia";
+import { ADMIN_NAV, roleLevel } from "./lib/admin-nav";
 // import { defineMiddleware } from "astro:middleware";
 
 
@@ -34,6 +35,15 @@ export const onRequest = async (context, next) => {
     const user = context.locals.user;
     if (!user || !STAFF.includes(user.role)) {
       return new Response(null, { status: 302, headers: { Location: '/?signin=1' } });
+    }
+    // Per-section role enforcement: only for known admin-nav sections (e.g. /admin/users
+    // = superadmin, /admin/team|settings|analytics = admin+). Paths NOT in the matrix
+    // (e.g. /admin/articles) stay open to any staff so content editing isn't blocked.
+    const match = ADMIN_NAV
+      .filter((i) => i.href !== '/admin' && (path === i.href || path.startsWith(i.href + '/')))
+      .sort((a, b) => b.href.length - a.href.length)[0];
+    if (match && roleLevel(user.role) < match.minLevel) {
+      return new Response(null, { status: 302, headers: { Location: '/admin' } });
     }
   }
   return next();
