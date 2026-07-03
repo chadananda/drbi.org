@@ -7,5 +7,12 @@ const dispType = Astro.props.type || defaultType; // calendar, mini, agenda
 
 <div data-tockify-component="calendar" data-tockify-calendar="drbiffa"
 data-tockify-view={dispType}
+role="region" aria-label="Events calendar"
 ></div>
+<noscript>
+  <p>
+    Our events calendar requires JavaScript. View it directly on
+    <a href="https://tockify.com/drbiffa/agenda" rel="noopener noreferrer">Tockify</a>.
+  </p>
+</noscript>
 <script data-cfasync="false" data-tockify-script="embed" src="https://public.tockify.com/browser/embed.js"></script>

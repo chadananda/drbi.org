@@ -5,6 +5,8 @@ import { currentURL, displayImageObj, hashstr } from '@utils/utils.js';
 const author = Astro.props.author
 const name_slug = author.id
 var { image_src, image_alt, name, type, worksFor_type, worksFor_name, description, sameAs } = author.data;
+// Guarantee a non-empty alt (axe image-alt was critical here when the author had no image_alt).
+image_alt = image_alt || name || 'Author photo';
 
 const pageURL = currentURL(Astro);
 const siteURL = new URL(pageURL).origin.replace(/\/$/, '');

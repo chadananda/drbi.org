@@ -23,16 +23,16 @@ const topicSubtitle = topic?.description || 'Explore articles and teachings on t
 <Layout title={topic?.name ?? slug} description={topic?.description}>
 
   <PageHero
-    label=”Articles by topic”
+    label="Articles by topic"
     title={topic?.name ?? slug}
     subtitle={topicSubtitle}
     image={studyImg}
     imageAlt={topic?.name ?? slug}
   />
 
-  <div class=”max-w-screen-xl mx-auto”>
+  <div class="max-w-screen-xl mx-auto">
    { !!topic?.faqs && (<TopicFAQ faqs={topic?.faqs} max=8 />)}
-  <Container class="w-full mx-5 sm:mx-15">
+  <Container class="w-full mx-5 sm:mx-8">
     <div class="flex flex-wrap justify-center gap-20 mt-5">
       {Array.isArray(posts) && posts.map((post) => {
         // console.log('postThumb: ', post.id);

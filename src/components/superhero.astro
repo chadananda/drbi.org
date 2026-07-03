@@ -27,10 +27,17 @@ const quotes = [
 ];
 ---
 
+<noscript>
+  <style>
+    /* Server-rendered first quote starts hidden for the JS fade-in; reveal it when JS is off. */
+    #hero-quote, #hero-source { opacity: 1 !important; }
+  </style>
+</noscript>
+
 <div id="superhero" class="relative w-full overflow-hidden flex flex-col">
 
   <!-- Video background -->
-  <video loop muted autoplay playsinline preload="auto"
+  <video loop muted autoplay playsinline preload="auto" aria-hidden="true" tabindex="-1"
     class="w-full h-full absolute inset-0 z-0 object-cover">
     <source src="/drbi-open_md.mp4" type="video/mp4">
   </video>
@@ -40,18 +47,18 @@ const quotes = [
 
   <!-- Main headline — upper portion -->
   <div class="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-6 pt-16 pb-8">
-    <p class="text-white/55 text-xs uppercase tracking-[0.3em] mb-7">
+    <p class="text-white/70 text-xs uppercase tracking-[0.3em] mb-7">
       Desert Rose Bahá'í Institute &mdash; Eloy, Arizona
     </p>
     <h1 class="text-white text-4xl md:text-6xl lg:text-7xl font-serif font-light leading-tight tracking-wide max-w-4xl">
       Study deeply.<br>Grow food.<br>Build a better world.
     </h1>
-    <p class="text-white/65 mt-8 text-base md:text-lg font-light tracking-wide max-w-xl leading-relaxed">
+    <p class="text-white/80 mt-8 text-base md:text-lg font-light tracking-wide max-w-xl leading-relaxed">
       An institute for arts, agriculture, and Bahá'í education —<br class="hidden md:block">
       open to anyone who believes the world can be transformed.
     </p>
     <a href="#programs"
-      class="mt-10 inline-block border border-white/35 text-white/80 px-10 py-3.5 rounded-full text-xs tracking-[0.2em] uppercase hover:bg-white/15 transition duration-300">
+      class="mt-10 inline-block border border-white/35 text-white/90 px-10 py-3.5 rounded-full text-xs tracking-[0.2em] uppercase hover:bg-white/15 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none transition duration-300">
       Explore Programs
     </a>
   </div>
@@ -62,9 +69,11 @@ const quotes = [
     <div class="max-w-2xl mx-auto min-h-[90px] flex flex-col items-center justify-center">
       <p id="hero-quote"
         class="text-white/75 text-base md:text-xl font-serif font-light italic leading-relaxed transition-opacity duration-700 opacity-0">
+        {'“' + quotes[0].text + '”'}
       </p>
       <span id="hero-source"
         class="mt-4 block text-amber-300/70 text-xs uppercase tracking-[0.25em] transition-opacity duration-700 opacity-0">
+        {'— ' + quotes[0].source}
       </span>
     </div>
   </div>
@@ -74,7 +83,11 @@ const quotes = [
 <style>
   #superhero {
     height: 94vh;
+    height: 94dvh;
     min-height: 600px;
+  }
+  @media (max-height: 640px) {
+    #superhero { min-height: 480px; }
   }
   /* Soft, barely-visible dark glow so white hero text stays legible where the
      background image is light. */

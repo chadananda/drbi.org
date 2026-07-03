@@ -19,10 +19,16 @@ const categories = await getCategories();
 // console.log('[author].astro, posts/author:', posts.length, author_slug);
 ---
 
-<Layout title={author?.name || author_slug}>
+<Layout title={author?.data?.name || author_slug}>
   <Container>
 
+     <h1 class="text-center text-3xl font-bold text-gray-900 mt-10 mb-8">{author?.data?.name || author_slug}</h1>
+
      <AuthorCard slug={author_slug} size="md" author={author} />
+
+      {posts.length === 0 && (
+        <p class="text-center text-gray-500 mt-12">No published articles yet.</p>
+      )}
 
       <div class="mt-16">
         <div class="flex flex-wrap justify-center gap-20">
@@ -30,8 +36,7 @@ const categories = await getCategories();
             const category = categories.find(c => c.id === post.data.category);
             const notEnglish = post.data.language && post.data.language !== 'en';
             return (
-              <div className={`flex-none articlePost ${notEnglish ? 'hidden' : ''}`}
-                style={{ width: '300px' }}
+              <div className={`flex-none articlePost w-full max-w-[300px] ${notEnglish ? 'hidden' : ''}`}
                 data-title={post.data.title}
                 data-language={post.data.language}>
                 <PostThumb post={post} author={author} category={category} />
@@ -43,9 +48,7 @@ const categories = await getCategories();
 
 
 
-      <button class="mt-16 text-center block mx-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">
-        <a href="/authors" aria-label="All Authors">Back to Authors</a>
-      </button>
+      <a href="/authors" class="mt-16 text-center block w-fit mx-auto bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:outline-none">Back to Authors</a>
 
   </Container>
 </Layout>

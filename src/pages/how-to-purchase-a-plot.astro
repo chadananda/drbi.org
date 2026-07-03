@@ -53,7 +53,7 @@ const PLOT_PRICE = 1500;
           <p class="text-sm text-slate-600 leading-relaxed mb-3">
             For caskets, headstones, and burial arrangements, please contact:
           </p>
-          <a href="https://www.jwarrenfuneral.com/" target="_blank" class="font-serif text-slate-800 hover:text-amber-700 transition">
+          <a href="https://www.jwarrenfuneral.com/" target="_blank" rel="noopener noreferrer" class="font-serif text-slate-800 hover:text-amber-700 transition">
             J. Warren Funeral Home
           </a>
           <br />
@@ -76,9 +76,10 @@ const PLOT_PRICE = 1500;
               name="fullName"
               required
               placeholder="Your full name"
+              aria-describedby="fullName-feedback"
               class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
             />
-            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+            <div id="fullName-feedback" class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
               Please provide your full name.
             </div>
           </div>
@@ -92,12 +93,13 @@ const PLOT_PRICE = 1500;
               name="email"
               required
               placeholder="you@example.com"
+              aria-describedby="email-feedback email-invalid-feedback"
               class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
             />
-            <div class="empty-feedback text-red-400 text-sm mt-1">
+            <div id="email-feedback" class="empty-feedback text-red-400 text-sm mt-1">
               Please provide your email address.
             </div>
-            <div class="invalid-feedback text-red-400 text-sm mt-1">
+            <div id="email-invalid-feedback" class="invalid-feedback text-red-400 text-sm mt-1">
               Please provide a valid email address.
             </div>
           </div>
@@ -111,9 +113,10 @@ const PLOT_PRICE = 1500;
               name="phone"
               required
               placeholder="(555) 123-4567"
+              aria-describedby="phone-feedback"
               class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
             />
-            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+            <div id="phone-feedback" class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
               Please provide your phone number.
             </div>
           </div>
@@ -125,6 +128,7 @@ const PLOT_PRICE = 1500;
               id="numPlots"
               name="numPlots"
               required
+              aria-describedby="numPlots-feedback"
               class="w-full px-4 py-3 border rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
             >
               <option value="">Select number of plots</option>
@@ -139,7 +143,7 @@ const PLOT_PRICE = 1500;
               <option value="9">9 plots - $13,500</option>
               <option value="10">10 plots - $15,000</option>
             </select>
-            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+            <div id="numPlots-feedback" class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
               Please select the number of plots.
             </div>
           </div>
@@ -153,9 +157,10 @@ const PLOT_PRICE = 1500;
               required
               rows="3"
               placeholder="Please list the name(s) of who the plot(s) are intended for"
+              aria-describedby="plotsFor-feedback"
               class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
             ></textarea>
-            <div class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
+            <div id="plotsFor-feedback" class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
               Please provide the names of who the plots are for.
             </div>
           </div>
@@ -238,6 +243,13 @@ form.addEventListener("submit", async function(e) {
   e.preventDefault();
   form.classList.add("was-validated");
 
+  // Reflect validity to assistive tech via aria-invalid
+  form.querySelectorAll("input, select, textarea").forEach((field) => {
+    if (field.willValidate) {
+      field.setAttribute("aria-invalid", field.checkValidity() ? "false" : "true");
+    }
+  });
+
   if (!form.checkValidity()) {
     form.querySelectorAll(":invalid")[0].focus();
     return;
@@ -276,14 +288,16 @@ form.addEventListener("submit", async function(e) {
     if (response.ok && data.success) {
       // Replace form with success message
       const formContainer = form.parentElement;
+      formContainer.setAttribute("role", "status");
+      formContainer.setAttribute("aria-live", "polite");
       formContainer.innerHTML = `
         <div class="text-center py-8">
           <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Invoice Sent!</h3>
+          <h3 tabindex="-1" class="text-xl font-bold text-gray-900 mb-2 focus:outline-none">Invoice Sent!</h3>
           <p class="text-gray-600 mb-4">
             A PayPal invoice for <strong>$${data.total.toLocaleString()}</strong> has been sent to <strong>${formData.email}</strong>
           </p>
@@ -303,6 +317,8 @@ form.addEventListener("submit", async function(e) {
           <p class="text-sm text-gray-500 mt-3">Invoice ID: ${data.invoiceId}</p>
         </div>
       `;
+      // Move focus to the success heading so AT users are announced
+      formContainer.querySelector("h3")?.focus();
     } else {
       result.innerHTML = `<span class="text-red-500">${data.error || "Something went wrong. Please try again or contact us directly."}</span>`;
       submitBtn.disabled = false;

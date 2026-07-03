@@ -69,21 +69,21 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
 
     <div class="mx-auto max-w-3xl text-center mt-3">
       <span class="text-blue-500 uppercase tracking-wider text-sm font-medium">
-        <a href={`/categories/${category?.id}`} aria-label={category?.data?.category}>{category?.data?.category}</a>
+        <a href={`/categories/${category?.id}`}>{category?.data?.category}</a>
       </span>
       <h1 class="text-3xl lg:text-4xl font-bold lg:tracking-tight mt-1 lg:leading-tight"> {post.data?.title} </h1>
       <div class="flex gap-2 mt-3 items-center justify-center text-sm flex-wrap">
         {!!author && (
           <div class="name-date">
             <span class="text-slate-500">
-              <a href={`/authors/${author?.id}`} aria-label={author?.data?.name}> {author?.data?.name} </a>
+              <a href={`/authors/${author?.id}`}> {author?.data?.name} </a>
             </span>
           </div>
         )}
         <div class="w-full md:w-auto flex flex-wrap justify-center gap-1 p-0 m-0 !line-clamp-2">
           {topics && topics?.map((topic) => (
             <span class="text-sm text-slate-500">
-              #<a href={`/topics/${topic?.id}`} aria-label={topic?.data?.topic}>{topic?.data?.topic}</a>
+              #<a href={`/topics/${topic?.id}`}>{topic?.data?.topic}</a>
             </span>
           ))}
         </div>
@@ -92,7 +92,7 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
 
     <div class="mx-auto max-w-10xl">
       <div class="relative pt-[40%] rounded-xl mt-6 overflow-hidden shadow-xl border border-gray-200" >
-        <img {...cover_image} class="cover-image absolute top-0 left-0 w-full h-full object-cover" />
+        <img {...cover_image} alt={cover_image?.alt ?? post.data?.title} class="cover-image absolute top-0 left-0 w-full h-full object-cover" />
       </div>
      </div>
 

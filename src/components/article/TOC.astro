@@ -33,7 +33,7 @@ const tocHtml = (() => {
 
 <div id="tableofcontents" class="overflow-visible sticky top-[7vh] z-40">
   <!-- mobile version shows a button  -->
-  <nav id="toc_mobile_button" class="p-0 mt-1 block md:hidden noprint">
+  <nav id="toc_mobile_button" class="p-0 mt-1 block md:hidden noprint" aria-label="Table of contents menu">
     <button class="w-full focus:outline-none min-w-11 -ml-2
       border border-gray-300 rounded-md shadow-sm py-1 px-2 bg-white "
     aria-controls="mobile-toc" aria-expanded="false">
@@ -44,14 +44,14 @@ const tocHtml = (() => {
   <!-- Slide-out TOC for mobile -->
   <div id="mobile-toc" class="fixed top-28 left-0 transform -translate-x-full md:hidden transition duration-300 ease-in-out
   border-4 border-gray-300 bg-white shadow-lg rounded-lg -ml-1 p-5">
-    <nav class="w-60 leading-4 text-sm overflow-y-auto">
+    <nav class="w-60 leading-4 text-sm overflow-y-auto" aria-label="Table of contents (mobile)">
       <ul set:html={tocHtml}></ul>
     </nav>
   </div>
 
 
   <!-- desktop version shows a side menu  -->
-  <nav id="desktop-toc" class={`p-0 w-60 lg:w-64 leading-4 m-0 pt-5
+  <nav id="desktop-toc" aria-label="Table of contents" class={`p-0 w-60 lg:w-64 leading-4 m-0 pt-5
   ${textsize}
   hidden md:block noprint`}>
     <ul set:html={tocHtml}></ul>

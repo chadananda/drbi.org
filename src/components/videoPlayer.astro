@@ -97,7 +97,7 @@ const playerID = 'id-' + uniqueID;
     >
       <img
         src={imageURL}
-        alt={title}
+        alt=""
         class="w-full h-auto"
         loading="lazy"
       />
@@ -118,7 +118,7 @@ const playerID = 'id-' + uniqueID;
   </div>
 
   {/* Fullscreen modal */}
-  <div id={`${playerID}-modal`} class="video-modal fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-4">
+  <div id={`${playerID}-modal`} role="dialog" aria-modal="true" aria-label={title} class="video-modal fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-4">
     <button
       type="button"
       class="video-modal-close absolute top-4 right-4 text-white hover:text-gray-300 z-10"
@@ -134,6 +134,9 @@ const playerID = 'id-' + uniqueID;
   </div>
 
   <script>
+    // Track the trigger so focus can be restored on close
+    let lastVideoTrigger: HTMLElement | null = null;
+
     // Video thumbnail modal functionality
     document.querySelectorAll<HTMLButtonElement>('.video-thumbnail-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -143,11 +146,14 @@ const playerID = 'id-' + uniqueID;
         const content = modal?.querySelector('.video-modal-content');
 
         if (modal && content) {
+          lastVideoTrigger = btn;
           // Create iframe with autoplay
           content.innerHTML = `<iframe class="w-full h-full rounded-lg" src="${videoUrl}?autoplay=1" title="Video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
           modal.classList.remove('hidden');
           modal.classList.add('flex');
           document.body.style.overflow = 'hidden';
+          // Move focus into the dialog
+          (modal.querySelector('.video-modal-close') as HTMLElement | null)?.focus();
         }
       });
     });
@@ -178,6 +184,9 @@ const playerID = 'id-' + uniqueID;
         modal.classList.remove('flex');
         content.innerHTML = '';
         document.body.style.overflow = '';
+        // Restore focus to the trigger that opened the dialog
+        lastVideoTrigger?.focus();
+        lastVideoTrigger = null;
       }
     }
   </script>

@@ -224,7 +224,7 @@ const displayEvents = upcomingEvents.map(event => {
           </div>
           <div class="timeline-content">
             {event.display.teacherImageLarge && (
-              <img src={event.display.teacherImageLarge} alt="" class="timeline-avatar" />
+              <img src={event.display.teacherImageLarge} alt={`Teacher for ${event.display.name}`} class="timeline-avatar" />
             )}
             <div class="timeline-details">
               <h3 class="timeline-title">{event.display.name}</h3>
@@ -240,7 +240,7 @@ const displayEvents = upcomingEvents.map(event => {
     </div>
   ) : (
     <div class={
-      view === 'cards' ? 'flex flex-wrap gap-[120px] justify-center p-5' :
+      view === 'cards' ? 'flex flex-wrap gap-8 md:gap-[120px] justify-center p-5' :
       view === 'list-full' ? 'events-list-full' :
       'events-list'
     }>
@@ -251,7 +251,7 @@ const displayEvents = upcomingEvents.map(event => {
         >
           {view === 'cards' ? (
             <>
-              <article class={`relative overflow-hidden ${event.isMinimal ? 'w-[450px] h-[200px] opacity-80' : 'w-[450px] h-[300px]'} m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl`}>
+              <article class={`relative overflow-hidden w-full ${event.isMinimal ? 'max-w-[450px] h-[200px] opacity-80' : 'max-w-[450px] h-[300px]'} m-2 rounded-lg bg-white border border-gray-300 transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-2xl`}>
                 {event.isMinimal && (
                   <div class="recurring-card-badge">
                     <span class="badge-icon">🔄</span>
@@ -281,8 +281,8 @@ const displayEvents = upcomingEvents.map(event => {
                 </a>
               </article>
               {!event.isMinimal && event.display.teacherImage && (
-                <div class="absolute top-0 -left-[90px] w-[150px] h-[160px] rounded-[30%] overflow-hidden border-[3px] border-white shadow-lg z-10 pointer-events-none">
-                  <img src={event.display.teacherImage} alt="Teacher" class="w-full h-full object-cover" />
+                <div class="hidden md:block absolute top-0 -left-[90px] w-[150px] h-[160px] rounded-[30%] overflow-hidden border-[3px] border-white shadow-lg z-10 pointer-events-none">
+                  <img src={event.display.teacherImage} alt={`Teacher for ${event.display.name}`} class="w-full h-full object-cover" />
                 </div>
               )}
             </>
@@ -291,7 +291,7 @@ const displayEvents = upcomingEvents.map(event => {
               {event.isMinimal ? (
                 event.display.teacherImageLarge ? (
                   <div class="teacher-overlay-minimal">
-                    <img src={event.display.teacherImageLarge} alt="Teacher" class="teacher-image-minimal" />
+                    <img src={event.display.teacherImageLarge} alt={`Teacher for ${event.display.name}`} class="teacher-image-minimal" />
                     <div class="recurring-indicator-overlay">🔄</div>
                   </div>
                 ) : (
@@ -309,7 +309,7 @@ const displayEvents = upcomingEvents.map(event => {
                   </div>
                   {event.display.teacherImageLarge && (
                     <div class="teacher-overlay-large">
-                      <img src={event.display.teacherImageLarge} alt="Teacher" class="teacher-image-large" />
+                      <img src={event.display.teacherImageLarge} alt={`Teacher for ${event.display.name}`} class="teacher-image-large" />
                     </div>
                   )}
                 </>
@@ -335,7 +335,7 @@ const displayEvents = upcomingEvents.map(event => {
                   <div class="compact-short-description" set:html={event.display.shortDescriptionHtml}></div>
                 )}
 
-                <div class={`expandable-content ${event.isMinimal ? 'collapsed' : ''}`} data-event-id={event.instanceId}>
+                <div id={`expandable-${event.instanceId}`} class={`expandable-content ${event.isMinimal ? 'collapsed' : ''}`} data-event-id={event.instanceId}>
                   <div class="list-full-content">
                     <div class="list-full-left-column">
                       <div class="list-full-image-container">
@@ -348,12 +348,12 @@ const displayEvents = upcomingEvents.map(event => {
                       <div class="list-full-meta">
                         {event.data.price && (
                           <div class="meta-item price">
-                            <span class="icon">💲</span>
+                            <span class="icon" aria-hidden="true">💲</span>
                             <span>{event.display.price}</span>
                           </div>
                         )}
                         <div class="meta-item organizer">
-                          <span class="icon">👥</span>
+                          <span class="icon" aria-hidden="true">👥</span>
                           <span>{event.data.organizer}</span>
                         </div>
                       </div>
@@ -362,6 +362,7 @@ const displayEvents = upcomingEvents.map(event => {
 
                   <div class="event-text-preview">
                     <div
+                      id={`preview-${event.instanceId}`}
                       class="event-preview-text"
                       data-event-id={event.instanceId}
                       data-preview-html={event.display.previewHtml}
@@ -387,6 +388,8 @@ const displayEvents = upcomingEvents.map(event => {
                         type="button"
                         class="show-more-btn"
                         data-event-id={event.instanceId}
+                        aria-expanded="false"
+                        aria-controls={`expandable-${event.instanceId}`}
                         onclick={`toggleMinimalEvent('${event.instanceId}')`}
                       >
                         <span class="btn-text">Show More</span>
@@ -406,6 +409,8 @@ const displayEvents = upcomingEvents.map(event => {
                         type="button"
                         class="show-more-btn"
                         data-event-id={event.instanceId}
+                        aria-expanded="false"
+                        aria-controls={`preview-${event.instanceId}`}
                         onclick={`toggleDescription('${event.instanceId}')`}
                       >
                         <span class="btn-text">Show More</span>
@@ -431,11 +436,11 @@ const displayEvents = upcomingEvents.map(event => {
                     <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">{event.display.name}</a>
                   </h3>
                   <div class="list-meta">
-                    <span class="time-icon">🕐&nbsp;</span><time>{event.display.time}</time>
+                    <span class="time-icon" aria-hidden="true">🕐&nbsp;</span><time>{event.display.time}</time>
                     {!event.isMinimal && event.data.price && (
                       <>
-                        <span class="separator">•</span>
-                        <span class="price-icon">💰&nbsp;</span><span class="price">{event.display.price}</span>
+                        <span class="separator" aria-hidden="true">•</span>
+                        <span class="price-icon" aria-hidden="true">💰&nbsp;</span><span class="price">{event.display.price}</span>
                       </>
                     )}
                   </div>
@@ -445,7 +450,7 @@ const displayEvents = upcomingEvents.map(event => {
                 </div>
                 <div class="list-actions">
                   <a href={`/admin/events/${event.data.id}`} class="edit-btn">
-                    <span class="edit-icon">✏️&nbsp;</span>
+                    <span class="edit-icon" aria-hidden="true">✏️&nbsp;</span>
                     <span class="edit-text">Edit</span>
                   </a>
                 </div>
@@ -494,6 +499,7 @@ const displayEvents = upcomingEvents.map(event => {
       contentEl.classList.remove('collapsed');
       const btn = targetEl.querySelector(`.show-more-btn[data-event-id="${eventId}"]`);
       if (btn) {
+        btn.setAttribute('aria-expanded', 'true');
         btn.querySelector('.btn-text').textContent = 'Show Less';
         btn.querySelector('.btn-icon').textContent = '↑';
       }
@@ -523,12 +529,14 @@ const displayEvents = upcomingEvents.map(event => {
       // Collapse
       previewEl.innerHTML = previewHtml;
       buttonEl.classList.remove('expanded');
+      buttonEl.setAttribute('aria-expanded', 'false');
       buttonEl.querySelector('.btn-text').textContent = 'Show More';
       buttonEl.querySelector('.btn-icon').textContent = '↓';
     } else {
       // Expand
       previewEl.innerHTML = fullHtml;
       buttonEl.classList.add('expanded');
+      buttonEl.setAttribute('aria-expanded', 'true');
       buttonEl.querySelector('.btn-text').textContent = 'Show Less';
       buttonEl.querySelector('.btn-icon').textContent = '↑';
     }
@@ -546,11 +554,13 @@ const displayEvents = upcomingEvents.map(event => {
     if (isCollapsed) {
       // Expand
       contentEl.classList.remove('collapsed');
+      buttonEl.setAttribute('aria-expanded', 'true');
       buttonEl.querySelector('.btn-text').textContent = 'Show Less';
       buttonEl.querySelector('.btn-icon').textContent = '↑';
     } else {
       // Collapse
       contentEl.classList.add('collapsed');
+      buttonEl.setAttribute('aria-expanded', 'false');
       buttonEl.querySelector('.btn-text').textContent = 'Show More';
       buttonEl.querySelector('.btn-icon').textContent = '↓';
     }

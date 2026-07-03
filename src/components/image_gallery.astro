@@ -18,10 +18,10 @@ const galleryId = 'gallery_' + Math.random().toString(36).substr(2, 9);
 
 // Function to determine the grid columns based on image count
 const getGridCols = (count: number) => {
-  if (count <= 3) return 'grid-cols-3';
-  if (count <= 8) return 'grid-cols-4';
-  if (count <= 15) return 'grid-cols-5';
-  return 'grid-cols-6';
+  if (count <= 3) return 'grid-cols-2 sm:grid-cols-3';
+  if (count <= 8) return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4';
+  if (count <= 15) return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-5';
+  return 'grid-cols-2 sm:grid-cols-3 md:grid-cols-6';
 };
 
 const gridCols = getGridCols(images.length);
@@ -37,23 +37,26 @@ const defaultClasses = {
 <div id={galleryId}>
   <div class:list={[defaultClasses.container, classes.container]}>
     {images.map((image, index) => (
-      <div
+      <button
+        type="button"
+        aria-label={`View image ${index + 1}`}
         class:list={[defaultClasses.thumbnailWrapper, classes.thumbnailWrapper]}
         data-lightbox-trigger
         data-image-index={index}
       >
         <Image
           src={image}
-          alt={`thumbnail ${index}`}
+          alt=""
           class:list={[defaultClasses.thumbnail, classes.thumbnail]}
         />
-      </div>
+      </button>
     ))}
   </div>
 
-  <div id={`lightbox-${galleryId}`} class:list={[defaultClasses.lightbox, classes.lightbox]}>
+  <div id={`lightbox-${galleryId}`} role="dialog" aria-modal="true" aria-label="Image viewer" class:list={[defaultClasses.lightbox, classes.lightbox]}>
+    <button type="button" data-lightbox-close aria-label="Close" class="absolute top-4 right-4 z-10 text-white text-3xl leading-none rounded-full w-10 h-10 flex items-center justify-center hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white">&times;</button>
     <div class="max-w-4xl max-h-full p-4">
-      <Image id={`lightbox-image-${galleryId}`} src={images[0]} alt="Lightbox image" class="max-w-full max-h-full object-contain rounded-lg" />
+      <Image id={`lightbox-image-${galleryId}`} src={images[0]} alt="" class="max-w-full max-h-full object-contain rounded-lg" />
     </div>
   </div>
 </div>
@@ -62,19 +65,39 @@ const defaultClasses = {
   const galleryContainer = document.getElementById(galleryId);
   const lightbox = galleryContainer.querySelector(`#lightbox-${galleryId}`);
   const lightboxImage = galleryContainer.querySelector(`#lightbox-image-${galleryId}`);
+  const closeBtn = lightbox.querySelector('[data-lightbox-close]');
   const triggers = galleryContainer.querySelectorAll('[data-lightbox-trigger]');
+  let lastTrigger = null;
+
+  function openLightbox(index, trigger) {
+    lastTrigger = trigger;
+    lightboxImage.src = images[index].src;
+    lightbox.classList.remove('hidden');
+    lightbox.classList.add('flex');
+    closeBtn.focus();
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('flex');
+    lightbox.classList.add('hidden');
+    if (lastTrigger) lastTrigger.focus();
+  }
 
   triggers.forEach((trigger) => {
     trigger.addEventListener('click', () => {
       const index = parseInt(trigger.getAttribute('data-image-index'), 10);
-      lightboxImage.src = images[index].src;
-      lightbox.classList.remove('hidden');
-      lightbox.classList.add('flex');
+      openLightbox(index, trigger);
     });
   });
 
-  lightbox.addEventListener('click', () => {
-    lightbox.classList.remove('flex');
-    lightbox.classList.add('hidden');
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeLightbox();
+  });
+
+  lightbox.addEventListener('click', () => closeLightbox());
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lightbox.classList.contains('flex')) closeLightbox();
   });
 </script>

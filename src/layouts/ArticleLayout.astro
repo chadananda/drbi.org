@@ -11,19 +11,37 @@ import JSONLD  from "@components/article/JSONLD.astro"; // validate at https://v
        // fyi, check your opengraph here:  https://www.opengraph.xyz/
 
 const {footerMargin = true, post, author, category, language } = Astro.props;
+
+// Article <head> metadata (was entirely missing — empty <title>, no description/OG).
+const siteName = "Desert Rose Bahá'í Institute";
+const articleTitle = post?.data?.title ?? "Article";
+const pageTitle = `${articleTitle} — ${siteName}`;
+const pageDesc = post?.data?.description || post?.data?.desc_125 || post?.data?.abstract || "";
+const ogImage = post?.data?.image?.src || "";
+const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://drbi.org").toString();
 ---
 <!doctype html>
-<html lang={language}>
+<html lang={language ?? 'en'}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    {pageDesc && <meta name="description" content={pageDesc} />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={articleTitle} />
+    {pageDesc && <meta property="og:description" content={pageDesc} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
     <!-- <JSONLD {author} {category} {post} /> -->
 
   </head>
 
   <body>
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-slate-900 focus:shadow">Skip to content</a>
     <Navbar />
-    <main>
+    <main id="main">
       <slot />
     </main>
     <Footer margin={footerMargin} />

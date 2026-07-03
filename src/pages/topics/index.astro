@@ -37,15 +37,18 @@ const topicLinks = allTopics.map((topic) => ({
     <Container>
       <div class="max-w-3xl mx-auto text-center flex flex-wrap justify-center gap-3">
         {topicLinks.map((tag) => (
-          <a href={tag.href}
-            data-astro-prefetch="false"
-            class={`px-5 py-2 rounded-full text-sm border transition duration-200 ${
-              tag.used
-                ? 'border-amber-700 text-amber-800 hover:bg-amber-50'
-                : 'border-stone-200 text-stone-400 cursor-default pointer-events-none'
-            }`}>
-            {tag.name}
-          </a>
+          tag.used ? (
+            <a href={tag.href}
+              data-astro-prefetch="false"
+              class="px-5 py-2 rounded-full text-sm border transition duration-200 border-amber-700 text-amber-800 hover:bg-amber-50 focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:outline-none">
+              {tag.name}
+            </a>
+          ) : (
+            <span
+              class="px-5 py-2 rounded-full text-sm border transition duration-200 border-stone-200 text-stone-400 cursor-default">
+              {tag.name}
+            </span>
+          )
         ))}
       </div>
     </Container>

@@ -13,15 +13,16 @@ import JSONLD  from "@components/article/JSONLD.astro"; // validate at https://v
 const {footerMargin = true, post, author, category, language } = Astro.props;
 ---
 <!doctype html>
-<html lang={language}>
+<html lang={language ?? 'en'}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <JSONLD {author} {category} {post} />
   </head>
   <body>
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-slate-900 focus:shadow">Skip to content</a>
     <Navbar />
-    <main>
+    <main id="main">
       <slot />
     </main>
     <Footer margin={footerMargin} />

@@ -58,7 +58,7 @@ const id = "quote-" + Math.floor(Math.random() * 1000000000);
 ---
 
 <div id={id} class="quoteblock hidden sm:block text-xs w-full ml-6 mr-5 text-center color-gray-300" data-num={num}>
-  <div class="relative w-auto mx-0 sm:mx-12"><a href={link} class="link" target="_blank">
+  <div class="relative w-auto mx-0 sm:mx-12"><a href={link} class="link rounded focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:outline-none" target="_blank" rel="noopener noreferrer">
     <div class="quote italic">{quote}</div>
   </a></div>
 </div>

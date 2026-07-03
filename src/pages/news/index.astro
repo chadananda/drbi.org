@@ -25,7 +25,7 @@ const posts = await getPublishedPostsByType_Content('News');
     <Container>
       <div class="flex flex-wrap justify-center gap-14">
         {Array.isArray(posts) && posts.map((post) => (
-          <div class="flex-none" style={{ width: '300px' }}>
+          <div class="flex-none w-full max-w-[300px]">
             <PostThumb post={post} />
           </div>
         ))}

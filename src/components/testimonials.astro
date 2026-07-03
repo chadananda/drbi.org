@@ -57,7 +57,7 @@ const testimonials = [
     <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800">
       What people say about DRBI
     </h2>
-    <p class="mt-4 text-slate-400 text-sm max-w-md mx-auto italic">
+    <p class="mt-4 text-slate-600 text-sm max-w-md mx-auto italic">
       These are placeholder testimonials. Real voices from real visitors will replace them —
       if you've attended a program at DRBI, we'd love to hear from you at
       <a href="mailto:info@drbi.org" class="text-amber-700 hover:underline">info@drbi.org</a>.
@@ -66,7 +66,7 @@ const testimonials = [
 
   <!-- Scrolling marquee -->
   <div class="relative md:flex gap-8 overflow-hidden group">
-    <div class="md:motion-safe:animate-marquee flex min-w-full shrink-0 items-stretch gap-8 snap-x snap-mandatory px-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0">
+    <div class="md:motion-safe:animate-marquee group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused] flex min-w-full shrink-0 items-stretch gap-8 snap-x snap-mandatory px-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0">
       {testimonials.map(t => (
         <div class="w-80 shrink-0 snap-start bg-stone-50 border border-stone-100 rounded-2xl p-8 flex flex-col justify-between">
           <blockquote class="text-slate-600 text-sm leading-relaxed font-serif italic">
@@ -78,7 +78,7 @@ const testimonials = [
             </div>
             <div>
               <p class="text-slate-800 text-sm font-medium">{t.name}</p>
-              <p class="text-slate-400 text-xs">{t.location}</p>
+              <p class="text-slate-600 text-xs">{t.location}</p>
             </div>
           </div>
         </div>
@@ -86,7 +86,7 @@ const testimonials = [
     </div>
 
     <!-- Duplicate for seamless loop on desktop -->
-    <div class="hidden md:flex md:motion-safe:animate-marquee min-w-full shrink-0 items-stretch gap-8 px-6 md:motion-reduce:hidden">
+    <div class="hidden md:flex md:motion-safe:animate-marquee group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused] min-w-full shrink-0 items-stretch gap-8 px-6 md:motion-reduce:hidden">
       {testimonials.map(t => (
         <div class="w-80 shrink-0 bg-stone-50 border border-stone-100 rounded-2xl p-8 flex flex-col justify-between">
           <blockquote class="text-slate-600 text-sm leading-relaxed font-serif italic">
@@ -98,7 +98,7 @@ const testimonials = [
             </div>
             <div>
               <p class="text-slate-800 text-sm font-medium">{t.name}</p>
-              <p class="text-slate-400 text-xs">{t.location}</p>
+              <p class="text-slate-600 text-xs">{t.location}</p>
             </div>
           </div>
         </div>

@@ -20,6 +20,14 @@ const quotes = [
 ];
 ---
 
+<noscript>
+  <style>
+    /* Attribution starts hidden for the JS fade-in; reveal it when JS is off. */
+    #typewriter-attr { opacity: 1 !important; }
+    #typewriter-cursor { display: none !important; }
+  </style>
+</noscript>
+
 <section class="py-16 md:py-28 bg-stone-800 text-white relative overflow-hidden border-y border-amber-900/40">
   <div class="absolute inset-0 opacity-8 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-600 via-transparent to-transparent"></div>
 
@@ -28,12 +36,12 @@ const quotes = [
 
     <div class="min-h-[200px] flex flex-col items-center justify-center">
       <blockquote class="text-lg md:text-2xl lg:text-3xl font-serif font-light leading-relaxed text-white/90 max-w-2xl mx-auto">
-        "<span id="typewriter-text"></span><span id="typewriter-cursor" class="inline-block w-0.5 h-7 bg-amber-400 ml-1 align-middle animate-pulse"></span>"
+        "<span id="typewriter-text">{quotes[0].text}</span><span id="typewriter-cursor" class="inline-block w-0.5 h-7 bg-amber-400 ml-1 align-middle animate-pulse"></span>"
       </blockquote>
       <div id="typewriter-attr" class="mt-8 flex flex-col items-center gap-1 opacity-0 transition-opacity duration-700">
         <div class="w-8 h-px bg-amber-500 mb-4"></div>
-        <cite id="typewriter-source" class="not-italic text-amber-300 text-sm tracking-wide font-medium"></cite>
-        <span id="typewriter-work" class="text-stone-500 text-xs tracking-wide italic"></span>
+        <cite id="typewriter-source" class="not-italic text-amber-300 text-sm tracking-wide font-medium">{quotes[0].source}</cite>
+        <span id="typewriter-work" class="text-stone-400 text-xs tracking-wide italic">{quotes[0].work}</span>
       </div>
     </div>
   </div>
