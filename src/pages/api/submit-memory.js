@@ -4,6 +4,15 @@ export const prerender = false;
 // Required fields to create: name (text), email (email), caption (text), photos (file, multiple)
 // Until PocketBase is configured this returns success so the UI works.
 export async function POST({ request }) {
+  // Temporarily disabled: memory submissions accept user-uploaded images with no
+  // moderation. Re-enable once an image-approval workflow exists. The /memories page
+  // is hidden too (redirects home; removed from nav).
+  return new Response(
+    JSON.stringify({ success: false, error: 'Memory submissions are temporarily closed.' }),
+    { status: 403, headers: { 'Content-Type': 'application/json' } }
+  );
+
+  // eslint-disable-next-line no-unreachable
   try {
     const data = await request.formData();
     const name    = data.get('name')?.toString().trim();

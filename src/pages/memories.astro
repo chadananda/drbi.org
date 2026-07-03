@@ -34,6 +34,11 @@ const photos = [
   { src: farm,       caption: "Our Farm" },
   { src: agr1,       caption: "Working the desert soil" },
 ];
+
+// Temporarily hidden: memory submissions accept user images with no moderation.
+// Re-enable once an image-approval workflow exists. Also removed from nav
+// (siteLinks.json) and the submit-memory endpoint is disabled meanwhile.
+return Astro.redirect('/', 302);
 ---
 
 <Layout
