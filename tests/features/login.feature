@@ -7,15 +7,14 @@ Feature: Login Page
     Given the website is running
 
   @smoke @critical
-  Scenario: Login page renders correctly
-    When I visit "/login"
-    Then I should see the page title containing "Login"
-    And I should see an email input field
+  Scenario: Sign-in popover renders correctly
+    When I visit "/?signin=1"
+    Then I should see an email input field
     And I should see a password input field
     And I should see the break-glass "Sign In" button
 
-  Scenario: Login page has proper form attributes
-    When I visit "/login"
+  Scenario: Sign-in popover has proper form attributes
+    When I visit "/?signin=1"
     Then the email field should have type "email" or "text"
     And the password field should have type "password"
     And the form should have a POST method

@@ -17,13 +17,13 @@ export const GET: APIRoute = async (context) => {
     if (payload.purpose !== 'magic' || !payload.email) throw new Error('bad token');
 
     const user = await resolveUserByEmail(String(payload.email), { name: payload.name ? String(payload.name) : '' });
-    if (!user) return context.redirect('/login?error=account-disabled', 303);
+    if (!user) return context.redirect('/?auth_error=account-disabled', 303);
 
     await startSession(context, user.id, user.role);
     // Staff land in the admin; base `user` accounts have no admin access, so send them home.
     return context.redirect(user.role === 'user' ? '/' : '/admin', 303);
   } catch (e) {
     console.error('verify error:', e);
-    return context.redirect('/login?error=invalid-or-expired', 303);
+    return context.redirect('/?auth_error=invalid-or-expired', 303);
   }
 };

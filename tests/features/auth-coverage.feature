@@ -13,13 +13,12 @@ Feature: Authentication Coverage
     Then I should be redirected to the login page
 
   @critical
-  Scenario: Login page shows email magic-link form
-    When I visit "/login"
-    Then I should see the page title containing "Login"
-    And the magic-link email form is visible
+  Scenario: Sign-in popover shows email magic-link form
+    When I visit "/?signin=1"
+    Then the magic-link email form is visible
 
-  Scenario: Login page shows Google sign-in option
-    When I visit "/login"
+  Scenario: Sign-in popover shows Google sign-in option
+    When I visit "/?signin=1"
     Then the Google sign-in widget or button is present
 
   @critical

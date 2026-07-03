@@ -8,42 +8,35 @@ export const onRequest = async (context, next) => {
   // DB bindings are read directly from `cloudflare:workers` env in src/lib/db.ts
   // (Astro v6+ removed Astro.locals.runtime.env).
   const path = new URL(context.request.url).pathname;
-  // Skip admin auth for non-admin paths
-  if (!path.startsWith('/admin')) return next();
-  // Retrieve session ID from cookies
+  const isAdmin = path.startsWith('/admin');
+  const STAFF = ['superadmin', 'admin', 'editor', 'author'];
+
+  // Validate the session on EVERY page so the navbar can show login/account state
+  // anywhere. Sign-in happens via the navbar popover — there is no login page.
   const sessionId = context.cookies.get(lucia.sessionCookieName)?.value ?? null;
-  // Redirect to login page if no session ID is present
-  if (!sessionId) {
-      // console.log('No sessionId, redirecting to login');
-      return new Response(null, { status: 302, headers: { Location: '/login' } });
-  }
-  try {
-    // Perform origin verification for additional security
-    const originHeader = context.request.headers.get("Origin"); // comes out null
-    const hostHeader = context.request.headers.get("Host");
-    const isDev = import.meta.env.APP_ENV === 'dev';
-    // In development, we might skip the origin check for ease of testing
-    // if (!isDev && (!originHeader || !hostHeader || !verifyOrig(originHeader, [hostHeader]))) {
-    //   console.log('Origin verification failed:', originHeader, hostHeader );
-    //   return new Response("Forbidden", { status: 403 });
-    // }
-    // Validate session and user, then proceed
-    const { session, user } = await lucia.validateSession(sessionId);
-    // console.log('Session and user validated:', session, user);
-    if (!user || !session || !['superadmin', 'admin','editor','author'].includes(user.role)) {
-      console.log('User role not allowed or no user:', user?.role);
-      return new Response(null, { status: 302, headers: { Location: '/login' } });
+  if (sessionId) {
+    try {
+      const { session, user } = await lucia.validateSession(sessionId);
+      if (session && user) {
+        context.locals.session = session;
+        context.locals.user = user;
+      }
+    } catch (error) {
+      // Invalid/expired token — clear the cookie and continue as anonymous.
+      const sessionCookie = lucia.createBlankSessionCookie();
+      context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
     }
-    context.locals.session = session;
-    context.locals.user = user;
-    return next();
-  } catch (error) {
-    // console.error('Session validation error:', error);
-    // Clear session cookie on validation error and redirect to login
-    const sessionCookie = lucia.createBlankSessionCookie();
-    context.cookies.set(sessionCookie.name, sessionCookie.value, sessionCookie.attributes);
-    return new Response(null, { status: 302, headers: { Location: '/login' } });
   }
+
+  // Gate the admin panel on a staff role. Unauthenticated hits go home with the
+  // sign-in popover open (?signin=1) rather than to a dedicated login page.
+  if (isAdmin) {
+    const user = context.locals.user;
+    if (!user || !STAFF.includes(user.role)) {
+      return new Response(null, { status: 302, headers: { Location: '/?signin=1' } });
+    }
+  }
+  return next();
 };
 
 export const config = {

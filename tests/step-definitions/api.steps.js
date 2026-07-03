@@ -41,8 +41,9 @@ Then('I should be redirected to login', async function () {
   // After following redirect (or checking location header for 302)
   const status = this.apiResponse.status();
   const location = this.apiResponse.headers()['location'] ?? '';
+  const looksLikeLogin = (s) => s.includes('signin') || s.includes('/login');
   const isRedirectToLogin = status === 302 || status === 301
-    ? location.includes('/login')
-    : this.page.url().includes('/login');
+    ? looksLikeLogin(location)
+    : looksLikeLogin(this.page.url());
   expect(isRedirectToLogin).toBeTruthy();
 });

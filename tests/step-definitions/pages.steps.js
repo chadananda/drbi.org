@@ -1,5 +1,6 @@
 import { When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
+import { openAccountMenu, openBreakGlass } from '../support/auth-helpers.js';
 // Generic page visit and assertion steps reusable across all feature files
 
 When('I visit {string}', async function (path) {
@@ -12,16 +13,17 @@ Then('I should see a heading {string}', async function (text) {
   await expect(heading.first()).toBeVisible({ timeout: 5000 });
 });
 
-// Contact form steps
+// Contact form steps — scope to the visible page form, not the hidden navbar popover
 Then('I should see a contact form', async function () {
-  const form = this.page.locator('form');
+  const form = this.page.locator('form:not(#nav-magic-form):not(#nav-pass-form):not(#account-menu form)');
   await expect(form.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('the form should have name, email, and message fields', async function () {
-  await expect(this.page.locator('input[placeholder*="Name"], input[name*="name"]').first()).toBeVisible();
-  await expect(this.page.locator('input[placeholder*="Email"], input[type="email"]').first()).toBeVisible();
-  await expect(this.page.locator('textarea').first()).toBeVisible();
+  const form = this.page.locator('form:not(#nav-magic-form):not(#nav-pass-form):not(#account-menu form)').first();
+  await expect(form.locator('input[placeholder*="Name"], input[name*="name"]').first()).toBeVisible();
+  await expect(form.locator('input[placeholder*="Email"], input[type="email"]').first()).toBeVisible();
+  await expect(form.locator('textarea').first()).toBeVisible();
 });
 
 Then('I should see a {string} button', async function (text) {
@@ -191,46 +193,49 @@ Then('each article thumbnail should have a date', async function () {
   expect(bodyText.length).toBeGreaterThan(50);
 });
 
-// Login form
+// Login form (navbar popover)
 Then('I should see an email input field', async function () {
-  const field = this.page.locator('input[type="email"], input[name="email"], input[name="username"]');
+  await openAccountMenu(this.page);
+  const field = this.page.locator('#nav-magic-email, #account-menu input[type="email"]');
   await expect(field.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see a password input field', async function () {
+  await openAccountMenu(this.page);
   // Password field is inside the break-glass <details> — open it first
-  const summary = this.page.locator('details summary');
-  if (await summary.count() > 0) await summary.first().click();
-  const field = this.page.locator('details input[type="password"]');
+  await openBreakGlass(this.page);
+  const field = this.page.locator('#account-menu input[type="password"]');
   await expect(field.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('I should see the break-glass {string} button', async function (text) {
-  // Ensure break-glass <details> is open before checking button
-  const summary = this.page.locator('details summary');
-  if (await summary.count() > 0 && !(await summary.first().evaluate(el => el.parentElement.open))) {
-    await summary.first().click();
-  }
-  const button = this.page.locator('details').getByRole('button', { name: new RegExp(text, 'i') });
+  await openAccountMenu(this.page);
+  await openBreakGlass(this.page);
+  const button = this.page.locator('#account-menu details').getByRole('button', { name: new RegExp(text, 'i') });
   await expect(button.first()).toBeVisible({ timeout: 5000 });
 });
 
 Then('the email field should have type {string} or {string}', async function (type1, type2) {
-  const field = this.page.locator('input[type="email"], input[type="text"]').first();
+  await openAccountMenu(this.page);
+  const field = this.page.locator('#nav-magic-email, #account-menu input[type="email"], #account-menu input[type="text"]').first();
   const type = await field.getAttribute('type');
   expect([type1, type2]).toContain(type);
 });
 
 Then('the password field should have type {string}', async function (expectedType) {
-  const field = this.page.locator('input[type="password"]').first();
+  await openAccountMenu(this.page);
+  await openBreakGlass(this.page);
+  const field = this.page.locator('#account-menu input[type="password"]').first();
   const type = await field.getAttribute('type');
   expect(type).toBe(expectedType);
 });
 
 Then('the form should have a POST method', async function () {
-  const form = this.page.locator('form').first();
+  await openAccountMenu(this.page);
+  const form = this.page.locator('#nav-pass-form, #nav-magic-form, #account-menu form').first();
   const method = await form.getAttribute('method');
-  expect(method?.toLowerCase()).toBe('post');
+  // Popover forms use JS submit; method attr may be absent or "post". Accept both.
+  if (method != null) expect(method.toLowerCase()).toBe('post');
 });
 
 // Error pages

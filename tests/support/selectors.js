@@ -23,18 +23,20 @@ export const selectors = {
   eventDate: '[data-testid="event-date"], time, .event-date, [class*="date"]',
   eventLink: 'a[href*="/events/"]',
 
-  // Admin - Auth
-  loginForm: '[data-testid="login-form"], form',
-  usernameField: '[data-testid="username"], input[name="email"], input[name="username"], input[type="email"]',
-  passwordField: '[data-testid="password"], input[name="password"], input[type="password"]',
-  submitButton: '[data-testid="submit"], button[type="submit"]',
-  errorMessage: '[data-testid="error"], [role="alert"], [class*="error"]',
-  logoutButton: '[data-testid="logout"], a[href*="logout"], button:has-text("Logout")',
-  // Break-glass password form (hidden inside <details>)
-  breakGlassSummary: 'details summary',
-  breakGlassEmailField: 'details input[name="email"]',
-  breakGlassPasswordField: 'details input[name="password"]',
-  breakGlassSubmit: '#login-form button[type="submit"]',
+  // Admin - Auth (navbar popover — click #account-btn to reveal #account-menu)
+  accountButton: '#account-btn',
+  accountMenu: '#account-menu',
+  loginForm: '#nav-magic-form, #account-menu form',
+  usernameField: '#nav-magic-email, #account-menu input[type="email"]',
+  passwordField: '#nav-pass-form input[type="password"], #account-menu input[type="password"]',
+  submitButton: '#account-menu button[type="submit"]',
+  errorMessage: '#nav-auth-msg, [role="alert"]',
+  logoutButton: '#signout-btn, a[href*="logout"]',
+  // Break-glass password form (inside popover <details>)
+  breakGlassSummary: '#account-menu details summary',
+  breakGlassEmailField: '#nav-pass-form input[name="email"]',
+  breakGlassPasswordField: '#nav-pass-form input[name="password"]',
+  breakGlassSubmit: '#nav-pass-form button[type="submit"]',
 
   // Admin - Events
   adminEventCard: '[data-testid="admin-event-card"], .event-card',

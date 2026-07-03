@@ -1,4 +1,5 @@
 import { Given, When, Then } from '@cucumber/cucumber';
+import { openAccountMenu } from '../support/auth-helpers.js';
 
 // Browser lifecycle hooks are in tests/support/hooks.js
 
@@ -18,11 +19,13 @@ When('I visit the events page', async function () {
 });
 
 When('I visit the login page', async function () {
-  await this.page.goto(`${this.baseURL}/login`);
+  await this.page.goto(`${this.baseURL}/?signin=1`);
+  await openAccountMenu(this.page);
 });
 
 When('I visit the login page directly', async function () {
-  await this.page.goto(`${this.baseURL}/login`);
+  await this.page.goto(`${this.baseURL}/?signin=1`);
+  await openAccountMenu(this.page);
 });
 
 When('I visit the admin page', async function () {
