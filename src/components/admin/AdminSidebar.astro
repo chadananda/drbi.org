@@ -15,6 +15,12 @@ const navigationItems = [
     active: currentPath === "/admin"
   },
   {
+    title: "Analytics",
+    icon: "📊",
+    href: "/admin/analytics",
+    active: currentPath.startsWith("/admin/analytics")
+  },
+  {
     title: "Content",
     icon: "📝",
     href: "/admin/posts",
@@ -157,15 +163,17 @@ const navigationItems = [
         <div class="text-xs text-gray-400">Super Admin</div>
       </div>
     </div>
-    <a 
-      href="/api/auth/logout" 
-      class="flex items-center py-2 px-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 rounded-lg transition-all duration-200"
-    >
-      <span class="w-6 h-6 flex items-center justify-center flex-shrink-0">🚪</span>
-      <span class="nav-text ml-3 text-sm transition-all duration-300 whitespace-nowrap">
-        Logout
-      </span>
-    </a>
+    <!-- POST form, not a GET link: a GET logout gets prefetched (astro prefetchAll) and
+         silently logs the admin out on every page load. -->
+    <form method="POST" action="/api/auth/logout" class="w-full">
+      <button type="submit"
+        class="w-full flex items-center py-2 px-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 rounded-lg transition-all duration-200">
+        <span class="w-6 h-6 flex items-center justify-center flex-shrink-0">🚪</span>
+        <span class="nav-text ml-3 text-sm transition-all duration-300 whitespace-nowrap">
+          Logout
+        </span>
+      </button>
+    </form>
   </div>
 </aside>
 
