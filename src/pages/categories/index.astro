@@ -20,7 +20,7 @@ const categories = await getCategories()
 
       <div class="flex flex-wrap justify-center gap-20 mt-5 pb-40">
         {Array.isArray(categories) && categories.map((cat) => (
-           <div class="flex-none"> <CategoryCard slug={cat.id} size="md" category={cat} /> </div>
+           <div class="w-full max-w-96"> <CategoryCard slug={cat.id} size="md" category={cat} /> </div>
         ))}
         <ClientRouter/>
       </div>
