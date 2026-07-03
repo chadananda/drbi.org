@@ -74,7 +74,8 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
                 <p class="text-sm font-semibold text-gray-900 mb-3">Sign in</p>
                 {googleClientId && (
                   <div class="mb-3">
-                    <div id="g_id_onload" data-client_id={googleClientId} data-callback="handleNavGoogle" data-auto_prompt="true" data-prompt_parent_id="oneTapAnchor" data-use_fedcm_for_prompt="false"></div>
+                    {/* The One Tap config (#g_id_onload) lives at the top level, NOT here —
+                        GIS mis-places the prompt when its config is inside a display:none popover. */}
                     <div class="g_id_signin" data-type="standard" data-width="256"></div>
                   </div>
                 )}
@@ -167,8 +168,10 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
 
 {!user && googleClientId && (
   <Fragment>
-    <!-- One Tap docks here (below the navbar, right-aligned) instead of covering the profile button -->
-    <div id="oneTapAnchor" class="fixed right-3 top-[4.25rem] z-[60] noprint"></div>
+    {/* One Tap config at the TOP LEVEL (not inside the hidden popover) so GIS can place it. */}
+    <div id="g_id_onload" data-client_id={googleClientId} data-callback="handleNavGoogle" data-auto_prompt="true" data-prompt_parent_id="oneTapAnchor" data-use_fedcm_for_prompt="false"></div>
+    <!-- One Tap docks here: below the navbar, right-aligned, instead of over the profile button -->
+    <div id="oneTapAnchor" class="fixed right-3 top-[4.25rem] z-[60] noprint w-[min(24rem,92vw)]"></div>
     <script is:inline src="https://accounts.google.com/gsi/client" async></script>
   </Fragment>
 )}
