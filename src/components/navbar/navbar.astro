@@ -71,7 +71,12 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
               </div>
             ) : (
               <div>
-                <p class="text-sm font-semibold text-gray-900 mb-3">Sign in</p>
+                <div class="flex items-center justify-between mb-3">
+                  <p class="text-sm font-semibold text-gray-900">Sign in</p>
+                  <button id="nav-signin-close" type="button" aria-label="Close" class="text-gray-400 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:outline-none rounded">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                  </button>
+                </div>
                 {googleClientId && (
                   <div class="mb-3">
                     {/* The One Tap config (#g_id_onload) lives at the top level, NOT here —
@@ -168,10 +173,11 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
 
 {!user && googleClientId && (
   <Fragment>
-    {/* One Tap config at the TOP LEVEL (not inside the hidden popover) so GIS can place it. */}
-    <div id="g_id_onload" data-client_id={googleClientId} data-callback="handleNavGoogle" data-auto_prompt="true" data-prompt_parent_id="oneTapAnchor" data-use_fedcm_for_prompt="false"></div>
-    <!-- One Tap docks here: below the navbar, right-aligned, instead of over the profile button -->
-    <div id="oneTapAnchor" class="fixed right-3 top-[4.25rem] z-[60] noprint w-[min(24rem,92vw)]"></div>
+    {/* auto_prompt is OFF: Google's One Tap prompt is FedCM-controlled and floats over the
+        navbar with no way to reposition it (mandatory FedCM since Aug 2025). Instead we
+        auto-open our own popover (below the profile button) — see the script below. This
+        g_id_onload only configures GIS so the rendered "Sign in with Google" button works. */}
+    <div id="g_id_onload" data-client_id={googleClientId} data-callback="handleNavGoogle" data-auto_prompt="false"></div>
     <script is:inline src="https://accounts.google.com/gsi/client" async></script>
   </Fragment>
 )}
@@ -184,17 +190,32 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
     const setMsg = (text, ok) => { const m = msgEl(); if (m) { m.textContent = text; m.className = 'text-sm mt-2 ' + (ok ? 'text-green-600' : 'text-red-500'); } };
 
     if (btn && menu) {
+      const loggedOut = !!document.getElementById('nav-magic-form');
+      const PROMPTED = 'drbi_login_prompted';
+      const wasPrompted = () => { try { return sessionStorage.getItem(PROMPTED) === '1'; } catch (e) { return false; } };
+      const markPrompted = () => { try { sessionStorage.setItem(PROMPTED, '1'); } catch (e) {} };
+      const isOpen = () => !menu.classList.contains('hidden');
       const open = () => { menu.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); };
       const close = () => { menu.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); };
-      btn.addEventListener('click', (e) => { e.stopPropagation(); menu.classList.contains('hidden') ? open() : close(); });
-      document.addEventListener('click', (e) => { if (!menu.contains(e.target) && !btn.contains(e.target)) close(); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+      // Closing the sign-in popover counts as "seen it" — don't auto-reopen this session.
+      const dismiss = () => { close(); markPrompted(); };
+      btn.addEventListener('click', (e) => { e.stopPropagation(); isOpen() ? dismiss() : open(); });
+      document.addEventListener('click', (e) => { if (isOpen() && !menu.contains(e.target) && !btn.contains(e.target)) dismiss(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) dismiss(); });
+      document.getElementById('nav-signin-close')?.addEventListener('click', (e) => { e.stopPropagation(); dismiss(); });
 
       // Arriving from a bounce (?signin=1) or a failed magic link (?auth_error=…): open the popover.
       const params = new URLSearchParams(location.search);
+      const forced = params.get('signin') === '1' || !!params.get('auth_error');
       if (params.get('signin') === '1') open();
       const err = params.get('auth_error');
       if (err) { setMsg(err === 'invalid-or-expired' ? 'That sign-in link was invalid or expired. Request a new one.' : 'That account has been disabled. Contact an administrator.', false); open(); }
+
+      // Auto-open our sign-in popover below the navbar (replaces Google's over-the-navbar One Tap).
+      // Once per session for logged-out visitors, after the page settles; dismissing stops it.
+      if (loggedOut && !forced && !wasPrompted()) {
+        setTimeout(() => { if (!isOpen()) { open(); markPrompted(); } }, 900);
+      }
     }
 
     // Google One Tap / button callback (auto-prompts when signed into Google).
