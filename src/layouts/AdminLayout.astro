@@ -1,10 +1,10 @@
 ---
-// Admin shell. Uses the SAME site navbar as the public pages (its profile menu holds the
-// role-based admin links). Full-width content — no separate admin chrome.
+// Admin shell: the SAME site navbar on top (full-width) + the admin side menu on the left.
 export const prerender = false;
 
 import "../styles/tailwind.css";
 import Navbar from "@components/navbar/navbar.astro";
+import AdminSidebar from "@components/admin/AdminSidebar.astro";
 
 interface Props {
   title?: string;
@@ -24,8 +24,43 @@ const { title = "Admin Dashboard", description = "DRBI Content Management System
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-800">
   <Navbar />
-  <main class="w-full px-4 sm:px-6 lg:px-8 py-6">
-    <slot />
-  </main>
+  <div class="flex">
+    <AdminSidebar />
+    <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6">
+      <button id="adminMobileMenu" type="button" aria-label="Open admin menu"
+        class="md:hidden mb-4 inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50">
+        <span aria-hidden="true">☰</span> Menu
+      </button>
+      <slot />
+    </main>
+  </div>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+  <style is:global>
+    /* Dock the admin sidebar below the sticky navbar (~3.5rem) and let it scroll on its own. */
+    @media (min-width: 768px) {
+      .admin-sidebar {
+        height: calc(100dvh - 3.5rem) !important;
+        position: sticky !important;
+        top: 3.5rem;
+        align-self: flex-start;
+      }
+    }
+    @media (max-width: 767px) {
+      .admin-sidebar { top: 0 !important; height: 100dvh !important; }
+    }
+  </style>
+
+  <script>
+    // Mobile drawer: open the admin sidebar (its own #sidebarToggle handles desktop collapse).
+    const mBtn = document.getElementById('adminMobileMenu');
+    const sb = document.getElementById('adminSidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    const open = () => { sb?.classList.add('mobile-open'); ov?.classList.add('active'); };
+    const close = () => { sb?.classList.remove('mobile-open'); ov?.classList.remove('active'); };
+    mBtn?.addEventListener('click', open);
+    ov?.addEventListener('click', close);
+    sb?.querySelectorAll('a[href]').forEach((a) => a.addEventListener('click', close));
+  </script>
 </body>
 </html>
