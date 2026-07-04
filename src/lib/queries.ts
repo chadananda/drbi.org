@@ -392,6 +392,19 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
   return { id, action: 'created' as const };
 }
 
+// ─── Sponsor-a-youth follow-up tracking ─────────────────────────────────────
+// Dedupe table so each registrant is asked to sponsor at most once per order.
+export async function wasSponsorInvited(orderId: string): Promise<boolean> {
+  const r = await db.execute({ sql: 'SELECT 1 FROM sponsor_invites WHERE order_id = ? LIMIT 1', args: [orderId] });
+  return r.rows.length > 0;
+}
+export async function recordSponsorInvite(orderId: string, eventId: string, email: string): Promise<void> {
+  await db.execute({
+    sql: 'INSERT OR IGNORE INTO sponsor_invites (order_id, event_id, email, sent_at) VALUES (?,?,?,?)',
+    args: [orderId, eventId, email, new Date().toISOString()],
+  });
+}
+
 // ─── Content ─────────────────────────────────────────────────────────────────
 
 export async function getContentByCollection(collection: string) {

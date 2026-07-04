@@ -31,3 +31,19 @@ jobs:
           echo "HTTP $code"
           # 200 = synced, 503 = not yet configured (HUMANITIX_API_KEY missing) — both are non-fatal
           if [ "$code" != "200" ] && [ "$code" != "503" ]; then exit 1; fi
+
+      - name: Trigger sponsor-a-youth follow-up emails
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          ENDPOINT: https://drbi.org/api/cron/sponsor-invites
+        run: |
+          echo "Triggering $ENDPOINT"
+          body=$(curl -fsS -X POST "$ENDPOINT" \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -w "\n%{http_code}")
+          code=$(echo "$body" | tail -n1)
+          echo "$body" | sed '$d'
+          echo "HTTP $code"
+          if [ "$code" != "200" ] && [ "$code" != "503" ]; then exit 1; fi

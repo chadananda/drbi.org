@@ -3,7 +3,7 @@
 // (the mapper must NOT emit a `visible` field so synced rows default to DRAFT).
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { mapHumanitixEvent, fetchHumanitixEvents } from "../../src/lib/humanitix.js";
+import { mapHumanitixEvent, fetchHumanitixEvents, shapeOrder, isSponsorInviteEligible } from "../../src/lib/humanitix.js";
 
 // Representative Humanitix API event (fields per the public v1 API, with drift fallbacks).
 const sample = {
@@ -122,5 +122,46 @@ describe("fetchHumanitixEvents", () => {
   it("throws with status + body on a non-ok response", async () => {
     const fetchImpl = async () => ({ ok: false, status: 403, text: async () => "Forbidden" });
     await assert.rejects(fetchHumanitixEvents("bad", { fetchImpl }), /Humanitix API 403: Forbidden/);
+  });
+});
+
+describe("dedupe primary date", () => {
+  it("drops a dates[] entry that equals the primary startDate (no double-render)", () => {
+    const m = mapHumanitixEvent({ _id: "x", name: "E", startDate: "2026-11-26T23:00:00Z", endDate: "2026-11-29T19:00:00Z", dates: [{ startDate: "2026-11-26T23:00:00Z", endDate: "2026-11-29T19:00:00Z" }] });
+    assert.deepEqual(m.additionalDates, []);
+  });
+  it("keeps genuinely additional (recurring) dates", () => {
+    const m = mapHumanitixEvent({ _id: "x", name: "E", startDate: "2026-11-26T23:00:00Z", dates: [{ startDate: "2026-11-26T23:00:00Z" }, { startDate: "2026-12-03T23:00:00Z" }] });
+    assert.equal(m.additionalDates.length, 1);
+    assert.equal(m.additionalDates[0].startDate, "2026-12-03T23:00:00Z");
+  });
+});
+
+describe("shapeOrder + isSponsorInviteEligible", () => {
+  const base = { _id: "o1", email: "A@Ex.com", firstName: "Bilbo", lastName: "Baggins", createdAt: "2026-01-01T00:00:00Z", status: "complete", clientDonation: 0 };
+  it("shapeOrder normalizes email + name + donation", () => {
+    const o = shapeOrder(base);
+    assert.equal(o.email, "a@ex.com");
+    assert.equal(o.name, "Bilbo Baggins");
+    assert.equal(o.donation, 0);
+  });
+  it("shapeOrder reads clientDonation from totals fallback", () => {
+    assert.equal(shapeOrder({ ...base, clientDonation: undefined, totals: { clientDonation: 170 } }).donation, 170);
+  });
+  const NOW = new Date("2026-01-10T00:00:00Z").getTime();
+  it("eligible: completed, >2 days old, no donation", () => {
+    assert.equal(isSponsorInviteEligible(shapeOrder(base), { now: NOW }), true);
+  });
+  it("NOT eligible: already donated/sponsored", () => {
+    assert.equal(isSponsorInviteEligible(shapeOrder({ ...base, clientDonation: 170 }), { now: NOW }), false);
+  });
+  it("NOT eligible: too recent (< delayDays)", () => {
+    assert.equal(isSponsorInviteEligible(shapeOrder({ ...base, createdAt: "2026-01-09T12:00:00Z" }), { now: NOW }), false);
+  });
+  it("NOT eligible: cancelled/refunded status", () => {
+    assert.equal(isSponsorInviteEligible(shapeOrder({ ...base, status: "cancelled" }), { now: NOW }), false);
+  });
+  it("NOT eligible: no email", () => {
+    assert.equal(isSponsorInviteEligible(shapeOrder({ ...base, email: "" }), { now: NOW }), false);
   });
 });

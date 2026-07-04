@@ -51,8 +51,10 @@ export function mapHumanitixEvent(hx) {
     fullDescription: hx.description ?? "",
     startDate: hx.startDate ?? "",
     endDate: hx.endDate ?? "",
+    // Humanitix's `dates` array repeats the primary occurrence — drop that duplicate so the
+    // event isn't rendered twice; keep only genuinely additional (recurring) dates.
     additionalDates: (hx.dates ?? [])
-      .filter((d) => d && d.startDate)
+      .filter((d) => d && d.startDate && d.startDate !== hx.startDate)
       .map((d) => ({ startDate: d.startDate, endDate: d.endDate ?? d.startDate })),
     location: {
       venue: loc.venueName ?? "",
@@ -99,4 +101,56 @@ export async function fetchHumanitixEvents(apiKey, opts = {}) {
     if (batch.length < pageSize) break; // last page
   }
   return all;
+}
+
+// ── Orders (for the sponsor-a-youth follow-up) ───────────────────────────────
+/** Fetch all orders for one event. GET /events/{id}/orders → { total, page, orders }. */
+export async function fetchHumanitixOrders(apiKey, eventId, opts = {}) {
+  const pageSize = opts.pageSize ?? 100;
+  const maxPages = opts.maxPages ?? 20;
+  const doFetch = opts.fetchImpl ?? fetch;
+  const all = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const res = await doFetch(`${HX_API_BASE}/events/${eventId}/orders?page=${page}&pageSize=${pageSize}`, {
+      headers: { "x-api-key": apiKey, Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`Humanitix orders API ${res.status}`);
+    const body = await res.json();
+    const batch = body.orders ?? [];
+    all.push(...batch);
+    if (batch.length < pageSize) break;
+  }
+  return all;
+}
+
+/** Donation amount on an order (clientDonation is the buyer's own donation). */
+export function orderDonation(order) {
+  return Number(order?.clientDonation ?? order?.totals?.clientDonation ?? order?.purchaseTotals?.clientDonation ?? 0) || 0;
+}
+
+/** Normalize a raw Humanitix order to the fields the sponsor follow-up needs. */
+export function shapeOrder(order) {
+  return {
+    id: order?._id ?? order?.id ?? "",
+    email: String(order?.email ?? "").trim().toLowerCase(),
+    name: [order?.firstName, order?.lastName].filter(Boolean).join(" ").trim(),
+    createdAt: order?.createdAt ?? null,
+    status: String(order?.status ?? order?.financialStatus ?? "").toLowerCase(),
+    donation: orderDonation(order),
+  };
+}
+
+/**
+ * Eligible for a "sponsor a youth" invite: a completed order, registered at least
+ * `delayDays` ago, that has NOT already donated/sponsored. (Dedup — already emailed —
+ * is handled by the caller against the sponsor_invites table.)
+ */
+export function isSponsorInviteEligible(o, { delayDays = 2, now = Date.now() } = {}) {
+  if (!o?.email || !o?.createdAt) return false;
+  if (o.donation > 0) return false; // already sponsored/donated
+  const ok = ["complete", "completed", "paid", "succeeded", "success", ""];
+  if (o.status && !ok.includes(o.status)) return false; // skip cancelled/refunded/pending
+  const created = new Date(o.createdAt).getTime();
+  if (!Number.isFinite(created)) return false;
+  return created <= now - delayDays * 864e5;
 }
