@@ -4,6 +4,7 @@ export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
 import site from '@data/site.json';
 import { getTeamWithRole, transformS3Url } from '@utils/utils.js';
+import { getUsers } from '@lib/queries';
 
 // transformS3Url = (url = '', width = null, height = null, format = 'webp', quality=0)
 
@@ -11,10 +12,17 @@ const user  = Astro.locals?.user
 // this page is only for admins
 if (!['admin','superadmin'].includes(user?.role)) return Astro.redirect('/admin');
 
-
-// add small image
+// Photo per member: their own team image → the Gmail photo captured on their last Google
+// sign-in (matched by email) → the DRBI rose. (info@drbi.org has no personal photo → rose.)
+const ROSE = '/favicon.svg';
 const imgSm = (url) => transformS3Url(url, 80, 80);
-const teamMembers  = (await getTeamWithRole()).map(member => ({...member, image_sm: imgSm(member.image_src)}));
+const users = await getUsers().catch(() => []);
+const avatarByEmail = new Map(users.filter(u => u.avatar).map(u => [String(u.email).toLowerCase(), u.avatar]));
+const teamMembers = (await getTeamWithRole()).map(member => {
+  const gmail = avatarByEmail.get(String(member.email || '').toLowerCase());
+  const image_sm = member.image_src ? imgSm(member.image_src) : (gmail || ROSE);
+  return { ...member, image_sm };
+});
 
 
 // console.log(JSON.stringify(teamMembers, null, 2))
@@ -49,7 +57,7 @@ const teamMembers  = (await getTeamWithRole()).map(member => ({...member, image_
         <div class="relative bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
           <div class="flex items-start gap-6">
             <div class="flex-shrink-0">
-              <img src={member.image_sm} alt={member.image_alt} class="rounded-full h-20 w-20 object-cover" />
+              <img src={member.image_sm} alt={member.image_alt || member.name} referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/favicon.svg'" class="rounded-full h-20 w-20 object-cover bg-gray-50 ring-1 ring-gray-200" />
               <span class="inline-block bg-gray-100 text-xs text-gray-600 px-3 py-1 rounded-full mt-2">
                 {member.role}
               </span>

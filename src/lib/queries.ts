@@ -731,7 +731,7 @@ function shapeUser(row: UserRow) {
 }
 
 export async function getUsers() {
-  const result = await db.execute("SELECT id, email, name, role, disabled, email_verified, created_at FROM users ORDER BY created_at ASC");
+  const result = await db.execute("SELECT id, email, name, avatar_url, role, disabled, email_verified, created_at FROM users ORDER BY created_at ASC");
   return (result.rows as unknown as UserRow[]).map(shapeUser);
 }
 

@@ -11,6 +11,9 @@ interface Props {
 }
 
 const { title = "Admin Dashboard", description = "DRBI Content Management System", user } = Astro.props;
+// Avatar: the user's Gmail photo when we have one, else the DRBI rose (info@drbi.org has no personal photo).
+const avatarUrl = (user as any)?.avatar || '/favicon.svg';
+const displayName = user?.name || user?.email || 'Admin';
 
 // Get git commit hash for version display
 let gitCommit = 'dev';
@@ -66,8 +69,8 @@ try {
             </div>
             <div class="user-menu">
               <button class="user-menu-toggle">
-                <span class="user-avatar">👤</span>
-                <span class="user-name">{user?.name || "Admin"}</span>
+                <span class="user-avatar"><img src={avatarUrl} alt="" referrerpolicy="no-referrer" /></span>
+                <span class="user-name">{displayName}</span>
                 <span class="dropdown-arrow">▼</span>
               </button>
               <div class="user-dropdown absolute top-full right-0 bg-white border border-gray-200 rounded-lg shadow-lg min-w-[160px] opacity-0 invisible transform -translate-y-2 transition-all duration-200 z-[1000]">
@@ -275,6 +278,14 @@ try {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 0 0 2px #22c55e; /* green ring — everyone in /admin is staff */
+  flex-shrink: 0;
+}
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .user-name {

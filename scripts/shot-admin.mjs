@@ -12,7 +12,8 @@ if (!routes.length) routes.push('/admin/analytics?range=30');
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
 await page.goto(`${BASE}/`, { waitUntil: 'networkidle' });
-await page.click('#account-btn');
+await page.waitForTimeout(1300); // let the popover auto-open first
+if (await page.evaluate(() => document.getElementById('account-menu').classList.contains('hidden'))) await page.click('#account-btn');
 await page.waitForTimeout(300);
 await page.click('#account-menu details summary');
 await page.waitForTimeout(200);
