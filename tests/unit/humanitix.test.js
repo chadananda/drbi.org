@@ -56,13 +56,10 @@ describe("mapHumanitixEvent", () => {
     assert.ok(!m.price.some((p) => p.label === "Retired Ticket"), "disabled tickets excluded");
   });
 
-  it("collects banner + feature images and picks banner as mainImage", () => {
+  it("uses the banner as the single image (deduped)", () => {
     const m = mapHumanitixEvent(sample);
     assert.equal(m.mainImage, "https://img.humanitix.com/banner.jpg");
-    assert.deepEqual(m.images, [
-      "https://img.humanitix.com/banner.jpg",
-      "https://img.humanitix.com/feature.jpg",
-    ]);
+    assert.deepEqual(m.images, ["https://img.humanitix.com/banner.jpg"]);
   });
 
   it("normalizes location from eventLocation", () => {

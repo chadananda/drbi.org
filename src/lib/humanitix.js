@@ -38,7 +38,10 @@ export function mapHumanitixEvent(hx) {
     .filter((t) => t && !t.disabled)
     .map((t) => ({ label: t.name, amount: t.price, currency: hx.currency ?? "USD" }));
   const registrationUrl = hx.slug ? `https://events.humanitix.com/${hx.slug}` : "";
-  const images = [hx.bannerImage?.url, hx.featureImage?.url].filter(Boolean);
+  // Humanitix events usually have a single banner image — dedupe banner/feature so we don't
+  // store the same URL twice (or a redundant variant).
+  const mainImage = hx.bannerImage?.url ?? hx.featureImage?.url ?? "";
+  const images = mainImage ? [mainImage] : [];
   return {
     id: `event-hx-${externalId}`,
     externalId,
@@ -61,7 +64,7 @@ export function mapHumanitixEvent(hx) {
     registrationUrl,
     url: registrationUrl,
     slug: hx.slug ?? "",
-    mainImage: hx.bannerImage?.url ?? hx.featureImage?.url ?? "",
+    mainImage,
     images,
     organizer: "DRBI",
     categories: hx.category ? [hx.category] : [],

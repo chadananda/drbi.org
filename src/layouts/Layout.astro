@@ -26,7 +26,7 @@ const pageURL = currentURL(Astro);
 const resolvedImageWithDomain = new URL( "/favicon.svg", Astro.site, ).toString();
 
 // console.log ('resolvedImageWithDomain', resolvedImageWithDomain);
-const { title, footerMargin = true, description, image } = Astro.props;
+const { title, footerMargin = true, description, image, noindex = false } = Astro.props;
 
 const makeTitle = title +' | '+ site.site;
 const makeDesc = description || site.description;
@@ -78,6 +78,8 @@ const { title, footerMargin = true } = Astro.props;
       title={makeTitle}
       description={makeDesc}
       canonical={pageURL}
+      noindex={noindex}
+      nofollow={noindex}
       twitter={{
         creator: site.twitter.creator,
         site: site.twitter.site,

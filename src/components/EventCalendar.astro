@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import { transformS3Url } from '../utils/utils.js';
 import MarkdownIt from 'markdown-it';
 import { getVisibleEvents } from '../lib/queries';
+import { eventSlug } from '../lib/event-slug';
 
 // Initialize markdown renderer
 const md = new MarkdownIt({
@@ -210,7 +211,7 @@ const displayEvents = upcomingEvents.map(event => {
     <div class="timeline-view">
       {displayEvents.map((event) => (
         <a
-          href={`/events#event-${event.instanceId}`}
+          href={`/events/${eventSlug(event)}`}
           class="timeline-item"
         >
           <div class="timeline-date-block">
@@ -259,7 +260,7 @@ const displayEvents = upcomingEvents.map(event => {
                   </div>
                 )}
                 <a
-                  href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events#event-${event.instanceId}`}
+                  href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events/${eventSlug(event)}`}
                   target={hasValidRegistrationUrl(event.data.registrationUrl) ? '_blank' : undefined}
                   rel={hasValidRegistrationUrl(event.data.registrationUrl) ? 'noopener noreferrer' : undefined}
                   class="block no-underline text-inherit h-full"
@@ -318,7 +319,7 @@ const displayEvents = upcomingEvents.map(event => {
                 <div class="card-title-header">
                   <h3 class={`card-title ${event.isMinimal ? 'text-lg' : ''}`}>
                     <a
-                      href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events#event-${event.instanceId}`}
+                      href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events/${eventSlug(event)}`}
                       target={hasValidRegistrationUrl(event.data.registrationUrl) ? '_blank' : undefined}
                       rel={hasValidRegistrationUrl(event.data.registrationUrl) ? 'noopener noreferrer' : undefined}
                     >

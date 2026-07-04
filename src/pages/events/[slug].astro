@@ -1,0 +1,124 @@
+---
+// Per-event, SEO-shareable detail page. Full (Humanitix) description + register + ticket
+// prices. Draft events (visible=0) render for direct-link preview but are noindexed.
+// Slug includes the start year so annual programs don't collide — see lib/event-slug.js.
+export const prerender = false;
+
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import { getEvents } from "@lib/queries";
+import { eventSlug } from "@lib/event-slug";
+
+const { slug } = Astro.params;
+const events = await getEvents();
+const event = events.find((e) => eventSlug(e) === slug);
+if (!event) return Astro.rewrite("/404");
+
+const d = event.data;
+const hidden = !d.visible;
+const title = d.title || d.name || "Event";
+const plainDesc = (d.shortDescription || (d.fullDescription || "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim().slice(0, 180);
+
+const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }); } catch { return ""; } };
+const start = d.startDate ? fmtDay(d.startDate) : "";
+const end = d.endDate && d.endDate !== d.startDate ? fmtDay(d.endDate) : "";
+const loc = d.location || {};
+const locText = loc.online ? "Online" : [loc.venue, loc.address].filter(Boolean).join(" · ");
+const prices = Array.isArray(d.price) ? d.price : [];
+const hasReg = d.registrationUrl && /^https?:\/\//.test(d.registrationUrl);
+---
+
+<Layout title={title} description={plainDesc} image={d.mainImage} noindex={hidden}>
+  <article class="pb-20">
+    <!-- Hero -->
+    <div class="relative">
+      {d.mainImage ? (
+        <div class="relative h-[42vh] min-h-[300px] w-full overflow-hidden">
+          <img src={d.mainImage} alt={title} class="absolute inset-0 w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
+          <div class="absolute inset-0 flex items-end">
+            <Container>
+              <div class="pb-8">
+                {start && <p class="text-amber-200 text-sm font-medium tracking-wide mb-2">{start}{end ? ` – ${end}` : ""}</p>}
+                <h1 class="text-white text-3xl md:text-5xl font-serif font-light max-w-3xl" style="text-shadow:0 1px 3px rgba(0,0,0,.5)">{title}</h1>
+                {locText && <p class="text-white/85 mt-3">{locText}</p>}
+              </div>
+            </Container>
+          </div>
+        </div>
+      ) : (
+        <Container>
+          <div class="pt-16 pb-6">
+            {start && <p class="text-amber-700 text-sm font-medium mb-2">{start}{end ? ` – ${end}` : ""}</p>}
+            <h1 class="text-3xl md:text-5xl font-serif font-light text-slate-900 max-w-3xl">{title}</h1>
+            {locText && <p class="text-slate-500 mt-3">{locText}</p>}
+          </div>
+        </Container>
+      )}
+    </div>
+
+    {hidden && (
+      <Container>
+        <p class="mt-6 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+          This event isn't published yet — it will appear publicly once it's live on Humanitix.
+        </p>
+      </Container>
+    )}
+
+    <Container>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-10">
+        <!-- Description -->
+        <div class="lg:col-span-2">
+          {d.fullDescription ? (
+            <div class="prose prose-slate max-w-none prose-headings:font-serif prose-a:text-amber-700" set:html={d.fullDescription} />
+          ) : (
+            <p class="text-slate-500">Details coming soon.</p>
+          )}
+        </div>
+
+        <!-- Register / details sidebar -->
+        <aside class="lg:col-span-1">
+          <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm lg:sticky lg:top-24">
+            <h2 class="text-lg font-semibold text-slate-900 mb-4">Register</h2>
+            {prices.length > 0 && (
+              <ul class="space-y-2 mb-5">
+                {prices.map((p) => (
+                  <li class="flex items-center justify-between text-sm">
+                    <span class="text-slate-600">{p.label}</span>
+                    <span class="font-medium text-slate-900">{p.amount ? `$${p.amount}` : "Free"}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {hasReg ? (
+              <a href={d.registrationUrl} target="_blank" rel="noopener noreferrer"
+                class="block w-full text-center px-5 py-3 text-sm font-medium text-white bg-amber-700 hover:bg-amber-600 rounded-full transition">
+                Get tickets
+              </a>
+            ) : (
+              <p class="text-sm text-slate-500">Registration opens soon.</p>
+            )}
+            {start && <p class="text-xs text-slate-400 mt-4">{start}{end ? ` – ${end}` : ""}</p>}
+            {locText && <p class="text-xs text-slate-400 mt-1">{locText}</p>}
+          </div>
+        </aside>
+      </div>
+
+      <!-- Post-event photo donation (wired next) -->
+      <section id="share-photos" class="mt-16 border-t border-gray-100 pt-12">
+        <div class="max-w-2xl">
+          <p class="text-xs uppercase tracking-[0.2em] text-amber-700 mb-2">After the event</p>
+          <h2 class="text-2xl font-serif font-light text-slate-900 mb-3">Were you there? Share your photos</h2>
+          <p class="text-slate-600">
+            Participants can contribute photos and a short write-up from this program — we'll add
+            the best ones to this page. Submissions are reviewed before they appear.
+          </p>
+          <a href={`mailto:info@drbi.org?subject=${encodeURIComponent('Photos from ' + title)}`}
+            class="inline-block mt-4 text-sm font-medium text-amber-700 hover:text-amber-800">
+            Email your photos → info@drbi.org
+          </a>
+        </div>
+      </section>
+    </Container>
+  </article>
+</Layout>
