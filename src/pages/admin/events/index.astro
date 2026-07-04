@@ -312,7 +312,16 @@ const getEventLocation = (event) => {
                     </svg>
                     View
                   </a>
-                  
+
+                  {event.data.source !== 'manual' && event.isPrimary && (
+                    <a href={`/admin/events/${event.data.id}/registrants`} class="inline-flex items-center px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors" title="View registrants, stats & checkout answers">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"></path>
+                      </svg>
+                      Registrants
+                    </a>
+                  )}
+
                   <button
                     class={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility ${event.data.visible ? 'text-gray-600 bg-gray-50 hover:bg-gray-100' : 'text-orange-600 bg-orange-50 hover:bg-orange-100'}`}
                     data-event-id={event.data.id}
@@ -537,8 +546,17 @@ const getEventLocation = (event) => {
                       </svg>
                       View
                     </a>
-                    
-                    <button 
+
+                    ${event.source !== 'manual' && isPrimary ? `
+                      <a href="/admin/events/${event.id}/registrants" class="inline-flex items-center px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors" title="View registrants, stats & checkout answers">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"></path>
+                        </svg>
+                        Registrants
+                      </a>
+                    ` : ''}
+
+                    <button
                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer toggle-visibility"
                       data-event-id="${event.id}"
                       title="${event.visible ? 'Hide event' : 'Show event'}"
