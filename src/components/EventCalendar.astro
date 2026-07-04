@@ -5,12 +5,16 @@ import MarkdownIt from 'markdown-it';
 import { getVisibleEvents } from '../lib/queries';
 import { eventSlug } from '../lib/event-slug';
 
-// Initialize markdown renderer
+// Initialize markdown renderer. html:true because event descriptions come from our own D1
+// (admin-entered or synced from OUR Humanitix account, which stores HTML) — trusted content.
+// Without it, Humanitix's HTML descriptions render as literal <p>/<h2> tags.
 const md = new MarkdownIt({
-  html: false, // Disable HTML for security
+  html: true,
   linkify: true, // Auto-convert URLs to links
   typographer: true // Enable smart quotes
 });
+// Plain-text (tags stripped) — for sliced previews so we never cut a tag in half.
+const stripHtml = (s) => (s || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim();
 
 // Load visible events from D1 — already shaped to { id, data: { ...camelCase } }
 const events = await getVisibleEvents();
@@ -176,15 +180,15 @@ const displayEvents = upcomingEvents.map(event => {
       fullDescription: curlyQuotes(d.fullDescription || ''),
       shortDescriptionHtml: md.render(d.shortDescription || ''),
       fullDescriptionHtml: md.render(d.fullDescription || ''),
-      // Show truncated preview for all events
+      // Show truncated preview for all events (strip HTML first so we don't cut a tag in half)
       preview: curlyQuotes(
-        d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.'
+        d.fullDescription ? stripHtml(d.fullDescription).slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.'
       ),
       previewHtml: md.render(
-        d.fullDescription ? d.fullDescription.slice(0, 400) + '...' : d.shortDescription || ''
+        d.fullDescription ? stripHtml(d.fullDescription).slice(0, 400) + '...' : stripHtml(d.shortDescription || '')
       ),
       // Flag if description is long enough to need expansion
-      isLongDescription: !hasValidReg && (d.fullDescription || '').length > 400,
+      isLongDescription: !hasValidReg && stripHtml(d.fullDescription || '').length > 400,
       dateRange: formatDateRange(d.startDate, d.endDate),
       time: formatTime(d.startDate),
       price: formatPrice(d.price),

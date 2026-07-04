@@ -7,6 +7,9 @@ import { lucia } from '@lib/auth';
 import { transformS3Url } from '@utils/utils.js';
 import site from '@data/site.json';
 import { getEvents } from '@lib/queries';
+import { getEnv } from '@lib/runtime-env';
+import { fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
+import { computeEventStats } from '@lib/event-registrations';
 
 const sessionid = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
 const user = Astro.locals?.user;
@@ -44,6 +47,22 @@ try {
 } catch (e) {
   error = e.message;
   console.error('Error loading events from Turso:', e);
+}
+
+// Live registration summary per synced Humanitix event (keyed by our event id).
+const eventStats = new Map();
+const hxKey = getEnv('HUMANITIX_API_KEY');
+if (hxKey) {
+  const uniqueHx = [...new Map(events.filter(e => e.data.source === 'humanitix' && e.data.externalId).map(e => [e.data.externalId, e])).values()];
+  await Promise.all(uniqueHx.map(async (e) => {
+    try {
+      const [orders, tickets] = await Promise.all([
+        fetchHumanitixOrders(hxKey, e.data.externalId),
+        fetchHumanitixTickets(hxKey, e.data.externalId),
+      ]);
+      eventStats.set(e.id, computeEventStats(orders, tickets));
+    } catch { /* leave unset on API error */ }
+  }));
 }
 
 // Filter old events by default (more than 1 week past)
@@ -230,6 +249,15 @@ const getEventLocation = (event) => {
                         🙈 DRAFT
                       </span>
                     )}
+                    {eventStats.get(event.id) && (
+                      <a href={`/admin/events/${event.id}/registrants`} class="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-full hover:bg-emerald-100 transition" title="View registrants">
+                        <span>{eventStats.get(event.id).registrations} registered</span>
+                        <span class="text-emerald-400">·</span>
+                        <span>${Math.round(eventStats.get(event.id).revenue).toLocaleString()}</span>
+                        {eventStats.get(event.id).donationCount > 0 && (<><span class="text-emerald-400">·</span><span>{eventStats.get(event.id).donationCount} donations</span></>)}
+                        <span class="text-emerald-600">→</span>
+                      </a>
+                    )}
                   </div>
                   <div class="flex items-center gap-3">
                     <span class="text-lg font-semibold text-blue-700">{formatDate(event.data.startDate)}</span>
@@ -303,14 +331,9 @@ const getEventLocation = (event) => {
               </div>
               
               <!-- Bottom: Description -->
-              {event.data.shortDescription && (
-                <div class="text-gray-700 text-sm leading-relaxed">
-                  {event.data.shortDescription}
-                </div>
-              )}
-              {event.data.fullDescription && !event.data.shortDescription && (
+              {(event.data.shortDescription || event.data.fullDescription) && (
                 <div class="text-gray-700 text-sm leading-relaxed line-clamp-3">
-                  {event.data.fullDescription}
+                  {(event.data.shortDescription || event.data.fullDescription).replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim().slice(0, 240)}
                 </div>
               )}
             </div>

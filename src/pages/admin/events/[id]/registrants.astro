@@ -1,0 +1,113 @@
+---
+// Registrants for one synced Humanitix event: summary stats + a table of attendees with the
+// checkout answers (where they're staying, meal preference, etc.). Live from the Humanitix API.
+export const prerender = false;
+
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { getEventById } from '@lib/queries';
+import { getEnv } from '@lib/runtime-env';
+import { fetchHumanitixEvents, fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
+import { computeEventStats, buildRegistrantRows } from '@lib/event-registrations';
+
+const user = Astro.locals?.user;
+const { id } = Astro.params;
+const event = await getEventById(id);
+const extId = event?.data?.externalId;
+const isHx = event?.data?.source === 'humanitix' && extId;
+
+let stats = null, rows = [], error = null, questionCols = [];
+if (isHx) {
+  const apiKey = getEnv('HUMANITIX_API_KEY');
+  if (!apiKey) { error = 'HUMANITIX_API_KEY not configured'; }
+  else {
+    try {
+      const [events, orders, tickets] = await Promise.all([
+        fetchHumanitixEvents(apiKey).catch(() => []),
+        fetchHumanitixOrders(apiKey, extId).catch(() => []),
+        fetchHumanitixTickets(apiKey, extId).catch(() => []),
+      ]);
+      const hx = events.find((e) => (e._id ?? e.id) === extId);
+      const questions = hx?.additionalQuestions ?? [];
+      stats = computeEventStats(orders, tickets);
+      rows = buildRegistrantRows(tickets, orders, questions);
+      // Union of answer labels for stable table columns.
+      const seen = new Set();
+      for (const r of rows) for (const a of r.answers) if (!seen.has(a.label)) { seen.add(a.label); questionCols.push(a.label); }
+    } catch (e) { error = String(e?.message ?? e); }
+  }
+}
+const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
+const answerFor = (row, label) => row.answers.find((a) => a.label === label)?.value ?? '';
+---
+
+<AdminLayout title={`Registrants — ${event?.data?.title ?? 'Event'}`} user={user}>
+  <div class="w-full">
+    <div class="mb-6">
+      <a href="/admin/events" class="text-sm text-gray-500 hover:text-amber-700">← Events</a>
+      <h1 class="text-2xl font-bold text-gray-900 mt-1">{event?.data?.title ?? 'Event'} — registrants</h1>
+    </div>
+
+    {!isHx && <p class="text-gray-500">This isn't a synced Humanitix event, so there are no live registrations to show.</p>}
+    {error && <p class="text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-4 py-2">{error}</p>}
+
+    {stats && (
+      <>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+            <div class="text-2xl font-bold text-gray-900 tabular-nums">{stats.registrations}</div>
+            <div class="text-xs text-gray-500">Registered</div>
+          </div>
+          <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+            <div class="text-2xl font-bold text-gray-900 tabular-nums">{money(stats.revenue)}</div>
+            <div class="text-xs text-gray-500">Collected</div>
+          </div>
+          <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+            <div class="text-2xl font-bold text-gray-900 tabular-nums">{money(stats.donationTotal)}</div>
+            <div class="text-xs text-gray-500">Donations{stats.donationCount ? ` (${stats.donationCount})` : ''}</div>
+          </div>
+          <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
+            <div class="text-2xl font-bold text-gray-900 tabular-nums">{stats.orders}</div>
+            <div class="text-xs text-gray-500">Orders</div>
+          </div>
+        </div>
+
+        {Object.keys(stats.byTicketType).length > 0 && (
+          <div class="flex flex-wrap gap-2 mb-6">
+            {Object.entries(stats.byTicketType).map(([name, n]) => (
+              <span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 rounded-full px-3 py-1">{name}: {n}</span>
+            ))}
+          </div>
+        )}
+
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-x-auto">
+          {rows.length === 0 ? (
+            <p class="text-gray-400 text-sm p-6">No registrations yet.</p>
+          ) : (
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-gray-500 border-b border-gray-100">
+                  <th class="py-3 px-4 font-medium">Name</th>
+                  <th class="py-3 px-4 font-medium">Email</th>
+                  <th class="py-3 px-4 font-medium">Ticket</th>
+                  {questionCols.map((q) => <th class="py-3 px-4 font-medium">{q}</th>)}
+                  <th class="py-3 px-4 font-medium">In</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr class="border-b border-gray-50 hover:bg-gray-50">
+                    <td class="py-2.5 px-4 text-gray-900">{r.name}</td>
+                    <td class="py-2.5 px-4 text-gray-500">{r.email}</td>
+                    <td class="py-2.5 px-4 text-gray-600">{r.ticketType}</td>
+                    {questionCols.map((q) => <td class="py-2.5 px-4 text-gray-600">{answerFor(r, q)}</td>)}
+                    <td class="py-2.5 px-4">{r.checkedIn ? '✅' : ''}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </>
+    )}
+  </div>
+</AdminLayout>

@@ -123,6 +123,25 @@ export async function fetchHumanitixOrders(apiKey, eventId, opts = {}) {
   return all;
 }
 
+/** Fetch all (complete) tickets/attendees for one event, incl. their checkout answers. */
+export async function fetchHumanitixTickets(apiKey, eventId, opts = {}) {
+  const pageSize = opts.pageSize ?? 100;
+  const maxPages = opts.maxPages ?? 40;
+  const doFetch = opts.fetchImpl ?? fetch;
+  const all = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const res = await doFetch(`${HX_API_BASE}/events/${eventId}/tickets?page=${page}&pageSize=${pageSize}&status=complete`, {
+      headers: { "x-api-key": apiKey, Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`Humanitix tickets API ${res.status}`);
+    const body = await res.json();
+    const batch = body.tickets ?? [];
+    all.push(...batch);
+    if (batch.length < pageSize) break;
+  }
+  return all;
+}
+
 /** Donation amount on an order (clientDonation is the buyer's own donation). */
 export function orderDonation(order) {
   return Number(order?.clientDonation ?? order?.totals?.clientDonation ?? order?.purchaseTotals?.clientDonation ?? 0) || 0;
