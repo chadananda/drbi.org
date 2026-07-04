@@ -1,839 +1,126 @@
 ---
+// Admin dashboard — a summary of everything (content, events, team, users) plus a compact
+// analytics glance that links to the full Analytics page.
 export const prerender = false;
 
-/**
- * Admin Dashboard - File-based CMS Interface
- * Main dashboard for managing content
- */
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { getContentByCollection, getUpcomingEvents, getTeam, getUsers } from '@lib/queries';
+import { getAnalytics } from '@lib/analytics';
+import { roleLevel } from '@lib/admin-nav';
 
-import AdminLayout from '../../layouts/AdminLayout.astro';
-import { getContentByCollection } from '../../lib/queries';
-// Import analytics utilities
-import { loadAnalyticsSummary } from '../../utils/analytics-cache.js';
+const user = Astro.locals?.user;
+const level = roleLevel(user?.role);
 
-// Get all posts for dashboard overview
-let memorial = [];
-let news = [];
-let articles = [];
-let error = null;
-
+let articles = [], news = [], memorial = [], events = [], team = [], users = [];
 try {
-  [memorial, news, articles] = await Promise.all([
-    getContentByCollection('memorial'),
-    getContentByCollection('news'),
-    getContentByCollection('articles')
+  [articles, news, memorial, events, team, users] = await Promise.all([
+    getContentByCollection('articles').catch(() => []),
+    getContentByCollection('news').catch(() => []),
+    getContentByCollection('memorial').catch(() => []),
+    getUpcomingEvents().catch(() => []),
+    getTeam().catch(() => []),
+    level >= 40 ? getUsers().catch(() => []) : Promise.resolve([]),
   ]);
-} catch (e) {
-  error = e.message;
-  console.error('Error loading posts for admin dashboard:', e);
-}
+} catch (e) { console.error('dashboard load error', e); }
 
-const totalPosts = memorial.length + news.length + articles.length;
+const analytics = await getAnalytics(30);
+const fmt = (n) => Math.round(n).toLocaleString('en-US');
 
-// Get selected period from query params (default 30 days)
-const url = new URL(Astro.request.url);
-const selectedPeriod = parseInt(url.searchParams.get('period') || '30', 10);
-const validPeriods = [30, 60, 90, 365, 730];
-const period = validPeriods.includes(selectedPeriod) ? selectedPeriod : 30;
+const draftCount = [...articles, ...news, ...memorial].filter((p) => p.data?.draft).length;
+const recent = [...articles.map((p) => ({ ...p, _c: 'articles' })), ...news.map((p) => ({ ...p, _c: 'news' }))]
+  .filter((p) => p.data?.datePublished)
+  .sort((a, b) => new Date(b.data.datePublished).getTime() - new Date(a.data.datePublished).getTime())
+  .slice(0, 6);
+const fmtDate = (s) => { try { return new Date(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return ''; } };
 
-let analyticsData = null;
+// Stat cards, gated by role where relevant.
+const stats = [
+  { label: 'Articles', value: articles.length, href: '/admin/articles', icon: '📝', show: true },
+  { label: 'News', value: news.length, href: '/admin/news', icon: '📰', show: true },
+  { label: 'Memorial', value: memorial.length, href: '/admin/memorial', icon: '🕊️', show: true },
+  { label: 'Upcoming events', value: events.length, href: '/admin/events', icon: '📅', show: level >= 30 },
+  { label: 'Team', value: team.length, href: '/admin/team', icon: '👥', show: level >= 40 },
+  { label: 'Users', value: users.length, href: '/admin/users', icon: '🔑', show: level >= 100 },
+].filter((s) => s.show);
 
-// Helper function to create demo data
-function createDemoData() {
-  return {
-    pageViews: Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 100) + 50),
-    topPages: [
-      { breakdown_value: '/', count: 1250, label: 'Home Page' },
-      { breakdown_value: '/events', count: 890, label: 'Events' },
-      { breakdown_value: '/articles', count: 654, label: 'Articles' },
-      { breakdown_value: '/about', count: 432, label: 'About Us' },
-      { breakdown_value: '/contact', count: 398, label: 'Contact' },
-      { breakdown_value: '/team', count: 356, label: 'Team' },
-      { breakdown_value: '/news', count: 298, label: 'News' },
-      { breakdown_value: '/memorial', count: 276, label: 'Memorial' },
-      { breakdown_value: '/categories', count: 234, label: 'Categories' },
-      { breakdown_value: '/tags', count: 212, label: 'Tags' },
-      { breakdown_value: '/search', count: 198, label: 'Search' },
-      { breakdown_value: '/archive', count: 176, label: 'Archive' },
-      { breakdown_value: '/sitemap', count: 154, label: 'Sitemap' },
-      { breakdown_value: '/privacy', count: 134, label: 'Privacy Policy' },
-      { breakdown_value: '/terms', count: 123, label: 'Terms of Service' },
-      { breakdown_value: '/donate', count: 98, label: 'Donate' },
-      { breakdown_value: '/volunteer', count: 87, label: 'Volunteer' },
-      { breakdown_value: '/newsletter', count: 76, label: 'Newsletter' },
-      { breakdown_value: '/faq', count: 65, label: 'FAQ' },
-      { breakdown_value: '/subscribe', count: 54, label: 'Subscribe' }
-    ],
-    countries: [
-      { breakdown_value: 'United States', count: 2850, label: 'United States' },
-      { breakdown_value: 'United Kingdom', count: 1240, label: 'United Kingdom' },
-      { breakdown_value: 'Canada', count: 980, label: 'Canada' },
-      { breakdown_value: 'Australia', count: 720, label: 'Australia' },
-      { breakdown_value: 'Germany', count: 650, label: 'Germany' },
-      { breakdown_value: 'France', count: 590, label: 'France' },
-      { breakdown_value: 'Netherlands', count: 430, label: 'Netherlands' },
-      { breakdown_value: 'Spain', count: 380, label: 'Spain' },
-      { breakdown_value: 'Italy', count: 320, label: 'Italy' },
-      { breakdown_value: 'Sweden', count: 280, label: 'Sweden' },
-      { breakdown_value: 'Norway', count: 250, label: 'Norway' },
-      { breakdown_value: 'Belgium', count: 210, label: 'Belgium' },
-      { breakdown_value: 'Switzerland', count: 180, label: 'Switzerland' },
-      { breakdown_value: 'Denmark', count: 150, label: 'Denmark' },
-      { breakdown_value: 'Finland', count: 120, label: 'Finland' }
-    ],
-    states: [
-      { breakdown_value: 'California', count: 850, label: 'California' },
-      { breakdown_value: 'Texas', count: 620, label: 'Texas' },
-      { breakdown_value: 'New York', count: 580, label: 'New York' },
-      { breakdown_value: 'Florida', count: 450, label: 'Florida' },
-      { breakdown_value: 'Illinois', count: 280, label: 'Illinois' },
-      { breakdown_value: 'Pennsylvania', count: 250, label: 'Pennsylvania' },
-      { breakdown_value: 'Ohio', count: 220, label: 'Ohio' },
-      { breakdown_value: 'Georgia', count: 190, label: 'Georgia' },
-      { breakdown_value: 'North Carolina', count: 170, label: 'North Carolina' },
-      { breakdown_value: 'Michigan', count: 150, label: 'Michigan' },
-      { breakdown_value: 'Washington', count: 140, label: 'Washington' },
-      { breakdown_value: 'Arizona', count: 130, label: 'Arizona' },
-      { breakdown_value: 'Virginia', count: 120, label: 'Virginia' },
-      { breakdown_value: 'Colorado', count: 110, label: 'Colorado' },
-      { breakdown_value: 'Oregon', count: 100, label: 'Oregon' },
-      { breakdown_value: 'Massachusetts', count: 95, label: 'Massachusetts' },
-      { breakdown_value: 'Tennessee', count: 85, label: 'Tennessee' },
-      { breakdown_value: 'Maryland', count: 80, label: 'Maryland' },
-      { breakdown_value: 'Minnesota', count: 75, label: 'Minnesota' },
-      { breakdown_value: 'Wisconsin', count: 70, label: 'Wisconsin' }
-    ],
-    referrers: [
-      { breakdown_value: 'direct', count: 1250, label: 'Direct Traffic' },
-      { breakdown_value: 'https://google.com', count: 890, label: 'Google Search' },
-      { breakdown_value: 'https://facebook.com', count: 456, label: 'Facebook' },
-      { breakdown_value: 'https://twitter.com', count: 334, label: 'Twitter' },
-      { breakdown_value: 'https://instagram.com', count: 298, label: 'Instagram' },
-      { breakdown_value: 'https://linkedin.com', count: 234, label: 'LinkedIn' },
-      { breakdown_value: 'https://youtube.com', count: 198, label: 'YouTube' },
-      { breakdown_value: 'https://bing.com', count: 176, label: 'Bing Search' },
-      { breakdown_value: 'https://pinterest.com', count: 154, label: 'Pinterest' },
-      { breakdown_value: 'https://reddit.com', count: 134, label: 'Reddit' },
-      { breakdown_value: 'https://newsletter.drbi.org', count: 123, label: 'Newsletter' },
-      { breakdown_value: 'https://bahai.org', count: 98, label: 'Bahai.org' },
-      { breakdown_value: 'https://bahaicentre.org', count: 87, label: 'Bahai Centre' },
-      { breakdown_value: 'https://duckduckgo.com', count: 76, label: 'DuckDuckGo' },
-      { breakdown_value: 'https://yahoo.com', count: 65, label: 'Yahoo Search' },
-      { breakdown_value: 'https://whatsapp.com', count: 54, label: 'WhatsApp' },
-      { breakdown_value: 'https://telegram.org', count: 43, label: 'Telegram' },
-      { breakdown_value: 'https://signal.org', count: 32, label: 'Signal' },
-      { breakdown_value: 'https://wikipedia.org', count: 28, label: 'Wikipedia' },
-      { breakdown_value: 'https://ecosia.org', count: 21, label: 'Ecosia' }
-    ],
-    uniqueVisitors: Array.from({length: 30}, (_, i) => Math.floor(Math.random() * 50) + 20),
-    dateRange: { startDate: '2024-01-01', endDate: '2024-01-31' },
-    totalPageViews: 3524,
-    totalUniqueVisitors: 1456,
-    isDemo: true
-  };
-}
-
-
-
-// Load imported analytics data (historical/archived) — use fast cached summary
-const importedAnalytics = await loadAnalyticsSummary();
-// Fall back to demo data if no imported analytics available
-analyticsData = importedAnalytics || createDemoData();
-
-// Create debug info for client-side logging
-const debugInfo = {
-  isDemo: analyticsData.isDemo,
-  countriesCount: analyticsData.countries?.length || 0,
-  statesCount: analyticsData.states?.length || 0,
-  countries: analyticsData.countries?.slice(0, 3) || [],
-  states: analyticsData.states?.slice(0, 3) || []
-};
+const quickActions = [
+  { label: 'New article', href: '/admin/articles/new', icon: '✍️', show: true },
+  { label: 'New event', href: '/admin/events', icon: '📅', show: level >= 30 },
+  { label: 'Media library', href: '/admin/media', icon: '🖼️', show: true },
+  { label: 'Full analytics', href: '/admin/analytics', icon: '📊', show: level >= 40 },
+].filter((a) => a.show);
 ---
 
-<AdminLayout title="Admin Dashboard" user={Astro.locals?.user}>
-  <div class="max-w-6xl mx-auto px-6 py-6">
-    <!-- Page Header -->
-    <div class="mb-8">
-      <div class="flex items-center gap-3 mb-2">
-        <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-          <span class="text-white text-xl">🏠</span>
-        </div>
-        <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-      </div>
-      <p class="text-gray-600">Overview of your website's content and analytics</p>
+<AdminLayout title="Dashboard" user={user}>
+  <div class="w-full">
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+      <p class="text-sm text-gray-500 mt-1">Welcome back{user?.name ? `, ${user.name}` : ''} — here's an overview of the site.</p>
     </div>
 
+    <!-- Stat cards -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+      {stats.map((s) => (
+        <a href={s.href} class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition group">
+          <div class="text-2xl mb-1" aria-hidden="true">{s.icon}</div>
+          <div class="text-2xl font-bold text-gray-900 tabular-nums">{fmt(s.value)}</div>
+          <div class="text-xs text-gray-500 group-hover:text-amber-700">{s.label}</div>
+        </a>
+      ))}
+    </div>
 
-    {analyticsData && (
-      <div class="mb-16">
-        <div class="flex items-center justify-between mb-8">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"></path>
-              </svg>
-            </div>
-            <h2 class="text-2xl font-bold text-gray-900">Website Analytics</h2>
-          </div>
-
-          <!-- Actions -->
-          <div class="flex items-center gap-3">
-            <label class="text-sm font-medium text-gray-700">Period:</label>
-            <select id="analyticsPeriod" class="px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white">
-              <option value="30" selected={period === 30}>30 Days</option>
-              <option value="60" selected={period === 60}>60 Days</option>
-              <option value="90" selected={period === 90}>90 Days</option>
-              <option value="365" selected={period === 365}>1 Year</option>
-              <option value="730" selected={period === 730}>2 Years</option>
-            </select>
-          </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Recent content -->
+      <div class="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Recent content</h2>
+          {draftCount > 0 && <span class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1">{draftCount} draft{draftCount === 1 ? '' : 's'}</span>}
         </div>
-
-        <!-- Analytics Overview -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded-full">{period} days</span>
-            </div>
-            <h3 class="text-3xl font-bold text-gray-900 mb-1">{analyticsData.totalPageViews.toLocaleString()}</h3>
-            <p class="text-gray-600 font-medium">Total Page Views</p>
-          </div>
-
-          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">{period} days</span>
-            </div>
-            <h3 class="text-3xl font-bold text-gray-900 mb-1">{analyticsData.totalUniqueVisitors.toLocaleString()}</h3>
-            <p class="text-gray-600 font-medium">Unique Visitors</p>
-          </div>
-
-          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">avg</span>
-            </div>
-            <h3 class="text-3xl font-bold text-gray-900 mb-1">{Math.round(analyticsData.totalPageViews / period)}</h3>
-            <p class="text-gray-600 font-medium">Daily Average</p>
-          </div>
-
-          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-              <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"></path>
-                </svg>
-              </div>
-              <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded-full">ratio</span>
-            </div>
-            <h3 class="text-3xl font-bold text-gray-900 mb-1">{analyticsData.totalUniqueVisitors > 0 ? (analyticsData.totalPageViews / analyticsData.totalUniqueVisitors).toFixed(1) : '0.0'}</h3>
-            <p class="text-gray-600 font-medium">Pages/Visitor</p>
-          </div>
-        </div>
-
-        <!-- Traffic Chart -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm mb-8">
-          <h3 class="text-xl font-semibold text-gray-900 mb-6">{period}-Day Traffic Overview</h3>
-          <div class="h-80">
-            <canvas id="trafficChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Data Sources Info (for hybrid/imported data) -->
-        {analyticsData.isHybrid && analyticsData.sources && (
-          <div class="bg-purple-50 border border-purple-200 rounded-xl p-6 shadow-sm mb-8">
-            <h3 class="text-lg font-semibold text-purple-900 mb-4 flex items-center gap-2">
-              <span>🔄</span>
-              Data Sources
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {analyticsData.sources.map((source) => (
-                <div class="bg-white border border-purple-200 rounded-lg p-4">
-                  <div class="flex items-center gap-2 mb-2">
-                    <span class="w-3 h-3 bg-purple-500 rounded-full"></span>
-                    <h4 class="font-medium text-gray-900">{source.source === 'vercel' ? 'Vercel Analytics' : source.source}</h4>
-                  </div>
-                  <p class="text-sm text-gray-600 mb-1">{source.recordCount?.toLocaleString()} records</p>
-                  <p class="text-sm text-gray-600 mb-1">{typeof source.dateRange === 'object' ? (source.dateRange.description || `${source.dateRange.start} to ${source.dateRange.end}`) : source.dateRange}</p>
-                  <p class="text-xs text-gray-500">
-                    Uploaded: {new Date(source.uploadedAt).toLocaleDateString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <!-- Top Pages and Traffic Sources -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Top Pages -->
-          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 20 Pages</h3>
-            <div class="space-y-2">
-              {analyticsData.topPages.map((page: any, index: number) => (
-                <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
-                  <div class="flex items-center gap-3 min-w-0 flex-1">
-                    <div class="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-semibold">{index + 1}</div>
-                    <div class="min-w-0 flex-1">
-                      <h4 class="text-sm font-medium text-gray-900 truncate">{page.label || page.breakdown_value}</h4>
-                      <p class="text-xs text-gray-500 truncate">{page.breakdown_value}</p>
-                    </div>
-                  </div>
-                  <div class="text-right flex-shrink-0">
-                    <span class="text-sm font-semibold text-gray-900">{page.count?.toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <!-- Traffic Sources -->
-          <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Traffic Sources</h3>
-            <div class="space-y-2">
-              {analyticsData.referrers?.map((referrer) => {
-                const getSourceIcon = (source) => {
-                  if (source === 'direct') return '🔗';
-                  if (source.includes('google')) return '🔍';
-                  if (source.includes('facebook')) return '📘';
-                  if (source.includes('twitter')) return '🐦';
-                  if (source.includes('linkedin')) return '💼';
-                  if (source.includes('youtube')) return '📺';
-                  if (source.includes('pinterest')) return '📌';
-                  if (source.includes('instagram')) return '📷';
-                  if (source.includes('reddit')) return '🤖';
-                  if (source.includes('tiktok')) return '🎵';
-                  if (source.includes('github')) return '⚙️';
-                  if (source.includes('medium')) return '📝';
-                  if (source.includes('yahoo')) return '🌐';
-                  if (source.includes('bing')) return '🔎';
-                  if (source.includes('ecosia')) return '🌱';
-                  return '🌐';
-                };
-
-                return (
-                  <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
-                    <div class="flex items-center gap-3 min-w-0 flex-1">
-                      <div class="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs">{getSourceIcon(referrer.breakdown_value)}</div>
-                      <div class="min-w-0 flex-1">
-                        <h4 class="text-sm font-medium text-gray-900 truncate">{referrer.label || referrer.breakdown_value}</h4>
-                        <p class="text-xs text-gray-500 truncate">{referrer.breakdown_value === 'direct' ? 'Direct traffic' : referrer.breakdown_value.replace('https://', '')}</p>
-                      </div>
-                    </div>
-                    <div class="text-right flex-shrink-0">
-                      <span class="text-sm font-semibold text-gray-900">{referrer.count?.toLocaleString()}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        <div class="divide-y divide-gray-100">
+          {recent.length === 0 && <p class="text-sm text-gray-400">No content yet.</p>}
+          {recent.map((p) => (
+            <a href={`/admin/${p._c}/${p.baseid}`} class="flex items-center justify-between py-2.5 group">
+              <span class="min-w-0 pr-3">
+                <span class="block text-sm font-medium text-gray-800 truncate group-hover:text-amber-700">{p.data?.title || '(untitled)'}</span>
+                <span class="block text-xs text-gray-400 capitalize">{p._c}{p.data?.draft ? ' · draft' : ''}</span>
+              </span>
+              <span class="text-xs text-gray-400 shrink-0">{fmtDate(p.data?.datePublished)}</span>
+            </a>
+          ))}
         </div>
       </div>
 
-      <!-- Geographic Analytics - World Map Full Width -->
-      <div class="mt-6">
-        <!-- World Map -->
-        <div class="bg-white border border-gray-200 rounded-xl p-6 mb-6">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Traffic by Location</h3>
-          <div id="worldMap" class="h-96 bg-gray-50 rounded-lg"></div>
-        </div>
-
-        <!-- Geographic Data -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Top Countries -->
-          <div class="bg-white border border-gray-200 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Countries</h3>
-            <div class="space-y-2 max-h-[48rem] overflow-y-auto">
-              {analyticsData.countries?.map((country, index) => {
-                // Get flag emoji for country (basic mapping)
-                const getCountryFlag = (countryName) => {
-                  const flags = {
-                    'United States': '🇺🇸',
-                    'United Kingdom': '🇬🇧',
-                    'Canada': '🇨🇦',
-                    'Australia': '🇦🇺',
-                    'Germany': '🇩🇪',
-                    'France': '🇫🇷',
-                    'Netherlands': '🇳🇱',
-                    'Spain': '🇪🇸',
-                    'Italy': '🇮🇹',
-                    'Sweden': '🇸🇪',
-                    'Norway': '🇳🇴',
-                    'Belgium': '🇧🇪',
-                    'Switzerland': '🇨🇭',
-                    'Denmark': '🇩🇰',
-                    'Finland': '🇫🇮',
-                  };
-                  return flags[countryName] || '🏳️';
-                };
-
-                return (
-                  <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
-                    <div class="flex items-center gap-3 min-w-0 flex-1">
-                      <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-lg">{getCountryFlag(country.breakdown_value)}</div>
-                      <div class="min-w-0 flex-1">
-                        <h4 class="text-sm font-medium text-gray-900 truncate">{country.label || country.breakdown_value}</h4>
-                        <p class="text-xs text-gray-500">Rank #{index + 1}</p>
-                      </div>
-                    </div>
-                    <div class="text-right flex-shrink-0">
-                      <span class="text-sm font-semibold text-gray-900">{country.count?.toLocaleString()}</span>
-                      <p class="text-xs text-gray-500">visitors</p>
-                    </div>
-                  </div>
-                );
-              })}
+      <!-- Sidebar column: analytics glance + quick actions -->
+      <div class="space-y-6">
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-gray-900">Traffic</h2>
+            <span class="text-xs text-gray-400">30 days</span>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <div class="text-2xl font-bold text-gray-900 tabular-nums">{fmt(analytics.totals.pageviews)}</div>
+              <div class="text-xs text-gray-500">Page views</div>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-gray-900 tabular-nums">{fmt(analytics.totals.visits)}</div>
+              <div class="text-xs text-gray-500">Visits</div>
             </div>
           </div>
+          {level >= 40 && <a href="/admin/analytics" class="inline-block mt-4 text-sm font-medium text-amber-700 hover:text-amber-800">View full analytics →</a>}
+        </div>
 
-          <!-- US States -->
-          {analyticsData.states && analyticsData.states.length > 0 && (
-            <div class="bg-white border border-gray-200 rounded-xl p-6">
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">Top US States</h3>
-              <div class="space-y-2 max-h-[48rem] overflow-y-auto">
-                {analyticsData.states?.slice(0, 15).map((state, index) => {
-                  return (
-                    <div class="flex items-center justify-between py-2 px-3 hover:bg-gray-50 rounded-md">
-                      <div class="flex items-center gap-3 min-w-0 flex-1">
-                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">🇺🇸</div>
-                        <div class="min-w-0 flex-1">
-                          <h4 class="text-sm font-medium text-gray-900 truncate">{state.label || state.breakdown_value}</h4>
-                          <p class="text-xs text-gray-500">#{index + 1} in US</p>
-                        </div>
-                      </div>
-                      <div class="text-right flex-shrink-0">
-                        <span class="text-sm font-semibold text-gray-900">{state.count?.toLocaleString()}</span>
-                        <p class="text-xs text-gray-500">visitors</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
+          <h2 class="text-lg font-semibold text-gray-900 mb-3">Quick actions</h2>
+          <div class="space-y-1.5">
+            {quickActions.map((a) => (
+              <a href={a.href} class="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-amber-50 hover:text-amber-800 transition">
+                <span aria-hidden="true">{a.icon}</span>{a.label}
+              </a>
+            ))}
+          </div>
         </div>
       </div>
-    )}
-
+    </div>
   </div>
 </AdminLayout>
-
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-     crossorigin=""/>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-     crossorigin=""></script>
-<script define:vars={{ analyticsData, period }} is:inline>
-  // Check CMS status on page load
-  async function checkCMSStatus() {
-    try {
-      const response = await fetch('/api/cms-status');
-      const data = await response.json();
-
-      if (data.success) {
-        updateGitHubStatus(data.status);
-        updateEnvironmentStatus(data.status);
-      } else {
-        showError('Failed to load system status');
-      }
-    } catch (error) {
-      console.error('Status check failed:', error);
-      showError('Could not connect to system status API');
-    }
-  }
-
-  function updateGitHubStatus(status) {
-    const githubStatus = document.getElementById('github-status');
-    if (!githubStatus) return;
-
-    const { github, environment } = status;
-    let icon, text, className;
-
-    if (github.enabled) {
-      icon = '✅';
-      text = 'GitHub connected (' + github.repository + ')';
-      className = 'connected';
-
-      if (environment === 'development' && status.features.autoSync) {
-        text += ' • Auto-sync enabled';
-      }
-    } else if (github.configured) {
-      icon = '⚠️';
-      text = 'GitHub configured but not enabled';
-      className = 'warning';
-
-      if (environment === 'development') {
-        text += ' • Set CMS_USE_GITHUB=true to enable';
-      }
-    } else {
-      icon = '❌';
-      text = 'GitHub not configured';
-      className = 'disconnected';
-    }
-
-    githubStatus.innerHTML = '<span>' + icon + '</span> ' + text;
-    githubStatus.className = 'status-indicator ' + className;
-  }
-
-  function updateEnvironmentStatus(status) {
-    const envStatus = document.getElementById('environment-status');
-    if (!envStatus) return;
-
-    const { environment, validation } = status;
-    const envClass = environment === 'production' ? 'production' : 'development';
-
-    let validationText = '';
-    if (validation.strict) {
-      validationText += ' • Strict validation';
-    }
-    if (validation.buildCheck) {
-      validationText += ' • Build checks enabled';
-    }
-
-    envStatus.innerHTML = '<span class="env-badge ' + envClass + '">' + environment + '</span> Environment: ' + environment + validationText;
-  }
-
-  function showError(message) {
-    const githubStatus = document.getElementById('github-status');
-    if (githubStatus) {
-      githubStatus.innerHTML = '<span>❌</span> ' + message;
-      githubStatus.className = 'status-indicator disconnected';
-    }
-  }
-
-  // Initialize traffic chart
-  function initTrafficChart() {
-    if (!analyticsData) return;
-
-    const ctx = document.getElementById('trafficChart');
-    if (!ctx) return;
-
-    // Generate date labels for the selected period
-    const labels = [];
-    const now = new Date();
-    const daysToShow = Math.min(period, analyticsData.pageViews?.length || period);
-    for (let i = daysToShow - 1; i >= 0; i--) {
-      const date = new Date(now.getTime() - (i * 24 * 60 * 60 * 1000));
-      // For periods > 90 days, show month only to avoid crowding
-      const format = period > 90 ? { month: 'short' } : { month: 'short', day: 'numeric' };
-      labels.push(date.toLocaleDateString('en-US', format));
-    }
-
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Page Views',
-            data: analyticsData.pageViews,
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4
-          },
-          {
-            label: 'Unique Visitors',
-            data: analyticsData.uniqueVisitors,
-            borderColor: 'rgb(16, 185, 129)',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.4
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: 'rgba(0, 0, 0, 0.1)'
-            }
-          },
-          x: {
-            grid: {
-              color: 'rgba(0, 0, 0, 0.1)'
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            position: 'top',
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-          }
-        },
-        interaction: {
-          mode: 'nearest',
-          axis: 'x',
-          intersect: false
-        }
-      }
-    });
-  }
-
-  // Initialize world map with heat mapping
-  function initWorldMap() {
-    if (!analyticsData) {
-      console.log('No analytics data available for world map');
-      return;
-    }
-
-    // Check if we have any geographic data with actual counts
-    const countries = analyticsData.countries || [];
-    const states = analyticsData.states || [];
-
-    if (countries.length === 0 && states.length === 0) {
-      console.log('No geographic data available for world map');
-      return;
-    }
-
-    // Create the map centered on the world
-    const map = L.map('worldMap').setView([20, 0], 2);
-
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Country coordinates mapping (basic set)
-    const countryCoords = {
-      'United Kingdom': [55.3781, -3.4360],
-      'Canada': [56.1304, -106.3468],
-      'Australia': [-25.2744, 133.7751],
-      'Germany': [51.1657, 10.4515],
-      'France': [46.2276, 2.2137],
-      'Netherlands': [52.1326, 5.2913],
-      'Spain': [40.4637, -3.7492],
-      'Italy': [41.8719, 12.5674],
-      'Sweden': [60.1282, 18.6435],
-      'Norway': [60.4720, 8.4689],
-      'Belgium': [50.5039, 4.4699],
-      'Switzerland': [46.8182, 8.2275],
-      'Denmark': [56.2639, 9.5018],
-      'Finland': [61.9241, 25.7482],
-    };
-
-    // US State coordinates mapping
-    const stateCoords = {
-      'Alabama': [32.806671, -86.791130],
-      'Alaska': [61.370716, -152.404419],
-      'Arizona': [33.729759, -111.431221],
-      'Arkansas': [34.969704, -92.373123],
-      'California': [36.116203, -119.681564],
-      'Colorado': [39.059811, -105.311104],
-      'Connecticut': [41.597782, -72.755371],
-      'Delaware': [39.318523, -75.507141],
-      'Florida': [27.766279, -81.686783],
-      'Georgia': [33.040619, -83.643074],
-      'Hawaii': [21.094318, -157.498337],
-      'Idaho': [44.240459, -114.478828],
-      'Illinois': [40.349457, -88.986137],
-      'Indiana': [39.849426, -86.258278],
-      'Iowa': [42.011539, -93.210526],
-      'Kansas': [38.526600, -96.726486],
-      'Kentucky': [37.668140, -84.670067],
-      'Louisiana': [31.169546, -91.867805],
-      'Maine': [44.323535, -69.765261],
-      'Maryland': [39.063946, -76.802101],
-      'Massachusetts': [42.230171, -71.530106],
-      'Michigan': [43.326618, -84.536095],
-      'Minnesota': [45.694454, -93.900192],
-      'Mississippi': [32.741646, -89.678696],
-      'Missouri': [38.572954, -92.189283],
-      'Montana': [47.052952, -110.454353],
-      'Nebraska': [41.125370, -98.268082],
-      'Nevada': [38.313515, -117.055374],
-      'New Hampshire': [43.452492, -71.563896],
-      'New Jersey': [40.298904, -74.756138],
-      'New Mexico': [34.840515, -106.248482],
-      'New York': [42.165726, -74.948051],
-      'North Carolina': [35.630066, -79.806419],
-      'North Dakota': [47.528912, -99.784012],
-      'Ohio': [40.388783, -82.764915],
-      'Oklahoma': [35.565342, -96.928917],
-      'Oregon': [44.572021, -122.070938],
-      'Pennsylvania': [40.590752, -77.209755],
-      'Rhode Island': [41.680893, -71.511780],
-      'South Carolina': [33.856892, -80.945007],
-      'South Dakota': [44.299782, -99.438828],
-      'Tennessee': [35.747845, -86.692345],
-      'Texas': [31.054487, -97.563461],
-      'Utah': [40.150032, -111.862434],
-      'Vermont': [44.045876, -72.710686],
-      'Virginia': [37.769337, -78.169968],
-      'Washington': [47.400902, -121.490494],
-      'West Virginia': [38.491226, -80.954570],
-      'Wisconsin': [44.268543, -89.616508],
-      'Wyoming': [42.755966, -107.302490]
-    };
-
-    // Get max count for color scaling from both countries and states
-    const allData = [...countries, ...states];
-    const counts = allData.map(item => item.count || 0).filter(c => c > 0);
-    const maxCount = counts.length > 0 ? Math.max(...counts) : 1; // Default to 1 to avoid division by zero
-
-    // Add country markers (excluding US since we'll show states instead)
-    if (countries.length > 0) {
-      countries.forEach(country => {
-        // Skip United States since we'll show individual states
-        if (!country || country.breakdown_value === 'United States') return;
-
-        const coords = countryCoords[country.breakdown_value];
-        if (coords) {
-          const [lat, lng] = coords;
-          const count = country.count || 0;
-          if (count === 0) return; // Skip if no data
-          
-          // Calculate circle size and opacity based on traffic
-          const radius = Math.max(8, (count / maxCount) * 40);
-          const opacity = Math.max(0.4, count / maxCount);
-
-          // Color gradient from light blue to dark red
-          const intensity = count / maxCount;
-          let color = '#3b82f6'; // Default blue
-          if (intensity > 0.7) color = '#dc2626'; // Red
-          else if (intensity > 0.4) color = '#f59e0b'; // Orange
-          else if (intensity > 0.2) color = '#10b981'; // Green
-
-          // Create circle marker
-          L.circleMarker([lat, lng], {
-            radius: radius,
-            fillColor: color,
-            color: color,
-            weight: 2,
-            opacity: opacity,
-            fillOpacity: opacity * 0.7
-          })
-          .bindPopup(`
-            <div class="font-semibold">${country.breakdown_value}</div>
-            <div class="text-sm text-gray-600">${count.toLocaleString()} visitors</div>
-          `)
-          .addTo(map);
-        }
-      });
-    }
-
-    // Add US state markers
-    if (states.length > 0) {
-      states.forEach(state => {
-        if (!state) return;
-        const coords = stateCoords[state.breakdown_value];
-        if (coords) {
-          const [lat, lng] = coords;
-          const count = state.count || 0;
-          if (count === 0) return; // Skip if no data
-          
-          // Calculate circle size and opacity based on traffic
-          const radius = Math.max(6, (count / maxCount) * 35);
-          const opacity = Math.max(0.4, count / maxCount);
-
-          // Color gradient for states (slightly different to distinguish from countries)
-          const intensity = count / maxCount;
-          let color = '#1e40af'; // Darker blue for states
-          if (intensity > 0.7) color = '#b91c1c'; // Dark red
-          else if (intensity > 0.4) color = '#d97706'; // Dark orange
-          else if (intensity > 0.2) color = '#059669'; // Dark green
-
-          // Create circle marker for state
-          L.circleMarker([lat, lng], {
-            radius: radius,
-            fillColor: color,
-            color: color,
-            weight: 2,
-            opacity: opacity,
-            fillOpacity: opacity * 0.7
-          })
-          .bindPopup(`
-            <div class="font-semibold">${state.breakdown_value}</div>
-            <div class="text-sm text-gray-600">${count.toLocaleString()} visitors</div>
-            <div class="text-xs text-gray-500">United States</div>
-          `)
-          .addTo(map);
-        }
-      });
-    }
-
-    // Add legend
-    const legend = L.control({ position: 'bottomright' });
-    legend.onAdd = function(map) {
-      const div = L.DomUtil.create('div', 'info legend');
-      div.style.background = 'white';
-      div.style.padding = '10px';
-      div.style.border = '1px solid #ccc';
-      div.style.borderRadius = '5px';
-      div.style.fontSize = '12px';
-      
-      div.innerHTML = `
-        <div style="font-weight: bold; margin-bottom: 5px;">Visitors</div>
-        <div><span style="color: #dc2626;">●</span> High (${Math.round(maxCount * 0.7)}+)</div>
-        <div><span style="color: #f59e0b;">●</span> Medium (${Math.round(maxCount * 0.4)}+)</div>
-        <div><span style="color: #10b981;">●</span> Low (${Math.round(maxCount * 0.2)}+)</div>
-        <div><span style="color: #3b82f6;">●</span> Minimal</div>
-      `;
-      return div;
-    };
-    legend.addTo(map);
-  }
-
-  // Handle period dropdown change
-  function initPeriodSelector() {
-    const periodSelect = document.getElementById('analyticsPeriod');
-    if (periodSelect) {
-      periodSelect.addEventListener('change', function() {
-        const selectedPeriod = this.value;
-        const url = new URL(window.location.href);
-        url.searchParams.set('period', selectedPeriod);
-        window.location.href = url.toString();
-      });
-    }
-  }
-
-  // Check status when page loads
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('DRBI Admin Dashboard loaded');
-
-    checkCMSStatus();
-    initTrafficChart();
-    initWorldMap();
-    initPeriodSelector();
-  });
-</script>
-
-<!-- Debug Info Script -->
-<script is:inline define:vars={{debugInfo}}>
-  console.log('DRBI Analytics Debug Info:', debugInfo);
-  console.log('Analytics data isDemo:', debugInfo.isDemo);
-  console.log('Total countries:', debugInfo.countriesCount);
-  console.log('Total states:', debugInfo.statesCount);
-  console.log('Countries data:', debugInfo.countries);
-  console.log('States data:', debugInfo.states);
-</script>

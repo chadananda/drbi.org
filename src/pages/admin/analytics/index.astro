@@ -196,6 +196,32 @@ const panels = [
       </div>
     </div>
 
+    <!-- 404s / Not found -->
+    <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm mt-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold text-gray-900">Not found (404s)</h2>
+        <span class="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-full px-2.5 py-1">Broken / missing URLs</span>
+      </div>
+      {a.notFound.length === 0 ? (
+        <p class="text-sm text-gray-400">No 404s recorded in this period.</p>
+      ) : (
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+          {a.notFound.slice(0, 10).map((row) => (
+            <div>
+              <div class="flex items-center justify-between text-sm mb-1">
+                <span class="text-gray-700 truncate pr-3 font-mono text-xs">{row.label}</span>
+                <span class="text-gray-500 tabular-nums shrink-0">{fmt(row.views)} <span class="text-gray-400">· {row.pct}%</span></span>
+              </div>
+              <div class="h-2 rounded-full bg-gray-100 overflow-hidden">
+                <div class="h-full rounded-full bg-gradient-to-r from-rose-500 to-rose-400" style={`width:${Math.max(2, row.pct)}%`}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <p class="text-xs text-gray-400 mt-4">Consider adding redirects for the top broken URLs in <code class="text-gray-500">public/_redirects</code>.</p>
+    </div>
+
     {a.source !== 'cloudflare' && (
       <p class="text-xs text-gray-400 mt-6 text-center">
         Showing representative sample data. Add <code class="text-gray-500">CF_ANALYTICS_API_TOKEN</code>,

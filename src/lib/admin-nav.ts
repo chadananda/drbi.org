@@ -9,7 +9,6 @@ export const ADMIN_NAV: AdminNavItem[] = [
   { title: 'Content',   href: '/admin/posts',      icon: '📝', minLevel: 20 },
   { title: 'Media',     href: '/admin/media',      icon: '🖼️', minLevel: 20 },
   { title: 'Events',    href: '/admin/events',     icon: '📅', minLevel: 30 },
-  { title: 'Comments',  href: '/admin/comments',   icon: '💬', minLevel: 30 },
   { title: 'Categories',href: '/admin/categories', icon: '🏷️', minLevel: 30 },
   { title: 'Topics',    href: '/admin/topics',     icon: '🗂️', minLevel: 30 },
   { title: 'Analytics', href: '/admin/analytics',  icon: '📊', minLevel: 40 },

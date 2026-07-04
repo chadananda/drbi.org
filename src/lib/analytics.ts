@@ -20,6 +20,7 @@ export interface Analytics {
   countries: Slice[];
   devices: Slice[];
   browsers: Slice[];
+  notFound: Slice[]; // top 404 / not-found paths
 }
 
 const CF_GQL = 'https://api.cloudflare.com/client/v4/graphql';
@@ -104,7 +105,18 @@ async function queryCloudflare(days: number, token: string, accountTag: string, 
     countries: toSlices(acct.countries, 'countryName'),
     devices: toSlices(acct.devices, 'deviceType'),
     browsers: toSlices(acct.browsers, 'userAgentBrowser'),
+    notFound: [], // 404s come from the zone HTTP dataset, not RUM — populated when CF_ZONE_TAG is wired
   };
+}
+
+/** Sample 404 paths (bots/old links) for the not-found panel. */
+function sampleNotFound(): Slice[] {
+  const rows: [string, number][] = [
+    ['/blog', 34], ['/events/2024', 26], ['/kure-fm', 21], ['/wp-login.php', 18],
+    ['/donate.html', 13], ['/index.php', 11], ['/old-newsletter', 8], ['/arts/gallery', 6],
+  ];
+  const total = rows.reduce((a, r) => a + r[1], 0);
+  return rows.map(([label, v]) => ({ label, views: v, pct: pct(v, total) }));
 }
 
 // ── Sample data (deterministic, realistic) ───────────────────────────────────
@@ -148,5 +160,6 @@ export function sampleAnalytics(days = 30): Analytics {
     countries: mk([['United States', 140, 'US'], ['Canada', 22, 'CA'], ['United Kingdom', 14, 'GB'], ['Mexico', 11, 'MX'], ['Germany', 8, 'DE'], ['Australia', 7, 'AU'], ['India', 6, 'IN'], ['France', 5, 'FR']]),
     devices: mk([['Mobile', 118], ['Desktop', 96], ['Tablet', 14]]),
     browsers: mk([['Chrome', 120], ['Safari', 78], ['Edge', 22], ['Firefox', 14], ['Samsung Internet', 8]]),
+    notFound: sampleNotFound(),
   };
 }
