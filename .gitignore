@@ -1,6 +1,7 @@
 # build output
 dist/
 .astro/
+.wrangler/
 .vercel/
 .vercel
 .aider*
@@ -19,6 +20,8 @@ pnpm-debug.log*
 
 # environment variables
 .env
+.env.*
+!.env.example
 .env.production
 
 # analytics data (exclude raw imports but include processed summary)
@@ -37,12 +40,9 @@ public/posts/
 # backup and research
 work/
 
-# local test db
-tmp/tmpdata.db
+# temp / scratch (screenshots, audits, uploads, local db) — never committed
+tmp/
 cron-last-run.json
-tmp/cron-last-run.json
-tmp/sample-vercel-data.csv
-tmp/*.log
 
 # Playwright test outputs
 /test-results/

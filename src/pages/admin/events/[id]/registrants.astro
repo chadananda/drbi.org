@@ -7,7 +7,7 @@ import AdminLayout from '@layouts/AdminLayout.astro';
 import { getEventById } from '@lib/queries';
 import { getEnv } from '@lib/runtime-env';
 import { fetchHumanitixEvents, fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
-import { computeEventStats, buildRegistrantRows } from '@lib/event-registrations';
+import { computeEventStats, buildRegistrantRows, sampleRegistrants } from '@lib/event-registrations';
 
 const user = Astro.locals?.user;
 const { id } = Astro.params;
@@ -36,6 +36,13 @@ if (isHx) {
     } catch (e) { error = String(e?.message ?? e); }
   }
 }
+
+// No real registrations yet → show grayed example data so the layout is reviewable.
+let isExample = false;
+if (isHx && !error && stats && stats.registrations === 0) {
+  const s = sampleRegistrants();
+  stats = s.stats; rows = s.rows; questionCols = s.questionCols; isExample = true;
+}
 const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
 const answerFor = (row, label) => row.answers.find((a) => a.label === label)?.value ?? '';
 ---
@@ -50,8 +57,18 @@ const answerFor = (row, label) => row.answers.find((a) => a.label === label)?.va
     {!isHx && <p class="text-gray-500">This isn't a synced Humanitix event, so there are no live registrations to show.</p>}
     {error && <p class="text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-4 py-2">{error}</p>}
 
+    {isExample && (
+      <p class="mb-6 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+        <strong>Example data</strong> — no one has registered yet. This previews the layout; real attendees and their answers appear here once the event is published and people sign up.
+      </p>
+    )}
+
     {stats && (
-      <>
+      <div class:list={[isExample && "opacity-60"]}>
+        {rows.length > 0 && (
+          <input id="registrant-search" type="search" placeholder="Search name or email…"
+            class="w-full sm:w-72 mb-4 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        )}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
             <div class="text-2xl font-bold text-gray-900 tabular-nums">{stats.registrations}</div>
@@ -93,9 +110,9 @@ const answerFor = (row, label) => row.answers.find((a) => a.label === label)?.va
                   <th class="py-3 px-4 font-medium">In</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="registrant-rows">
                 {rows.map((r) => (
-                  <tr class="border-b border-gray-50 hover:bg-gray-50">
+                  <tr class="border-b border-gray-50 hover:bg-gray-50" data-search={`${r.name} ${r.email}`.toLowerCase()}>
                     <td class="py-2.5 px-4 text-gray-900">{r.name}</td>
                     <td class="py-2.5 px-4 text-gray-500">{r.email}</td>
                     <td class="py-2.5 px-4 text-gray-600">{r.ticketType}</td>
@@ -107,7 +124,21 @@ const answerFor = (row, label) => row.answers.find((a) => a.label === label)?.va
             </table>
           )}
         </div>
-      </>
+      </div>
     )}
   </div>
+
+  <script is:inline>
+    (() => {
+      const box = document.getElementById('registrant-search');
+      const body = document.getElementById('registrant-rows');
+      if (!box || !body) return;
+      box.addEventListener('input', () => {
+        const q = box.value.trim().toLowerCase();
+        for (const tr of body.querySelectorAll('tr')) {
+          tr.style.display = !q || (tr.dataset.search || '').includes(q) ? '' : 'none';
+        }
+      });
+    })();
+  </script>
 </AdminLayout>

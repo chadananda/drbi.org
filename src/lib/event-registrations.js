@@ -28,6 +28,19 @@ function fieldValue(f) {
   return "";
 }
 
+/** Grayed placeholder data — shown (clearly labelled) when an event has no registrations yet. */
+export function sampleRegistrants() {
+  const q1 = 'Where will you stay?', q2 = 'Meal preference';
+  const rows = [
+    { name: 'Amelia Hart', email: 'amelia@example.com', ticketType: 'Full Weekend — Adult', checkedIn: false, answers: [{ label: q1, value: 'Dorm A' }, { label: q2, value: 'Vegetarian' }] },
+    { name: 'Noah Reed', email: 'noah@example.com', ticketType: 'Full Weekend — Adult', checkedIn: true, answers: [{ label: q1, value: 'Apartment' }, { label: q2, value: 'No preference' }] },
+    { name: 'Sofia Marín', email: 'sofia@example.com', ticketType: 'Full Weekend — Minor (under 18)', checkedIn: false, answers: [{ label: q1, value: 'Dorm B' }, { label: q2, value: 'Gluten-free' }] },
+    { name: 'Liam Osei', email: 'liam@example.com', ticketType: 'Local / Commuter', checkedIn: false, answers: [{ label: q1, value: 'Commuting' }, { label: q2, value: 'Vegan' }] },
+  ];
+  const stats = { registrations: 4, orders: 3, revenue: 1360, donationTotal: 170, donationCount: 1, byTicketType: { 'Full Weekend — Adult': 2, 'Full Weekend — Minor (under 18)': 1, 'Local / Commuter': 1 } };
+  return { rows, stats, questionCols: [q1, q2] };
+}
+
 /** One row per attendee: name, email (from their order), ticket type, check-in, and answers. */
 export function buildRegistrantRows(tickets = [], orders = [], questions = []) {
   const emailByOrder = new Map();
