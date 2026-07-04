@@ -1,5 +1,5 @@
 // Sponsor-a-youth follow-up. For each synced Humanitix event, emails registrants who signed
-// up ≥2 days ago and haven't donated/sponsored yet, once each. Secured (Bearer CRON_SECRET);
+// up ≥3 days ago and haven't donated/sponsored yet, once each. Secured (Bearer CRON_SECRET);
 // run on a schedule. Dormant until HUMANITIX_API_KEY + registrations exist. See docs/humanitix-sponsor.md.
 export const prerender = false;
 
@@ -9,7 +9,7 @@ import { fetchHumanitixOrders, shapeOrder, isSponsorInviteEligible } from '@lib/
 import { getEvents, wasSponsorInvited, recordSponsorInvite } from '@lib/queries';
 import { sendEmail } from '@lib/email';
 
-const DELAY_DAYS = 2;
+const DELAY_DAYS = 3;
 const MAX_PER_RUN = 200; // safety cap against a runaway send
 
 function authorized(request: Request): boolean {
