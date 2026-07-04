@@ -36,9 +36,11 @@ describe("mapHumanitixEvent", () => {
     assert.equal(m.organizer, "DRBI");
   });
 
-  it("NEVER emits a `visible` field (never-publish invariant)", () => {
-    const m = mapHumanitixEvent(sample);
-    assert.ok(!("visible" in m), "mapper must not set visibility — humans own publish");
+  it("visible mirrors the source published+public state (auto-show when live on Humanitix)", () => {
+    assert.equal(mapHumanitixEvent({ ...sample, published: true, public: true }).visible, true);
+    assert.equal(mapHumanitixEvent({ ...sample, published: false, public: true }).visible, false);
+    assert.equal(mapHumanitixEvent({ ...sample, published: true, public: false }).visible, false);
+    assert.equal(mapHumanitixEvent({ ...sample }).visible, false); // no flags → hidden
   });
 
   it("builds the registration URL from the slug", () => {

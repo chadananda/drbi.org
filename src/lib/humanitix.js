@@ -60,11 +60,14 @@ export function mapHumanitixEvent(hx) {
     price: price.length ? price : null,
     registrationUrl,
     url: registrationUrl,
+    slug: hx.slug ?? "",
     mainImage: hx.bannerImage?.url ?? hx.featureImage?.url ?? "",
     images,
     organizer: "DRBI",
     categories: hx.category ? [hx.category] : [],
     lastModified: hx.updatedAt ?? null,
+    // Auto-show on our site only when the event is live (published + public) on Humanitix.
+    visible: !!(hx.published && hx.public),
   };
 }
 

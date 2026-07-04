@@ -345,14 +345,16 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
     return { id, action: 'skipped-manual' as const };
   }
 
+  const visible = data.visible ? 1 : 0; // auto-show only if published+public on the source
+
   if (existing) {
-    // Refresh content from the source, but leave `visible` and `manually_edited` untouched.
+    // Refresh content + visibility from the source; leave `manually_edited` rows to humans (handled above).
     await db.execute({
       sql: `UPDATE events SET
         title = ?, short_description = ?, full_description = ?, start_date = ?, end_date = ?,
         additional_dates = ?, location = ?, price = ?, registration_url = ?, url = ?,
         main_image = ?, images = ?, organizer = ?, categories = ?, source = ?, external_id = ?,
-        last_synced = ?, last_modified = ?, updated_at = ?
+        visible = ?, last_synced = ?, last_modified = ?, updated_at = ?
         WHERE id = ?`,
       args: [
         data.title ?? '', data.shortDescription ?? '', data.fullDescription ?? '',
@@ -362,20 +364,20 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
         data.registrationUrl ?? '', data.url ?? '', data.mainImage ?? '',
         JSON.stringify(data.images ?? []), data.organizer ?? 'DRBI',
         JSON.stringify(data.categories ?? []), source, data.externalId ?? null,
-        now, data.lastModified ?? null, now, id,
+        visible, now, data.lastModified ?? null, now, id,
       ]
     });
     return { id, action: 'updated' as const };
   }
 
-  // New synced row — DRAFT (visible=0), not manually edited.
+  // New synced row — visibility mirrors the source's published state.
   await db.execute({
     sql: `INSERT INTO events (id, title, short_description, full_description, start_date, end_date,
       additional_dates, location, price, registration_url, url, main_image, teacher_image,
       images, highlights, event_schedule, refund_policy, organizer, categories, source,
       external_id, visible, featured, onsite, is_eventbrite, eventbrite_id,
       manually_edited, last_manual_edit, last_synced, last_modified, updated_at)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,0,1,0,NULL,0,NULL,?,?,?)`,
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,1,0,NULL,0,NULL,?,?,?)`,
     args: [
       id, data.title ?? '', data.shortDescription ?? '', data.fullDescription ?? '',
       data.startDate ?? '', data.endDate ?? '',
@@ -384,7 +386,7 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
       data.registrationUrl ?? '', data.url ?? '', data.mainImage ?? '', '',
       JSON.stringify(data.images ?? []), JSON.stringify([]), JSON.stringify([]), '',
       data.organizer ?? 'DRBI', JSON.stringify(data.categories ?? []), source,
-      data.externalId ?? null, now, data.lastModified ?? null, now,
+      data.externalId ?? null, visible, now, data.lastModified ?? null, now,
     ]
   });
   return { id, action: 'created' as const };
