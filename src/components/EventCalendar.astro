@@ -171,6 +171,18 @@ const curlyQuotes = (text: string): string => {
     .replace(/(\w)'(\w)/g, '$1' + closeSingle + '$2');  // apostrophe
 };
 
+// Humanitix descriptions often open by restating the event name (sometimes with
+// a "::" subtitle). Strip that leading echo so the card preview doesn't repeat the
+// title shown directly above it.
+const stripLeadingTitle = (text, name) => {
+  let t = (text || '').replace(/\s+/g, ' ').trim();
+  const n = (name || '').replace(/\s+/g, ' ').trim();
+  if (n && t.toLowerCase().startsWith(n.toLowerCase())) {
+    t = t.slice(n.length).replace(/^[\s:·—–-]+/, '');
+  }
+  return t;
+};
+
 // Prepare display data for all events
 const displayEvents = upcomingEvents.map(event => {
   const d = event.data;
@@ -190,10 +202,10 @@ const displayEvents = upcomingEvents.map(event => {
       fullDescriptionHtml: md.render(d.fullDescription || ''),
       // Show truncated preview for all events (strip HTML first so we don't cut a tag in half)
       preview: curlyQuotes(
-        d.fullDescription ? stripHtml(d.fullDescription).slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.'
+        d.fullDescription ? stripLeadingTitle(stripHtml(d.fullDescription), d.name).slice(0, 400) + '...' : d.shortDescription || 'Join us for this transformative learning experience.'
       ),
       previewHtml: md.render(
-        d.fullDescription ? stripHtml(d.fullDescription).slice(0, 400) + '...' : stripHtml(d.shortDescription || '')
+        d.fullDescription ? stripLeadingTitle(stripHtml(d.fullDescription), d.name).slice(0, 400) + '...' : stripHtml(d.shortDescription || '')
       ),
       // Flag if description is long enough to need expansion
       isLongDescription: !hasValidReg && stripHtml(d.fullDescription || '').length > 400,
@@ -851,8 +863,12 @@ const displayEvents = upcomingEvents.map(event => {
 
 /* List Full View */
 .events-list-full {
-  max-width: 1000px;
-  margin: 0 auto;
+  /* This list is nested inside a narrow `.prose` reading column (~655px) but
+     an events grid needs room. Break out and self-center on the viewport. */
+  width: min(900px, calc(100vw - 2rem));
+  max-width: none;
+  margin-left: 50%;
+  transform: translateX(-50%);
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -942,26 +958,30 @@ const displayEvents = upcomingEvents.map(event => {
 }
 
 .list-full-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 2rem;
-  padding: 1.5rem;
-  margin-left: 80px;
+  display: block;
+  padding: 1.5rem 1.5rem 1.5rem 2.5rem;
+}
+/* Clear the floated image so the card wraps its full height. */
+.list-full-content::after {
+  content: "";
+  display: table;
+  clear: both;
 }
 
+/* Float the image so the description text wraps around and continues beneath it. */
 .list-full-left-column {
-  flex-shrink: 0;
+  float: left;
+  margin: 0.25rem 1.75rem 0.5rem 0;
 }
 
 /* New image container with teacher overlay */
 .list-full-image-container {
-  width: 300px;
-  height: 200px;
+  width: 240px;
+  height: 180px;
   border-radius: 8px;
   overflow: hidden;
   background: rgb(243, 244, 246);
   position: relative;
-  margin-bottom: 1rem;
 }
 
 .main-image {
@@ -1053,7 +1073,6 @@ const displayEvents = upcomingEvents.map(event => {
 }
 
 .list-full-details {
-  flex: 1;
   min-width: 0;
 }
 
@@ -1107,14 +1126,23 @@ const displayEvents = upcomingEvents.map(event => {
   font-size: 1.05rem;
   line-height: 1.7;
   color: rgb(75, 85, 99);
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.25rem 0;
+}
+.list-full-description p {
+  margin: 0 0 0.75rem 0;
+}
+.list-full-description p:last-child {
+  margin-bottom: 0;
 }
 
 .list-full-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  align-items: flex-start;
+  gap: 1.5rem 2.5rem;
   margin-bottom: 1rem;
+  clear: both;
+  padding-top: 0.5rem;
 }
 
 .meta-item {
@@ -1141,13 +1169,23 @@ const displayEvents = upcomingEvents.map(event => {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.35rem;
+  min-width: 260px;
+  max-width: 340px;
 }
 
 .ticket-prices li {
   display: flex;
-  gap: 0.6rem;
+  justify-content: space-between;
+  gap: 1.5rem;
   align-items: baseline;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px dotted rgb(226, 232, 240);
+}
+
+.ticket-prices li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .ticket-prices .ticket-label {
@@ -1180,12 +1218,11 @@ const displayEvents = upcomingEvents.map(event => {
   letter-spacing: 0.025em;
 }
 
+/* The card already shows the description wrapping the floated image, and the
+   full text lives on the per-event details page — this duplicate callout is
+   redundant, so it's hidden. */
 .event-text-preview {
-  margin: 1rem 1.5rem;
-  padding: 1rem;
-  background: rgb(249, 250, 251);
-  border-radius: 8px;
-  border-left: 4px solid rgb(59, 130, 246);
+  display: none;
 }
 
 .event-preview-text {
