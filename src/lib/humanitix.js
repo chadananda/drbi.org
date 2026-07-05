@@ -31,6 +31,16 @@ const HX_API_BASE = "https://api.humanitix.com/v1";
  * Deliberately omits `visible` so upsertSyncedEvent can default new rows to DRAFT.
  * @param {HumanitixEvent} hx
  */
+// "Sponsor a Youth" donation pages are standalone Humanitix events (one per program) used
+// only for the follow-up email + mailing-list link. They must NOT be synced onto the site's
+// events list. Identify them by our naming convention (title/slug prefix). Accepts a raw
+// Humanitix event or a mapped event.
+export function isSponsorPageEvent(ev) {
+  const title = String(ev?.title ?? ev?.name ?? "").trim().toLowerCase();
+  const slug = String(ev?.slug ?? "").trim().toLowerCase();
+  return title.startsWith("sponsor a youth") || slug.startsWith("sponsor-youth");
+}
+
 export function mapHumanitixEvent(hx) {
   const externalId = hx._id ?? hx.id ?? "";
   const loc = hx.eventLocation ?? hx.location ?? {};

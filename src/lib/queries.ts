@@ -1,5 +1,6 @@
 // Typed query functions for Turso — all collections
 import { db } from './db';
+import { isSponsorPageEvent } from './humanitix';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -191,21 +192,22 @@ export async function getEvents() {
   const result = await db.execute(
     'SELECT * FROM events ORDER BY start_date ASC'
   );
-  return (result.rows as unknown as EventRow[]).map(shapeEvent);
+  // Sponsor-a-Youth donation pages are Humanitix events but not site events — never list them.
+  return (result.rows as unknown as EventRow[]).map(shapeEvent).filter((e) => !isSponsorPageEvent(e.data));
 }
 
 export async function getUpcomingEvents() {
   const result = await db.execute(
     "SELECT * FROM events WHERE visible = 1 AND start_date >= datetime('now', '-1 day') ORDER BY start_date ASC"
   );
-  return (result.rows as unknown as EventRow[]).map(shapeEvent);
+  return (result.rows as unknown as EventRow[]).map(shapeEvent).filter((e) => !isSponsorPageEvent(e.data));
 }
 
 export async function getVisibleEvents() {
   const result = await db.execute(
     'SELECT * FROM events WHERE visible = 1 ORDER BY start_date ASC'
   );
-  return (result.rows as unknown as EventRow[]).map(shapeEvent);
+  return (result.rows as unknown as EventRow[]).map(shapeEvent).filter((e) => !isSponsorPageEvent(e.data));
 }
 
 export async function getEventById(id: string) {

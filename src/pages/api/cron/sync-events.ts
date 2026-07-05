@@ -3,7 +3,7 @@
 // Returns 503 until HUMANITIX_API_KEY is configured. See memory [[humanitix-drbi-events]].
 import type { APIRoute } from "astro";
 import { getEnv } from "../../../lib/runtime-env";
-import { fetchHumanitixEvents, mapHumanitixEvent } from "../../../lib/humanitix";
+import { fetchHumanitixEvents, mapHumanitixEvent, isSponsorPageEvent } from "../../../lib/humanitix";
 import { upsertSyncedEvent } from "../../../lib/queries";
 
 export const prerender = false;
@@ -22,9 +22,12 @@ async function runSync() {
     return { ok: false, configured: false, error: "HUMANITIX_API_KEY not configured" };
   }
   const events = await fetchHumanitixEvents(apiKey);
-  const summary = { created: 0, updated: 0, skippedManual: 0, total: events.length };
+  const summary = { created: 0, updated: 0, skippedManual: 0, skippedSponsor: 0, total: events.length };
   for (const hx of events) {
-    const r = await upsertSyncedEvent(mapHumanitixEvent(hx));
+    const mapped = mapHumanitixEvent(hx);
+    // Sponsor-a-Youth donation pages are not site events — never sync them onto the events list.
+    if (isSponsorPageEvent(mapped)) { summary.skippedSponsor++; continue; }
+    const r = await upsertSyncedEvent(mapped);
     if (r.action === "created") summary.created++;
     else if (r.action === "updated") summary.updated++;
     else summary.skippedManual++;
