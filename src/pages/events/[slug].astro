@@ -24,7 +24,8 @@ const start = d.startDate ? fmtDay(d.startDate) : "";
 const end = d.endDate && d.endDate !== d.startDate ? fmtDay(d.endDate) : "";
 const loc = d.location || {};
 const locText = loc.online ? "Online" : [loc.venue, loc.address].filter(Boolean).join(" · ");
-const prices = Array.isArray(d.price) ? d.price : [];
+// Exclude the "any amount" sponsor donation from the ticket-price list.
+const prices = (Array.isArray(d.price) ? d.price : []).filter((p) => !/sponsor a youth|any amount/i.test(p?.label ?? ''));
 const hasReg = d.registrationUrl && /^https?:\/\//.test(d.registrationUrl);
 ---
 

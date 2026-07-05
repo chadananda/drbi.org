@@ -142,9 +142,17 @@ const formatTime = (date) => {
 
 const formatPrice = (price) => {
   if (!price) return 'Free';
-  if (price.low === price.high) {
-    return `$${price.low}`;
+  // Humanitix-synced events store price as an array of { label, amount, currency }.
+  // Show the range of paid tickets (ignore $0 entries like the "any amount" donation).
+  if (Array.isArray(price)) {
+    const amounts = price.map((p) => Number(p?.amount)).filter((n) => Number.isFinite(n) && n > 0);
+    if (!amounts.length) return 'Free';
+    const low = Math.min(...amounts), high = Math.max(...amounts);
+    return low === high ? `$${low}` : `$${low} - $${high}`;
   }
+  // Legacy { low, high } shape.
+  if (price.low == null && price.high == null) return 'Free';
+  if (price.low === price.high) return `$${price.low}`;
   return `$${price.low} - $${price.high}`;
 };
 
@@ -192,6 +200,10 @@ const displayEvents = upcomingEvents.map(event => {
       dateRange: formatDateRange(d.startDate, d.endDate),
       time: formatTime(d.startDate),
       price: formatPrice(d.price),
+      // Per-type ticket prices for the card (exclude the "any amount" sponsor donation).
+      ticketPrices: (Array.isArray(d.price) ? d.price : [])
+        .filter((p) => !/sponsor a youth|any amount/i.test(p?.label ?? ''))
+        .map((p) => ({ label: curlyQuotes(p?.label ?? ''), amount: Number(p?.amount) > 0 ? `$${Number(p.amount)}` : 'Free' })),
       month: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Phoenix' }),
       day: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Phoenix' }),
       weekday: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Phoenix' }),
@@ -348,10 +360,19 @@ const displayEvents = upcomingEvents.map(event => {
                       </div>
                     </div>
                     <div class="list-full-details">
-                      <div class="list-full-description" set:html={event.display.shortDescriptionHtml || '<p>No description available</p>'}></div>
+                      <div class="list-full-description" set:html={event.display.shortDescriptionHtml || event.display.previewHtml || '<p>No description available</p>'}></div>
 
                       <div class="list-full-meta">
-                        {event.data.price && (
+                        {event.display.ticketPrices.length > 0 ? (
+                          <div class="meta-item price">
+                            <span class="icon" aria-hidden="true">💲</span>
+                            <ul class="ticket-prices">
+                              {event.display.ticketPrices.map((t) => (
+                                <li><span class="ticket-label">{t.label}</span><span class="ticket-amount">{t.amount}</span></li>
+                              ))}
+                            </ul>
+                          </div>
+                        ) : event.data.price && (
                           <div class="meta-item price">
                             <span class="icon" aria-hidden="true">💲</span>
                             <span>{event.display.price}</span>
@@ -1111,6 +1132,33 @@ const displayEvents = upcomingEvents.map(event => {
 .meta-item.price {
   font-weight: 600;
   color: rgb(16, 185, 129);
+  align-items: flex-start;
+}
+
+.ticket-prices {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ticket-prices li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+
+.ticket-prices .ticket-label {
+  color: rgb(71, 85, 105);
+  font-weight: 500;
+}
+
+.ticket-prices .ticket-amount {
+  color: rgb(16, 185, 129);
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .list-full-highlights {
