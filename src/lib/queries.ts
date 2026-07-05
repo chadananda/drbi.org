@@ -14,6 +14,7 @@ export interface EventRow {
   location: string; // JSON
   price: string | null; // JSON
   registration_url: string | null;
+  sponsor_page_url: string | null;
   url: string | null;
   main_image: string;
   teacher_image: string;
@@ -127,6 +128,7 @@ export function shapeEvent(row: EventRow) {
       location: parseJson(row.location, {}),
       price: parseJson(row.price, null),
       registrationUrl: row.registration_url ?? '',
+      sponsorPageUrl: row.sponsor_page_url ?? '',
       url: row.url ?? '',
       mainImage: row.main_image ?? '',
       teacherImage: row.teacher_image ?? '',
@@ -274,6 +276,7 @@ export async function updateEvent(id: string, data: Record<string, any>) {
       location = COALESCE(?, location),
       price = ?,
       registration_url = COALESCE(?, registration_url),
+      sponsor_page_url = COALESCE(?, sponsor_page_url),
       url = COALESCE(?, url),
       main_image = COALESCE(?, main_image),
       teacher_image = COALESCE(?, teacher_image),
@@ -297,6 +300,7 @@ export async function updateEvent(id: string, data: Record<string, any>) {
       data.location != null ? JSON.stringify(data.location) : null,
       data.price != null ? JSON.stringify(data.price) : null,
       data.registrationUrl ?? null,
+      data.sponsorPageUrl ?? null,
       data.url ?? null,
       data.mainImage ?? null,
       data.teacherImage ?? null,

@@ -41,9 +41,6 @@ const handler: APIRoute = async ({ request }) => {
   if (!apiKey) {
     return new Response(JSON.stringify({ ok: false, configured: false, error: 'HUMANITIX_API_KEY not set' }), { status: 503, headers: { 'content-type': 'application/json' } });
   }
-  // A standalone sponsor donation page (mailing-list link) overrides the per-event link when set.
-  const sponsorUrl = getEnv('SPONSOR_DONATION_URL');
-
   const events = (await getEvents()).filter((e) => e.data.source === 'humanitix' && e.data.externalId);
   const summary = { considered: 0, sent: 0, skipped: 0, events: events.length };
 
@@ -57,7 +54,9 @@ const handler: APIRoute = async ({ request }) => {
       summary.considered++;
       if (!isSponsorInviteEligible(o, { delayDays: DELAY_DAYS })) { summary.skipped++; continue; }
       if (await wasSponsorInvited(o.id)) { summary.skipped++; continue; }
-      const link = sponsorUrl || ev.data.registrationUrl || 'https://drbi.org/events';
+      // Per-event dedicated "Sponsor a Youth for <event>" page (set in admin); fall back to the
+      // event's own registration page, then the events index.
+      const link = ev.data.sponsorPageUrl || ev.data.registrationUrl || 'https://drbi.org/events';
       try {
         await sendEmail({ to: o.email, subject: `Sponsor a youth participant — ${ev.data.title}`, html: inviteHtml(ev.data.title, o.name, link) });
         await recordSponsorInvite(o.id, ev.data.externalId, o.email);

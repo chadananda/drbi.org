@@ -138,6 +138,7 @@ async function handleUpdateEvent(eventData) {
       location: eventData.location,
       price: eventData.price,
       registration_url: eventData.registrationUrl,
+      sponsorPageUrl: eventData.sponsorPageUrl,
       main_image: eventData.mainImage,
       teacher_image: eventData.teacherImage,
       highlights: eventData.highlights,
