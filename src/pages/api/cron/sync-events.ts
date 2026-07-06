@@ -21,12 +21,14 @@ async function cacheExternalImage(url: string): Promise<string> {
     if (!url || url.startsWith("https://cdn.shrtr.com/") || !/^https?:\/\//.test(url)) return url;
     const r2 = (cfEnv as any)?.R2;
     if (!r2) return url;
+    // Derive a clean R2 key from the filename (drop query + Humanitix's @size
+    // suffix), but FETCH the original URL as-is — Humanitix 400s without @original.
     const clean = url.split("?")[0].replace(/@[a-z]+$/i, "");
     const base = clean.substring(clean.lastIndexOf("/") + 1) || "image";
     const key = `events/humanitix/${base}`;
     const objectKey = `drbi.org/${key}`;
     if (await r2.head(objectKey)) return `https://cdn.shrtr.com/${objectKey}`;
-    const resp = await fetch(clean);
+    const resp = await fetch(url);
     if (!resp.ok) return url;
     const contentType = resp.headers.get("content-type") || "image/jpeg";
     return await uploadR2(r2, key, await resp.arrayBuffer(), contentType);
