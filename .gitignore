@@ -7,6 +7,7 @@ dist/
 .aider*
 .claude/*
 !.claude/skills/
+!.claude/commands/
 
 # dependencies
 node_modules/
