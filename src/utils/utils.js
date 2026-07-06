@@ -949,6 +949,20 @@ export const guessContentType = (filename) => {
 }
 // Images are served from R2 at cdn.shrtr.com — no resizing transform needed
 export const transformS3Url = (url = '') => url || '';
+// blogworks resize/cache service (ImageKit). Rewrites an R2 image URL
+// (cdn.shrtr.com/…) to an ImageKit transform URL. URLs not on cdn.shrtr.com pass
+// through unchanged — they aren't in the ImageKit origin, so they can't be
+// transformed (cache them to R2 first). `face` centers the crop on a detected
+// face; combined with w+h it crops to that exact banner size (c-maintain_ratio).
+export const imagekitUrl = (url = '', { w = 0, h = 0, face = false, quality = 80 } = {}) => {
+  if (!url || !url.startsWith('https://cdn.shrtr.com/')) return url;
+  const path = url.slice('https://cdn.shrtr.com/'.length);
+  const tr = ['f-auto', `q-${quality}`];
+  if (w) tr.push(`w-${w}`);
+  if (h) tr.push(`h-${h}`);
+  if (face) tr.push('fo-face', 'c-maintain_ratio');
+  return `https://ik.imagekit.io/1260/cdn/${path}?tr=${tr.join(',')}`;
+};
 export const displayImageObj = (url, alt='', width=0, height=0, format='webp', quality=80) => {
   // Ensure width and height are numbers, not objects
   width = width ? parseInt(width, 10) : 0;

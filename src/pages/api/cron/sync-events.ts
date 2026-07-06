@@ -2,11 +2,38 @@
 // Auth: Bearer CRON_SECRET (or ?token=). Triggered by a scheduler (GitHub Action / CF cron).
 // Returns 503 until HUMANITIX_API_KEY is configured. See memory [[humanitix-drbi-events]].
 import type { APIRoute } from "astro";
+import { env as cfEnv } from "cloudflare:workers";
 import { getEnv } from "../../../lib/runtime-env";
 import { fetchHumanitixEvents, mapHumanitixEvent, isSponsorPageEvent } from "../../../lib/humanitix";
 import { upsertSyncedEvent } from "../../../lib/queries";
+import { uploadR2 } from "../../../utils/r2-upload";
 
 export const prerender = false;
+
+// Cache an external event image (e.g. Humanitix-hosted) into R2 so it can be
+// served + face-cropped through the blogworks resize service (ImageKit only
+// transforms images on its cdn.shrtr.com origin). Keyed by the source filename
+// (Humanitix uses a UUID that changes when the image is replaced), so re-syncs
+// are idempotent and a swapped source image re-caches under a fresh key.
+// Non-cacheable inputs (already-R2, non-http, fetch failure) return unchanged.
+async function cacheExternalImage(url: string): Promise<string> {
+  try {
+    if (!url || url.startsWith("https://cdn.shrtr.com/") || !/^https?:\/\//.test(url)) return url;
+    const r2 = (cfEnv as any)?.R2;
+    if (!r2) return url;
+    const clean = url.split("?")[0].replace(/@[a-z]+$/i, "");
+    const base = clean.substring(clean.lastIndexOf("/") + 1) || "image";
+    const key = `events/humanitix/${base}`;
+    const objectKey = `drbi.org/${key}`;
+    if (await r2.head(objectKey)) return `https://cdn.shrtr.com/${objectKey}`;
+    const resp = await fetch(clean);
+    if (!resp.ok) return url;
+    const contentType = resp.headers.get("content-type") || "image/jpeg";
+    return await uploadR2(r2, key, await resp.arrayBuffer(), contentType);
+  } catch {
+    return url;
+  }
+}
 
 function authorized(request: Request): boolean {
   const secret = getEnv("CRON_SECRET");
@@ -27,6 +54,8 @@ async function runSync() {
     const mapped = mapHumanitixEvent(hx);
     // Sponsor-a-Youth donation pages are not site events — never sync them onto the events list.
     if (isSponsorPageEvent(mapped)) { summary.skippedSponsor++; continue; }
+    // Cache the banner into R2 so it can be face-cropped via ImageKit on the site.
+    mapped.mainImage = await cacheExternalImage(mapped.mainImage);
     const r = await upsertSyncedEvent(mapped);
     if (r.action === "created") summary.created++;
     else if (r.action === "updated") summary.updated++;

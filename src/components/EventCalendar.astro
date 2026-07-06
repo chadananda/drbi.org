@@ -1,6 +1,6 @@
 ---
 import { Image } from "astro:assets";
-import { transformS3Url } from '../utils/utils.js';
+import { transformS3Url, imagekitUrl } from '../utils/utils.js';
 import MarkdownIt from 'markdown-it';
 import { getVisibleEvents } from '../lib/queries';
 import { eventSlug } from '../lib/event-slug';
@@ -221,6 +221,10 @@ const displayEvents = upcomingEvents.map(event => {
       weekday: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Phoenix' }),
       mainImage: transformS3Url(d.mainImage, 450, 300),
       mainImageLarge: transformS3Url(d.mainImage, 600, 400),
+      // Full-width, face-centered banner via the blogworks resize service (ImageKit).
+      // Only R2-hosted images (cdn.shrtr.com) transform; external URLs pass through
+      // until the sync caches them to R2. See imagekitUrl + sync-events image caching.
+      mainImageBanner: imagekitUrl(d.mainImage, { w: 1000, h: 340, face: true }),
       teacherImage: d.teacherImage ? transformS3Url(d.teacherImage, 200) : null,
       teacherImageLarge: d.teacherImage ? transformS3Url(d.teacherImage, 180) : null,
     }
@@ -368,7 +372,7 @@ const displayEvents = upcomingEvents.map(event => {
                   <div class="list-full-content">
                     <div class="list-full-left-column">
                       <div class="list-full-image-container">
-                        <img src={event.display.mainImageLarge} alt={event.display.name} class="main-image" />
+                        <img src={event.display.mainImageBanner} alt={event.display.name} class="main-image" />
                       </div>
                     </div>
                     <div class="list-full-details">
@@ -968,17 +972,16 @@ const displayEvents = upcomingEvents.map(event => {
   clear: both;
 }
 
-/* Float the image so the description text wraps around and continues beneath it. */
+/* Full-width banner image across the top of the card. */
 .list-full-left-column {
-  float: left;
-  margin: 0.25rem 1.75rem 0.5rem 0;
+  margin: 0 0 1.25rem 0;
 }
 
 /* New image container with teacher overlay */
 .list-full-image-container {
-  width: 240px;
-  height: 180px;
-  border-radius: 8px;
+  width: 100%;
+  height: 300px;
+  border-radius: 10px;
   overflow: hidden;
   background: rgb(243, 244, 246);
   position: relative;
