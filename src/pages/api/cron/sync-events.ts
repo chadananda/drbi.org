@@ -51,7 +51,7 @@ async function runSync() {
     return { ok: false, configured: false, error: "HUMANITIX_API_KEY not configured" };
   }
   const events = await fetchHumanitixEvents(apiKey);
-  const summary = { created: 0, updated: 0, skippedManual: 0, skippedSponsor: 0, total: events.length };
+  const summary = { created: 0, updated: 0, unchanged: 0, skippedManual: 0, skippedSponsor: 0, total: events.length };
   for (const hx of events) {
     const mapped = mapHumanitixEvent(hx);
     // Sponsor-a-Youth donation pages are not site events — never sync them onto the events list.
@@ -61,9 +61,16 @@ async function runSync() {
     const r = await upsertSyncedEvent(mapped);
     if (r.action === "created") summary.created++;
     else if (r.action === "updated") summary.updated++;
+    else if (r.action === "unchanged") summary.unchanged++;
     else summary.skippedManual++;
   }
-  return { ok: true, configured: true, ...summary };
+  // Only bump the edge-cache version when content actually changed, so unchanged polls
+  // don't invalidate the cache. Middleware keys /events cache entries on this token.
+  const changed = summary.created + summary.updated;
+  if (changed > 0) {
+    try { await (cfEnv as any)?.SESSION?.put("edge:events:v", Date.now().toString()); } catch {}
+  }
+  return { ok: true, configured: true, changed, ...summary };
 }
 
 const handler: APIRoute = async ({ request }) => {

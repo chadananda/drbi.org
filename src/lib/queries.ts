@@ -354,6 +354,14 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
   const visible = data.visible ? 1 : 0; // auto-show only if published+public on the source
 
   if (existing) {
+    // Change detection: Humanitix stamps every event with `updatedAt` (→ lastModified).
+    // If it hasn't moved since our last sync, the content is identical — skip the rewrite
+    // so empty polls stay read-only and don't churn the edge cache.
+    const incomingMod = data.lastModified ?? null;
+    const currentMod = existing.data.lastModified || null;
+    if (incomingMod && currentMod && incomingMod === currentMod) {
+      return { id, action: 'unchanged' as const };
+    }
     // Refresh content + visibility from the source; leave `manually_edited` rows to humans (handled above).
     await db.execute({
       sql: `UPDATE events SET

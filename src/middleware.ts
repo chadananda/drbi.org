@@ -2,19 +2,41 @@
 import { lucia } from "./lib/auth";
 import { verifyRequestOrigin as verifyOrig } from "lucia";
 import { ADMIN_NAV, roleLevel } from "./lib/admin-nav";
+import { env } from "cloudflare:workers";
 // import { defineMiddleware } from "astro:middleware";
+
+// Public event pages are edge-cached for anonymous visitors. Entries are keyed by a
+// content-version token (`edge:events:v` in KV) that the Humanitix sync bumps only on a
+// real change — so a change invalidates every colo's cache at once, while unchanged polls
+// leave the cache intact. Logged-in users bypass entirely (their navbar is personalized).
+const EVENTS_CACHE = /^\/events(?:\/|$)/;
 
 
 export const onRequest = async (context, next) => {
   // DB bindings are read directly from `cloudflare:workers` env in src/lib/db.ts
   // (Astro v6+ removed Astro.locals.runtime.env).
-  const path = new URL(context.request.url).pathname;
+  const url = new URL(context.request.url);
+  const path = url.pathname;
   const isAdmin = path.startsWith('/admin');
   const STAFF = ['superadmin', 'admin', 'editor', 'author'];
 
   // Validate the session on EVERY page so the navbar can show login/account state
   // anywhere. Sign-in happens via the navbar popover — there is no login page.
   const sessionId = context.cookies.get(lucia.sessionCookieName)?.value ?? null;
+
+  // --- Edge cache: anonymous GET of public event pages ---
+  const cacheable = context.request.method === 'GET' && !sessionId
+    && EVENTS_CACHE.test(path) && !url.searchParams.has('nocache');
+  let cache: any, cacheKey: any;
+  if (cacheable && typeof caches !== 'undefined') {
+    try {
+      cache = (caches as any).default;
+      const v = (await (env as any).SESSION?.get('edge:events:v')) || '0';
+      cacheKey = new Request(`https://edge.cache${path}?v=${v}`);
+      const hit = await cache.match(cacheKey);
+      if (hit) return hit;
+    } catch { cache = undefined; cacheKey = undefined; }
+  }
   if (sessionId) {
     try {
       const { session, user } = await lucia.validateSession(sessionId);
@@ -46,7 +68,22 @@ export const onRequest = async (context, next) => {
       return new Response(null, { status: 302, headers: { Location: '/admin' } });
     }
   }
-  return next();
+
+  const response = await next();
+
+  // Store anonymous 200 HTML for the current content version. Browser TTL is 0 (always
+  // revalidate against the edge) so a version bump is picked up on the next request.
+  if (cache && cacheKey && response.status === 200 && !response.headers.has('set-cookie')) {
+    try {
+      const bodyBuf = await response.clone().arrayBuffer();
+      const headers = new Headers(response.headers);
+      headers.delete('set-cookie');
+      headers.set('Cache-Control', 'public, max-age=0, s-maxage=86400');
+      headers.set('x-edge-cache', 'HIT'); // present only when later served from cache
+      await cache.put(cacheKey, new Response(bodyBuf, { status: 200, headers }));
+    } catch {}
+  }
+  return response;
 };
 
 export const config = {
