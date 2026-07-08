@@ -27,7 +27,7 @@ const quotes = [
 ];
 ---
 
-<link rel="preload" as="image" href="/drbi-landscape.webp" fetchpriority="high" />
+<link rel="preload" as="image" href="/drbi-hero-poster.webp" fetchpriority="high" />
 <noscript>
   <style>
     /* Server-rendered first quote starts hidden for the JS fade-in; reveal it when JS is off. */
@@ -40,7 +40,7 @@ const quotes = [
   <!-- Video background: the preloaded poster is the LCP; the video source is attached AFTER
        page load (idle) so it never competes with LCP. No autoplay attr — JS plays it. -->
   <video id="hero-video" loop muted playsinline preload="none"
-    poster="/drbi-landscape.webp"
+    poster="/drbi-hero-poster.webp"
     width="1280" height="720" data-src="/drbi-open_md.mp4"
     aria-hidden="true" tabindex="-1"
     class="w-full h-full absolute inset-0 z-0 object-cover">
