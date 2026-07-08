@@ -49,7 +49,7 @@ import {companyLinks, resourceLinks} from "@data/siteLinks.json";
       <!-- DRBI links -->
       { !!companyLinks.length && (
         <div>
-          <h3 class="font-semibold text-xs uppercase tracking-widest text-slate-500 mb-3">DRBI</h3>
+          <h3 class="font-semibold text-xs uppercase tracking-widest text-slate-600 mb-3">DRBI</h3>
           <div class="flex flex-col gap-1">
             {companyLinks.map((item) => (
               <a href={item.path || "#"} class="text-sm text-slate-600 hover:text-amber-700 transition py-0.5">
@@ -63,7 +63,7 @@ import {companyLinks, resourceLinks} from "@data/siteLinks.json";
       <!-- Resources -->
       { !!resourceLinks.length && (
         <div>
-          <h3 class="font-semibold text-xs uppercase tracking-widest text-slate-500 mb-3">Resources</h3>
+          <h3 class="font-semibold text-xs uppercase tracking-widest text-slate-600 mb-3">Resources</h3>
           <div class="flex flex-col gap-1">
             {resourceLinks.map((item) => (
               <a href={item.path || "#"} class="text-sm text-slate-600 hover:text-amber-700 transition py-0.5"
