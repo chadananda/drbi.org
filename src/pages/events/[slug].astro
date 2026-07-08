@@ -75,7 +75,13 @@ const ogImage = imagekitUrl(d.mainImage, { w: 1200, h: 630, face: true });
         <!-- Description -->
         <div class="lg:col-span-2">
           {d.fullDescription ? (
-            <div class="prose prose-slate max-w-none prose-headings:font-serif prose-a:text-amber-700" set:html={d.fullDescription} />
+            <div class="prose prose-lg prose-slate max-w-none
+              prose-headings:font-serif prose-headings:font-light prose-headings:text-slate-800
+              prose-h2:text-3xl prose-h2:mt-14 prose-h2:mb-5
+              prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-3
+              prose-p:text-slate-600 prose-p:leading-relaxed
+              prose-a:text-amber-700 prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-slate-700" set:html={d.fullDescription} />
           ) : (
             <p class="text-slate-500">Details coming soon.</p>
           )}

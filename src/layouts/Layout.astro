@@ -90,10 +90,10 @@ const { title, footerMargin = true } = Astro.props;
           url: pageURL,
           type: "website",
           title: makeTitle,
-          image: resolvedImageWithDomain,
+          image: image || resolvedImageWithDomain,
         },
         image: {
-          src: image,
+          src: image || resolvedImageWithDomain,
           alt: "Homepage Screenshot",
         },
       }}
