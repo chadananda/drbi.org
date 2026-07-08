@@ -1,17 +1,15 @@
 ---
-// Admin shell: the SAME site navbar on top (full-width) + the admin side menu on the left.
+// Admin shell: dedicated CMS chrome — dark warm sidebar rail + slim top bar + content canvas.
+// Design system (tokens + component classes) is the global <style> below, scoped to .admin-root.
 export const prerender = false;
 
 import "../styles/tailwind.css";
-import Navbar from "@components/navbar/navbar.astro";
 import AdminSidebar from "@components/admin/AdminSidebar.astro";
+import AdminTopbar from "@components/admin/AdminTopbar.astro";
 
-interface Props {
-  title?: string;
-  description?: string;
-  user?: any;
-}
-const { title = "Admin Dashboard", description = "DRBI Content Management System" } = Astro.props;
+interface Props { title?: string; description?: string; user?: any; }
+const { title = "Dashboard", description = "DRBI Content Management System" } = Astro.props;
+const user = Astro.props.user ?? Astro.locals.user ?? null;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -20,45 +18,136 @@ const { title = "Admin Dashboard", description = "DRBI Content Management System
   <meta name="description" content={description} />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" />
   <title>{title} — DRBI Admin</title>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800">
-  <Navbar />
-  <div class="flex">
-    <AdminSidebar />
-    <main class="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-6">
-      <button id="adminMobileMenu" type="button" aria-label="Open admin menu"
-        class="md:hidden mb-4 inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50">
-        <span aria-hidden="true">☰</span> Menu
-      </button>
-      <slot />
-    </main>
+<body class="admin-root">
+  <div class="admin-shell">
+    <AdminSidebar user={user} />
+    <div class="admin-main">
+      <AdminTopbar title={title} user={user} />
+      <main class="admin-content">
+        <slot />
+      </main>
+    </div>
   </div>
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <div id="sidebarOverlay" class="admin-overlay"></div>
 
   <style is:global>
-    /* Dock the admin sidebar below the sticky navbar (~3.5rem) and let it scroll on its own. */
-    @media (min-width: 768px) {
-      .admin-sidebar {
-        height: calc(100dvh - 3.5rem) !important;
-        position: sticky !important;
-        top: 3.5rem;
-        align-self: flex-start;
-      }
+    .admin-root {
+      /* Canvas + panels */
+      --a-bg: #f5f3ef;
+      --a-panel: #ffffff;
+      --a-panel-2: #fbfaf7;
+      /* Ink */
+      --a-ink: #1d1b17;
+      --a-ink-2: #57524a;
+      --a-muted: #8b847a;
+      /* Lines */
+      --a-line: #e7e2d8;
+      --a-line-2: #f0ebe1;
+      /* Brass accent */
+      --a-accent: #a9742f;
+      --a-accent-2: #8a5a22;
+      --a-accent-tint: #f4ecdd;
+      /* Dark sidebar rail (warm near-black) */
+      --a-side: #1c1a16;
+      --a-side-2: #262219;
+      --a-side-line: #322d24;
+      --a-side-ink: #c7bfb1;
+      --a-side-muted: #857d70;
+      --a-side-active: #f4ecdc;
+      --a-side-accent: #cf9a4e;
+      /* Semantic (desaturated) */
+      --a-green: #4b7a52; --a-green-bg: #eef3ec;
+      --a-amber: #9a6a24; --a-amber-bg: #f6eede;
+      --a-red: #a8443b;   --a-red-bg: #f6e9e6;
+      --a-blue: #3f5c86;  --a-blue-bg: #eaeef5;
+      --a-radius: 11px;
+      --a-radius-sm: 8px;
+      --a-shadow: 0 1px 2px rgba(40,30,10,.04), 0 10px 30px -20px rgba(40,30,10,.22);
+
+      background: var(--a-bg);
+      color: var(--a-ink);
+      font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+      min-height: 100vh;
     }
-    @media (max-width: 767px) {
-      .admin-sidebar { top: 0 !important; height: 100dvh !important; }
+    .admin-root * { box-sizing: border-box; }
+
+    /* Layout */
+    .admin-shell { display: flex; min-height: 100vh; }
+    .admin-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .admin-content { flex: 1; padding: 2rem clamp(1rem, 3vw, 2.75rem) 4rem; max-width: 1400px; width: 100%; }
+
+    /* Typography helpers */
+    .admin-root h1, .admin-root h2, .admin-root h3 { margin: 0; }
+    .a-page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem; flex-wrap: wrap; }
+    .a-title { font-family: 'Fraunces', Georgia, serif; font-weight: 450; font-size: 1.75rem; letter-spacing: -.01em; color: var(--a-ink); line-height: 1.1; }
+    .a-subtitle { color: var(--a-muted); font-size: .92rem; margin-top: .35rem; }
+    .a-eyebrow { text-transform: uppercase; letter-spacing: .15em; font-size: .68rem; font-weight: 600; color: var(--a-muted); }
+    .a-section-title { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.12rem; color: var(--a-ink); }
+
+    /* Card / panel */
+    .a-card { background: var(--a-panel); border: 1px solid var(--a-line); border-radius: var(--a-radius); box-shadow: var(--a-shadow); }
+    .a-card-pad { padding: 1.35rem 1.5rem; }
+
+    /* Buttons */
+    .a-btn { display: inline-flex; align-items: center; gap: .5rem; padding: .5rem .9rem; border-radius: 999px; font-size: .875rem; font-weight: 600; line-height: 1; border: 1px solid var(--a-line); background: var(--a-panel); color: var(--a-ink-2); cursor: pointer; transition: background .15s, border-color .15s, color .15s, transform .1s; text-decoration: none; }
+    .a-btn:hover { background: var(--a-panel-2); border-color: #dcd5c8; color: var(--a-ink); }
+    .a-btn:active { transform: translateY(.5px); }
+    .a-btn-primary { border: none; color: #fff; background: linear-gradient(180deg, #b0813a 0%, #92621f 100%); box-shadow: 0 6px 16px -8px rgba(140,90,25,.6); }
+    .a-btn-primary:hover { filter: brightness(1.05); color: #fff; }
+    .a-btn-ghost { border-color: transparent; background: transparent; }
+    .a-btn-ghost:hover { background: #efe9dd; }
+    .a-btn-danger { border-color: transparent; color: #fff; background: var(--a-red); }
+    .a-btn .a-icon { width: 16px; height: 16px; }
+
+    /* Badges */
+    .a-badge { display: inline-flex; align-items: center; gap: .35rem; padding: .18rem .55rem; border-radius: 999px; font-size: .72rem; font-weight: 600; letter-spacing: .01em; border: 1px solid var(--a-line); background: var(--a-panel-2); color: var(--a-ink-2); }
+    .a-badge-green { color: var(--a-green); background: var(--a-green-bg); border-color: transparent; }
+    .a-badge-amber { color: var(--a-amber); background: var(--a-amber-bg); border-color: transparent; }
+    .a-badge-red   { color: var(--a-red);   background: var(--a-red-bg);   border-color: transparent; }
+    .a-badge-blue  { color: var(--a-blue);  background: var(--a-blue-bg);  border-color: transparent; }
+    .a-badge-muted { color: var(--a-muted); }
+
+    /* Tables */
+    .a-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    .a-table thead th { text-align: left; font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; color: var(--a-muted); padding: .5rem .85rem; border-bottom: 1px solid var(--a-line); }
+    .a-table tbody td { padding: .8rem .85rem; border-bottom: 1px solid var(--a-line-2); color: var(--a-ink-2); }
+    .a-table tbody tr:last-child td { border-bottom: none; }
+    .a-table tbody tr:hover td { background: var(--a-panel-2); }
+    .a-num { font-variant-numeric: tabular-nums; }
+
+    /* Inputs (class-based only, so un-migrated pages keep their own styling) */
+    .a-input {
+      font-family: inherit; font-size: .9rem; color: var(--a-ink); background: var(--a-panel);
+      border: 1px solid var(--a-line); border-radius: var(--a-radius-sm); padding: .55rem .7rem; width: 100%;
+      transition: border-color .15s, box-shadow .15s;
     }
+    .a-input:focus {
+      outline: none; border-color: var(--a-accent); box-shadow: 0 0 0 3px rgba(169,116,47,.14);
+    }
+
+    .a-icon { flex-shrink: 0; }
+
+    /* Overlay for mobile drawer */
+    .admin-overlay { position: fixed; inset: 0; background: rgba(20,16,8,.5); z-index: 40; opacity: 0; visibility: hidden; transition: opacity .25s; }
+    .admin-overlay.active { opacity: 1; visibility: visible; }
+    @media (max-width: 900px) { .admin-content { padding: 1.25rem 1rem 3rem; } }
   </style>
 
   <script>
-    // Mobile drawer: open the admin sidebar (its own #sidebarToggle handles desktop collapse).
-    const mBtn = document.getElementById('adminMobileMenu');
     const sb = document.getElementById('adminSidebar');
     const ov = document.getElementById('sidebarOverlay');
+    const openBtn = document.getElementById('adminMobileMenu');
     const open = () => { sb?.classList.add('mobile-open'); ov?.classList.add('active'); };
     const close = () => { sb?.classList.remove('mobile-open'); ov?.classList.remove('active'); };
-    mBtn?.addEventListener('click', open);
+    openBtn?.addEventListener('click', open);
     ov?.addEventListener('click', close);
     sb?.querySelectorAll('a[href]').forEach((a) => a.addEventListener('click', close));
   </script>

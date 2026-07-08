@@ -4,6 +4,7 @@
 export const prerender = false;
 
 import AdminLayout from '@layouts/AdminLayout.astro';
+import AdminIcon from '@components/admin/AdminIcon.astro';
 import { getContentByCollection, getUpcomingEvents, getTeam, getUsers } from '@lib/queries';
 import { getAnalytics } from '@lib/analytics';
 import { roleLevel } from '@lib/admin-nav';
@@ -33,94 +34,137 @@ const recent = [...articles.map((p) => ({ ...p, _c: 'articles' })), ...news.map(
   .slice(0, 6);
 const fmtDate = (s) => { try { return new Date(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return ''; } };
 
-// Stat cards, gated by role where relevant.
 const stats = [
-  { label: 'Articles', value: articles.length, href: '/admin/articles', icon: '📝', show: true },
-  { label: 'News', value: news.length, href: '/admin/news', icon: '📰', show: true },
-  { label: 'Memorial', value: memorial.length, href: '/admin/memorial', icon: '🕊️', show: true },
-  { label: 'Upcoming events', value: events.length, href: '/admin/events', icon: '📅', show: level >= 30 },
-  { label: 'Team', value: team.length, href: '/admin/team', icon: '👥', show: level >= 40 },
-  { label: 'Users', value: users.length, href: '/admin/users', icon: '🔑', show: level >= 100 },
+  { label: 'Articles', value: articles.length, href: '/admin/articles', icon: 'content', show: true },
+  { label: 'News', value: news.length, href: '/admin/news', icon: 'news', show: true },
+  { label: 'Memorial', value: memorial.length, href: '/admin/memorial', icon: 'memorial', show: true },
+  { label: 'Upcoming events', value: events.length, href: '/admin/events', icon: 'events', show: level >= 30 },
+  { label: 'Team', value: team.length, href: '/admin/team', icon: 'team', show: level >= 40 },
+  { label: 'Users', value: users.length, href: '/admin/users', icon: 'users', show: level >= 100 },
 ].filter((s) => s.show);
 
 const quickActions = [
-  { label: 'New article', href: '/admin/articles/new', icon: '✍️', show: true },
-  { label: 'New event', href: '/admin/events', icon: '📅', show: level >= 30 },
-  { label: 'Media library', href: '/admin/media', icon: '🖼️', show: true },
-  { label: 'Full analytics', href: '/admin/analytics', icon: '📊', show: level >= 40 },
+  { label: 'New article', href: '/admin/articles/new', icon: 'pen-square', show: true },
+  { label: 'New event', href: '/admin/events', icon: 'calendar-plus', show: level >= 30 },
+  { label: 'Media library', href: '/admin/media', icon: 'media', show: true },
+  { label: 'Full analytics', href: '/admin/analytics', icon: 'analytics', show: level >= 40 },
 ].filter((a) => a.show);
 ---
 
 <AdminLayout title="Dashboard" user={user}>
-  <div class="w-full">
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-      <p class="text-sm text-gray-500 mt-1">Welcome back{user?.name ? `, ${user.name}` : ''} — here's an overview of the site.</p>
+  <div class="a-page-head">
+    <div>
+      <h1 class="a-title">Dashboard</h1>
+      <p class="a-subtitle">Welcome back{user?.name ? `, ${user.name}` : ''} — here's an overview of the site.</p>
     </div>
+    <a href="/admin/articles/new" class="a-btn a-btn-primary"><AdminIcon name="plus" size={16} /> New article</a>
+  </div>
 
-    <!-- Stat cards -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-      {stats.map((s) => (
-        <a href={s.href} class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-amber-300 transition group">
-          <div class="text-2xl mb-1" aria-hidden="true">{s.icon}</div>
-          <div class="text-2xl font-bold text-gray-900 tabular-nums">{fmt(s.value)}</div>
-          <div class="text-xs text-gray-500 group-hover:text-amber-700">{s.label}</div>
-        </a>
-      ))}
-    </div>
+  <!-- Stat tiles -->
+  <div class="a-stats">
+    {stats.map((s) => (
+      <a href={s.href} class="a-stat">
+        <span class="a-stat-ic"><AdminIcon name={s.icon} size={18} /></span>
+        <span class="a-stat-val">{fmt(s.value)}</span>
+        <span class="a-stat-label">{s.label}</span>
+      </a>
+    ))}
+  </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Recent content -->
-      <div class="lg:col-span-2 bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Recent content</h2>
-          {draftCount > 0 && <span class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-1">{draftCount} draft{draftCount === 1 ? '' : 's'}</span>}
+  <div class="a-grid">
+    <!-- Recent content -->
+    <section class="a-card a-card-pad">
+      <div class="a-panel-head">
+        <h2 class="a-section-title">Recent content</h2>
+        {draftCount > 0 && <span class="a-badge a-badge-amber">{draftCount} draft{draftCount === 1 ? '' : 's'}</span>}
+      </div>
+      <div class="a-list">
+        {recent.length === 0 && <p class="a-empty">No content yet.</p>}
+        {recent.map((p) => (
+          <a href={`/admin/${p._c}/${p.baseid}`} class="a-list-row">
+            <span class="a-list-main">
+              <span class="a-list-title">{p.data?.title || '(untitled)'}</span>
+              <span class="a-list-sub">{p._c}{p.data?.draft ? ' · draft' : ''}</span>
+            </span>
+            <span class="a-list-meta a-num">{fmtDate(p.data?.datePublished)}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Right column -->
+    <div class="a-col">
+      <section class="a-card a-card-pad">
+        <div class="a-panel-head">
+          <h2 class="a-section-title">Traffic</h2>
+          <span class="a-eyebrow">30 days</span>
         </div>
-        <div class="divide-y divide-gray-100">
-          {recent.length === 0 && <p class="text-sm text-gray-400">No content yet.</p>}
-          {recent.map((p) => (
-            <a href={`/admin/${p._c}/${p.baseid}`} class="flex items-center justify-between py-2.5 group">
-              <span class="min-w-0 pr-3">
-                <span class="block text-sm font-medium text-gray-800 truncate group-hover:text-amber-700">{p.data?.title || '(untitled)'}</span>
-                <span class="block text-xs text-gray-400 capitalize">{p._c}{p.data?.draft ? ' · draft' : ''}</span>
-              </span>
-              <span class="text-xs text-gray-400 shrink-0">{fmtDate(p.data?.datePublished)}</span>
+        <div class="a-traffic">
+          <div>
+            <div class="a-traffic-val">{fmt(analytics.totals.pageviews)}</div>
+            <div class="a-list-sub">Page views</div>
+          </div>
+          <div>
+            <div class="a-traffic-val">{fmt(analytics.totals.visits)}</div>
+            <div class="a-list-sub">Visits</div>
+          </div>
+        </div>
+        {level >= 40 && <a href="/admin/analytics" class="a-more">View full analytics <AdminIcon name="chevron" size={14} /></a>}
+      </section>
+
+      <section class="a-card a-card-pad">
+        <h2 class="a-section-title" style="margin-bottom:.9rem">Quick actions</h2>
+        <div class="a-quick">
+          {quickActions.map((a) => (
+            <a href={a.href} class="a-quick-item">
+              <span class="a-quick-ic"><AdminIcon name={a.icon} size={17} /></span>
+              {a.label}
+              <AdminIcon name="chevron" size={14} class="a-quick-caret" />
             </a>
           ))}
         </div>
-      </div>
-
-      <!-- Sidebar column: analytics glance + quick actions -->
-      <div class="space-y-6">
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
-          <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-semibold text-gray-900">Traffic</h2>
-            <span class="text-xs text-gray-400">30 days</span>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <div class="text-2xl font-bold text-gray-900 tabular-nums">{fmt(analytics.totals.pageviews)}</div>
-              <div class="text-xs text-gray-500">Page views</div>
-            </div>
-            <div>
-              <div class="text-2xl font-bold text-gray-900 tabular-nums">{fmt(analytics.totals.visits)}</div>
-              <div class="text-xs text-gray-500">Visits</div>
-            </div>
-          </div>
-          {level >= 40 && <a href="/admin/analytics" class="inline-block mt-4 text-sm font-medium text-amber-700 hover:text-amber-800">View full analytics →</a>}
-        </div>
-
-        <div class="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 shadow-sm">
-          <h2 class="text-lg font-semibold text-gray-900 mb-3">Quick actions</h2>
-          <div class="space-y-1.5">
-            {quickActions.map((a) => (
-              <a href={a.href} class="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-amber-50 hover:text-amber-800 transition">
-                <span aria-hidden="true">{a.icon}</span>{a.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   </div>
 </AdminLayout>
+
+<style>
+  .a-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: .9rem; margin-bottom: 1.5rem; }
+  @media (min-width: 640px) { .a-stats { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1100px) { .a-stats { grid-template-columns: repeat(6, 1fr); } }
+  .a-stat { display: flex; flex-direction: column; gap: .1rem; padding: 1.05rem 1.1rem 1rem; background: var(--a-panel); border: 1px solid var(--a-line); border-radius: var(--a-radius); text-decoration: none; transition: border-color .15s, box-shadow .15s, transform .12s; }
+  .a-stat:hover { border-color: #dcc9a8; box-shadow: var(--a-shadow); transform: translateY(-1px); }
+  .a-stat-ic { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--a-panel-2); border: 1px solid var(--a-line-2); color: var(--a-muted); margin-bottom: .55rem; transition: color .15s, background .15s; }
+  .a-stat:hover .a-stat-ic { color: var(--a-accent); background: var(--a-accent-tint); border-color: transparent; }
+  .a-stat-val { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.75rem; line-height: 1; color: var(--a-ink); font-variant-numeric: tabular-nums; }
+  .a-stat-label { font-size: .78rem; color: var(--a-muted); margin-top: .3rem; }
+
+  .a-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+  @media (min-width: 1024px) { .a-grid { grid-template-columns: 2fr 1fr; align-items: start; } }
+  .a-col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .a-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
+
+  .a-list { display: flex; flex-direction: column; }
+  .a-list-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 0; border-bottom: 1px solid var(--a-line-2); text-decoration: none; }
+  .a-list-row:last-child { border-bottom: none; }
+  .a-list-main { min-width: 0; }
+  .a-list-title { display: block; font-size: .9rem; font-weight: 500; color: var(--a-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .15s; }
+  .a-list-row:hover .a-list-title { color: var(--a-accent-2); }
+  .a-list-sub { display: block; font-size: .74rem; color: var(--a-muted); text-transform: capitalize; margin-top: 1px; }
+  .a-list-meta { font-size: .76rem; color: var(--a-muted); flex-shrink: 0; }
+  .a-empty { font-size: .875rem; color: var(--a-muted); }
+
+  .a-traffic { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .a-traffic-val { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.9rem; line-height: 1; color: var(--a-ink); font-variant-numeric: tabular-nums; }
+  .a-more { display: inline-flex; align-items: center; gap: .25rem; margin-top: 1.1rem; font-size: .84rem; font-weight: 600; color: var(--a-accent-2); text-decoration: none; }
+  .a-more:hover { color: var(--a-accent); }
+
+  .a-quick { display: flex; flex-direction: column; gap: 2px; }
+  .a-quick-item { display: flex; align-items: center; gap: .7rem; padding: .6rem .65rem; border-radius: 9px; font-size: .88rem; font-weight: 500; color: var(--a-ink-2); text-decoration: none; transition: background .15s, color .15s; }
+  .a-quick-item:hover { background: var(--a-panel-2); color: var(--a-ink); }
+  .a-quick-ic { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--a-panel-2); border: 1px solid var(--a-line-2); color: var(--a-muted); }
+  .a-quick-item:hover .a-quick-ic { color: var(--a-accent); background: var(--a-accent-tint); border-color: transparent; }
+  .a-quick-caret { margin-left: auto; color: var(--a-muted); opacity: 0; transition: opacity .15s; }
+  .a-quick-item:hover .a-quick-caret { opacity: 1; }
+</style>
