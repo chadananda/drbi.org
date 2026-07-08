@@ -4,17 +4,18 @@ export const ROLE_LEVEL: Record<string, number> = { superadmin: 100, admin: 40, 
 
 export interface AdminNavItem { title: string; href: string; icon: string; minLevel: number; }
 
+// icon = AdminIcon name (line icons), rendered in the navbar account menu + admin.
 export const ADMIN_NAV: AdminNavItem[] = [
-  { title: 'Dashboard', href: '/admin',            icon: '🏠', minLevel: 20 },
-  { title: 'Content',   href: '/admin/posts',      icon: '📝', minLevel: 20 },
-  { title: 'Media',     href: '/admin/media',      icon: '🖼️', minLevel: 20 },
-  { title: 'Events',    href: '/admin/events',     icon: '📅', minLevel: 30 },
-  { title: 'Categories',href: '/admin/categories', icon: '🏷️', minLevel: 30 },
-  { title: 'Topics',    href: '/admin/topics',     icon: '🗂️', minLevel: 30 },
-  { title: 'Analytics', href: '/admin/analytics',  icon: '📊', minLevel: 40 },
-  { title: 'Team',      href: '/admin/team',       icon: '👥', minLevel: 40 },
-  { title: 'Settings',  href: '/admin/settings',   icon: '⚙️', minLevel: 40 },
-  { title: 'Users',     href: '/admin/users',      icon: '🔑', minLevel: 100 },
+  { title: 'Dashboard', href: '/admin',            icon: 'dashboard',    minLevel: 20 },
+  { title: 'Content',   href: '/admin/posts',      icon: 'content',      minLevel: 20 },
+  { title: 'Media',     href: '/admin/media',      icon: 'media',        minLevel: 20 },
+  { title: 'Events',    href: '/admin/events',     icon: 'events',       minLevel: 30 },
+  { title: 'Categories',href: '/admin/categories', icon: 'tag',          minLevel: 30 },
+  { title: 'Topics',    href: '/admin/topics',     icon: 'organization', minLevel: 30 },
+  { title: 'Analytics', href: '/admin/analytics',  icon: 'analytics',    minLevel: 40 },
+  { title: 'Team',      href: '/admin/team',       icon: 'team',         minLevel: 40 },
+  { title: 'Settings',  href: '/admin/settings',   icon: 'settings',     minLevel: 40 },
+  { title: 'Users',     href: '/admin/users',      icon: 'users',        minLevel: 100 },
 ];
 
 export function roleLevel(role: string | undefined | null): number {

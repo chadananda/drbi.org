@@ -4,8 +4,8 @@
 export const prerender = false;
 
 import "../styles/tailwind.css";
+import Navbar from "@components/navbar/navbar.astro";
 import AdminSidebar from "@components/admin/AdminSidebar.astro";
-import AdminTopbar from "@components/admin/AdminTopbar.astro";
 
 interface Props { title?: string; description?: string; user?: any; }
 const { title = "Dashboard", description = "DRBI Content Management System" } = Astro.props;
@@ -24,10 +24,13 @@ const user = Astro.props.user ?? Astro.locals.user ?? null;
   <title>{title} — DRBI Admin</title>
 </head>
 <body class="admin-root">
+  <Navbar />
   <div class="admin-shell">
     <AdminSidebar user={user} />
     <div class="admin-main">
-      <AdminTopbar title={title} user={user} />
+      <button id="adminMobileMenu" type="button" class="admin-mobile-menu" aria-label="Open menu">
+        <span class="admin-mobile-bars"><span></span><span></span><span></span></span> Menu
+      </button>
       <main class="admin-content">
         <slot />
       </main>
@@ -79,10 +82,14 @@ const user = Astro.props.user ?? Astro.locals.user ?? null;
     }
     .admin-root * { box-sizing: border-box; }
 
-    /* Layout */
-    .admin-shell { display: flex; min-height: 100vh; }
+    /* Layout (sits below the global sticky navbar, ~3.5rem tall) */
+    .admin-shell { display: flex; min-height: calc(100vh - 3.5rem); }
     .admin-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     .admin-content { flex: 1; padding: 2rem clamp(1rem, 3vw, 2.75rem) 4rem; max-width: 1400px; width: 100%; }
+    .admin-mobile-menu { display: none; align-items: center; gap: .5rem; margin: 1rem 0 -.5rem 1rem; padding: .5rem .8rem; font-size: .85rem; font-weight: 600; color: var(--a-ink-2); background: var(--a-panel); border: 1px solid var(--a-line); border-radius: 999px; cursor: pointer; }
+    .admin-mobile-bars { display: inline-flex; flex-direction: column; gap: 3px; }
+    .admin-mobile-bars span { width: 14px; height: 1.5px; background: var(--a-ink-2); border-radius: 2px; }
+    @media (max-width: 900px) { .admin-mobile-menu { display: inline-flex; } }
 
     /* Typography helpers */
     .admin-root h1, .admin-root h2, .admin-root h3 { margin: 0; }

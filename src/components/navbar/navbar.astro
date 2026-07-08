@@ -4,6 +4,7 @@ import { StickyHeader } from "astro-navbar";
 import SiteLogo from "@components/siteLogo.astro";
 import links from "@data/siteLinks.json";
 import { adminNavForRole } from "@lib/admin-nav";
+import AdminIcon from "@components/admin/AdminIcon.astro";
 const menuLinks = links.menuLinks;
 
 // Auth state (set on every request by middleware.ts). Sign-in happens right here in
@@ -12,6 +13,9 @@ const user = Astro.locals?.user ?? null;
 const isStaff = !!user && ['superadmin', 'admin', 'editor', 'author'].includes(user.role);
 const avatarUrl = (user as any)?.avatar || '';
 const adminLinks = isStaff ? adminNavForRole(user!.role) : [];
+const email = (user as any)?.email || '';
+const roleLabel = user ? String(user.role).replace(/^\w/, (c: string) => c.toUpperCase()) : '';
+const initials = user ? String(user.name || user.email || '?').trim().split(/\s+/).map((s: string) => s[0]).slice(0, 2).join('').toUpperCase() : '?';
 const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
 ---
 
@@ -65,31 +69,31 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
             )}
           </button>
 
-          <div id="account-menu" class="hidden absolute right-0 top-full mt-2 w-72 bg-white border border-gray-200 rounded-xl shadow-lg p-4 z-50 text-left">
+          <div id="account-menu" class="acct-menu hidden absolute right-0 top-full mt-2 w-72 z-50 text-left">
             {user ? (
               <div>
-                <div class="flex items-center gap-3 pb-3 mb-3 border-b border-gray-100">
+                <div class="acct-head">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="" referrerpolicy="no-referrer" class="w-10 h-10 rounded-full object-cover shrink-0" />
+                    <img src={avatarUrl} alt="" referrerpolicy="no-referrer" class="acct-avatar-img" />
                   ) : (
-                    <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-semibold shrink-0">{(user.name || user.email || '?').charAt(0).toUpperCase()}</div>
+                    <span class="acct-avatar">{initials}</span>
                   )}
-                  <div class="min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{user.name || user.email}</p>
-                    <p class="text-xs text-gray-400 truncate">{user.email}</p>
+                  <div class="acct-id">
+                    <p class="acct-name">{user.name || user.email}</p>
+                    {email && <p class="acct-email">{email}</p>}
                   </div>
                 </div>
-                <p class="text-xs text-gray-400 mb-2 capitalize">Role: {user.role}</p>
+                <span class="acct-role">{roleLabel}</span>
                 {adminLinks.length > 0 && (
-                  <nav aria-label="Admin sections" class="mb-2 -mx-1 max-h-72 overflow-y-auto">
+                  <nav aria-label="Admin sections" class="acct-links">
                     {adminLinks.map((l) => (
-                      <a href={l.href} class="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-amber-50 hover:text-amber-800 transition">
-                        <span class="w-5 text-center" aria-hidden="true">{l.icon}</span>{l.title}
-                      </a>
+                      <a href={l.href} class="acct-item"><AdminIcon name={l.icon} size={16} /> {l.title}</a>
                     ))}
                   </nav>
                 )}
-                <button id="signout-btn" type="button" class="block w-full mt-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition border-t border-gray-100 rounded-t-none">Sign out</button>
+                <div class="acct-foot">
+                  <button id="signout-btn" type="button" class="acct-item acct-signout"><AdminIcon name="logout" size={16} /> Sign out</button>
+                </div>
               </div>
             ) : (
               <div>
@@ -143,6 +147,24 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
 <style>
   /* In the dropdown, links stack full-width and lose the pill hover for a cleaner list */
   #nav-overflow-list .nav-link { display: block; border-radius: 0.5rem; }
+
+  /* Refined account menu — consistent across the public site and the admin. */
+  .acct-menu { background: #fff; border: 1px solid #e7e2d8; border-radius: 12px; padding: .4rem; box-shadow: 0 14px 40px -14px rgba(40,30,10,.3); }
+  .acct-head { display: flex; align-items: center; gap: .7rem; padding: .55rem .55rem .65rem; }
+  .acct-avatar-img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .acct-avatar { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; background: linear-gradient(180deg,#2a2620,#1c1a16); color: #e9dcc4; font-weight: 700; font-size: .82rem; }
+  .acct-id { min-width: 0; }
+  .acct-name { font-size: .9rem; font-weight: 600; color: #1c1a17; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acct-email { font-size: .74rem; color: #8b847a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .acct-role { display: inline-block; margin: 0 .55rem .55rem; padding: .16rem .5rem; border-radius: 999px; font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #8a5a22; background: #f4ecdd; }
+  .acct-links { display: flex; flex-direction: column; padding: .3rem 0; border-top: 1px solid #f0ece4; max-height: 19rem; overflow-y: auto; }
+  .acct-item { display: flex; align-items: center; gap: .65rem; width: 100%; padding: .5rem .6rem; border-radius: 8px; font-size: .86rem; color: #57524a; text-decoration: none; background: transparent; border: none; cursor: pointer; text-align: left; transition: background .15s, color .15s; }
+  .acct-item:hover { background: #faf7f1; color: #1c1a17; }
+  .acct-item svg { color: #a99f8f; transition: color .15s; }
+  .acct-item:hover svg { color: #a9742f; }
+  .acct-foot { border-top: 1px solid #f0ece4; margin-top: .1rem; padding-top: .2rem; }
+  .acct-signout, .acct-signout:hover { color: #a8443b; }
+  .acct-signout svg, .acct-signout:hover svg { color: #a8443b; }
 </style>
 
 <script>
