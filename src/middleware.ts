@@ -3,6 +3,7 @@ import { lucia } from "./lib/auth";
 import { verifyRequestOrigin as verifyOrig } from "lucia";
 import { ADMIN_NAV, roleLevel } from "./lib/admin-nav";
 import { env } from "cloudflare:workers";
+import { revalidateEventsIfStale } from "./lib/humanitix-sync";
 // import { defineMiddleware } from "astro:middleware";
 
 // Public event pages are edge-cached for anonymous visitors. Entries are keyed by a
@@ -23,6 +24,13 @@ export const onRequest = async (context, next) => {
   // Validate the session on EVERY page so the navbar can show login/account state
   // anywhere. Sign-in happens via the navbar popover — there is no login page.
   const sessionId = context.cookies.get(lucia.sessionCookieName)?.value ?? null;
+
+  // --- Stale-while-revalidate: refresh event content from Humanitix as a side effect of
+  // traffic. Runs before the cache return so even a cache HIT can drive a background refresh.
+  // Serves instantly; only touches D1 + flushes the cache if Humanitix actually changed. ---
+  if (context.request.method === 'GET' && EVENTS_CACHE.test(path)) {
+    await revalidateEventsIfStale(context.locals.cfContext);
+  }
 
   // --- Edge cache: anonymous GET of public event pages ---
   const cacheable = context.request.method === 'GET' && !sessionId
