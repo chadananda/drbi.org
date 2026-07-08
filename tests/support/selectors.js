@@ -17,8 +17,8 @@ export const selectors = {
   newsletterLink: 'a[href*="eepurl"], a[href*="newsletter"]',
 
   // Events
-  eventsCalendar: '[data-testid="events-calendar"], .event-calendar',
-  eventCard: '[data-testid="event-card"], [data-event-start], .event-card',
+  eventsCalendar: '[data-testid="events-calendar"], .event-calendar, .home-events, .timeline-view, .events-list-full',
+  eventCard: '[data-testid="event-card"], [data-event-start], .event-card, .he-card, .timeline-item',
   eventTitle: '[data-testid="event-title"], .event-title, h3',
   eventDate: '[data-testid="event-date"], time, .event-date, [class*="date"]',
   eventLink: 'a[href*="/events/"]',
