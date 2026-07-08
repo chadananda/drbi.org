@@ -29,8 +29,6 @@ if (Astro.request.method === "POST") {
     errorMsg = 'Title is required';
   } else if (!startDates || startDates.length === 0 || !startDates[0]) {
     errorMsg = 'At least one start date is required';
-  } else if (formData.isEventbrite === 'true' && !formData.eventbriteId?.trim()) {
-    errorMsg = 'Eventbrite ID is required for Eventbrite events';
   } else {
     // Create single event with additionalDates array
     try {
@@ -54,9 +52,7 @@ if (Astro.request.method === "POST") {
         startDate: new Date(startDates[0] + '-07:00').toISOString(),
         endDate: new Date((endDates[0] || startDates[0]) + '-07:00').toISOString(),
         additionalDates: additionalDates.length > 0 ? additionalDates : [],
-        registrationUrl: formData.isEventbrite === 'true'
-          ? `https://www.eventbrite.com/e/${formData.eventbriteId.trim()}`
-          : (formData.registrationUrl?.trim() || 'https://drbi.org'),
+        registrationUrl: formData.registrationUrl?.trim() || 'https://drbi.org',
         organizer: formData.organizer?.trim() || 'DRBI',
         visible: formData.visible !== 'false',
         featured: formData.featured === 'true',
@@ -81,9 +77,7 @@ if (Astro.request.method === "POST") {
         } : null,
         highlights: formData.highlights ? formData.highlights.split(',').map(h => h.trim()).filter(Boolean) : [],
         mainImage: formData.mainImage?.trim() || null,
-        teacherImage: formData.teacherImage?.trim() || null,
-        isEventbrite: formData.isEventbrite === 'true',
-        eventbriteId: formData.isEventbrite === 'true' ? formData.eventbriteId?.trim() : null
+        teacherImage: formData.teacherImage?.trim() || null
       };
 
       console.log('Creating event with sessionid:', sessionid);
@@ -114,7 +108,7 @@ if (Astro.request.method === "POST") {
   <div class="max-w-4xl mx-auto p-8" data-sessionid={sessionid}>
     <header class="mb-8">
       <h1 class="text-3xl font-bold text-gray-800 mb-2">Add Event</h1>
-      <p class="text-gray-600 mb-4">Create a new event or import from Eventbrite</p>
+      <p class="text-gray-600 mb-4">Create a new event</p>
       <a href="/admin/events" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">← Back to Events</a>
     </header>
 
@@ -124,31 +118,6 @@ if (Astro.request.method === "POST") {
         <p>{errorMsg}</p>
       </div>
     )}
-
-    <!-- Quick Eventbrite Import -->
-    <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 shadow-sm">
-      <h2 class="text-xl font-semibold text-blue-800 mb-4">🎫 Import from Eventbrite</h2>
-      <p class="text-blue-700 mb-4">Have an Eventbrite event ID? Import the event details automatically.</p>
-      <div class="flex gap-4">
-        <input 
-          type="text" 
-          id="eventbriteId" 
-          placeholder="Enter Eventbrite Event ID (e.g., 123456789)"
-          class="flex-1 px-3 py-2 border border-blue-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        />
-        <button 
-          type="button" 
-          id="importEventbrite"
-          class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-        >
-          Import Event
-        </button>
-      </div>
-    </div>
-
-    <div class="text-center mb-8">
-      <span class="px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm">OR</span>
-    </div>
 
     <form method="POST" class="bg-white border border-gray-200 rounded-xl p-8 shadow-sm">
       <div class="mb-8 pb-8 border-b border-gray-200 last:border-b-0 last:pb-0">
@@ -238,49 +207,6 @@ if (Astro.request.method === "POST") {
         <h2 class="text-xl font-semibold text-gray-800 mb-6">Registration & Pricing</h2>
         
         <div class="mb-4">
-          <label class="flex items-center">
-            <input 
-              type="checkbox" 
-              id="isEventbrite" 
-              name="isEventbrite" 
-              value="true" 
-              checked={formData.isEventbrite === 'true'}
-              onchange="toggleRegistrationFields()"
-              class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2 mr-2"
-            />
-            <span class="font-medium text-gray-700">This is an Eventbrite event</span>
-          </label>
-        </div>
-
-        <div id="eventbriteFields" class="mb-4" style="display: none;">
-          <label for="eventbriteId" class="block font-medium text-gray-700 mb-1">Eventbrite Event ID</label>
-          <div class="flex gap-2">
-            <input 
-              type="text" 
-              id="eventbriteId" 
-              name="eventbriteId" 
-              value={formData.eventbriteId || ''} 
-              placeholder="1000901030927 or full URL"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-            <button type="button" onclick="importFromEventbrite()" id="importBtn" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors text-sm">
-              📥 Import Data
-            </button>
-          </div>
-          <small class="block text-gray-500 text-sm mt-1">Enter the numeric ID from the Eventbrite URL or paste the full URL. Click "Import Data" to automatically fill in event details.</small>
-          
-          <div id="importStatus" class="flex items-center gap-2 mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md" style="display: none;">
-            <div class="text-blue-600">🔄</div>
-            <span id="importMessage" class="text-blue-800 text-sm">Importing event data...</span>
-          </div>
-          
-          <div id="importSuccess" class="flex items-center gap-2 mt-2 p-3 bg-green-50 border border-green-200 rounded-md" style="display: none;">
-            <div class="text-green-600">✅</div>
-            <span class="text-green-800 text-sm">Event data imported successfully! Review and modify as needed before saving.</span>
-          </div>
-        </div>
-
-        <div id="regularFields" class="mb-4">
           <label for="registrationUrl" class="block font-medium text-gray-700 mb-1">Registration URL</label>
           <input
             type="url"
@@ -474,75 +400,6 @@ if (Astro.request.method === "POST") {
       } catch { return url; }
     };
     
-    // Eventbrite import functionality
-    document.getElementById('importEventbrite')?.addEventListener('click', async function() {
-      const eventbriteId = document.getElementById('eventbriteId').value.trim();
-      if (!eventbriteId) {
-        alert('Please enter an Eventbrite Event ID');
-        return;
-      }
-      
-      const button = this;
-      const originalText = button.textContent;
-      button.textContent = 'Importing...';
-      button.disabled = true;
-      
-      try {
-        const response = await fetch('/api/events', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'import-eventbrite',
-            eventbriteId: eventbriteId,
-            sessionid: sessionid
-          })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success && result.eventData) {
-          const eventData = result.eventData;
-          
-          // Populate form fields with imported data
-          if (eventData.name) document.getElementById('title').value = eventData.name;
-          if (eventData.shortDescription) document.getElementById('shortDescription').value = eventData.shortDescription;
-          if (eventData.fullDescription) document.getElementById('fullDescription').value = eventData.fullDescription;
-          if (eventData.startDate) {
-            const startDate = new Date(eventData.startDate);
-            document.getElementById('startDate').value = startDate.toISOString().slice(0, 16);
-          }
-          if (eventData.endDate) {
-            const endDate = new Date(eventData.endDate);
-            document.getElementById('endDate').value = endDate.toISOString().slice(0, 16);
-          }
-          if (eventData.organizer) document.getElementById('organizer').value = eventData.organizer;
-          if (eventData.price && eventData.price.low) document.getElementById('priceValue').value = eventData.price.low;
-          if (eventData.highlights) document.getElementById('highlights').value = eventData.highlights.join(', ');
-          
-          // Set as Eventbrite event
-          document.getElementById('isEventbrite').checked = true;
-          document.getElementById('eventbriteIdField').value = eventbriteId;
-          
-          // Set registration URL
-          document.getElementById('registrationUrl').value = `https://www.eventbrite.com/e/${eventbriteId}`;
-          
-          alert('Event imported successfully! Review the details below and submit to save.');
-          
-          // Scroll to form
-          document.querySelector('form').scrollIntoView({ behavior: 'smooth' });
-          
-        } else {
-          alert(result.error || 'Failed to import event. Please check the Event ID and try again.');
-        }
-      } catch (error) {
-        console.error('Import error:', error);
-        alert('Error importing event. Please try again.');
-      } finally {
-        button.textContent = originalText;
-        button.disabled = false;
-      }
-    });
-
     // Image upload functionality
     function setupImageUpload(inputId, hiddenId, previewId) {
       const fileInput = document.getElementById(inputId);
@@ -650,116 +507,6 @@ if (Astro.request.method === "POST") {
     // Make removeImage globally available
     window.removeImage = removeImage;
 
-    // Import event data from Eventbrite
-    async function importFromEventbrite() {
-      const eventbriteIdInput = document.getElementById('eventbriteId');
-      const importBtn = document.getElementById('importBtn');
-      const importStatus = document.getElementById('importStatus');
-      const importSuccess = document.getElementById('importSuccess');
-      const importMessage = document.getElementById('importMessage');
-
-      let eventbriteInput = eventbriteIdInput.value.trim();
-      if (!eventbriteInput) {
-        alert('Please enter an Eventbrite ID or URL');
-        return;
-      }
-
-      // Extract ID from URL if a full URL was provided
-      let eventbriteId = eventbriteInput;
-      if (eventbriteInput.includes('eventbrite.com')) {
-        const match = eventbriteInput.match(/(?:registration|tickets|e)[-\/](\d+)/);
-        if (match) {
-          eventbriteId = match[1];
-        } else {
-          alert('Could not extract event ID from URL');
-          return;
-        }
-      }
-
-      // Update UI to show loading
-      importBtn.disabled = true;
-      importBtn.textContent = '⏳ Importing...';
-      importStatus.style.display = 'flex';
-      importSuccess.style.display = 'none';
-      importMessage.textContent = 'Fetching event data from Eventbrite...';
-
-      try {
-        const response = await fetch('/api/events/import-eventbrite', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ eventbriteId })
-        });
-
-        const result = await response.json();
-
-        if (result.success && result.eventData) {
-          const eventData = result.eventData;
-          
-          // Populate form fields with imported data
-          if (eventData.title) document.getElementById('title').value = eventData.title;
-          if (eventData.shortDescription) document.getElementById('shortDescription').value = eventData.shortDescription;
-          if (eventData.fullDescription) document.getElementById('fullDescription').value = eventData.fullDescription;
-          if (eventData.startDate) document.getElementById('startDate').value = eventData.startDate.split('T')[0];
-          if (eventData.startTime) document.getElementById('startTime').value = eventData.startTime;
-          if (eventData.endDate) document.getElementById('endDate').value = eventData.endDate.split('T')[0];
-          if (eventData.endTime) document.getElementById('endTime').value = eventData.endTime;
-          if (eventData.organizer) document.getElementById('organizer').value = eventData.organizer;
-          if (eventData.price && eventData.price.low) document.getElementById('priceValue').value = eventData.price.low;
-          if (eventData.highlights) document.getElementById('highlights').value = eventData.highlights.join(', ');
-
-          // Update the eventbrite ID field with the clean ID
-          eventbriteIdInput.value = eventbriteId;
-
-          // Show success message
-          importStatus.style.display = 'none';
-          importSuccess.style.display = 'flex';
-
-          console.log('Event data imported:', eventData);
-        } else {
-          throw new Error(result.error || 'Failed to import event data');
-        }
-      } catch (error) {
-        console.error('Import error:', error);
-        importMessage.textContent = `Error importing event: ${error.message}`;
-        setTimeout(() => {
-          importStatus.style.display = 'none';
-        }, 3000);
-      } finally {
-        // Reset button
-        importBtn.disabled = false;
-        importBtn.textContent = '📥 Import Data';
-      }
-    }
-
-    // Make importFromEventbrite globally available
-    window.importFromEventbrite = importFromEventbrite;
-
-    // Toggle registration fields based on Eventbrite checkbox
-    function toggleRegistrationFields() {
-      const isEventbrite = document.getElementById('isEventbrite').checked;
-      const eventbriteFields = document.getElementById('eventbriteFields');
-      const regularFields = document.getElementById('regularFields');
-      const registrationUrl = document.getElementById('registrationUrl');
-      const eventbriteId = document.getElementById('eventbriteId');
-      
-      if (isEventbrite) {
-        eventbriteFields.style.display = 'block';
-        regularFields.style.display = 'none';
-        registrationUrl.required = false;
-        eventbriteId.required = true;
-      } else {
-        eventbriteFields.style.display = 'none';
-        regularFields.style.display = 'block';
-        registrationUrl.required = false;
-        eventbriteId.required = false;
-      }
-    }
-
-    // Make toggleRegistrationFields globally available
-    window.toggleRegistrationFields = toggleRegistrationFields;
-
     // Make setupImageUpload globally available
     window.setupImageUpload = setupImageUpload;
 
@@ -777,10 +524,6 @@ if (Astro.request.method === "POST") {
       setupImageUpload('mainImageFile', 'mainImage', 'mainImagePreview');
       setupImageUpload('teacherImageFile', 'teacherImage', 'teacherImagePreview');
       console.log('✅ Image upload handlers ready');
-      
-      // Initialize registration fields visibility
-      toggleRegistrationFields();
-      
       // Set default times and auto-calculate end dates
       setupDateTimeDefaults();
     });

@@ -32,21 +32,17 @@ export const POST = async ({ request }) => {
   try {
     const { action, eventData, sessionid } = await request.json();
 
-    // Auth required for all write operations except sync-external
-    if (action !== 'sync-external') {
-      if (!sessionid) {
-        return new Response('Session ID required', { status: 401 });
-      }
-      const { user } = await lucia.validateSession(sessionid);
-      if (!user) return new Response('Invalid session', { status: 401 });
-      if (!['superadmin', 'admin', 'editor'].includes(user.role)) {
-        return new Response(`Access denied`, { status: 403 });
-      }
+    // Auth required for all write operations
+    if (!sessionid) {
+      return new Response('Session ID required', { status: 401 });
+    }
+    const { user } = await lucia.validateSession(sessionid);
+    if (!user) return new Response('Invalid session', { status: 401 });
+    if (!['superadmin', 'admin', 'editor'].includes(user.role)) {
+      return new Response(`Access denied`, { status: 403 });
     }
 
     switch (action) {
-      case 'sync-external':
-        return await handleExternalSync();
       case 'create':
         return await handleCreateEvent(eventData);
       case 'update':
@@ -55,8 +51,6 @@ export const POST = async ({ request }) => {
         return await handleDeleteEvent(eventData);
       case 'toggle-visibility':
         return await handleToggleVisibility(eventData);
-      case 'force-refresh':
-        return await handleForceRefresh(eventData);
       default:
         return new Response('Invalid action', { status: 400 });
     }
@@ -65,27 +59,6 @@ export const POST = async ({ request }) => {
     return new Response('Server error', { status: 500 });
   }
 };
-
-async function handleExternalSync() {
-  try {
-    const { updateEvents } = await import('../../utils/eventbrite-scraper.js');
-    const hasChanges = await updateEvents();
-
-    if (hasChanges) {
-      // Re-seed updated events from filesystem into Turso
-      const { seedEventsToTurso } = await import('../../lib/seed-events.js');
-      await seedEventsToTurso();
-    }
-
-    return new Response(JSON.stringify({ success: true, hasChanges }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
-    console.error('Error syncing external events:', error);
-    return new Response('Error syncing external events', { status: 500 });
-  }
-}
 
 async function handleCreateEvent(eventData) {
   if (!eventData?.title || !eventData?.startDate) {
@@ -189,26 +162,3 @@ async function handleToggleVisibility(eventData) {
   }
 }
 
-async function handleForceRefresh(eventData) {
-  if (!eventData?.id) return new Response('Event ID required', { status: 400 });
-
-  try {
-    const { refreshSingleEvent } = await import('../../utils/eventbrite-scraper.js');
-    const refreshed = await refreshSingleEvent(eventData.id, eventData.redownloadImages ?? false);
-
-    if (refreshed) {
-      // Re-seed this event from filesystem into Turso
-      const { seedEventsToTurso } = await import('../../lib/seed-events.js');
-      await seedEventsToTurso();
-
-      return new Response(JSON.stringify({ success: true, message: 'Event refreshed.' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-    return new Response('Failed to refresh event', { status: 500 });
-  } catch (error) {
-    console.error('Error force refreshing event:', error);
-    return new Response('Error force refreshing event', { status: 500 });
-  }
-}

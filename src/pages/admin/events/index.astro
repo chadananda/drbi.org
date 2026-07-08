@@ -138,10 +138,6 @@ const getEventLocation = (event) => {
 
     <div class="flex flex-col lg:flex-row gap-4 mb-6">
       <div class="flex gap-4">
-        <button id="sync-external" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
-          <span>🔄</span>
-          Sync External Events
-        </button>
         <a href="/admin/events/add" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
           <span>➕</span>
           Add Event
@@ -330,12 +326,21 @@ const getEventLocation = (event) => {
                     {event.data.visible ? '👁️ Hide' : '🙈 Show'}
                   </button>
                   
-                  <a href={`/admin/events/${event.data.id}`} class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                    Edit
-                  </a>
+                  {event.data.source === 'humanitix' && event.data.externalId ? (
+                    <a href={`https://console.humanitix.com/console/events/${event.data.externalId}/overview`} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all" title="Edit on Humanitix — the source of truth for this event">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                      Edit on Humanitix ↗
+                    </a>
+                  ) : (
+                    <a href={`/admin/events/${event.data.id}`} class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
+                      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                      Edit
+                    </a>
+                  )}
                 </div>
               </div>
               
@@ -367,6 +372,7 @@ const getEventLocation = (event) => {
     endDate: event.data.endDate,
     location: event.data.location,
     source: event.data.source,
+    externalId: event.data.externalId,
     visible: event.data.visible,
     registrationUrl: event.data.registrationUrl,
     url: event.data.url,
@@ -564,11 +570,11 @@ const getEventLocation = (event) => {
                       ${event.visible ? '👁️ Hide' : '🙈 Show'}
                     </button>
                     
-                    <a href="/admin/events/${event.id}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
+                    <a href="${event.source === 'humanitix' && event.externalId ? `https://console.humanitix.com/console/events/${event.externalId}/overview` : `/admin/events/${event.id}`}" ${event.source === 'humanitix' && event.externalId ? 'target="_blank" rel="noopener noreferrer" title="Edit on Humanitix — the source of truth for this event"' : ''} class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                       </svg>
-                      Edit
+                      ${event.source === 'humanitix' && event.externalId ? 'Edit on Humanitix ↗' : 'Edit'}
                     </a>
                   </div>
                 </div>
@@ -608,39 +614,6 @@ const getEventLocation = (event) => {
       }
     });
     
-    // Sync external events
-    document.getElementById('sync-external')?.addEventListener('click', async () => {
-      const button = document.getElementById('sync-external');
-      const originalText = button.innerHTML;
-      button.innerHTML = '<span class="icon">⏳</span> Syncing...';
-      button.disabled = true;
-      
-      try {
-        const response = await fetch('/api/events', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'sync-external', sessionid })
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          if (result.hasChanges) {
-            alert('Events synced successfully! Refreshing page...');
-            window.location.reload();
-          } else {
-            alert('No new events found.');
-          }
-        } else {
-          alert('Failed to sync events. Please try again.');
-        }
-      } catch (error) {
-        console.error('Sync error:', error);
-        alert('Error syncing events. Check console for details.');
-      } finally {
-        button.innerHTML = originalText;
-        button.disabled = false;
-      }
-    });
     
     // Toggle visibility
     document.querySelectorAll('.toggle-visibility').forEach(button => {

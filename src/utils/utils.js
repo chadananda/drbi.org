@@ -1169,10 +1169,6 @@ export const crontasks = async () => {
       }
     } catch (error) {
       console.error('❌ Error syncing events:', error);
-      // Fallback to direct scraper call if API fails
-      console.log('🔄 Falling back to direct scraper...');
-      const { updateEvents } = await import('./eventbrite-scraper.js');
-      await updateEvents();
     }
     
     console.log('✅ All cron tasks completed');

@@ -54,10 +54,7 @@ try {
     priceCurrency: event.price?.currency || 'USD',
     highlights: event.highlights?.join(', ') || '',
     mainImage: event.mainImage || '',
-    teacherImage: event.teacherImage || '',
-    isEventbrite: (event.registrationUrl || event.url || '').includes('eventbrite.com') ? 'true' : 'false',
-    eventbriteId: (event.registrationUrl || event.url || '').includes('eventbrite.com') ? 
-      (event.registrationUrl || event.url || '').split('/').pop()?.split('-').pop() || '' : ''
+    teacherImage: event.teacherImage || ''
   };
   
 } catch (error) {
@@ -77,8 +74,6 @@ if (Astro.request.method === "POST" && event) {
     errorMsg = 'Title is required';
   } else if (!startDates || startDates.length === 0 || !startDates[0]) {
     errorMsg = 'At least one start date is required';
-  } else if (postData.isEventbrite === 'true' && !postData.eventbriteId?.trim()) {
-    errorMsg = 'Eventbrite ID is required for Eventbrite events';
   } else {
     // Update event with all dates (first date + additionalDates array)
     try {
@@ -104,12 +99,8 @@ if (Astro.request.method === "POST" && event) {
         startDate: new Date(startDates[0] + '-07:00').toISOString(),
         endDate: new Date((endDates[0] || startDates[0]) + '-07:00').toISOString(),
         additionalDates: additionalDates.length > 0 ? additionalDates : [],
-        registrationUrl: postData.isEventbrite === 'true'
-          ? `https://www.eventbrite.com/e/${postData.eventbriteId.trim()}`
-          : (postData.registrationUrl?.trim() || 'https://drbi.org'),
-        url: postData.isEventbrite === 'true'
-          ? `https://www.eventbrite.com/e/${postData.eventbriteId.trim()}`
-          : (postData.registrationUrl?.trim() || 'https://drbi.org'),
+        registrationUrl: postData.registrationUrl?.trim() || 'https://drbi.org',
+        url: postData.registrationUrl?.trim() || 'https://drbi.org',
         organizer: postData.organizer?.trim() || 'DRBI',
         visible: postData.visible === 'true',
         featured: postData.featured === 'true',
@@ -135,8 +126,6 @@ if (Astro.request.method === "POST" && event) {
         highlights: postData.highlights ? postData.highlights.split(',').map(h => h.trim()).filter(Boolean) : [],
         mainImage: postData.mainImage?.trim() || null,
         teacherImage: postData.teacherImage?.trim() || null,
-        isEventbrite: postData.isEventbrite === 'true',
-        eventbriteId: postData.isEventbrite === 'true' ? postData.eventbriteId?.trim() : null,
         manuallyEdited: true,
         lastManualEdit: new Date().toISOString()
       };
@@ -176,26 +165,6 @@ if (Astro.request.method === "POST" && event) {
       )}
       <div class="flex flex-wrap gap-4 items-center">
         <a href="/admin/events" class="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors">← Back to Events</a>
-        {event?.source === 'external' && (
-          <button type="button" id="refresh-from-eventbrite" class="inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors">
-            🔄 Re-sync from Eventbrite
-          </button>
-        )}
-        {event?.source === 'external' && (
-          <button type="button" id="refresh-with-images" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
-            🖼️ Re-sync + Re-download Images
-          </button>
-        )}
-        {event?.source === 'external' && !event?.manuallyEdited && (
-          <span class="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-lg text-sm font-medium">
-            ℹ️ Manual edits will prevent automatic syncing
-          </span>
-        )}
-        {event?.source === 'external' && event?.manuallyEdited && (
-          <span class="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-lg text-sm font-medium">
-            ✅ Protected from auto-sync (manually edited)
-          </span>
-        )}
       </div>
     </header>
 
@@ -707,79 +676,6 @@ if (Astro.request.method === "POST" && event) {
 
     // Make removeImage globally available
     window.removeImage = removeImage;
-
-    // Refresh from Eventbrite functionality (data only)
-    document.getElementById('refresh-from-eventbrite')?.addEventListener('click', async function() {
-      const confirmed = confirm(
-        '🔄 Re-sync Event Data\\n\\n' +
-        'This will refresh event details from Eventbrite (title, description, dates, etc.)\\n\\n' +
-        'Images will NOT be re-downloaded.\\n\\n' +
-        'Proceed?'
-      );
-
-      if (confirmed) {
-        await doRefresh(false);
-      }
-    });
-
-    // Refresh with images functionality
-    document.getElementById('refresh-with-images')?.addEventListener('click', async function() {
-      const confirmed = confirm(
-        '🖼️ Full Re-sync with Images\\n\\n' +
-        '⚠️ WARNING: This will:\\n' +
-        '• Refresh all event details from Eventbrite\\n' +
-        '• Re-download and replace the main image\\n' +
-        '• Re-download and replace the teacher image\\n\\n' +
-        'This may take a few seconds. Proceed?'
-      );
-
-      if (confirmed) {
-        await doRefresh(true);
-      }
-    });
-
-    // Shared refresh function
-    async function doRefresh(includeImages) {
-      const button = includeImages
-        ? document.getElementById('refresh-with-images')
-        : document.getElementById('refresh-from-eventbrite');
-
-      const originalText = button.innerHTML;
-      button.disabled = true;
-      button.innerHTML = includeImages
-        ? '⏳ Re-downloading images...'
-        : '⏳ Syncing...';
-
-      try {
-        const response = await fetch(`${window.location.origin}/api/events`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'force-refresh',
-            eventData: {
-              id: document.querySelector('[data-event-id]')?.dataset?.eventId,
-              redownloadImages: includeImages
-            },
-            sessionid: sessionid
-          })
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          alert(result.message || 'Event refreshed from Eventbrite successfully!');
-          window.location.reload();
-        } else {
-          const errorText = await response.text();
-          alert('Failed to refresh event: ' + errorText);
-        }
-      } catch (error) {
-        console.error('Refresh error:', error);
-        alert('Error refreshing from Eventbrite: ' + error.message);
-      } finally {
-        button.disabled = false;
-        button.innerHTML = originalText;
-      }
-    }
 
     // Make setupImageUpload globally available
     window.setupImageUpload = setupImageUpload;
