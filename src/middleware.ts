@@ -19,7 +19,7 @@ function applySecurityHeaders(headers: Headers): void {
     [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://gsi.cloudflare.com https://static.cloudflareinsights.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https://ik.imagekit.io https://cdn.shrtr.com https://lh3.googleusercontent.com https://res.cloudinary.com https://images.humanitix.com https://img.youtube.com https://i.ytimg.com",
       "connect-src 'self' https://accounts.google.com https://apis.google.com https://static.cloudflareinsights.com",

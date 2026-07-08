@@ -37,13 +37,13 @@ const quotes = [
 
 <div id="superhero" class="relative w-full overflow-hidden flex flex-col">
 
-  <!-- Video background: poster gives instant first paint; preload=none defers video bytes until after LCP -->
-  <video loop muted autoplay playsinline preload="none"
+  <!-- Video background: the preloaded poster is the LCP; the video source is attached AFTER
+       page load (idle) so it never competes with LCP. No autoplay attr — JS plays it. -->
+  <video id="hero-video" loop muted playsinline preload="none"
     poster="/drbi-landscape.webp"
-    width="1280" height="720"
+    width="1280" height="720" data-src="/drbi-open_md.mp4"
     aria-hidden="true" tabindex="-1"
     class="w-full h-full absolute inset-0 z-0 object-cover">
-    <source src="/drbi-open_md.mp4" type="video/mp4">
   </video>
 
   <!-- Gradient overlay — heavier at bottom for quote legibility -->
@@ -85,6 +85,23 @@ const quotes = [
   </div>
 
 </div>
+
+<script is:inline>
+  (function () {
+    var start = function () {
+      var v = document.getElementById('hero-video');
+      if (!v || v.dataset.loaded) return;
+      v.dataset.loaded = '1';
+      var s = document.createElement('source');
+      s.src = v.dataset.src; s.type = 'video/mp4';
+      v.appendChild(s); v.load();
+      var p = v.play(); if (p && p.catch) p.catch(function () {});
+    };
+    var idle = window.requestIdleCallback || function (f) { setTimeout(f, 400); };
+    if (document.readyState === 'complete') idle(start);
+    else window.addEventListener('load', function () { idle(start); });
+  })();
+</script>
 
 <style>
   #superhero {
