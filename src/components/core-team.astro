@@ -8,12 +8,11 @@ const publishedTeamMembers = await getTeam().then(team => team.filter(({ data })
 
 
 
-
 <div class="mt-24">
- <h2 class="text-4xl lg:text-5xl lg:tracking-tight text-center">
-   Core <span class="text-indigo-600 font-bold">Team</span>
+ <h2 class="text-4xl lg:text-5xl lg:tracking-tight text-center font-serif font-light text-ink">
+   Core Team
  </h2>
- <p class="text-lg mt-4 text-slate-600 text-center">
+ <p class="text-lg mt-4 text-body text-center">
    {brand.siteName} is built by some awesome individuals.
  </p>
 </div>
@@ -30,14 +29,14 @@ const publishedTeamMembers = await getTeam().then(team => team.filter(({ data })
            width={400}
            height={400}
            formats={["webp", "jpg"]}
-           class="w-full h-full object-cover bg-white rounded transition group-hover:-translate-y-1 group-hover:shadow-xl"
+           class="w-full h-full object-cover bg-surface rounded transition group-hover:-translate-y-1 group-hover:shadow-xl"
            widths={[120, 188, 300, 372, 788, 1000, 1280]}
          />
        </div>
 
        <div class="mt-4 text-center">
-         <h3 class="text-lg text-gray-800">{teamMemberEntry.data.name}</h3>
-         <p class="text-sm text-slate-600">
+         <h3 class="text-lg text-ink">{teamMemberEntry.data.name}</h3>
+         <p class="text-sm text-body">
            {teamMemberEntry.data.title}
          </p>
        </div>

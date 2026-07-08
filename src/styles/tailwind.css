@@ -2,6 +2,37 @@
 
 @theme {
   --font-family-serif: Merriweather, ui-serif, Georgia, "Times New Roman", Times, serif;
+
+  /* ---------------------------------------------------------------------------
+     DRBI design tokens — the single source of truth for site colors.
+     These generate Tailwind utilities (text-ink, bg-paper, border-line, ...) AND
+     are available as CSS variables (var(--color-ink)) for hand-written CSS.
+     Warm, editorial palette: parchment surfaces, warm ink, terracotta/amber brand.
+     --------------------------------------------------------------------------- */
+
+  /* Surfaces */
+  --color-paper: #faf8f3;      /* warm page background */
+  --color-paper-2: #f4efe6;    /* alt section background */
+  --color-surface: #ffffff;    /* cards / panels */
+
+  /* Text */
+  --color-ink: #2a2521;        /* headings / primary (warm near-black) */
+  --color-body: #4b453e;       /* body copy */
+  --color-muted: #756c60;      /* secondary / captions (AA on paper/white) */
+
+  /* Lines */
+  --color-line: #e9e2d6;
+  --color-line-soft: #f2ece1;
+
+  /* Brand — terracotta / desert amber */
+  --color-brand: #b45309;      /* primary accent (AA on white) */
+  --color-brand-deep: #8a3f0b; /* hover / emphasis */
+  --color-brand-soft: #f6ecdd; /* tinted background */
+  --color-accent: #a9742f;     /* brass secondary accent */
+
+  /* Semantic (desaturated, warm) */
+  --color-success: #4b7a52;
+  --color-danger: #a8443b;
 }
 
 
