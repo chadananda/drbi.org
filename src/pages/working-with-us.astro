@@ -200,14 +200,16 @@ const volunteers = [
     <Image src={aboutusimg} alt="Desert Rose Bahá'í Institute"
       class="w-full h-[50vh] h-[50svh] min-h-[320px] object-cover object-center opacity-40" />
     <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-      <p class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-5">Come and Serve</p>
-      <h1 class="text-white text-4xl md:text-6xl font-serif font-light leading-tight max-w-3xl">
-        Volunteer at<br>Desert Rose
-      </h1>
-      <p class="mt-6 text-white/70 text-base md:text-lg max-w-xl leading-relaxed font-light">
-        "This is worship, to serve mankind and to minister to the needs of the people."
-      </p>
-      <p class="mt-2 text-amber-400/80 text-xs tracking-widest uppercase">— 'Abdu'l-Bahá</p>
+      <div class="bg-black/45 rounded-2xl px-8 py-6 max-w-3xl w-full mx-auto">
+        <p class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-5">Come and Serve</p>
+        <h1 class="text-white text-4xl md:text-6xl font-serif font-light leading-tight max-w-3xl">
+          Volunteer at<br>Desert Rose
+        </h1>
+        <p class="mt-6 text-white/95 text-base md:text-lg max-w-xl leading-relaxed font-light mx-auto">
+          "This is worship, to serve mankind and to minister to the needs of the people."
+        </p>
+        <p class="mt-2 text-amber-300 text-xs tracking-widest uppercase">— 'Abdu'l-Bahá</p>
+      </div>
     </div>
   </div>
 
@@ -261,21 +263,21 @@ const volunteers = [
           <div class="px-6">
             <div class="w-8 h-px bg-amber-400 mx-auto mb-5"></div>
             <h4 class="font-serif text-slate-800 mb-3">A Place to Stay</h4>
-            <p class="text-slate-500 text-sm leading-relaxed">
+            <p class="text-slate-600 text-sm leading-relaxed">
               On-site accommodation available for longer-term volunteers. A roof, a bed, and a community to come home to.
             </p>
           </div>
           <div class="px-6">
             <div class="w-8 h-px bg-amber-400 mx-auto mb-5"></div>
             <h4 class="font-serif text-slate-800 mb-3">Meals & Community</h4>
-            <p class="text-slate-500 text-sm leading-relaxed">
+            <p class="text-slate-600 text-sm leading-relaxed">
               Shared meals, shared work, shared purpose. You will not be alone here. You will be part of something.
             </p>
           </div>
           <div class="px-6">
             <div class="w-8 h-px bg-amber-400 mx-auto mb-5"></div>
             <h4 class="font-serif text-slate-800 mb-3">Meaningful Work</h4>
-            <p class="text-slate-500 text-sm leading-relaxed">
+            <p class="text-slate-600 text-sm leading-relaxed">
               Every task here — whether it is cooking, farming, teaching, or painting — contributes
               to something that will outlast your visit.
             </p>
@@ -314,8 +316,8 @@ const volunteers = [
                   </div>
                   <p class="text-slate-600 text-sm leading-relaxed mb-4">{role.description}</p>
                   <div class="border-t border-black/5 pt-4 mt-4 space-y-2">
-                    <p class="text-xs text-slate-500"><span class="font-semibold text-slate-700">Skills:</span> {role.skills}</p>
-                    <p class="text-xs text-slate-500"><span class="font-semibold text-slate-700">Ideal for:</span> {role.ideal}</p>
+                    <p class="text-xs text-slate-600"><span class="font-semibold text-slate-700">Skills:</span> {role.skills}</p>
+                    <p class="text-xs text-slate-600"><span class="font-semibold text-slate-700">Ideal for:</span> {role.ideal}</p>
                   </div>
                 </div>
               ))}

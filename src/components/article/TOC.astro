@@ -17,7 +17,7 @@ const tocHtml = (() => {
       ${heading.subheadings && heading.subheadings.length > 0 ? `
         <ul>
           ${heading.subheadings.map(subheading => `
-            <li class="overflow-hidden block text-ellipsis text-gray-500 mt-0.5 pl-2 ml-1 pt-0 pb-0 rounded-md text-xs lg:text-sm">
+            <li class="overflow-hidden block text-ellipsis text-gray-600 mt-0.5 pl-2 ml-1 pt-0 pb-0 rounded-md text-xs lg:text-sm">
               <a href="#${subheading.slug}" aria-label="${subheading.slug}" class="hover:text-gray-800 hover:underline">
                 ${subheading.text}
               </a>

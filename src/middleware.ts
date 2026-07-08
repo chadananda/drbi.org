@@ -6,6 +6,30 @@ import { env } from "cloudflare:workers";
 import { revalidateEventsIfStale } from "./lib/humanitix-sync";
 // import { defineMiddleware } from "astro:middleware";
 
+// Security headers applied to every response.
+// CSP is report-only so it cannot break inline scripts/GIS — safe to add immediately.
+function applySecurityHeaders(headers: Headers): void {
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  headers.set('X-Frame-Options', 'SAMEORIGIN');
+  headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  headers.set(
+    'Content-Security-Policy-Report-Only',
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://gsi.cloudflare.com https://static.cloudflareinsights.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: https://ik.imagekit.io https://cdn.shrtr.com https://lh3.googleusercontent.com https://res.cloudinary.com https://images.humanitix.com",
+      "connect-src 'self' https://accounts.google.com https://apis.google.com https://static.cloudflareinsights.com",
+      "frame-src https://accounts.google.com",
+      "object-src 'none'",
+      "base-uri 'self'",
+    ].join('; ')
+  );
+}
+
 // Public event pages are edge-cached for anonymous visitors. Entries are keyed by a
 // content-version token (`edge:events:v` in KV) that the Humanitix sync bumps only on a
 // real change — so a change invalidates every colo's cache at once, while unchanged polls
@@ -42,7 +66,11 @@ export const onRequest = async (context, next) => {
       const v = (await (env as any).SESSION?.get('edge:events:v')) || '0';
       cacheKey = new Request(`https://edge.cache${path}?v=${v}`);
       const hit = await cache.match(cacheKey);
-      if (hit) return hit;
+      if (hit) {
+        const h = new Response(hit.body, hit);
+        applySecurityHeaders(h.headers);
+        return h;
+      }
     } catch { cache = undefined; cacheKey = undefined; }
   }
   if (sessionId) {
@@ -78,6 +106,7 @@ export const onRequest = async (context, next) => {
   }
 
   const response = await next();
+  applySecurityHeaders(response.headers);
 
   // Store anonymous 200 HTML for the current content version. Browser TTL is 0 (always
   // revalidate against the edge) so a version bump is picked up on the next request.
