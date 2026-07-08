@@ -1,7 +1,7 @@
 ---
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
-import EventCalendar from "@components/EventCalendar.astro";
+import HomeFeaturedEvents from "@components/HomeFeaturedEvents.astro";
 import SuperHero from "@components/superhero.astro";
 import VideoPlayer from "@components/videoPlayer.astro";
 import Testimonials from "@components/testimonials.astro";
@@ -141,7 +141,7 @@ const websiteSchema = {
             Classes, workshops, retreats, and intensives. Open to everyone — Bahá'í and non-Bahá'í alike.
           </p>
         </div>
-        <EventCalendar view="timeline" />
+        <HomeFeaturedEvents limit={3} />
         <div class="text-center mt-12">
           <a href="/events"
             class="inline-block border border-slate-300 text-slate-600 px-10 py-3.5 rounded-full text-sm tracking-wide hover:bg-white hover:shadow-sm transition duration-200">

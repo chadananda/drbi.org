@@ -1,0 +1,102 @@
+---
+// Rich featured-event cards for the homepage. The generic timeline view was too sparse for
+// multi-day Humanitix events (image, date range, price, description). Self-contained.
+import { getVisibleEvents } from "../lib/queries";
+import { eventSlug } from "../lib/event-slug";
+import { imagekitUrl } from "../utils/utils.js";
+
+const { limit = 2 } = Astro.props;
+const now = new Date();
+
+const all = await getVisibleEvents().catch(() => []);
+const upcoming = all
+  .filter((e) => e?.data?.visible !== false)
+  .map((e) => ({ ...e, _start: new Date(e.data.startDate), _end: new Date(e.data.endDate || e.data.startDate) }))
+  .filter((e) => !isNaN(e._start) && e._end >= now)
+  .sort((a, b) => a._start - b._start)
+  .slice(0, limit);
+
+const AZ = "America/Phoenix";
+const fmtRange = (s, e) => {
+  const o = { month: "long", day: "numeric", timeZone: AZ };
+  if (!e || +e === +s || e.toDateString() === s.toDateString())
+    return s.toLocaleDateString("en-US", { weekday: "long", ...o, year: "numeric" });
+  const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
+  const left = s.toLocaleDateString("en-US", o);
+  const right = sameMonth ? String(e.getDate()) : e.toLocaleDateString("en-US", o);
+  return `${left} – ${right}, ${e.getFullYear()}`;
+};
+const stripHtml = (s) => (s || "").replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/gi, " ").replace(/\s+/g, " ").trim();
+const previewOf = (ev) => {
+  let t = stripHtml(ev.data.fullDescription || ev.data.shortDescription || "");
+  const n = (ev.data.name || "").trim();
+  if (n && t.toLowerCase().startsWith(n.toLowerCase())) t = t.slice(n.length).replace(/^[\s:·—–-]+/, "");
+  return t.length > 165 ? t.slice(0, 165).replace(/\s+\S*$/, "") + "…" : t;
+};
+const priceOf = (price) => {
+  if (!Array.isArray(price)) return "";
+  const amts = price.map((p) => Number(p?.amount)).filter((n) => Number.isFinite(n) && n > 0);
+  if (!amts.length) return "Free";
+  const lo = Math.min(...amts), hi = Math.max(...amts);
+  return lo === hi ? `$${lo}` : `$${lo}–$${hi}`;
+};
+const locOf = (ev) => {
+  const l = ev.data.location || {};
+  return l.online ? "Online" : (l.venue || l.address || "Desert Rose, Eloy AZ");
+};
+---
+
+{upcoming.length === 0 ? (
+  <p class="he-empty">No upcoming programs are scheduled right now — check back soon.</p>
+) : (
+  <div class="home-events">
+    {upcoming.map((ev) => (
+      <a href={`/events/${eventSlug(ev)}`} class="he-card">
+        {ev.data.mainImage && (
+          <div class="he-media">
+            <img src={imagekitUrl(ev.data.mainImage, { w: 560, h: 420, face: true })} alt={ev.data.name} loading="lazy" decoding="async" width="560" height="420" />
+          </div>
+        )}
+        <div class="he-body">
+          <p class="he-date">{fmtRange(ev._start, ev._end)}</p>
+          <h3 class="he-title">{ev.data.name}</h3>
+          {previewOf(ev) && <p class="he-desc">{previewOf(ev)}</p>}
+          <div class="he-meta">
+            <span class="he-loc">{locOf(ev)}</span>
+            {priceOf(ev.data.price) && <span class="he-price">{priceOf(ev.data.price)}</span>}
+          </div>
+          <span class="he-cta">Learn more &rarr;</span>
+        </div>
+      </a>
+    ))}
+  </div>
+)}
+
+<style>
+  .home-events { display: flex; flex-direction: column; gap: 1.5rem; max-width: 60rem; margin: 0 auto; }
+  .he-empty { text-align: center; color: #57534e; font-size: 1rem; }
+
+  .he-card {
+    display: grid; grid-template-columns: 1fr; background: #fff;
+    border: 1px solid #eae6df; border-radius: 18px; overflow: hidden; text-decoration: none;
+    box-shadow: 0 1px 2px rgba(60,45,20,.04); transition: box-shadow .2s, transform .2s, border-color .2s;
+  }
+  @media (min-width: 720px) { .he-card { grid-template-columns: 15rem 1fr; } }
+  .he-card:hover { box-shadow: 0 20px 44px -24px rgba(70,50,20,.35); transform: translateY(-2px); border-color: #e6d4b4; }
+
+  .he-media { position: relative; overflow: hidden; background: #f3efe8; min-height: 200px; }
+  @media (min-width: 720px) { .he-media { min-height: 100%; } }
+  .he-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+  .he-card:hover .he-media img { transform: scale(1.04); }
+
+  .he-body { padding: 1.6rem 1.7rem 1.7rem; display: flex; flex-direction: column; }
+  .he-date { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: #b45309; font-weight: 600; margin: 0 0 .55rem; }
+  .he-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.4rem; line-height: 1.25; color: #292524; margin: 0; transition: color .15s; }
+  .he-card:hover .he-title { color: #92400e; }
+  .he-desc { margin: .7rem 0 0; font-size: .92rem; line-height: 1.6; color: #57534e; }
+  .he-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; margin: 1rem 0 0; font-size: .82rem; color: #78716c; }
+  .he-loc { display: inline-flex; align-items: center; }
+  .he-price { display: inline-flex; align-items: center; padding: .12rem .6rem; border-radius: 999px; background: #f6eede; color: #92400e; font-weight: 600; }
+  .he-cta { margin-top: 1.1rem; font-size: .85rem; font-weight: 600; letter-spacing: .01em; color: #b45309; }
+  .he-card:hover .he-cta { color: #92400e; }
+</style>
