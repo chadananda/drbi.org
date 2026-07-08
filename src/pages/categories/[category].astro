@@ -18,7 +18,7 @@ const posts = allPosts.filter((ar) => ar.data.category === slug);
 const authors = await getTeam();
 ---
 
-<Layout title={slug} description={category?.data?.description}>
+<Layout title={category?.data?.category || slug} description={category?.data?.description || `Browse articles on ${category?.data?.category || slug} from Desert Rose Bahai Institute.`}>
   <Sectionhead>
     <Fragment slot="title"> Article Topics </Fragment>
     <Fragment slot="desc"> About  “{category?.data?.category}” </Fragment>

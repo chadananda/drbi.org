@@ -23,10 +23,12 @@ const pageURL = currentURL(Astro);
 //   footerMargin: boolean (optional, default true)
 
 
-const resolvedImageWithDomain = new URL( "/favicon.svg", Astro.site, ).toString();
-
+const siteBase = (Astro.site ?? "https://drbi.org").toString().replace(/\/$/, "");
+const defaultImage = siteBase + "/drbi-landscape.webp";
 // console.log ('resolvedImageWithDomain', resolvedImageWithDomain);
 const { title, footerMargin = true, description, image, noindex = false } = Astro.props;
+// Ensure OG image is always an absolute URL
+const resolvedImage = !image ? defaultImage : (image.startsWith("http") ? image : siteBase + image);
 
 const makeTitle = title +' | '+ site.site;
 const makeDesc = description || site.description;
@@ -90,11 +92,11 @@ const { title, footerMargin = true } = Astro.props;
           url: pageURL,
           type: "website",
           title: makeTitle,
-          image: image || resolvedImageWithDomain,
+          image: resolvedImage,
         },
         image: {
-          src: image || resolvedImageWithDomain,
-          alt: "Homepage Screenshot",
+          src: resolvedImage,
+          alt: makeTitle,
         },
       }}
     />

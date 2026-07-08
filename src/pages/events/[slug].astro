@@ -62,9 +62,56 @@ function beautifyDescription(html) {
   return out;
 }
 const richDesc = beautifyDescription(d.fullDescription);
+
+// Event JSON-LD — only emit for visible events with a start date
+const eventSchema = (!hidden && d.startDate) ? {
+  "@context": "https://schema.org",
+  "@type": "Event",
+  "name": title,
+  "description": plainDesc,
+  "startDate": d.startDate,
+  "endDate": d.endDate || d.startDate,
+  "eventStatus": "https://schema.org/EventScheduled",
+  "eventAttendanceMode": loc.online
+    ? "https://schema.org/OnlineEventAttendanceMode"
+    : "https://schema.org/OfflineEventAttendanceMode",
+  "location": loc.online ? {
+    "@type": "VirtualLocation",
+    "url": d.registrationUrl || "https://drbi.org/events"
+  } : {
+    "@type": "Place",
+    "name": loc.venue || "Desert Rose Bahai Institute",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": loc.address || "1950 W. William Sears Dr.",
+      "addressLocality": "Eloy",
+      "addressRegion": "AZ",
+      "postalCode": "85131",
+      "addressCountry": "US"
+    }
+  },
+  "organizer": {
+    "@type": "Organization",
+    "name": "Desert Rose Bahai Institute",
+    "url": "https://drbi.org"
+  },
+  "image": ogImage || "https://drbi.org/drbi-landscape.webp",
+  "url": `https://drbi.org/events/${slug}`,
+  ...(prices.length > 0 ? {
+    "offers": prices.map((p) => ({
+      "@type": "Offer",
+      "name": p.label,
+      "price": p.amount ? String(p.amount) : "0",
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "url": ticketsUrl || `https://drbi.org/events/${slug}`
+    }))
+  } : {})
+} : null;
 ---
 
 <Layout title={title} description={plainDesc} image={ogImage} noindex={hidden}>
+  {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} />}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" />

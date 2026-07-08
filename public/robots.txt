@@ -1,4 +1,19 @@
 User-agent: *
-Disallow: /admin/ 
+Disallow: /admin/
+Disallow: /api/
+Disallow: /login
 
-Sitemap: /sitemap-index.xml
+# Allow AI search crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://drbi.org/sitemap-index.xml

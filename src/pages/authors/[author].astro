@@ -19,7 +19,7 @@ const categories = await getCategories();
 // console.log('[author].astro, posts/author:', posts.length, author_slug);
 ---
 
-<Layout title={author?.data?.name || author_slug}>
+<Layout title={author?.data?.name || author_slug} description={author?.data?.bio ? author.data.bio.slice(0, 155) : `Articles and contributions by ${author?.data?.name || author_slug} at Desert Rose Bahai Institute.`}>
   <Container>
 
      <h1 class="text-center text-3xl font-bold text-gray-900 mt-10 mb-8">{author?.data?.name || author_slug}</h1>

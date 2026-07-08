@@ -43,9 +43,11 @@ const imageMap = {
 };
 const heroImage = (imageMap as Record<string, any>)[frontmatter.image] ?? undefined;
 const heroPosition = frontmatter.imagePosition ?? "object-center";
+// Resolve OG image to an absolute URL (heroImage is an Astro image object with .src)
+const ogImageSrc = heroImage?.src ? `https://drbi.org${heroImage.src}` : undefined;
 ---
 
-<Layout title={frontmatter.title} description={frontmatter.description} image={frontmatter.image}>
+<Layout title={frontmatter.title} description={frontmatter.description} image={ogImageSrc}>
 
   <PageHero
     label={frontmatter.label}

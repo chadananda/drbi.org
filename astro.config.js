@@ -22,13 +22,10 @@ import site from './src/data/site.json'; // for branding
 // import react from "@astrojs/react";
 const isDev = process.env.NODE_ENV === 'development';
 const siteMapConfig = {
+  // Exclude admin, API, and login routes — include everything else
   filter: url => {
-    // Define the base paths to include in the sitemap
-    const includedBasePaths = ['/', '/about/', '/contact/', '/privacy/'];
-    // Define the directory paths to include in the sitemap
-    const includedDirectories = ['/topics/', '/categories/', '/authors/'];
     const pathname = new URL(url).pathname;
-    return includedBasePaths.includes(pathname) || includedDirectories.some(dir => pathname.startsWith(dir));
+    return !pathname.startsWith('/admin') && !pathname.startsWith('/api') && pathname !== '/login';
   }
   // additionalSitemaps: [ site.url + '/sitemap_articles.xml' ]
 };

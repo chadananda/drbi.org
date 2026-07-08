@@ -10,6 +10,45 @@ import { Image } from "astro:assets";
 import artsImg from "../assets/drbi/arts.webp";
 import studyImg from "../assets/drbi/study.webp";
 import soilImg from "../assets/drbi/soil.webp";
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOrganization",
+  "name": "Desert Rose Bahai Institute",
+  "alternateName": "DRBI",
+  "url": "https://drbi.org",
+  "logo": "https://drbi.org/logo.svg",
+  "description": "A Bahai educational institute in Eloy, Arizona offering scripture study, arts, and agricultural programs. Founded by Marguerite Sears.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "1950 W. William Sears Dr.",
+    "addressLocality": "Eloy",
+    "addressRegion": "AZ",
+    "postalCode": "85131",
+    "addressCountry": "US"
+  },
+  "telephone": "+15204667961",
+  "email": "info@drbi.org",
+  "sameAs": [
+    "https://www.youtube.com/@drbi",
+    "https://www.facebook.com/drbi"
+  ],
+  "foundingDate": "1988",
+  "founder": {
+    "@type": "Person",
+    "name": "Marguerite Sears"
+  }
+};
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Desert Rose Bahai Institute",
+  "url": "https://drbi.org",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://drbi.org/topics/{search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+};
 ---
 
 <Layout
@@ -17,6 +56,8 @@ import soilImg from "../assets/drbi/soil.webp";
   description="A school for the furtherance of arts, agriculture and Bahá'í education. Founded by Marguerite Sears."
   image="/drbi-landscape.webp"
 >
+  <script type="application/ld+json" set:html={JSON.stringify(orgSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
   <div class="overflow-x-clip">
 
     <!-- 1. Hero -->

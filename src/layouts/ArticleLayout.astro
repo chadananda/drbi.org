@@ -15,9 +15,10 @@ const {footerMargin = true, post, author, category, language } = Astro.props;
 // Article <head> metadata (was entirely missing — empty <title>, no description/OG).
 const siteName = "Desert Rose Bahá'í Institute";
 const articleTitle = post?.data?.title ?? "Article";
-const pageTitle = `${articleTitle} — ${siteName}`;
+const pageTitle = `${articleTitle} | ${siteName}`;
 const pageDesc = post?.data?.description || post?.data?.desc_125 || post?.data?.abstract || "";
-const ogImage = post?.data?.image?.src || "";
+const ogImageRaw = post?.data?.image?.src || "";
+const ogImage = ogImageRaw && ogImageRaw.startsWith("http") ? ogImageRaw : "";
 const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://drbi.org").toString();
 ---
 <!doctype html>
@@ -34,7 +35,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? "https://drbi.org").
     {ogImage && <meta property="og:image" content={ogImage} />}
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary_large_image" />
-    <!-- <JSONLD {author} {category} {post} /> -->
+    {post && category && <JSONLD {author} {category} {post} />}
 
   </head>
 
