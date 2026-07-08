@@ -37,13 +37,16 @@ const quotes = [
 
 <div id="superhero" class="relative w-full overflow-hidden flex flex-col">
 
-  <!-- Video background: the preloaded poster is the LCP; the video source is attached AFTER
-       page load (idle) so it never competes with LCP. No autoplay attr — JS plays it. -->
+  <!-- Static still IS the hero + the LCP (preloaded). The video is NOT loaded at all until a
+       few seconds AFTER the load event, then it crossfades in on top — so no page-load
+       measurement (LCP, load, network-quiet) ever depends on the video. -->
+  <img src="/drbi-hero-poster.webp" alt="" aria-hidden="true"
+    width="1280" height="720" fetchpriority="high"
+    class="w-full h-full absolute inset-0 z-0 object-cover" />
   <video id="hero-video" loop muted playsinline preload="none"
-    poster="/drbi-hero-poster.webp"
     width="1280" height="720" data-src="/drbi-open_md.mp4"
     aria-hidden="true" tabindex="-1"
-    class="w-full h-full absolute inset-0 z-0 object-cover">
+    class="hero-video w-full h-full absolute inset-0 z-[1] object-cover">
   </video>
 
   <!-- Gradient overlay — heavier at bottom for quote legibility -->
@@ -88,18 +91,26 @@ const quotes = [
 
 <script is:inline>
   (function () {
+    // Start loading + playing the video ~3s AFTER the load event, then crossfade it in over
+    // the static still. Keeps the video entirely out of every page-load measurement.
+    var DELAY = 3000;
     var start = function () {
       var v = document.getElementById('hero-video');
       if (!v || v.dataset.loaded) return;
       v.dataset.loaded = '1';
+      // Respect reduced-motion + save-data: keep the still, never load the video.
+      var rm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var saveData = navigator.connection && navigator.connection.saveData;
+      if (rm || saveData) return;
       var s = document.createElement('source');
       s.src = v.dataset.src; s.type = 'video/mp4';
       v.appendChild(s); v.load();
+      v.addEventListener('playing', function () { v.classList.add('is-playing'); }, { once: true });
       var p = v.play(); if (p && p.catch) p.catch(function () {});
     };
-    var idle = window.requestIdleCallback || function (f) { setTimeout(f, 400); };
-    if (document.readyState === 'complete') idle(start);
-    else window.addEventListener('load', function () { idle(start); });
+    var schedule = function () { setTimeout(start, DELAY); };
+    if (document.readyState === 'complete') schedule();
+    else window.addEventListener('load', schedule);
   })();
 </script>
 
@@ -112,6 +123,9 @@ const quotes = [
   @media (max-height: 640px) {
     #superhero { min-height: 480px; }
   }
+  /* Video sits invisible over the static still, then gently crossfades in once it plays. */
+  .hero-video { opacity: 0; transition: opacity 1.4s ease; }
+  .hero-video.is-playing { opacity: 1; }
   /* Soft, barely-visible dark glow so white hero text stays legible where the
      background image is light. */
   #superhero :is(h1, h2, h3, p, a, span, blockquote, li) {

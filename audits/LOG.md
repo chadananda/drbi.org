@@ -9,3 +9,4 @@ Append one row after any audit or maintain run.
 | 2026-07-08 | security | report-only CSP + set:html/API review | added HSTS/nosniff/frame/referrer/permissions headers + CSP-RO | 0 | set:html trusted; secrets clean |
 | 2026-07-08 | seo | thin meta, sitemap gaps | titles/descriptions, JSON-LD, sitemap, robots.txt | 0 | SEO 100 |
 | 2026-07-08 | usability | tap targets, forms, empty states | labels/autocomplete/aria-live, empty states, 404, external rel, mobile overflow | 0 | |
+| 2026-07-08 | e2e | homepage event selectors stale after restyle | updated selectors + added 8 page-coverage features (pages-reachable crawl 30/30 green) | 0 | Lighthouse A11y/BP/SEO=100 across public site |
