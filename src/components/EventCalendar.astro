@@ -292,9 +292,7 @@ const displayEvents = upcomingEvents.map(event => {
                   </div>
                 )}
                 <a
-                  href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events/${eventSlug(event)}`}
-                  target={hasValidRegistrationUrl(event.data.registrationUrl) ? '_blank' : undefined}
-                  rel={hasValidRegistrationUrl(event.data.registrationUrl) ? 'noopener noreferrer' : undefined}
+                  href={`/events/${eventSlug(event)}`}
                   class="block no-underline text-inherit h-full"
                 >
                   <div class="relative w-full h-full bg-cover bg-center rounded-lg overflow-hidden" style={`background-image: url(${event.display.mainImage})`}>
@@ -350,11 +348,7 @@ const displayEvents = upcomingEvents.map(event => {
               <article class={`event-list-full-item ${event.isMinimal ? 'minimal-event' : ''}`}>
                 <div class="card-title-header">
                   <h3 class={`card-title ${event.isMinimal ? 'text-lg' : ''}`}>
-                    <a
-                      href={hasValidRegistrationUrl(event.data.registrationUrl) ? event.data.registrationUrl : `/events/${eventSlug(event)}`}
-                      target={hasValidRegistrationUrl(event.data.registrationUrl) ? '_blank' : undefined}
-                      rel={hasValidRegistrationUrl(event.data.registrationUrl) ? 'noopener noreferrer' : undefined}
-                    >
+                    <a href={`/events/${eventSlug(event)}`}>
                       {event.display.name}
                     </a>
                   </h3>
@@ -440,7 +434,7 @@ const displayEvents = upcomingEvents.map(event => {
                     </div>
                   ) : hasValidRegistrationUrl(event.data.registrationUrl) ? (
                     <div class="list-full-actions">
-                      <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer" class="read-more-btn">
+                      <a href={`/events/${eventSlug(event)}`} class="read-more-btn">
                         <span class="btn-text">Read More</span>
                         <span class="btn-icon">→</span>
                       </a>
@@ -475,7 +469,7 @@ const displayEvents = upcomingEvents.map(event => {
                 </div>
                 <div class="list-content">
                   <h3 class={`list-title ${event.isMinimal ? 'text-base' : ''}`}>
-                    <a href={event.data.registrationUrl} target="_blank" rel="noopener noreferrer">{event.display.name}</a>
+                    <a href={`/events/${eventSlug(event)}`}>{event.display.name}</a>
                   </h3>
                   <div class="list-meta">
                     <span class="time-icon" aria-hidden="true">🕐&nbsp;</span><time>{event.display.time}</time>
