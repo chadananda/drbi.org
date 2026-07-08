@@ -7,6 +7,7 @@ import { lucia } from '@lib/auth';
 import { transformS3Url } from '@utils/utils.js';
 import site from '@data/site.json';
 import { getEvents } from '@lib/queries';
+import { eventSlug } from '@lib/event-slug';
 import { getEnv } from '@lib/runtime-env';
 import { fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
 import { computeEventStats } from '@lib/event-registrations';
@@ -302,7 +303,7 @@ const getEventLocation = (event) => {
                     </button>
                   )}
                   
-                  <a href={event.data.registrationUrl || event.data.url} target="_blank" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                  <a href={`/events/${eventSlug(event)}`} target="_blank" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors" title="View the public DRBI event page">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                     </svg>
@@ -373,6 +374,7 @@ const getEventLocation = (event) => {
     location: event.data.location,
     source: event.data.source,
     externalId: event.data.externalId,
+    slug: eventSlug(event),
     visible: event.data.visible,
     registrationUrl: event.data.registrationUrl,
     url: event.data.url,
@@ -546,7 +548,7 @@ const getEventLocation = (event) => {
                       </button>
                     ` : ''}
                     
-                    <a href="${event.registrationUrl || event.url}" target="_blank" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                    <a href="/events/${event.slug}" target="_blank" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors" title="View the public DRBI event page">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                       </svg>
