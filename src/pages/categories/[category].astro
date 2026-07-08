@@ -27,20 +27,27 @@ const authors = await getTeam();
 
     <CategoryCard slug={slug} size="lg" category={category} />
 
-    <div class="flex flex-wrap justify-center gap-20 mt-10">
-      {Array.isArray(posts) && posts.map((post) => {
-        const author = authors.find((a) => a.data.id === post.data.author);
-        const notEnglish = post.data.language && post.data.language !== 'en';
-        return (
-          <div className={`flex-none articlePost ${notEnglish ? 'hidden' : ''}`}
-            data-title={post.data.title}
-            data-topics={post.data.topics.join(',')}
-            data-language={post.data.language}>
-            <PostThumb post={post} category={category} author={author} />
-          </div>
-        );
-      })}
-    </div>
+    {Array.isArray(posts) && posts.length > 0 ? (
+      <div class="flex flex-wrap justify-center gap-20 mt-10">
+        {posts.map((post) => {
+          const author = authors.find((a) => a.data.id === post.data.author);
+          const notEnglish = post.data.language && post.data.language !== 'en';
+          return (
+            <div className={`flex-none articlePost ${notEnglish ? 'hidden' : ''}`}
+              data-title={post.data.title}
+              data-topics={post.data.topics.join(',')}
+              data-language={post.data.language}>
+              <PostThumb post={post} category={category} author={author} />
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="text-center py-20 text-slate-600">
+        <p class="text-xl mb-3">No articles in this category yet.</p>
+        <p class="text-sm"><a href="/" class="text-amber-700 hover:underline">Return home</a> or <a href="/contact-us" class="text-amber-700 hover:underline">contact us</a>.</p>
+      </div>
+    )}
 
   </Container>
 </Layout>

@@ -50,9 +50,9 @@ import {companyLinks, resourceLinks} from "@data/siteLinks.json";
       { !!companyLinks.length && (
         <div>
           <h3 class="font-semibold text-xs uppercase tracking-widest text-slate-600 mb-3">DRBI</h3>
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col gap-0">
             {companyLinks.map((item) => (
-              <a href={item.path || "#"} class="text-sm text-slate-600 hover:text-amber-700 transition py-0.5">
+              <a href={item.path || "#"} class="text-sm text-slate-600 hover:text-amber-700 transition py-2 min-h-[44px] flex items-center">
                 {item.title}
               </a>
             ))}
@@ -64,9 +64,9 @@ import {companyLinks, resourceLinks} from "@data/siteLinks.json";
       { !!resourceLinks.length && (
         <div>
           <h3 class="font-semibold text-xs uppercase tracking-widest text-slate-600 mb-3">Resources</h3>
-          <div class="flex flex-col gap-1">
+          <div class="flex flex-col gap-0">
             {resourceLinks.map((item) => (
-              <a href={item.path || "#"} class="text-sm text-slate-600 hover:text-amber-700 transition py-0.5"
+              <a href={item.path || "#"} class="text-sm text-slate-600 hover:text-amber-700 transition py-2 min-h-[44px] flex items-center"
                 target={item.path?.startsWith('http') ? '_blank' : undefined}
                 rel={item.path?.startsWith('http') ? 'noopener noreferrer' : undefined}>
                 {item.title}
@@ -81,15 +81,15 @@ import {companyLinks, resourceLinks} from "@data/siteLinks.json";
 
   <div class="mt-8 pt-5 px-5 border-t border-slate-200">
     <Container>
-      <p class="text-center text-xs text-slate-600">
-        &copy; {new Date().getFullYear()} {brand.site} &mdash; All rights reserved.
-        &nbsp;&middot;&nbsp;
-        <a href="/terms" class="hover:text-amber-600 transition" rel="nofollow">Terms</a>
-        &nbsp;&middot;&nbsp;
-        <a href="/privacy" class="hover:text-amber-600 transition" rel="nofollow">Privacy</a>
-        &nbsp;&middot;&nbsp;
-        <a href="/login" class="hover:text-amber-600 transition" rel="nofollow">Admin</a>
-      </p>
+      <div class="flex flex-wrap justify-center items-center gap-x-1 gap-y-1 text-xs text-slate-600">
+        <span>&copy; {new Date().getFullYear()} {brand.site} &mdash; All rights reserved.</span>
+        <span aria-hidden="true" class="hidden sm:inline">&middot;</span>
+        <a href="/terms" class="px-2 py-2 hover:text-amber-600 transition" rel="nofollow">Terms</a>
+        <span aria-hidden="true">&middot;</span>
+        <a href="/privacy" class="px-2 py-2 hover:text-amber-600 transition" rel="nofollow">Privacy</a>
+        <span aria-hidden="true">&middot;</span>
+        <a href="/login" class="px-2 py-2 hover:text-amber-600 transition" rel="nofollow">Admin</a>
+      </div>
     </Container>
   </div>
 

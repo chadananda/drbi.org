@@ -23,13 +23,20 @@ const posts = await getPublishedPostsByType_Content('News');
 
   <section class="py-24 bg-white">
     <Container>
-      <div class="flex flex-wrap justify-center gap-14">
-        {Array.isArray(posts) && posts.map((post) => (
-          <div class="flex-none w-full max-w-[300px]">
-            <PostThumb post={post} />
-          </div>
-        ))}
-      </div>
+      {Array.isArray(posts) && posts.length > 0 ? (
+        <div class="flex flex-wrap justify-center gap-14">
+          {posts.map((post) => (
+            <div class="flex-none w-full max-w-[300px]">
+              <PostThumb post={post} />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="text-center py-20 text-slate-600">
+          <p class="text-xl mb-3">No news articles yet.</p>
+          <p class="text-sm">Check back soon, or <a href="/contact-us" class="text-amber-700 hover:underline">contact us</a> to stay connected.</p>
+        </div>
+      )}
     </Container>
   </section>
 

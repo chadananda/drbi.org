@@ -75,13 +75,13 @@ if (image) {
 <div dir="ltr" class="related-resource bg-gray-100 w-full h-24 grid grid-cols-[100px,1fr,auto] sm:grid-cols-[120px,1fr,auto] items-center border-2 border-gray-300 rounded-lg shadow transition-all duration-300 ease-in-out hover:border-gray-300 hover:shadow-lg overflow-hidden noprint">
 
   <!-- Left box with 20% width -->
-  <a href={downloadURL} aria-label={type} download target="_blank" class="box-left bg-gray-200 rounded-l-lg flex items-center justify-center text-base sm:text-lg font-bold text-center w-full h-full no-underline">
+  <a href={downloadURL} aria-label={type} download target="_blank" rel="noopener noreferrer" class="box-left bg-gray-200 rounded-l-lg flex items-center justify-center text-base sm:text-lg font-bold text-center w-full h-full no-underline">
     <div class="resource-type whitespace-normal break-words">{type}</div>
   </a>
 
   <!-- Center box with text centered vertically -->
   <div class="box-center flex-grow flex items-center justify-center px-5">
-    <a href={downloadURL}  aria-label={type}  download target="_blank" class="resource-link no-underline w-full h-full ">
+    <a href={downloadURL}  aria-label={type}  download target="_blank" rel="noopener noreferrer" class="resource-link no-underline w-full h-full ">
       <div class="leading-tight sm:leading-normal">
         <span class="resource-title text-sm sm:text-lg font-bold block">{title}</span>
         <span class="resource-description hidden text-xs xs:block text-gray-600">{description}</span>
@@ -90,7 +90,7 @@ if (image) {
   </div>
 
   <div class="box-right items-center justify-end relative w-auto flex">
-    <a href={downloadURL} aria-label={type}  download target="_blank" class="resource-link no-underline w-full h-full flex justify-center items-center position-relative">
+    <a href={downloadURL} aria-label={type}  download target="_blank" rel="noopener noreferrer" class="resource-link no-underline w-full h-full flex justify-center items-center position-relative">
 
       { thumb && (
         <img src={thumb} alt="thumbnail" class="resource-thumbnail h-20 opacity-90 m-2">

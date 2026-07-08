@@ -18,12 +18,19 @@ const categories = await getCategories()
       <Fragment slot="desc"> {categories.length} Categories  </Fragment>
     </Sectionhead>
 
-      <div class="flex flex-wrap justify-center gap-20 mt-5 pb-40">
-        {Array.isArray(categories) && categories.map((cat) => (
-           <div class="w-full max-w-96"> <CategoryCard slug={cat.id} size="md" category={cat} /> </div>
-        ))}
-        <ClientRouter/>
-      </div>
+      {Array.isArray(categories) && categories.length > 0 ? (
+        <div class="flex flex-wrap justify-center gap-20 mt-5 pb-40">
+          {categories.map((cat) => (
+            <div class="w-full max-w-96"> <CategoryCard slug={cat.id} size="md" category={cat} /> </div>
+          ))}
+          <ClientRouter/>
+        </div>
+      ) : (
+        <div class="text-center py-20 text-slate-600">
+          <p class="text-xl mb-3">No categories yet.</p>
+          <p class="text-sm"><a href="/" class="text-amber-700 hover:underline">Return home</a>.</p>
+        </div>
+      )}
 
   </Container>
 </Layout>

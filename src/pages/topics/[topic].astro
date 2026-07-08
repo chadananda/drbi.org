@@ -33,22 +33,28 @@ const topicSubtitle = topic?.description || 'Explore articles and teachings on t
   <div class="max-w-screen-xl mx-auto">
    { !!topic?.faqs && (<TopicFAQ faqs={topic?.faqs} max=8 />)}
   <Container class="w-full mx-5 sm:mx-8">
-    <div class="flex flex-wrap justify-center gap-20 mt-5">
-      {Array.isArray(posts) && posts.map((post) => {
-        // console.log('postThumb: ', post.id);
-        const author = authors.find(author => author.id === post.data.author);
-        const category = categories.find(category => category.id === post.data.category);
-        const notEnglish = post.data.language && post.data.language !== 'en';
-        return (
-          <div className={`flex-none articlePost ${notEnglish ? 'hidden' : ''}`}
-              data-title={post.data.title}
-              data-topics={post.data.topics.join(',')}
-              data-language={post.data.language}>
-            <PostThumb post={post} author={author} category={category} />
-          </div>
-        );
-      })}
-    </div>
+    {Array.isArray(posts) && posts.length > 0 ? (
+      <div class="flex flex-wrap justify-center gap-20 mt-5">
+        {posts.map((post) => {
+          const author = authors.find(author => author.id === post.data.author);
+          const category = categories.find(category => category.id === post.data.category);
+          const notEnglish = post.data.language && post.data.language !== 'en';
+          return (
+            <div className={`flex-none articlePost ${notEnglish ? 'hidden' : ''}`}
+                data-title={post.data.title}
+                data-topics={post.data.topics.join(',')}
+                data-language={post.data.language}>
+              <PostThumb post={post} author={author} category={category} />
+            </div>
+          );
+        })}
+      </div>
+    ) : (
+      <div class="text-center py-20 mt-5 text-slate-600">
+        <p class="text-xl mb-3">No articles on this topic yet.</p>
+        <p class="text-sm"><a href="/" class="text-amber-700 hover:underline">Return home</a> or browse <a href="/categories" class="text-amber-700 hover:underline">all categories</a>.</p>
+      </div>
+    )}
   </Container>
 </div>
 </Layout>

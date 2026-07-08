@@ -76,6 +76,7 @@ const PLOT_PRICE = 1500;
               name="fullName"
               required
               placeholder="Your full name"
+              autocomplete="name"
               aria-describedby="fullName-feedback"
               class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
             />
@@ -93,6 +94,8 @@ const PLOT_PRICE = 1500;
               name="email"
               required
               placeholder="you@example.com"
+              autocomplete="email"
+              inputmode="email"
               aria-describedby="email-feedback email-invalid-feedback"
               class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
             />
@@ -113,6 +116,8 @@ const PLOT_PRICE = 1500;
               name="phone"
               required
               placeholder="(555) 123-4567"
+              autocomplete="tel"
+              inputmode="tel"
               aria-describedby="phone-feedback"
               class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
             />
@@ -191,7 +196,7 @@ const PLOT_PRICE = 1500;
           </Button>
 
           <!-- Result message -->
-          <div id="result" class="mt-4 text-center"></div>
+          <div id="result" class="mt-4 text-center" role="status" aria-live="polite"></div>
         </form>
       </div>
     </div>

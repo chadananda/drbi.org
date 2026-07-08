@@ -60,7 +60,7 @@ const uniqueID = 'id-' + hashstr(categoryURL + size) //  Math.random().toString(
 
 {(size==="lg" && image) && (
  <div id={uniqueID}
-      class="categoryCard w-[800px] h-[300px] shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-1"
+      class="categoryCard w-full max-w-[800px] h-[300px] shadow-lg rounded-lg overflow-hidden mx-auto border-2 border-gray-200 p-1"
      transition:name={categoryName} >
   <a href={categoryURL} aria-label={categoryName}>
     <div class="relative h-full">

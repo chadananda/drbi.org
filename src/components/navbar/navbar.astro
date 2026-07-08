@@ -6,6 +6,7 @@ import links from "@data/siteLinks.json";
 import { adminNavForRole } from "@lib/admin-nav";
 import AdminIcon from "@components/admin/AdminIcon.astro";
 const menuLinks = links.menuLinks;
+const currentPath = Astro.url.pathname;
 
 // Auth state (set on every request by middleware.ts). Sign-in happens right here in
 // the navbar popover — there is no login page.
@@ -33,12 +34,16 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
 
       <!-- Priority+ links: shows as many as fit; the rest are moved into the hamburger by JS -->
       <nav id="primary-nav" aria-label="Primary" class="flex flex-1 min-w-0 items-center justify-center gap-1 overflow-hidden noprint">
-        {menuLinks.map((item) => (
-          <a href={item.path} data-astro-reload
-            class="nav-link whitespace-nowrap px-3 py-2 text-sm text-gray-600 hover:text-amber-700 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-500 focus-visible:outline-none transition rounded-full">
-            {item.title}
-          </a>
-        ))}
+        {menuLinks.map((item) => {
+          const isCurrent = currentPath === item.path || (item.path !== '/' && currentPath.startsWith(item.path));
+          return (
+            <a href={item.path} data-astro-reload
+              aria-current={isCurrent ? "page" : undefined}
+              class:list={["nav-link whitespace-nowrap px-3 py-2 text-sm hover:text-amber-700 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-amber-500 focus-visible:outline-none transition rounded-full", isCurrent ? "text-amber-700 font-medium" : "text-gray-600"]}>
+              {item.title}
+            </a>
+          );
+        })}
       </nav>
 
       <!-- Right controls: Contribute · hamburger (only when links overflow) · profile -->
@@ -99,7 +104,7 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
               <div>
                 <div class="flex items-center justify-between mb-3">
                   <p class="text-sm font-semibold text-gray-900">Sign in</p>
-                  <button id="nav-signin-close" type="button" aria-label="Close" class="text-gray-600 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:outline-none rounded">
+                  <button id="nav-signin-close" type="button" aria-label="Close sign-in panel" class="inline-flex items-center justify-center w-8 h-8 text-gray-600 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:outline-none rounded">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
@@ -111,19 +116,23 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
                   </div>
                 )}
                 <form id="nav-magic-form" class="space-y-2">
+                  <label for="nav-magic-email" class="sr-only">Email address</label>
                   <input type="email" id="nav-magic-email" name="email" required placeholder="you@example.com"
+                    autocomplete="email" inputmode="email"
                     class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500" />
                   <button type="submit" class="w-full px-4 py-2 text-sm font-medium text-white bg-amber-700 hover:bg-amber-600 rounded-full transition">Email me a sign-in link</button>
                 </form>
                 <details class="mt-3">
                   <summary class="text-xs text-gray-600 cursor-pointer">Superadmin password</summary>
                   <form id="nav-pass-form" class="mt-2 space-y-2">
-                    <input type="email" name="email" placeholder="Email" required class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm" />
-                    <input type="password" name="password" placeholder="Password" required class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm" />
+                    <label for="nav-pass-email" class="sr-only">Email address</label>
+                    <input type="email" id="nav-pass-email" name="email" placeholder="Email" required autocomplete="email" class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm" />
+                    <label for="nav-pass-password" class="sr-only">Password</label>
+                    <input type="password" id="nav-pass-password" name="password" placeholder="Password" required autocomplete="current-password" class="w-full border border-gray-300 rounded-lg py-2 px-3 text-sm" />
                     <button type="submit" class="w-full px-4 py-2 text-sm text-white bg-gray-700 hover:bg-gray-900 rounded-full transition">Sign in</button>
                   </form>
                 </details>
-                <p id="nav-auth-msg" class="text-sm mt-2" role="alert"></p>
+                <p id="nav-auth-msg" class="text-sm mt-2" role="status" aria-live="polite"></p>
               </div>
             )}
           </div>
