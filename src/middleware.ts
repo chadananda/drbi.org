@@ -86,7 +86,9 @@ export const onRequest = async (context, next) => {
       const bodyBuf = await response.clone().arrayBuffer();
       const headers = new Headers(response.headers);
       headers.delete('set-cookie');
-      headers.set('Cache-Control', 'public, max-age=0, s-maxage=86400');
+      // Short edge TTL so code deploys propagate quickly; content changes still flush
+      // instantly via the version token. (Long TTLs held stale HTML across deploys.)
+      headers.set('Cache-Control', 'public, max-age=0, s-maxage=120');
       headers.set('x-edge-cache', 'HIT'); // present only when later served from cache
       await cache.put(cacheKey, new Response(bodyBuf, { status: 200, headers }));
     } catch {}
