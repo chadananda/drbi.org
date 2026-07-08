@@ -21,55 +21,55 @@ const PLOT_PRICE = 1500;
     imageAlt="Desert Rose Memorial Gardens"
   />
 
-  <section class="py-24 bg-white">
+  <section class="py-24 bg-surface">
   <Container>
     <div class="grid md:grid-cols-2 gap-12 mx-auto max-w-5xl">
       <!-- Left side: Info -->
       <div>
-        <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Plot Reservations</p>
-        <h2 class="text-2xl md:text-3xl font-serif font-light text-slate-800 mb-5">
+        <p class="text-xs uppercase tracking-[0.25em] text-brand mb-4">Plot Reservations</p>
+        <h2 class="text-2xl md:text-3xl font-serif font-light text-ink mb-5">
           Reserve your place at Desert Rose
         </h2>
-        <p class="text-slate-600 leading-relaxed">
+        <p class="text-body leading-relaxed">
           Complete this form to request a cemetery plot at Desert Rose Memorial Gardens.
           We will send you a PayPal invoice that you can pay online or by phone.
         </p>
 
-        <div class="mt-8 p-6 bg-amber-50 border border-amber-100 rounded-2xl">
-          <p class="text-xs uppercase tracking-widest text-amber-700 mb-2">Current Pricing</p>
-          <p class="text-3xl font-serif font-light text-slate-800">$1,500 <span class="text-lg text-slate-600">per plot</span></p>
-          <p class="text-sm text-amber-700 mt-2">Invoice sent via PayPal — pay now or pay later</p>
+        <div class="mt-8 p-6 bg-brand-soft border border-line-soft rounded-2xl">
+          <p class="text-xs uppercase tracking-widest text-brand mb-2">Current Pricing</p>
+          <p class="text-3xl font-serif font-light text-ink">$1,500 <span class="text-lg text-body">per plot</span></p>
+          <p class="text-sm text-brand mt-2">Invoice sent via PayPal — pay now or pay later</p>
         </div>
 
-        <div class="mt-8 space-y-3 text-slate-600">
-          <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-3">Questions?</p>
+        <div class="mt-8 space-y-3 text-body">
+          <p class="text-xs uppercase tracking-[0.25em] text-brand mb-3">Questions?</p>
           <p>{site.address}</p>
-          <a href={`mailto:${site.email}`} class="block text-amber-700 hover:underline">{site.email}</a>
-          <a href={`tel:${site.phone}`} class="block text-amber-700 hover:underline">{site.phone}</a>
+          <a href={`mailto:${site.email}`} class="block text-brand hover:underline">{site.email}</a>
+          <a href={`tel:${site.phone}`} class="block text-brand hover:underline">{site.phone}</a>
         </div>
 
-        <div class="mt-8 p-6 bg-stone-50 border border-stone-100 rounded-2xl">
-          <p class="text-xs uppercase tracking-widest text-slate-600 mb-3">Funeral Services</p>
-          <p class="text-sm text-slate-600 leading-relaxed mb-3">
+        <div class="mt-8 p-6 bg-paper border border-line-soft rounded-2xl">
+          <p class="text-xs uppercase tracking-widest text-muted mb-3">Funeral Services</p>
+          <p class="text-sm text-body leading-relaxed mb-3">
             For caskets, headstones, and burial arrangements, please contact:
           </p>
-          <a href="https://www.jwarrenfuneral.com/" target="_blank" rel="noopener noreferrer" class="font-serif text-slate-800 hover:text-amber-700 transition">
+          <a href="https://www.jwarrenfuneral.com/" target="_blank" rel="noopener noreferrer" class="font-serif text-ink hover:text-brand transition">
             J. Warren Funeral Home
           </a>
           <br />
-          <a href="tel:5203742000" class="text-sm text-slate-600 hover:text-amber-700 transition">(520) 374-2000</a>
-          <p class="text-xs text-slate-600 mt-3">
-            J. Warren is familiar with Bahá'í burial practices and exclusively manages burials at Desert Rose.
+          <a href="tel:5203742000" class="text-sm text-body hover:text-brand transition">(520) 374-2000</a>
+          <p class="text-xs text-body mt-3">
+            J. Warren is familiar with Bahai burial practices and exclusively manages burials at Desert Rose.
           </p>
         </div>
       </div>
 
       <!-- Right side: Form -->
-      <div class="bg-stone-50 border border-stone-100 p-8 rounded-2xl">
+      <div class="bg-paper border border-line-soft p-8 rounded-2xl">
         <form id="purchase-form" class="needs-validation" novalidate>
           <!-- Full Name -->
           <div class="mb-5">
-            <label for="fullName" class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <label for="fullName" class="block text-sm font-medium text-body mb-1">Full Name *</label>
             <input
               type="text"
               id="fullName"
@@ -78,7 +78,7 @@ const PLOT_PRICE = 1500;
               placeholder="Your full name"
               autocomplete="name"
               aria-describedby="fullName-feedback"
-              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
+              class="w-full px-4 py-3 border placeholder:text-muted rounded-md outline-none focus:ring-4 border-line focus:border-slate-600 ring-slate-100 bg-surface"
             />
             <div id="fullName-feedback" class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
               Please provide your full name.
@@ -87,7 +87,7 @@ const PLOT_PRICE = 1500;
 
           <!-- Email -->
           <div class="mb-5">
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+            <label for="email" class="block text-sm font-medium text-body mb-1">Email Address *</label>
             <input
               type="email"
               id="email"
@@ -97,7 +97,7 @@ const PLOT_PRICE = 1500;
               autocomplete="email"
               inputmode="email"
               aria-describedby="email-feedback email-invalid-feedback"
-              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
+              class="w-full px-4 py-3 border placeholder:text-muted rounded-md outline-none focus:ring-4 border-line focus:border-slate-600 ring-slate-100 bg-surface"
             />
             <div id="email-feedback" class="empty-feedback text-red-400 text-sm mt-1">
               Please provide your email address.
@@ -109,7 +109,7 @@ const PLOT_PRICE = 1500;
 
           <!-- Phone -->
           <div class="mb-5">
-            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number *</label>
+            <label for="phone" class="block text-sm font-medium text-body mb-1">Phone Number *</label>
             <input
               type="tel"
               id="phone"
@@ -119,7 +119,7 @@ const PLOT_PRICE = 1500;
               autocomplete="tel"
               inputmode="tel"
               aria-describedby="phone-feedback"
-              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
+              class="w-full px-4 py-3 border placeholder:text-muted rounded-md outline-none focus:ring-4 border-line focus:border-slate-600 ring-slate-100 bg-surface"
             />
             <div id="phone-feedback" class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
               Please provide your phone number.
@@ -128,13 +128,13 @@ const PLOT_PRICE = 1500;
 
           <!-- Number of Plots -->
           <div class="mb-5">
-            <label for="numPlots" class="block text-sm font-medium text-gray-700 mb-1">Number of Plots *</label>
+            <label for="numPlots" class="block text-sm font-medium text-body mb-1">Number of Plots *</label>
             <select
               id="numPlots"
               name="numPlots"
               required
               aria-describedby="numPlots-feedback"
-              class="w-full px-4 py-3 border rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
+              class="w-full px-4 py-3 border rounded-md outline-none focus:ring-4 border-line focus:border-slate-600 ring-slate-100 bg-surface"
             >
               <option value="">Select number of plots</option>
               <option value="1">1 plot - $1,500</option>
@@ -155,7 +155,7 @@ const PLOT_PRICE = 1500;
 
           <!-- Who are the plots for -->
           <div class="mb-5">
-            <label for="plotsFor" class="block text-sm font-medium text-gray-700 mb-1">Who are the plots intended for? *</label>
+            <label for="plotsFor" class="block text-sm font-medium text-body mb-1">Who are the plots intended for? *</label>
             <textarea
               id="plotsFor"
               name="plotsFor"
@@ -163,7 +163,7 @@ const PLOT_PRICE = 1500;
               rows="3"
               placeholder="Please list the name(s) of who the plot(s) are intended for"
               aria-describedby="plotsFor-feedback"
-              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
+              class="w-full px-4 py-3 border placeholder:text-muted rounded-md outline-none focus:ring-4 border-line focus:border-slate-600 ring-slate-100 bg-surface"
             ></textarea>
             <div id="plotsFor-feedback" class="empty-feedback invalid-feedback text-red-400 text-sm mt-1">
               Please provide the names of who the plots are for.
@@ -172,21 +172,21 @@ const PLOT_PRICE = 1500;
 
           <!-- Special Requests -->
           <div class="mb-5">
-            <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Special Requests or Notes (Optional)</label>
+            <label for="notes" class="block text-sm font-medium text-body mb-1">Special Requests or Notes (Optional)</label>
             <textarea
               id="notes"
               name="notes"
               rows="3"
               placeholder="Any special requests, plot location preferences, or additional notes"
-              class="w-full px-4 py-3 border placeholder:text-slate-400 rounded-md outline-none focus:ring-4 border-slate-300 focus:border-slate-600 ring-slate-100 bg-white"
+              class="w-full px-4 py-3 border placeholder:text-muted rounded-md outline-none focus:ring-4 border-line focus:border-slate-600 ring-slate-100 bg-surface"
             ></textarea>
           </div>
 
           <!-- Total Display -->
-          <div class="mb-6 p-4 bg-white rounded-lg border border-slate-200">
+          <div class="mb-6 p-4 bg-surface rounded-lg border border-line">
             <div class="flex justify-between items-center">
-              <span class="text-gray-700 font-medium">Total Amount:</span>
-              <span id="totalAmount" class="text-2xl font-serif font-light text-amber-700">$0.00</span>
+              <span class="text-body font-medium">Total Amount:</span>
+              <span id="totalAmount" class="text-2xl font-serif font-light text-brand">$0.00</span>
             </div>
           </div>
 
@@ -272,7 +272,7 @@ form.addEventListener("submit", async function(e) {
 
   // Show loading state
   result.className = "mt-4 text-center";
-  result.innerHTML = `<span class="text-slate-600">Creating your invoice...</span>`;
+  result.innerHTML = `<span class="text-body">Creating your invoice...</span>`;
 
   // Disable submit button
   const submitBtn = form.querySelector('button[type="submit"]');
@@ -302,11 +302,11 @@ form.addEventListener("submit", async function(e) {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
           </div>
-          <h3 tabindex="-1" class="text-xl font-bold text-gray-900 mb-2 focus:outline-none">Invoice Sent!</h3>
-          <p class="text-gray-600 mb-4">
+          <h3 tabindex="-1" class="text-xl font-bold text-ink mb-2 focus:outline-none">Invoice Sent!</h3>
+          <p class="text-body mb-4">
             A PayPal invoice for <strong>$${data.total.toLocaleString()}</strong> has been sent to <strong>${formData.email}</strong>
           </p>
-          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 text-left mb-4">
+          <div class="bg-brand-soft border border-line rounded-lg p-4 text-left mb-4">
             <h4 class="font-semibold text-amber-800 mb-1">What happens next?</h4>
             <ul class="text-sm text-amber-700 space-y-1">
               <li>• Check your email for the PayPal invoice</li>
@@ -319,7 +319,7 @@ form.addEventListener("submit", async function(e) {
              class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
             Pay Now with PayPal
           </a>
-          <p class="text-sm text-gray-600 mt-3">Invoice ID: ${data.invoiceId}</p>
+          <p class="text-sm text-body mt-3">Invoice ID: ${data.invoiceId}</p>
         </div>
       `;
       // Move focus to the success heading so AT users are announced

@@ -58,16 +58,16 @@ const ogImageSrc = heroImage?.src ? `https://drbi.org${heroImage.src}` : undefin
     imagePosition={heroPosition}
   />
 
-  <div class="py-16 bg-white">
+  <div class="py-16 bg-surface">
     <Container>
       <div class="mx-auto prose prose-lg prose-slate
-        prose-headings:font-serif prose-headings:font-light prose-headings:text-slate-800
+        prose-headings:font-serif prose-headings:font-light prose-headings:text-ink
         prose-h2:text-3xl prose-h2:mt-14 prose-h2:mb-5
         prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-3
-        prose-p:text-slate-600 prose-p:leading-relaxed
-        prose-a:text-amber-700 prose-a:no-underline hover:prose-a:underline
-        prose-blockquote:border-amber-400 prose-blockquote:text-slate-600 prose-blockquote:italic
-        prose-strong:text-slate-700
+        prose-p:text-body prose-p:leading-relaxed
+        prose-a:text-brand prose-a:no-underline hover:prose-a:underline
+        prose-blockquote:border-brand prose-blockquote:text-body prose-blockquote:italic
+        prose-strong:text-ink
         max-w-[80ch]">
         <slot />
       </div>

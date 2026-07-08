@@ -43,23 +43,23 @@ return Astro.redirect('/', 302);
 
 <Layout
   title="Memories — Desert Rose"
-  description="A collection of photographs from Desert Rose Bahá'í Institute — past and present. Add your own.">
+  description="A collection of photographs from Desert Rose Bahai Institute — past and present. Add your own.">
 
   <PageHero
     label="A living archive"
     title="Memories of Desert Rose"
     subtitle="Moments from decades of learning, service, and community in the Sonoran Desert."
     image={heroImg}
-    imageAlt="Desert Rose Bahá'í Institute"
+    imageAlt="Desert Rose Bahai Institute"
     imagePosition="object-center"
   />
 
   <!-- Photo grid -->
-  <section class="py-16 md:py-24 bg-white">
+  <section class="py-16 md:py-24 bg-surface">
     <Container>
       <div class="text-center mb-12">
-        <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Our history in pictures</p>
-        <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800">
+        <p class="text-xs uppercase tracking-[0.25em] text-brand mb-4">Our history in pictures</p>
+        <h2 class="text-3xl md:text-4xl font-serif font-light text-ink">
           Desert Rose through the years
         </h2>
       </div>
@@ -67,7 +67,7 @@ return Astro.redirect('/', 302);
       <div class="columns-2 sm:columns-3 lg:columns-4 gap-3">
         {photos.map((photo) => (
           <div class="break-inside-avoid mb-3 group">
-            <div class="overflow-hidden rounded-xl bg-stone-100">
+            <div class="overflow-hidden rounded-xl bg-paper">
               <Image
                 src={photo.src}
                 alt={photo.caption}
@@ -75,7 +75,7 @@ return Astro.redirect('/', 302);
               />
             </div>
             {photo.caption && (
-              <p class="text-xs text-slate-600 mt-1.5 px-1 leading-snug">{photo.caption}</p>
+              <p class="text-xs text-muted mt-1.5 px-1 leading-snug">{photo.caption}</p>
             )}
           </div>
         ))}
@@ -84,66 +84,66 @@ return Astro.redirect('/', 302);
   </section>
 
   <!-- Contribute section -->
-  <section class="py-20 bg-stone-50 border-t border-stone-100">
+  <section class="py-20 bg-paper border-t border-line-soft">
     <Container>
       <div class="max-w-2xl mx-auto">
         <div class="text-center mb-12">
-          <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-4">Share your memories</p>
-          <h2 class="text-3xl md:text-4xl font-serif font-light text-slate-800 mb-5">
+          <p class="text-xs uppercase tracking-[0.25em] text-brand mb-4">Share your memories</p>
+          <h2 class="text-3xl md:text-4xl font-serif font-light text-ink mb-5">
             Were you here?
           </h2>
-          <p class="text-slate-600 leading-relaxed">
+          <p class="text-body leading-relaxed">
             If you attended a class, volunteered, served on the board, or simply visited —
             we'd love to add your photos to this archive. Old or new, every picture helps
             tell the story of Desert Rose.
           </p>
         </div>
 
-        <form id="memory-form" class="bg-white rounded-2xl border border-stone-100 p-8 shadow-sm space-y-5">
+        <form id="memory-form" class="bg-surface rounded-2xl border border-line-soft p-8 shadow-sm space-y-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div>
-              <label for="mem-name" class="block text-sm font-medium text-slate-700 mb-1">Your name</label>
+              <label for="mem-name" class="block text-sm font-medium text-body mb-1">Your name</label>
               <input type="text" id="mem-name" name="name" required placeholder="Full name"
-                class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-white placeholder:text-slate-400" />
+                class="w-full px-4 py-3 border border-line rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-surface placeholder:text-muted" />
             </div>
             <div>
-              <label for="mem-email" class="block text-sm font-medium text-slate-700 mb-1">Email address</label>
+              <label for="mem-email" class="block text-sm font-medium text-body mb-1">Email address</label>
               <input type="email" id="mem-email" name="email" required placeholder="you@example.com"
-                class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-white placeholder:text-slate-400" />
+                class="w-full px-4 py-3 border border-line rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-surface placeholder:text-muted" />
             </div>
           </div>
 
           <div>
-            <label for="mem-caption" class="block text-sm font-medium text-slate-700 mb-1">Caption or story <span class="text-slate-600 font-normal">(optional)</span></label>
+            <label for="mem-caption" class="block text-sm font-medium text-body mb-1">Caption or story <span class="text-muted font-normal">(optional)</span></label>
             <textarea id="mem-caption" name="caption" rows="3" placeholder="When was this taken? Who is in it? What was happening?"
-              class="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-white placeholder:text-slate-400 resize-none"></textarea>
+              class="w-full px-4 py-3 border border-line rounded-lg text-sm outline-none focus:ring-4 ring-amber-100 focus:border-amber-400 bg-surface placeholder:text-muted resize-none"></textarea>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Photos</label>
+            <label class="block text-sm font-medium text-body mb-2">Photos</label>
             <label for="mem-files"
-              class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-stone-200 rounded-xl cursor-pointer hover:border-amber-400 hover:bg-amber-50/30 transition duration-200 group">
-              <svg class="w-8 h-8 text-stone-300 group-hover:text-amber-400 mb-2 transition duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-line rounded-xl cursor-pointer hover:border-amber-400 hover:bg-brand-soft/30 transition duration-200 group">
+              <svg class="w-8 h-8 text-muted group-hover:text-amber-400 mb-2 transition duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span class="text-sm text-slate-600 group-hover:text-amber-700 transition duration-200">Click to select photos</span>
-              <span class="text-xs text-slate-600 mt-1">JPG, PNG, WEBP — up to 10 files</span>
+              <span class="text-sm text-body group-hover:text-brand transition duration-200">Click to select photos</span>
+              <span class="text-xs text-muted mt-1">JPG, PNG, WEBP — up to 10 files</span>
               <input type="file" id="mem-files" name="photos" accept="image/*" multiple class="hidden" />
             </label>
-            <p id="file-list" class="text-xs text-slate-600 mt-2"></p>
+            <p id="file-list" class="text-xs text-muted mt-2"></p>
           </div>
 
           <button type="submit"
-            class="w-full bg-amber-700 hover:bg-amber-600 text-white py-3.5 rounded-full text-sm tracking-[0.12em] uppercase transition duration-200 font-medium">
+            class="w-full bg-brand hover:bg-brand-deep text-white py-3.5 rounded-full text-sm tracking-[0.12em] uppercase transition duration-200 font-medium">
             Submit My Photos
           </button>
 
           <div id="mem-result" class="hidden text-center py-4"></div>
         </form>
 
-        <p class="text-center text-slate-600 text-xs mt-6">
+        <p class="text-center text-muted text-xs mt-6">
           You can also email photos directly to
-          <a href="mailto:info@drbi.org" class="text-amber-700 hover:underline">info@drbi.org</a>
+          <a href="mailto:info@drbi.org" class="text-brand hover:underline">info@drbi.org</a>
         </p>
       </div>
     </Container>
@@ -168,7 +168,7 @@ return Astro.redirect('/', 302);
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
     btn.disabled = true;
-    btn.textContent = 'Sending…';
+    btn.textContent = 'Sending...';
 
     const data = new FormData(form);
 
@@ -185,8 +185,8 @@ return Astro.redirect('/', 302);
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
             </div>
-            <p class="font-serif text-slate-800 text-xl mb-2">Thank you!</p>
-            <p class="text-slate-600 text-sm">We received your photos and will add them to the archive soon.</p>
+            <p class="font-serif text-ink text-xl mb-2">Thank you!</p>
+            <p class="text-body text-sm">We received your photos and will add them to the archive soon.</p>
           </div>`;
       } else {
         throw new Error(json.error || 'Upload failed');

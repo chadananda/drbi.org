@@ -18,10 +18,10 @@ const posts = await getPublishedPostsByType_Content('News');
     title="Desert Rose News"
     subtitle="Updates, reflections, and stories from our community of learners and servants."
     image={newsImg}
-    imageAlt="Desert Rose Bahá'í Institute"
+    imageAlt="Desert Rose Bahai Institute"
   />
 
-  <section class="py-24 bg-white">
+  <section class="py-24 bg-surface">
     <Container>
       {Array.isArray(posts) && posts.length > 0 ? (
         <div class="flex flex-wrap justify-center gap-14">
@@ -32,9 +32,9 @@ const posts = await getPublishedPostsByType_Content('News');
           ))}
         </div>
       ) : (
-        <div class="text-center py-20 text-slate-600">
+        <div class="text-center py-20 text-body">
           <p class="text-xl mb-3">No news articles yet.</p>
-          <p class="text-sm">Check back soon, or <a href="/contact-us" class="text-amber-700 hover:underline">contact us</a> to stay connected.</p>
+          <p class="text-sm">Check back soon, or <a href="/contact-us" class="text-brand hover:underline">contact us</a> to stay connected.</p>
         </div>
       )}
     </Container>
