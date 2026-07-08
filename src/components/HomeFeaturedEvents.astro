@@ -1,6 +1,6 @@
 ---
-// Rich featured-event cards for the homepage. The generic timeline view was too sparse for
-// multi-day Humanitix events (image, date range, price, description). Self-contained.
+// Conversion-focused featured-event cards for the homepage: dramatic date, live countdown,
+// and a strong "reserve" CTA. Enticing sign-ups is the homepage's primary job.
 import { getVisibleEvents } from "../lib/queries";
 import { eventSlug } from "../lib/event-slug";
 import { imagekitUrl } from "../utils/utils.js";
@@ -17,32 +17,34 @@ const upcoming = all
   .slice(0, limit);
 
 const AZ = "America/Phoenix";
-const fmtRange = (s, e) => {
-  const o = { month: "long", day: "numeric", timeZone: AZ };
-  if (!e || +e === +s || e.toDateString() === s.toDateString())
-    return s.toLocaleDateString("en-US", { weekday: "long", ...o, year: "numeric" });
+const monthOf = (d) => d.toLocaleDateString("en-US", { month: "short", timeZone: AZ }).toUpperCase();
+const dayRange = (s, e) => {
+  if (!e || +e === +s || e.toDateString() === s.toDateString()) return String(s.getDate());
   const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
-  const left = s.toLocaleDateString("en-US", o);
-  const right = sameMonth ? String(e.getDate()) : e.toLocaleDateString("en-US", o);
-  return `${left} – ${right}, ${e.getFullYear()}`;
+  return sameMonth ? `${s.getDate()}–${e.getDate()}` : `${s.getDate()} ${monthOf(s)} – ${e.getDate()} ${monthOf(e)}`;
+};
+const weekdayOf = (s, e) => {
+  const w = (d) => d.toLocaleDateString("en-US", { weekday: "long", timeZone: AZ });
+  if (!e || e.toDateString() === s.toDateString()) return w(s);
+  return `${w(s)}–${e.toLocaleDateString("en-US", { weekday: "short", timeZone: AZ })}`;
 };
 const stripHtml = (s) => (s || "").replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/gi, " ").replace(/\s+/g, " ").trim();
 const previewOf = (ev) => {
   let t = stripHtml(ev.data.fullDescription || ev.data.shortDescription || "");
   const n = (ev.data.name || "").trim();
   if (n && t.toLowerCase().startsWith(n.toLowerCase())) t = t.slice(n.length).replace(/^[\s:·—–-]+/, "");
-  return t.length > 165 ? t.slice(0, 165).replace(/\s+\S*$/, "") + "…" : t;
+  t = t.replace(/\s+::\s+/g, " — ");
+  return t.length > 150 ? t.slice(0, 150).replace(/\s+\S*$/, "") + "…" : t;
 };
 const priceOf = (price) => {
   if (!Array.isArray(price)) return "";
   const amts = price.map((p) => Number(p?.amount)).filter((n) => Number.isFinite(n) && n > 0);
   if (!amts.length) return "Free";
-  const lo = Math.min(...amts), hi = Math.max(...amts);
-  return lo === hi ? `$${lo}` : `$${lo}–$${hi}`;
+  return `$${Math.min(...amts)}`;
 };
 const locOf = (ev) => {
   const l = ev.data.location || {};
-  return l.online ? "Online" : (l.venue || l.address || "Desert Rose, Eloy AZ");
+  return l.online ? "Online" : (l.venue || "Desert Rose, Eloy AZ");
 };
 ---
 
@@ -51,52 +53,120 @@ const locOf = (ev) => {
 ) : (
   <div class="home-events">
     {upcoming.map((ev) => (
-      <a href={`/events/${eventSlug(ev)}`} class="he-card">
-        {ev.data.mainImage && (
-          <div class="he-media">
-            <img src={imagekitUrl(ev.data.mainImage, { w: 560, h: 420, face: true })} alt={ev.data.name} loading="lazy" decoding="async" width="560" height="420" />
-          </div>
-        )}
+      <article class="he-card">
+        <a href={`/events/${eventSlug(ev)}`} class="he-media" aria-label={ev.data.name}>
+          {ev.data.mainImage && (
+            <img src={imagekitUrl(ev.data.mainImage, { w: 640, h: 520, face: true })} alt={ev.data.name} loading="lazy" decoding="async" width="640" height="520" />
+          )}
+          <span class="he-countdown" data-event-start={ev.data.startDate} aria-hidden="true"></span>
+        </a>
+
         <div class="he-body">
-          <p class="he-date">{fmtRange(ev._start, ev._end)}</p>
-          <h3 class="he-title">{ev.data.name}</h3>
-          {previewOf(ev) && <p class="he-desc">{previewOf(ev)}</p>}
-          <div class="he-meta">
-            <span class="he-loc">{locOf(ev)}</span>
-            {priceOf(ev.data.price) && <span class="he-price">{priceOf(ev.data.price)}</span>}
+          <div class="he-datebox">
+            <span class="he-month">{monthOf(ev._start)}</span>
+            <span class="he-days">{dayRange(ev._start, ev._end)}</span>
+            <span class="he-year">{ev._start.getFullYear()}</span>
           </div>
-          <span class="he-cta">Learn more &rarr;</span>
+          <div class="he-main">
+            <p class="he-weekday">{weekdayOf(ev._start, ev._end)}</p>
+            <h3 class="he-title"><a href={`/events/${eventSlug(ev)}`}>{ev.data.name}</a></h3>
+            {previewOf(ev) && <p class="he-desc">{previewOf(ev)}</p>}
+            <div class="he-actions">
+              <a href={`/events/${eventSlug(ev)}`} class="he-cta">Reserve your spot &rarr;</a>
+              <span class="he-meta">
+                <span>{locOf(ev)}</span>
+                {priceOf(ev.data.price) && <span class="he-dot">&middot;</span>}
+                {priceOf(ev.data.price) && <span class="he-price">from {priceOf(ev.data.price)}</span>}
+              </span>
+            </div>
+          </div>
         </div>
-      </a>
+      </article>
     ))}
   </div>
 )}
 
 <style>
-  .home-events { display: flex; flex-direction: column; gap: 1.5rem; max-width: 60rem; margin: 0 auto; }
-  .he-empty { text-align: center; color: #57534e; font-size: 1rem; }
+  .home-events { display: flex; flex-direction: column; gap: 1.75rem; max-width: 62rem; margin: 0 auto; }
+  .he-empty { text-align: center; color: var(--color-muted); font-size: 1rem; }
 
   .he-card {
-    display: grid; grid-template-columns: 1fr; background: #fff;
-    border: 1px solid #eae6df; border-radius: 18px; overflow: hidden; text-decoration: none;
-    box-shadow: 0 1px 2px rgba(60,45,20,.04); transition: box-shadow .2s, transform .2s, border-color .2s;
+    display: grid; grid-template-columns: 1fr; background: var(--color-surface);
+    border: 1px solid var(--color-line); border-radius: 20px; overflow: hidden;
+    box-shadow: 0 1px 2px rgba(60,45,20,.05); transition: box-shadow .25s, transform .25s, border-color .25s;
   }
-  @media (min-width: 720px) { .he-card { grid-template-columns: 15rem 1fr; } }
-  .he-card:hover { box-shadow: 0 20px 44px -24px rgba(70,50,20,.35); transform: translateY(-2px); border-color: #e6d4b4; }
+  @media (min-width: 760px) { .he-card { grid-template-columns: 17rem 1fr; } }
+  .he-card:hover { box-shadow: 0 26px 50px -26px rgba(70,50,20,.4); transform: translateY(-3px); border-color: #e6d4b4; }
 
-  .he-media { position: relative; overflow: hidden; background: #f3efe8; min-height: 200px; }
-  @media (min-width: 720px) { .he-media { min-height: 100%; } }
-  .he-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
-  .he-card:hover .he-media img { transform: scale(1.04); }
+  /* Media + countdown */
+  .he-media { position: relative; display: block; overflow: hidden; background: #f3efe8; min-height: 220px; }
+  @media (min-width: 760px) { .he-media { min-height: 100%; } }
+  .he-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .55s ease; }
+  .he-card:hover .he-media img { transform: scale(1.05); }
+  .he-countdown {
+    position: absolute; top: .85rem; left: .85rem; display: inline-flex; align-items: center; gap: .35rem;
+    padding: .32rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; color: #2a1c0b; background: rgba(255,255,255,.92); backdrop-filter: blur(4px);
+    box-shadow: 0 3px 10px rgba(0,0,0,.18); opacity: 0; transition: opacity .3s;
+  }
+  .he-countdown.ready { opacity: 1; }
+  .he-countdown.urgent { color: #fff; background: var(--color-brand); }
 
-  .he-body { padding: 1.6rem 1.7rem 1.7rem; display: flex; flex-direction: column; }
-  .he-date { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: #b45309; font-weight: 600; margin: 0 0 .55rem; }
-  .he-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.4rem; line-height: 1.25; color: #292524; margin: 0; transition: color .15s; }
-  .he-card:hover .he-title { color: #92400e; }
-  .he-desc { margin: .7rem 0 0; font-size: .92rem; line-height: 1.6; color: #57534e; }
-  .he-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; margin: 1rem 0 0; font-size: .82rem; color: #78716c; }
-  .he-loc { display: inline-flex; align-items: center; }
-  .he-price { display: inline-flex; align-items: center; padding: .12rem .6rem; border-radius: 999px; background: #f6eede; color: #92400e; font-weight: 600; }
-  .he-cta { margin-top: 1.1rem; font-size: .85rem; font-weight: 600; letter-spacing: .01em; color: #b45309; }
-  .he-card:hover .he-cta { color: #92400e; }
+  .he-body { display: grid; grid-template-columns: auto 1fr; gap: 1.4rem; padding: 1.7rem 1.8rem 1.8rem; align-items: start; }
+
+  /* Dramatic date box */
+  .he-datebox {
+    display: flex; flex-direction: column; align-items: center; text-align: center; flex-shrink: 0;
+    min-width: 4.6rem; padding: .7rem .7rem .55rem; border-radius: 14px;
+    background: var(--color-brand-soft); border: 1px solid #efe0c6; line-height: 1;
+  }
+  .he-month { font-size: .74rem; font-weight: 700; letter-spacing: .14em; color: var(--color-brand); }
+  .he-days { font-family: 'Merriweather', Georgia, serif; font-size: 2.15rem; font-weight: 700; color: var(--color-ink); margin: .18rem 0; letter-spacing: -.01em; }
+  .he-year { font-size: .72rem; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+
+  .he-main { min-width: 0; }
+  .he-weekday { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--color-muted); margin: .1rem 0 .5rem; }
+  .he-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.55rem; line-height: 1.2; margin: 0; }
+  .he-title a { color: var(--color-ink); text-decoration: none; transition: color .15s; }
+  .he-card:hover .he-title a { color: var(--color-brand-deep); }
+  .he-desc { margin: .7rem 0 0; font-size: .95rem; line-height: 1.6; color: var(--color-body); }
+
+  .he-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1.1rem; margin-top: 1.25rem; }
+  .he-cta {
+    display: inline-flex; align-items: center; padding: .62rem 1.3rem; border-radius: 999px;
+    font-size: .9rem; font-weight: 600; letter-spacing: .01em; text-decoration: none; color: #fff;
+    background: linear-gradient(180deg, #c05f14, #a04607); box-shadow: 0 10px 22px -10px rgba(160,70,7,.65);
+    transition: filter .15s, transform .12s;
+  }
+  .he-cta:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .he-meta { display: inline-flex; align-items: center; gap: .45rem; font-size: .84rem; color: var(--color-muted); }
+  .he-dot { color: #cbbfac; }
+  .he-price { font-weight: 600; color: var(--color-brand-deep); }
+
+  @media (max-width: 480px) {
+    .he-body { grid-template-columns: 1fr; gap: 1rem; }
+    .he-datebox { flex-direction: row; gap: .5rem; align-items: baseline; min-width: 0; width: fit-content; }
+    .he-days { font-size: 1.5rem; margin: 0; }
+  }
 </style>
+
+<script is:inline>
+  (function () {
+    var els = document.querySelectorAll('.he-countdown[data-event-start]');
+    var now = Date.now();
+    els.forEach(function (el) {
+      var start = new Date(el.getAttribute('data-event-start')).getTime();
+      if (isNaN(start)) return;
+      var days = Math.ceil((start - now) / 86400000);
+      var t;
+      if (days < 0) t = 'Happening now';
+      else if (days === 0) t = 'Starts today';
+      else if (days === 1) t = 'Tomorrow';
+      else if (days <= 45) t = days + ' days away';
+      else { var m = Math.round(days / 30); t = 'In ' + m + ' month' + (m === 1 ? '' : 's'); }
+      el.textContent = t;
+      el.classList.add('ready');
+      if (days >= 0 && days <= 10) el.classList.add('urgent');
+    });
+  })();
+</script>
