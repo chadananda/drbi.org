@@ -29,6 +29,11 @@ const locText = loc.online ? "Online" : [loc.venue, loc.address].filter(Boolean)
 // Exclude the "any amount" sponsor donation from the ticket-price list.
 const prices = (Array.isArray(d.price) ? d.price : []).filter((p) => !/sponsor a youth|any amount/i.test(p?.label ?? ''));
 const hasReg = d.registrationUrl && /^https?:\/\//.test(d.registrationUrl);
+// Always send buyers straight to the Humanitix TICKETS page, never the event page.
+const ticketsUrl = !hasReg ? "" :
+  /humanitix\.com/i.test(d.registrationUrl)
+    ? d.registrationUrl.replace(/[?#].*$/, "").replace(/\/+$/, "").replace(/\/tickets$/i, "") + "/tickets"
+    : d.registrationUrl;
 // Face-centered ImageKit crops (falls through to the raw URL for uncached externals).
 const heroImage = imagekitUrl(d.mainImage, { w: 1600, h: 640, face: true });
 const ogImage = imagekitUrl(d.mainImage, { w: 1200, h: 630, face: true });
@@ -128,7 +133,7 @@ const richDesc = beautifyDescription(d.fullDescription);
               </ul>
             )}
             {hasReg ? (
-              <a href={d.registrationUrl} target="_blank" rel="noopener noreferrer" class="reg-btn">
+              <a href={ticketsUrl} target="_blank" rel="noopener noreferrer" class="reg-btn">
                 Get tickets
               </a>
             ) : (
