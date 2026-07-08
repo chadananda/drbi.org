@@ -2,6 +2,7 @@
 // Per-event, SEO-shareable detail page. Full (Humanitix) description + register + ticket
 // prices. Draft events (visible=0) render for direct-link preview but are noindexed.
 // Slug includes the start year so annual programs don't collide — see lib/event-slug.js.
+// Design: "fine letterpress programme" — Fraunces/Newsreader, warm paper, brass accents.
 export const prerender = false;
 
 import Layout from "@layouts/Layout.astro";
@@ -31,32 +32,61 @@ const hasReg = d.registrationUrl && /^https?:\/\//.test(d.registrationUrl);
 // Face-centered ImageKit crops (falls through to the raw URL for uncached externals).
 const heroImage = imagekitUrl(d.mainImage, { w: 1600, h: 640, face: true });
 const ogImage = imagekitUrl(d.mainImage, { w: 1200, h: 630, face: true });
+
+// Refine the raw Humanitix HTML into a well-set programme:
+//  - drop the leading <h2> that just repeats the title, and empty spacer <p>s
+//  - "TIME :: ACTIVITY"  -> schedule rows
+//  - "Label: $340"       -> dotted-leader price rows
+//  - "long label :: date" subtitle -> standfirst with an em dash
+function beautifyDescription(html) {
+  if (!html) return "";
+  let out = html.replace(/^\s*<h2[^>]*>[\s\S]*?<\/h2>\s*/i, "");
+  out = out.replace(/ -- /g, " — ");   // Humanitix double-hyphen -> em dash
+  out = out.replace(/--/g, "—");        // stray double-hyphens
+  out = out.replace(/<p>([\s\S]*?)<\/p>/g, (m, inner) => {
+    const text = inner.replace(/&nbsp;/gi, " ").replace(/ /g, " ").trim();
+    if (!text) return "";                 // strip empty spacer paragraphs
+    if (/</.test(inner)) return m;         // inline markup present -> leave for prose
+    let mm = text.match(/^(.{1,40}?)\s*::\s*(.+)$/);   // schedule: short key :: value
+    if (mm) return `<p class="kv"><span class="kv-k">${mm[1].trim()}</span><span class="kv-v">${mm[2].trim()}</span></p>`;
+    mm = text.match(/^(.{1,60}?):\s*(\$[\d,]+|No charge|Free[\w /-]*)$/i);   // price: Label: $N
+    if (mm) return `<p class="kv kv--price"><span class="kv-k">${mm[1].trim()}</span><span class="kv-v">${mm[2].trim()}</span></p>`;
+    if (/\s::\s/.test(text)) return `<p class="standfirst">${text.replace(/\s*::\s*/g, " — ")}</p>`;
+    return m;
+  });
+  return out;
+}
+const richDesc = beautifyDescription(d.fullDescription);
 ---
 
 <Layout title={title} description={plainDesc} image={ogImage} noindex={hidden}>
-  <article class="pb-20">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" />
+
+  <article class="event-detail pb-24">
     <!-- Hero -->
     <div class="relative">
       {d.mainImage ? (
-        <div class="relative h-[42vh] min-h-[300px] w-full overflow-hidden">
+        <div class="event-hero relative h-[46vh] min-h-[320px] w-full overflow-hidden">
           <img src={heroImage} alt={title} class="absolute inset-0 w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/70"></div>
+          <div class="absolute inset-0" style="background:linear-gradient(to bottom, rgba(28,22,14,.15) 0%, rgba(28,22,14,.38) 55%, rgba(28,22,14,.78) 100%)"></div>
           <div class="absolute inset-0 flex items-end">
-            <Container>
-              <div class="pb-8">
-                {start && <p class="text-amber-200 text-sm font-medium tracking-wide mb-2">{start}{end ? ` – ${end}` : ""}</p>}
-                <h1 class="text-white text-3xl md:text-5xl font-serif font-light max-w-3xl" style="text-shadow:0 1px 3px rgba(0,0,0,.5)">{title}</h1>
-                {locText && <p class="text-white/85 mt-3">{locText}</p>}
+            <Container class="w-full">
+              <div class="hero-inner mx-auto max-w-5xl w-full pb-10">
+                {start && <p class="hero-date">{start}{end ? ` – ${end}` : ""}</p>}
+                <h1 class="hero-title">{title}</h1>
+                {locText && <p class="hero-loc">{locText}</p>}
               </div>
             </Container>
           </div>
         </div>
       ) : (
         <Container>
-          <div class="pt-16 pb-6">
-            {start && <p class="text-amber-700 text-sm font-medium mb-2">{start}{end ? ` – ${end}` : ""}</p>}
-            <h1 class="text-3xl md:text-5xl font-serif font-light text-slate-900 max-w-3xl">{title}</h1>
-            {locText && <p class="text-slate-500 mt-3">{locText}</p>}
+          <div class="mx-auto max-w-5xl pt-16 pb-6">
+            {start && <p class="hero-date hero-date--light">{start}{end ? ` – ${end}` : ""}</p>}
+            <h1 class="hero-title hero-title--light">{title}</h1>
+            {locText && <p class="hero-loc hero-loc--light">{locText}</p>}
           </div>
         </Container>
       )}
@@ -64,68 +94,64 @@ const ogImage = imagekitUrl(d.mainImage, { w: 1200, h: 630, face: true });
 
     {hidden && (
       <Container>
-        <p class="mt-6 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
-          This event isn't published yet — it will appear publicly once it's live on Humanitix.
-        </p>
+        <div class="mx-auto max-w-5xl">
+          <p class="mt-6 text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2">
+            This event isn't published yet — it will appear publicly once it's live on Humanitix.
+          </p>
+        </div>
       </Container>
     )}
 
     <Container>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-10">
+      <div class="event-grid mx-auto max-w-5xl mt-12 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-10 lg:gap-16 lg:items-start">
         <!-- Description -->
-        <div class="lg:col-span-2">
-          {d.fullDescription ? (
-            <div class="prose prose-lg prose-slate max-w-none
-              prose-headings:font-serif prose-headings:font-light prose-headings:text-slate-800
-              prose-h2:text-3xl prose-h2:mt-14 prose-h2:mb-5
-              prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-3
-              prose-p:text-slate-600 prose-p:leading-relaxed
-              prose-a:text-amber-700 prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-slate-700" set:html={d.fullDescription} />
+        <div class="min-w-0">
+          {richDesc ? (
+            <div class="event-desc" set:html={richDesc} />
           ) : (
             <p class="text-slate-500">Details coming soon.</p>
           )}
         </div>
 
         <!-- Register / details sidebar -->
-        <aside class="lg:col-span-1">
-          <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm lg:sticky lg:top-24">
-            <h2 class="text-lg font-semibold text-slate-900 mb-4">Register</h2>
+        <aside>
+          <div class="reg-card lg:sticky lg:top-24">
+            <p class="reg-eyebrow">Registration</p>
             {prices.length > 0 && (
-              <ul class="space-y-2 mb-5">
+              <ul class="reg-prices">
                 {prices.map((p) => (
-                  <li class="flex items-center justify-between text-sm">
-                    <span class="text-slate-600">{p.label}</span>
-                    <span class="font-medium text-slate-900">{p.amount ? `$${p.amount}` : "Free"}</span>
+                  <li>
+                    <span class="lbl">{p.label}</span>
+                    <span class="amt">{p.amount ? `$${p.amount}` : "Free"}</span>
                   </li>
                 ))}
               </ul>
             )}
             {hasReg ? (
-              <a href={d.registrationUrl} target="_blank" rel="noopener noreferrer"
-                class="block w-full text-center px-5 py-3 text-sm font-medium text-white bg-amber-700 hover:bg-amber-600 rounded-full transition">
+              <a href={d.registrationUrl} target="_blank" rel="noopener noreferrer" class="reg-btn">
                 Get tickets
               </a>
             ) : (
               <p class="text-sm text-slate-500">Registration opens soon.</p>
             )}
-            {start && <p class="text-xs text-slate-400 mt-4">{start}{end ? ` – ${end}` : ""}</p>}
-            {locText && <p class="text-xs text-slate-400 mt-1">{locText}</p>}
+            <div class="reg-meta">
+              {start && <p>{start}{end ? ` – ${end}` : ""}</p>}
+              {locText && <p>{locText}</p>}
+            </div>
           </div>
         </aside>
       </div>
 
-      <!-- Post-event photo donation (wired next) -->
-      <section id="share-photos" class="mt-16 border-t border-gray-100 pt-12">
+      <!-- Post-event photo donation -->
+      <section id="share-photos" class="mx-auto max-w-5xl mt-20 pt-12 share-photos">
         <div class="max-w-2xl">
-          <p class="text-xs uppercase tracking-[0.2em] text-amber-700 mb-2">After the event</p>
-          <h2 class="text-2xl font-serif font-light text-slate-900 mb-3">Were you there? Share your photos</h2>
-          <p class="text-slate-600">
+          <p class="reg-eyebrow">After the event</p>
+          <h2 class="share-title">Were you there? Share your photos</h2>
+          <p class="share-body">
             Participants can contribute photos and a short write-up from this program — we'll add
             the best ones to this page. Submissions are reviewed before they appear.
           </p>
-          <a href={`mailto:info@drbi.org?subject=${encodeURIComponent('Photos from ' + title)}`}
-            class="inline-block mt-4 text-sm font-medium text-amber-700 hover:text-amber-800">
+          <a href={`mailto:info@drbi.org?subject=${encodeURIComponent('Photos from ' + title)}`} class="share-link">
             Email your photos → info@drbi.org
           </a>
         </div>
@@ -133,3 +159,277 @@ const ogImage = imagekitUrl(d.mainImage, { w: 1200, h: 630, face: true });
     </Container>
   </article>
 </Layout>
+
+<style is:global>
+  .event-detail {
+    --ink: #2b2620;
+    --body: #423b31;
+    --muted: #857a69;
+    --brass: #a9742f;
+    --brass-deep: #855524;
+    --navy: #1e3a8a;
+    --navy-hover: #2c49a6;
+    --rule: #e7ddcb;
+    --rule-soft: #efe8da;
+    --paper: #fbf8f2;
+    --card: #ffffff;
+    background: var(--paper);
+  }
+
+  /* ---------- Hero ---------- */
+  .event-detail .hero-date {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    font-size: .8rem;
+    color: #f4d9a8;
+    margin-bottom: .7rem;
+  }
+  .event-detail .hero-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(2.1rem, 4.6vw, 3.6rem);
+    line-height: 1.04;
+    letter-spacing: -.005em;
+    color: #fff;
+    max-width: 20ch;
+    text-shadow: 0 1px 14px rgba(0,0,0,.45);
+  }
+  .event-detail .hero-loc { margin-top: .9rem; color: rgba(255,255,255,.82); font-size: 1rem; }
+  .event-detail .hero-date--light { color: var(--brass-deep); }
+  .event-detail .hero-title--light { color: var(--ink); text-shadow: none; }
+  .event-detail .hero-loc--light { color: var(--muted); }
+
+  /* ---------- Body prose ---------- */
+  .event-desc {
+    font-family: 'Newsreader', Georgia, serif;
+    font-optical-sizing: auto;
+    font-size: 1.235rem;
+    line-height: 1.72;
+    color: var(--body);
+    max-width: none;
+  }
+  .event-desc p { margin: 0 0 1.15rem; }
+  .event-desc strong { color: var(--ink); font-weight: 600; }
+  .event-desc em { font-style: italic; }
+
+  /* First (subtitle) heading acts as a tagline, not a section head */
+  .event-desc > h3:first-child {
+    font-family: 'Fraunces', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.5rem;
+    line-height: 1.3;
+    color: var(--brass-deep);
+    margin: 0 0 1.4rem;
+  }
+  .event-desc > h3:first-child::before { display: none; }
+
+  /* Section headings */
+  .event-desc h2, .event-desc h3, .event-desc h4 {
+    font-family: 'Fraunces', Georgia, serif;
+    color: var(--ink);
+    font-weight: 500;
+    line-height: 1.15;
+  }
+  .event-desc h3 {
+    font-size: 1.72rem;
+    letter-spacing: -.01em;
+    margin: 2.9rem 0 1.05rem;
+  }
+  .event-desc h3::before {
+    content: "";
+    display: block;
+    width: 2.4rem;
+    height: 2px;
+    background: var(--brass);
+    border-radius: 2px;
+    margin-bottom: .95rem;
+  }
+  .event-desc h4 { font-size: 1.3rem; margin: 2rem 0 .8rem; }
+
+  /* Standfirst (the "A weekend of deep study — dates" line) */
+  .event-desc .standfirst {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 1.4rem;
+    line-height: 1.42;
+    font-weight: 400;
+    color: var(--ink);
+    margin: 0 0 1.6rem;
+  }
+
+  /* Drop cap on the first true paragraph */
+  .event-desc > .standfirst + p::first-letter {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    float: left;
+    font-size: 3.9em;
+    line-height: .78;
+    padding: .04em .1em 0 0;
+    color: var(--brass-deep);
+  }
+
+  /* Links: navy, underlined, brass on hover */
+  .event-desc a {
+    color: var(--navy);
+    text-decoration: underline;
+    text-decoration-color: rgba(30,58,138,.35);
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+    transition: color .15s, text-decoration-color .15s;
+  }
+  .event-desc a:hover {
+    color: var(--brass-deep);
+    text-decoration-color: var(--brass);
+  }
+
+  /* Lists */
+  .event-desc ul { list-style: none; margin: 1.15rem 0; padding: 0; }
+  .event-desc ul li {
+    position: relative;
+    padding-left: 1.6rem;
+    margin: .5rem 0;
+  }
+  .event-desc ul li::before {
+    content: "";
+    position: absolute;
+    left: .15rem;
+    top: .72em;
+    width: .42rem;
+    height: .42rem;
+    background: var(--brass);
+    border-radius: 50%;
+  }
+  .event-desc ol { margin: 1.15rem 0; padding-left: 1.4rem; }
+  .event-desc ol li { margin: .5rem 0; }
+
+  /* Schedule rows: TIME :: ACTIVITY */
+  .event-desc .kv {
+    display: grid;
+    grid-template-columns: 8.5rem 1fr;
+    align-items: baseline;
+    column-gap: 1.5rem;
+    margin: 0;
+    padding: .62rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .event-desc .kv .kv-k {
+    font-variant-numeric: tabular-nums lining-nums;
+    color: var(--brass-deep);
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: .005em;
+  }
+  .event-desc .kv .kv-v { color: var(--body); }
+
+  /* Price rows: Label ........ $340 */
+  .event-desc .kv--price {
+    grid-template-columns: auto 1fr auto;
+    column-gap: .7rem;
+    border-bottom: none;
+    padding: .5rem 0;
+  }
+  .event-desc .kv--price .kv-k { grid-column: 1; color: var(--body); font-weight: 500; }
+  .event-desc .kv--price .kv-v {
+    grid-column: 3;
+    color: var(--ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .event-desc .kv--price::after {
+    content: "";
+    grid-column: 2;
+    align-self: baseline;
+    margin-bottom: .34em;
+    border-bottom: 1.5px dotted #cdb98f;
+  }
+
+  /* ---------- Register card ---------- */
+  .event-detail .reg-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 1.6rem 1.5rem 1.5rem;
+    box-shadow: 0 1px 2px rgba(60,45,20,.04), 0 14px 34px -18px rgba(80,55,20,.22);
+  }
+  .event-detail .reg-eyebrow {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    font-size: .72rem;
+    color: var(--brass-deep);
+    margin-bottom: 1.15rem;
+  }
+  .event-detail .reg-prices { list-style: none; margin: 0 0 1.4rem; padding: 0; }
+  .event-detail .reg-prices li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    column-gap: .5rem;
+    padding: .5rem 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .event-detail .reg-prices li:first-child { border-top: none; }
+  .event-detail .reg-prices .lbl { grid-column: 1; color: var(--body); font-size: .95rem; }
+  .event-detail .reg-prices .amt {
+    grid-column: 3;
+    color: var(--ink);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .event-detail .reg-prices li::after {
+    content: "";
+    grid-column: 2;
+    align-self: baseline;
+    margin-bottom: .32em;
+    border-bottom: 1.5px dotted #ddceb2;
+  }
+  .event-detail .reg-btn {
+    display: block;
+    text-align: center;
+    padding: .85rem 1.25rem;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: .02em;
+    font-size: 1rem;
+    color: #fff;
+    background: linear-gradient(180deg, #b07d34 0%, #98651f 100%);
+    border-radius: 999px;
+    box-shadow: 0 8px 18px -8px rgba(140,90,25,.6);
+    transition: transform .15s, box-shadow .15s, filter .15s;
+  }
+  .event-detail .reg-btn:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px -8px rgba(140,90,25,.7);
+  }
+  .event-detail .reg-meta {
+    margin-top: 1.15rem;
+    padding-top: 1.05rem;
+    border-top: 1px solid var(--rule-soft);
+    color: var(--muted);
+    font-size: .82rem;
+    line-height: 1.5;
+  }
+
+  /* ---------- Share-photos ---------- */
+  .event-detail .share-photos { border-top: 1px solid var(--rule); }
+  .event-detail .share-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 400;
+    font-size: 1.9rem;
+    color: var(--ink);
+    margin: .4rem 0 .8rem;
+  }
+  .event-detail .share-body { font-family: 'Newsreader', Georgia, serif; font-size: 1.1rem; color: var(--body); line-height: 1.6; }
+  .event-detail .share-link {
+    display: inline-block;
+    margin-top: 1.1rem;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    color: var(--brass-deep);
+  }
+  .event-detail .share-link:hover { color: var(--brass); }
+</style>
