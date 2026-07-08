@@ -257,7 +257,7 @@ const displayEvents = upcomingEvents.map(event => {
           </div>
           <div class="timeline-content">
             {event.display.teacherImageLarge && (
-              <img src={event.display.teacherImageLarge} alt={`Teacher for ${event.display.name}`} class="timeline-avatar" />
+              <img src={event.display.teacherImageLarge} alt={`Teacher for ${event.display.name}`} class="timeline-avatar" width="120" height="120" loading="lazy" decoding="async" />
             )}
             <div class="timeline-details">
               <h3 class="timeline-title">{event.display.name}</h3>

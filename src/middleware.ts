@@ -56,14 +56,18 @@ export const onRequest = async (context, next) => {
     await revalidateEventsIfStale(context.locals.cfContext);
   }
 
-  // --- Edge cache: anonymous GET of public event pages ---
-  const cacheable = context.request.method === 'GET' && !sessionId
-    && EVENTS_CACHE.test(path) && !url.searchParams.has('nocache');
+  // --- Edge cache: anonymous GET of public HTML pages (fast TTFB). Events are keyed by the
+  // content-version token so a Humanitix change flushes them; other pages key by path and
+  // rely on the short s-maxage to pick up code deploys. Logged-in users always bypass. ---
+  const isEventsPath = EVENTS_CACHE.test(path);
+  const cacheable = context.request.method === 'GET' && !sessionId && !url.searchParams.has('nocache')
+    && !path.startsWith('/admin') && !path.startsWith('/api') && path !== '/login'
+    && !/\.[a-z0-9]{2,5}$/i.test(path); // skip asset-like paths (served/cached by the CDN)
   let cache: any, cacheKey: any;
   if (cacheable && typeof caches !== 'undefined') {
     try {
       cache = (caches as any).default;
-      const v = (await (env as any).SESSION?.get('edge:events:v')) || '0';
+      const v = isEventsPath ? ((await (env as any).SESSION?.get('edge:events:v')) || '0') : 'p';
       cacheKey = new Request(`https://edge.cache${path}?v=${v}`);
       const hit = await cache.match(cacheKey);
       if (hit) {

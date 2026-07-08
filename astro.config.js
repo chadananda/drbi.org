@@ -85,8 +85,8 @@ export default defineConfig({
     },
   ],
   prefetch: {
-    defaultStrategy: 'viewport',
-    prefetchAll: !isDev,
+    defaultStrategy: 'hover',
+    prefetchAll: false,
   },
   vite: {
     plugins: [tailwindcss()],

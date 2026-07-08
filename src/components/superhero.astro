@@ -36,8 +36,11 @@ const quotes = [
 
 <div id="superhero" class="relative w-full overflow-hidden flex flex-col">
 
-  <!-- Video background -->
-  <video loop muted autoplay playsinline preload="auto" aria-hidden="true" tabindex="-1"
+  <!-- Video background: poster gives instant first paint; preload=none defers video bytes until after LCP -->
+  <video loop muted autoplay playsinline preload="none"
+    poster="/drbi-landscape.webp"
+    width="1280" height="720"
+    aria-hidden="true" tabindex="-1"
     class="w-full h-full absolute inset-0 z-0 object-cover">
     <source src="/drbi-open_md.mp4" type="video/mp4">
   </video>
