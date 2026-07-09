@@ -10,6 +10,7 @@ import "../styles/tailwind.css";
 import { SEO } from "astro-seo";
 import Footer from "@components/footer.astro";
 import Navbar from "@components/navbar/navbar.astro";
+import AnnouncementBanner from "@components/AnnouncementBanner.astro";
 
 import site from "@data/site.json";
 import { currentURL } from '@utils/utils.js';
@@ -111,6 +112,7 @@ const { title, footerMargin = true } = Astro.props;
   </head>
   <body class="max-w-screen">
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-slate-900 focus:shadow">Skip to content</a>
+    <AnnouncementBanner />
     <Navbar />
     <main id="main">
       <slot />

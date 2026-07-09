@@ -1,36 +1,202 @@
 ---
-// Admin press: press releases and media kit management.
+// Admin press: draft/publish press releases + a media-kit reference panel drawn from site.json.
 export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
 import AdminIcon from '@components/admin/AdminIcon.astro';
+import site from '@data/site.json';
+import { listReleases, getRelease, pressStats } from '@lib/server/press';
+
 const user = Astro.locals?.user;
+const q = Astro.url.searchParams;
+const editId = q.get('edit') ? Number(q.get('edit')) : null;
+
+const [releases, st, editing] = await Promise.all([
+  listReleases(),
+  pressStats(),
+  editId ? getRelease(editId) : Promise.resolve(null),
+]);
+
+let flash = null, flashKind = 'ok';
+if (q.get('published')) flash = 'Release published.';
+else if (q.get('unpublished')) flash = 'Release moved back to draft.';
+else if (q.get('saved')) flash = 'Draft saved.';
+else if (q.get('deleted')) flash = 'Release deleted.';
+else if (q.get('e') === 'empty') { flash = 'A title and body are required.'; flashKind = 'err'; }
+
+const facts = [
+  ['Organization', site.title],
+  ['Location', 'Eloy, Arizona'],
+  ['Address', site.address],
+  ['Focus', 'Bahá’í education, the arts & regenerative agriculture'],
+  ['Contact', site.email],
+  ['Phone', site.phone],
+  ['Website', 'drbi.org'],
+];
+const fmt = (iso) => iso ? new Date(iso.includes('T') ? iso : iso.replace(' ', 'T') + 'Z').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
 ---
 
 <Layout title="Press" user={user}>
   <div class="a-page-head">
     <div>
       <h1 class="a-title">Press</h1>
-      <p class="a-subtitle">Manage press releases, media kit assets, and journalist resources.</p>
+      <p class="a-subtitle">Publish press releases and keep the media kit at hand for journalists.</p>
     </div>
+    {editing && <a href="/admin/press" class="a-btn"><AdminIcon name="plus" size={15} /> New release</a>}
   </div>
 
-  <div class="cs-wrap">
-    <div class="a-card a-card-pad cs-card">
-      <div class="cs-icon-wrap">
-        <AdminIcon name="news" size={28} />
-      </div>
-      <h2 class="cs-heading">Press</h2>
-      <p class="cs-body">This screen will support drafting and publishing press releases, managing the DRBI media kit (logos, photos, fact sheets), and providing a curated resource page for journalists and media contacts.</p>
-      <span class="a-badge a-badge-amber cs-badge">Coming soon</span>
+  {flash && (
+    <div class={`pr-flash ${flashKind === 'err' ? 'is-err' : 'is-ok'}`} role="status">
+      <AdminIcon name={flashKind === 'err' ? 'bell' : 'news'} size={16} /><span>{flash}</span>
     </div>
+  )}
+
+  <div class="pr-layout">
+    <div class="pr-main">
+      <div class="pr-stats">
+        <div class="a-card pr-stat"><span class="pr-stat-n">{st.published}</span><span class="pr-stat-l">Published</span></div>
+        <div class="a-card pr-stat"><span class="pr-stat-n">{st.drafts}</span><span class="pr-stat-l">Drafts</span></div>
+        <div class="a-card pr-stat"><span class="pr-stat-n">{st.total}</span><span class="pr-stat-l">Total</span></div>
+      </div>
+
+      <form method="POST" action="/api/admin/press/action" class="a-card a-card-pad pr-compose">
+        <input type="hidden" name="id" value={editing?.id ?? ''} />
+        <h2 class="a-section-title pr-compose-title">{editing ? 'Edit release' : 'New release'}</h2>
+
+        <label class="pr-label" for="pr-title">Title</label>
+        <input class="a-input" id="pr-title" name="title" maxlength="250" required
+          placeholder="Desert Rose announces…" value={editing?.title ?? ''} />
+
+        <div class="pr-two">
+          <div>
+            <label class="pr-label" for="pr-dateline">Dateline</label>
+            <input class="a-input" id="pr-dateline" name="dateline" maxlength="120" placeholder="Eloy, AZ" value={editing?.dateline ?? ''} />
+          </div>
+          <div>
+            <label class="pr-label" for="pr-slug">URL slug <span class="pr-opt">(optional)</span></label>
+            <input class="a-input" id="pr-slug" name="slug" maxlength="120" placeholder="auto from title" value={editing?.slug ?? ''} />
+          </div>
+        </div>
+
+        <label class="pr-label" for="pr-summary">Standfirst / deck <span class="pr-opt">(optional)</span></label>
+        <textarea class="a-input pr-summary" id="pr-summary" name="summary" rows="2" maxlength="1000"
+          placeholder="One or two sentences summarizing the news.">{editing?.summary ?? ''}</textarea>
+
+        <label class="pr-label" for="pr-body">Body</label>
+        <textarea class="a-input pr-body" id="pr-body" name="body" rows="12" required
+          placeholder="The full release. Plain text or simple HTML.">{editing?.body ?? ''}</textarea>
+
+        <div class="pr-actions">
+          {(!editing || editing.status !== 'published') && (
+            <button type="submit" name="op" value="publish" class="a-btn a-btn-primary" data-confirm="Publish this release to the public press page?">
+              <AdminIcon name="news" size={16} /> Publish
+            </button>
+          )}
+          {editing?.status === 'published' && (
+            <button type="submit" name="op" value="unpublish" class="a-btn" data-confirm="Unpublish and move back to draft?">Unpublish</button>
+          )}
+          <button type="submit" name="op" value="save" class="a-btn a-btn-ghost">Save draft</button>
+          {editing?.status === 'published' && editing.slug && (
+            <a href={`/press/${editing.slug}`} target="_blank" rel="noopener" class="a-btn a-btn-ghost"><AdminIcon name="external" size={14} /> View</a>
+          )}
+        </div>
+      </form>
+
+      {releases.length > 0 && (
+        <section class="pr-list">
+          <h2 class="a-section-title pr-list-title">All releases</h2>
+          <div class="pr-cards">
+            {releases.map((r) => (
+              <article class="a-card pr-card">
+                <div class="pr-card-top">
+                  <span class={`a-badge ${r.status === 'published' ? 'a-badge-green' : 'a-badge-muted'}`}>{r.status}</span>
+                  <span class="pr-card-date">{r.status === 'published' ? fmt(r.published_at) : fmt(r.created_at)}</span>
+                </div>
+                <h3 class="pr-card-title">{r.title || 'Untitled'}</h3>
+                {r.summary && <p class="pr-card-summary">{r.summary}</p>}
+                <div class="pr-card-actions">
+                  <a href={`/admin/press?edit=${r.id}`} class="a-btn a-btn-ghost pr-sm"><AdminIcon name="pen-square" size={14} /> Edit</a>
+                  {r.status === 'published' && r.slug && <a href={`/press/${r.slug}`} target="_blank" rel="noopener" class="a-btn a-btn-ghost pr-sm"><AdminIcon name="eye" size={14} /> View</a>}
+                  <button type="submit" form="prDel" name="id" value={r.id} class="a-btn a-btn-ghost pr-sm pr-del" data-confirm="Delete this release?"><AdminIcon name="eye-off" size={14} /> Delete</button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+
+    <!-- Media kit reference -->
+    <aside class="pr-kit">
+      <div class="a-card a-card-pad">
+        <h2 class="a-section-title pr-kit-title"><AdminIcon name="layers" size={17} /> Media kit</h2>
+        <p class="pr-kit-note">Quick facts to drop into a release or share with a journalist.</p>
+        <dl class="pr-facts">
+          {facts.map(([k, v]) => (
+            <div class="pr-fact">
+              <dt>{k}</dt><dd>{v}</dd>
+            </div>
+          ))}
+        </dl>
+        <div class="pr-boiler">
+          <p class="pr-boiler-h">Boilerplate</p>
+          <p class="pr-boiler-t">{site.description_long} Desert Rose offers courses, retreats, and community programs uniting spiritual education, the arts, and regenerative agriculture on its campus in Eloy, Arizona.</p>
+        </div>
+      </div>
+    </aside>
   </div>
+
+  <form method="POST" action="/api/admin/press/action" id="prDel" hidden><input type="hidden" name="op" value="delete" /></form>
 </Layout>
 
 <style>
-  .cs-wrap { display: flex; justify-content: center; padding: 2rem 0; }
-  .cs-card { max-width: 480px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding: 2.5rem 2rem; }
-  .cs-icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: var(--a-accent-tint); color: var(--a-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .cs-heading { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.25rem; color: var(--a-ink); margin: 0; }
-  .cs-body { font-size: .9rem; color: var(--a-ink-2); line-height: 1.65; margin: 0; }
-  .cs-badge { margin-top: .25rem; }
+  .pr-flash { display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem; border-radius: 10px; font-size: .9rem; font-weight: 500; margin-bottom: 1.25rem; }
+  .pr-flash.is-ok { background: var(--a-green-bg); color: var(--a-green); }
+  .pr-flash.is-err { background: var(--a-red-bg); color: var(--a-red); }
+
+  .pr-layout { display: grid; grid-template-columns: 1fr; gap: 1.5rem; align-items: start; }
+  @media (min-width: 1000px) { .pr-layout { grid-template-columns: 1fr 20rem; } }
+
+  .pr-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .9rem; margin-bottom: 1.25rem; }
+  .pr-stat { padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: .15rem; }
+  .pr-stat-n { font-family: 'Fraunces', Georgia, serif; font-size: 1.6rem; font-weight: 500; color: var(--a-ink); line-height: 1; }
+  .pr-stat-l { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--a-muted); font-weight: 600; }
+
+  .pr-compose-title { margin-bottom: 1rem; }
+  .pr-label { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: var(--a-muted); margin: 1rem 0 .35rem; }
+  .pr-compose > .pr-label:first-of-type { margin-top: 0; }
+  .pr-opt { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--a-muted); }
+  .pr-two { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+  @media (max-width: 560px) { .pr-two { grid-template-columns: 1fr; } }
+  .pr-summary { resize: vertical; line-height: 1.55; font-family: inherit; }
+  .pr-body { resize: vertical; line-height: 1.65; min-height: 240px; font-family: inherit; }
+  .pr-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.3rem; }
+
+  .pr-list { margin-top: 2rem; }
+  .pr-list-title { margin-bottom: .85rem; }
+  .pr-cards { display: grid; gap: 1rem; }
+  @media (min-width: 620px) { .pr-cards { grid-template-columns: 1fr 1fr; } }
+  .pr-card { padding: 1.2rem 1.3rem; display: flex; flex-direction: column; }
+  .pr-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: .6rem; }
+  .pr-card-date { font-size: .78rem; color: var(--a-muted); }
+  .pr-card-title { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.15rem; color: var(--a-ink); line-height: 1.25; margin: 0 0 .4rem; }
+  .pr-card-summary { font-size: .88rem; line-height: 1.55; color: var(--a-ink-2); margin: 0 0 1rem; flex: 1; }
+  .pr-card-actions { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: auto; }
+  .pr-sm { padding: .35rem .6rem; font-size: .78rem; }
+  .pr-del { color: var(--a-red); }
+
+  .pr-kit-title { display: flex; align-items: center; gap: .5rem; margin-bottom: .35rem; }
+  .pr-kit-note { font-size: .82rem; color: var(--a-muted); margin: 0 0 1rem; }
+  .pr-facts { margin: 0; display: flex; flex-direction: column; gap: .7rem; }
+  .pr-fact { display: grid; grid-template-columns: 5.5rem 1fr; gap: .6rem; align-items: baseline; }
+  .pr-fact dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--a-muted); font-weight: 600; }
+  .pr-fact dd { margin: 0; font-size: .86rem; color: var(--a-ink); line-height: 1.4; }
+  .pr-boiler { margin-top: 1.3rem; padding-top: 1.1rem; border-top: 1px solid var(--a-line-2); }
+  .pr-boiler-h { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; color: var(--a-muted); font-weight: 600; margin: 0 0 .45rem; }
+  .pr-boiler-t { font-size: .84rem; line-height: 1.6; color: var(--a-ink-2); margin: 0; }
 </style>
+
+<script is:inline>
+  document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+    btn.addEventListener('click', function (e) { if (!window.confirm(btn.getAttribute('data-confirm'))) e.preventDefault(); });
+  });
+</script>

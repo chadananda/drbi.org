@@ -1,0 +1,54 @@
+---
+// Public single press release. 404 unless published.
+export const prerender = false;
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import site from "@data/site.json";
+import { getReleaseBySlug } from "@lib/server/press";
+import { bodyToHtml } from "@lib/email";
+
+const { slug } = Astro.params;
+const release = await getReleaseBySlug(slug);
+if (!release || release.status !== "published") {
+  return new Response(null, { status: 404 });
+}
+const fmt = (iso) => iso ? new Date(iso.includes("T") ? iso : iso.replace(" ", "T") + "Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "";
+const bodyHtml = bodyToHtml(release.body);
+---
+<Layout title={`${release.title} — Press — Desert Rose`}>
+  <article class="prd">
+    <Container>
+      <a href="/press" class="prd-back">&larr; All press releases</a>
+      <p class="prd-kicker">Press release</p>
+      <h1 class="prd-title">{release.title}</h1>
+      <p class="prd-meta">{release.dateline ? `${release.dateline} — ` : ""}{fmt(release.published_at)}</p>
+      {release.summary && <p class="prd-summary">{release.summary}</p>}
+      <div class="prd-body" set:html={bodyHtml}></div>
+
+      <footer class="prd-foot">
+        <p class="prd-foot-h">Media contact</p>
+        <p class="prd-foot-t"><a href={`mailto:${site.email}`}>{site.email}</a> · {site.phone}</p>
+        <p class="prd-boiler">{site.description_long}</p>
+      </footer>
+    </Container>
+  </article>
+</Layout>
+
+<style>
+  .prd { padding: clamp(2.25rem, 5vw, 4rem) 0 clamp(3rem, 7vw, 6rem); }
+  .prd .container, .prd :global(.container) { max-width: 44rem; }
+  .prd-back { display: inline-block; font-size: .85rem; font-weight: 600; color: var(--color-brand, #a04607); text-decoration: none; margin-bottom: 1.75rem; }
+  .prd-back:hover { text-decoration: underline; }
+  .prd-kicker { text-transform: uppercase; letter-spacing: .18em; font-size: .72rem; font-weight: 600; color: var(--color-muted, #8b847a); margin: 0 0 .7rem; }
+  .prd-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, 4.5vw, 2.75rem); line-height: 1.15; color: var(--color-ink, #1d1b17); margin: 0 0 .9rem; }
+  .prd-meta { font-size: .9rem; color: var(--color-muted, #8b847a); margin: 0 0 1.5rem; }
+  .prd-summary { font-size: 1.2rem; line-height: 1.6; font-weight: 500; color: var(--color-ink, #1d1b17); margin: 0 0 1.75rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--color-line, #e7e2d8); }
+  .prd-body { font-size: 1.05rem; line-height: 1.8; color: var(--color-body, #3f3a32); }
+  .prd-body :global(p) { margin: 0 0 1.25rem; }
+  .prd-body :global(a) { color: var(--color-brand, #a04607); }
+  .prd-foot { margin-top: 3rem; padding-top: 1.75rem; border-top: 1px solid var(--color-line, #e7e2d8); }
+  .prd-foot-h { text-transform: uppercase; letter-spacing: .1em; font-size: .7rem; font-weight: 700; color: var(--color-muted, #8b847a); margin: 0 0 .5rem; }
+  .prd-foot-t { font-size: .95rem; color: var(--color-body, #57524a); margin: 0 0 1rem; }
+  .prd-foot-t a { color: var(--color-brand, #a04607); text-decoration: none; }
+  .prd-boiler { font-size: .85rem; line-height: 1.6; color: var(--color-muted, #6b6459); margin: 0; font-style: italic; }
+</style>

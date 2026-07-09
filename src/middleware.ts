@@ -4,6 +4,7 @@ import { verifyRequestOrigin as verifyOrig } from "lucia";
 import { ADMIN_NAV, roleLevel } from "./lib/admin-nav";
 import { env } from "cloudflare:workers";
 import { revalidateEventsIfStale } from "./lib/humanitix-sync";
+import { maybeSendDue } from "./lib/server/newsletters";
 // import { defineMiddleware } from "astro:middleware";
 
 // Security headers applied to every response.
@@ -55,6 +56,10 @@ export const onRequest = async (context, next) => {
   if (context.request.method === 'GET' && EVENTS_CACHE.test(path)) {
     await revalidateEventsIfStale(context.locals.cfContext);
   }
+
+  // Traffic-driven scheduled-newsletter processor (self-throttled via KV, ~once/3min).
+  // Runs on admin loads too so a scheduled send fires even on low public traffic.
+  if (context.request.method === 'GET') { await maybeSendDue(); }
 
   // --- Edge cache: anonymous GET of public HTML pages (fast TTFB). Events are keyed by the
   // content-version token so a Humanitix change flushes them; other pages key by path and

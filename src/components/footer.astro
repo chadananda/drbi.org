@@ -1,6 +1,7 @@
 ---
 import Container from "@components/container.astro";
 import brand from "@data/site.json";
+import NewsletterSignup from "@components/NewsletterSignup.astro";
 
 const { margin } = Astro.props;
 const year = new Date().getFullYear();
@@ -78,6 +79,7 @@ const institute = [
           <a href="/contribute" class="fc-button">Contribute</a>
         </div>
       </div>
+      <NewsletterSignup variant="footer" />
     </Container>
   </div>
 

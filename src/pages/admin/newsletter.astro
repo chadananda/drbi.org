@@ -1,36 +1,210 @@
 ---
-// Admin newsletter: compose and send emails to subscribers via Zoho Mail.
+// Admin newsletter: compose + send/schedule broadcasts to subscribers, manage the subscriber list.
 export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
 import AdminIcon from '@components/admin/AdminIcon.astro';
+import { listNewsletters, getNewsletter, stats } from '@lib/server/newsletters';
+import { listSubscribers } from '@lib/server/subscribers';
+
 const user = Astro.locals?.user;
+const q = Astro.url.searchParams;
+const editId = q.get('edit') ? Number(q.get('edit')) : null;
+
+const [s, newsletters, subscribers, editing] = await Promise.all([
+  stats(),
+  listNewsletters(),
+  listSubscribers(),
+  editId ? getNewsletter(editId) : Promise.resolve(null),
+]);
+
+let flash = null, flashKind = 'ok';
+if (q.get('sent')) flash = `Newsletter sent to ${q.get('sent')} subscriber${q.get('sent') === '1' ? '' : 's'}.`;
+else if (q.get('scheduled')) flash = 'Newsletter scheduled.';
+else if (q.get('tested')) flash = 'Test email sent to you.';
+else if (q.get('saved')) flash = 'Draft saved.';
+else if (q.get('deleted')) flash = 'Newsletter deleted.';
+else if (q.get('removed')) flash = 'Subscriber removed.';
+else if (q.get('e') === 'empty') { flash = 'Add a subject and body first.'; flashKind = 'err'; }
+else if (q.get('e') === 'nodate') { flash = 'Pick a date and time to schedule.'; flashKind = 'err'; }
+else if (q.get('e') === 'testfail') { flash = 'Test send failed — check email configuration.'; flashKind = 'err'; }
+
+const fmt = (iso) => { if (!iso) return ''; const d = new Date(iso.includes('T') ? iso : iso.replace(' ', 'T') + 'Z'); return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); };
+const fmtDT = (iso) => { if (!iso) return ''; const d = new Date(iso.includes('T') ? iso : iso.replace(' ', 'T') + 'Z'); return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); };
+const statusBadge = (st) => st === 'sent' ? 'a-badge-green' : st === 'scheduled' ? 'a-badge-blue' : 'a-badge-muted';
+const editSendAtLocal = editing?.send_at ? new Date(editing.send_at).toISOString().slice(0, 16) : '';
 ---
 
 <Layout title="Newsletter" user={user}>
   <div class="a-page-head">
     <div>
       <h1 class="a-title">Newsletter</h1>
-      <p class="a-subtitle">Compose and send email newsletters to DRBI subscribers via Zoho Mail.</p>
+      <p class="a-subtitle">Compose and broadcast updates to everyone subscribed at drbi.org.</p>
     </div>
+    {editing && <a href="/admin/newsletter" class="a-btn"><AdminIcon name="plus" size={15} /> New newsletter</a>}
   </div>
 
-  <div class="cs-wrap">
-    <div class="a-card a-card-pad cs-card">
-      <div class="cs-icon-wrap">
-        <AdminIcon name="mail" size={28} />
-      </div>
-      <h2 class="cs-heading">Newsletter</h2>
-      <p class="cs-body">This screen will provide a compose interface for drafting and sending newsletters to the DRBI subscriber list. Sends will go through Zoho Mail once the API keys are configured — see the Open Questions page for current status.</p>
-      <span class="a-badge a-badge-amber cs-badge">Coming soon</span>
+  {flash && (
+    <div class={`nl-flash ${flashKind === 'err' ? 'is-err' : 'is-ok'}`} role="status">
+      <AdminIcon name={flashKind === 'err' ? 'bell' : 'mail'} size={16} /><span>{flash}</span>
     </div>
+  )}
+
+  <div class="nl-stats">
+    <div class="a-card nl-stat"><span class="nl-stat-n">{s.subscribers}</span><span class="nl-stat-l">Subscribers</span></div>
+    <div class="a-card nl-stat"><span class="nl-stat-n">{s.sent}</span><span class="nl-stat-l">Sent</span></div>
+    <div class="a-card nl-stat"><span class="nl-stat-n">{s.scheduled}</span><span class="nl-stat-l">Scheduled</span></div>
+    <div class="a-card nl-stat"><span class="nl-stat-n">{s.drafts}</span><span class="nl-stat-l">Drafts</span></div>
   </div>
+
+  <form method="POST" action="/api/admin/newsletter/action" class="a-card a-card-pad nl-compose">
+    <input type="hidden" name="id" value={editing?.id ?? ''} />
+    <h2 class="a-section-title nl-compose-title">{editing ? 'Edit newsletter' : 'Compose'}</h2>
+
+    <label class="nl-label" for="nl-subject">Subject</label>
+    <input class="a-input" id="nl-subject" name="subject" maxlength="200" required
+      placeholder="e.g. Spring at Desert Rose — new courses & harvest days" value={editing?.subject ?? ''} />
+
+    <label class="nl-label" for="nl-body">Body</label>
+    <textarea class="a-input nl-textarea" id="nl-body" name="body" rows="12" required
+      placeholder="Write your newsletter. Plain text is fine — links become clickable and it's wrapped in a branded template. Basic HTML is allowed too.">{editing?.body ?? ''}</textarea>
+    <p class="nl-hint">Plain text is auto-formatted and wrapped in the DRBI email template. You can also paste simple HTML.</p>
+
+    <div class="nl-schedule">
+      <label class="nl-label" for="nl-when">Schedule for (optional)</label>
+      <input class="a-input nl-when" id="nl-when" name="send_at" type="datetime-local" value={editSendAtLocal} />
+      <span class="nl-schedule-note">Leave empty to send immediately. Scheduled sends run automatically.</span>
+    </div>
+
+    <div class="nl-actions">
+      <button type="submit" name="op" value="sendnow" class="a-btn a-btn-primary" data-confirm="Send this newsletter to all subscribers now?">
+        <AdminIcon name="mail" size={16} /> Send now
+      </button>
+      <button type="submit" name="op" value="schedule" class="a-btn"><AdminIcon name="events" size={15} /> Schedule</button>
+      <button type="submit" name="op" value="test" class="a-btn"><AdminIcon name="eye" size={15} /> Send test to me</button>
+      <button type="submit" name="op" value="save" class="a-btn a-btn-ghost">Save draft</button>
+    </div>
+  </form>
+
+  {newsletters.length > 0 && (
+    <section class="nl-list">
+      <h2 class="a-section-title nl-list-title">History</h2>
+      <div class="a-card">
+        <table class="a-table">
+          <thead><tr><th>Subject</th><th>Status</th><th>When</th><th>Sent to</th><th></th></tr></thead>
+          <tbody>
+            {newsletters.map((n) => (
+              <tr>
+                <td class="nl-td-subject">{n.subject || <em class="nl-muted">Untitled</em>}</td>
+                <td><span class={`a-badge ${statusBadge(n.status)}`}>{n.status}</span></td>
+                <td class="nl-when-cell">{n.status === 'sent' ? fmt(n.sent_at) : n.status === 'scheduled' ? fmtDT(n.send_at) : fmt(n.created_at)}</td>
+                <td class="a-num">{n.status === 'sent' ? n.sent_count : '—'}</td>
+                <td class="nl-td-actions">
+                  {n.status !== 'sent' && <a href={`/admin/newsletter?edit=${n.id}`} class="a-btn a-btn-ghost nl-sm"><AdminIcon name="pen-square" size={14} /> Edit</a>}
+                  <button type="submit" form="nlDel" name="id" value={n.id} class="a-btn a-btn-ghost nl-sm nl-del" data-confirm="Delete this newsletter?"><AdminIcon name="eye-off" size={14} /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )}
+
+  <section class="nl-list">
+    <div class="nl-subs-head">
+      <h2 class="a-section-title nl-list-title">Subscribers <span class="nl-subs-count">{subscribers.length}</span></h2>
+      {subscribers.length > 0 && <button type="button" id="nlExport" class="a-btn nl-sm"><AdminIcon name="external" size={14} /> Export CSV</button>}
+    </div>
+    <div class="a-card">
+      {subscribers.length === 0 ? (
+        <p class="nl-empty">No subscribers yet. The signup form appears in the site footer and on <a href="/newsletter">/newsletter</a>.</p>
+      ) : (
+        <table class="a-table" id="nlSubs">
+          <thead><tr><th>Email</th><th>Source</th><th>Interest</th><th>Joined</th><th></th></tr></thead>
+          <tbody>
+            {subscribers.map((sub) => (
+              <tr>
+                <td class="nl-td-subject">{sub.email}</td>
+                <td>{sub.source || 'web'}</td>
+                <td>{sub.tag || <span class="nl-muted">—</span>}</td>
+                <td class="nl-when-cell">{fmt(sub.created_at)}</td>
+                <td class="nl-td-actions">
+                  <form method="POST" action="/api/admin/newsletter/action" class="nl-inline-form" data-confirm-form="Remove this subscriber?">
+                    <input type="hidden" name="op" value="unsubscribe" />
+                    <input type="hidden" name="sub_id" value={sub.id} />
+                    <button type="submit" class="a-btn a-btn-ghost nl-sm nl-del"><AdminIcon name="eye-off" size={14} /></button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  </section>
+
+  <form method="POST" action="/api/admin/newsletter/action" id="nlDel" hidden>
+    <input type="hidden" name="op" value="delete" />
+  </form>
 </Layout>
 
 <style>
-  .cs-wrap { display: flex; justify-content: center; padding: 2rem 0; }
-  .cs-card { max-width: 480px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding: 2.5rem 2rem; }
-  .cs-icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: var(--a-accent-tint); color: var(--a-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .cs-heading { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.25rem; color: var(--a-ink); margin: 0; }
-  .cs-body { font-size: .9rem; color: var(--a-ink-2); line-height: 1.65; margin: 0; }
-  .cs-badge { margin-top: .25rem; }
+  .nl-flash { display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem; border-radius: 10px; font-size: .9rem; font-weight: 500; margin-bottom: 1.25rem; }
+  .nl-flash.is-ok { background: var(--a-green-bg); color: var(--a-green); }
+  .nl-flash.is-err { background: var(--a-red-bg); color: var(--a-red); }
+
+  .nl-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: .9rem; margin-bottom: 1.5rem; }
+  .nl-stat { padding: 1.1rem 1.2rem; display: flex; flex-direction: column; gap: .15rem; }
+  .nl-stat-n { font-family: 'Fraunces', Georgia, serif; font-size: 1.7rem; font-weight: 500; color: var(--a-ink); line-height: 1; font-variant-numeric: tabular-nums; }
+  .nl-stat-l { font-size: .74rem; text-transform: uppercase; letter-spacing: .1em; color: var(--a-muted); font-weight: 600; }
+  @media (max-width: 620px) { .nl-stats { grid-template-columns: repeat(2, 1fr); } }
+
+  .nl-compose-title { margin-bottom: 1rem; }
+  .nl-label { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: var(--a-muted); margin: 1rem 0 .35rem; }
+  .nl-compose > .nl-label:first-of-type { margin-top: 0; }
+  .nl-textarea { resize: vertical; line-height: 1.65; min-height: 230px; font-family: inherit; }
+  .nl-hint { font-size: .78rem; color: var(--a-muted); margin: .4rem 0 0; }
+  .nl-schedule { margin-top: 1.1rem; padding-top: 1rem; border-top: 1px solid var(--a-line-2); }
+  .nl-when { max-width: 260px; }
+  .nl-schedule-note { display: block; font-size: .78rem; color: var(--a-muted); margin-top: .4rem; }
+  .nl-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.3rem; }
+
+  .nl-list { margin-top: 2rem; }
+  .nl-list-title { margin-bottom: .75rem; }
+  .nl-subs-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: .75rem; }
+  .nl-subs-head .nl-list-title { margin-bottom: 0; }
+  .nl-subs-count { font-size: .82rem; color: var(--a-accent-2); background: var(--a-accent-tint); padding: .1rem .55rem; border-radius: 999px; margin-left: .35rem; }
+  .nl-td-subject { color: var(--a-ink); font-weight: 500; }
+  .nl-when-cell { white-space: nowrap; }
+  .nl-td-actions { display: flex; gap: .4rem; justify-content: flex-end; }
+  .nl-inline-form { display: inline; margin: 0; }
+  .nl-sm { padding: .35rem .6rem; font-size: .78rem; }
+  .nl-del { color: var(--a-red); }
+  .nl-muted { color: var(--a-muted); }
+  .nl-empty { padding: 1.5rem; text-align: center; color: var(--a-muted); font-size: .88rem; margin: 0; }
+  .nl-empty a { color: var(--a-accent-2); font-weight: 600; }
 </style>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) { if (!window.confirm(btn.getAttribute('data-confirm'))) e.preventDefault(); });
+    });
+    document.querySelectorAll('[data-confirm-form]').forEach(function (f) {
+      f.addEventListener('submit', function (e) { if (!window.confirm(f.getAttribute('data-confirm-form'))) e.preventDefault(); });
+    });
+    var exp = document.getElementById('nlExport');
+    if (exp) exp.addEventListener('click', function () {
+      var rows = [['email', 'source', 'interest', 'joined']];
+      document.querySelectorAll('#nlSubs tbody tr').forEach(function (tr) {
+        var c = tr.querySelectorAll('td');
+        rows.push([c[0].textContent.trim(), c[1].textContent.trim(), c[2].textContent.trim(), c[3].textContent.trim()]);
+      });
+      var csv = rows.map(function (r) { return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','); }).join('\n');
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'drbi-subscribers.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+    });
+  })();
+</script>

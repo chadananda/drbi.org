@@ -1,36 +1,376 @@
 ---
-// Admin announcements: post updates to the team and optionally display a site banner.
+// Admin announcements: broadcast updates to the team/subscribers and optionally raise a
+// dismissible banner on the public site. Compose + recipient picker + autosave + history.
 export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
 import AdminIcon from '@components/admin/AdminIcon.astro';
+import { listAnnouncements, getAnnouncement, parseAudience } from '@lib/server/announcements';
+import { recipientList } from '@api/admin/announce';
+import { countSubscribers } from '@lib/server/subscribers';
+
 const user = Astro.locals?.user;
+const q = Astro.url.searchParams;
+const editId = q.get('edit') ? Number(q.get('edit')) : null;
+
+const [people, subCount, announcements, editing] = await Promise.all([
+  recipientList(),
+  countSubscribers(),
+  listAnnouncements(),
+  editId ? getAnnouncement(editId) : Promise.resolve(null),
+]);
+
+const editAud = editing ? parseAudience(editing.audience) : { selected: [], includeSubscribers: false };
+const selectedSet = new Set(editAud.selected);
+const drafts = announcements.filter((a) => a.status !== 'sent');
+const sent = announcements.filter((a) => a.status === 'sent');
+
+const roleRank = { superadmin: 0, admin: 1, editor: 2, author: 3, user: 4 };
+people.sort((a, b) => (roleRank[a.role] ?? 5) - (roleRank[b.role] ?? 5) || a.name.localeCompare(b.name));
+
+// Flash messages
+let flash = null, flashKind = 'ok';
+if (q.get('sent')) flash = `Announcement sent to ${q.get('sent')} of ${q.get('of')} recipient${q.get('of') === '1' ? '' : 's'}.`;
+else if (q.get('tested')) flash = 'Test email sent to you.';
+else if (q.get('saved')) flash = 'Draft saved.';
+else if (q.get('deleted')) flash = 'Announcement deleted.';
+else if (q.get('e') === 'empty') { flash = 'Add a subject and message before sending.'; flashKind = 'err'; }
+else if (q.get('e') === 'norecipients') { flash = 'Select at least one recipient.'; flashKind = 'err'; }
+else if (q.get('e') === 'testfail') { flash = 'Test send failed — check email configuration.'; flashKind = 'err'; }
+
+const fmtDate = (s) => s ? new Date(s.replace(' ', 'T') + 'Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+const roleBadge = (r) => r === 'superadmin' || r === 'admin' ? 'a-badge-amber' : r === 'user' ? 'a-badge-muted' : 'a-badge-blue';
 ---
 
 <Layout title="Announcements" user={user}>
   <div class="a-page-head">
     <div>
       <h1 class="a-title">Announcements</h1>
-      <p class="a-subtitle">Post updates to the team and publish optional banners on the public site.</p>
+      <p class="a-subtitle">Broadcast news to the team and subscribers, and raise a banner on the public site.</p>
     </div>
+    {editing && <a href="/admin/announcements" class="a-btn"><AdminIcon name="plus" size={15} /> New announcement</a>}
   </div>
 
-  <div class="cs-wrap">
-    <div class="a-card a-card-pad cs-card">
-      <div class="cs-icon-wrap">
-        <AdminIcon name="megaphone" size={28} />
-      </div>
-      <h2 class="cs-heading">Announcements</h2>
-      <p class="cs-body">This screen will let staff draft and send internal team announcements, as well as publish a dismissible banner strip on the public DRBI site for time-sensitive news — upcoming closures, schedule changes, or important notices.</p>
-      <span class="a-badge a-badge-amber cs-badge">Coming soon</span>
+  {flash && (
+    <div class={`ann-flash ${flashKind === 'err' ? 'is-err' : 'is-ok'}`} role="status">
+      <AdminIcon name={flashKind === 'err' ? 'bell' : 'megaphone'} size={16} />
+      <span>{flash}</span>
     </div>
-  </div>
+  )}
+
+  <form method="POST" action="/api/admin/announce" class="ann-form" id="annForm" data-editing={editing ? '1' : '0'} data-sub-count={subCount}>
+    <input type="hidden" name="id" value={editing?.id ?? ''} />
+    <div class="ann-grid">
+
+      <!-- Compose -->
+      <section class="a-card a-card-pad ann-compose">
+        <div class="ann-card-head">
+          <h2 class="a-section-title">{editing ? 'Edit announcement' : 'Compose'}</h2>
+          <span class="ann-save-status" data-status aria-live="polite"></span>
+        </div>
+
+        <label class="ann-label" for="ann-subject">Subject</label>
+        <input class="a-input" id="ann-subject" name="subject" maxlength="200" required
+          placeholder="e.g. Institute closed for Ridván" value={editing?.subject ?? ''} />
+
+        <label class="ann-label" for="ann-body">Message</label>
+        <textarea class="a-input ann-textarea" id="ann-body" name="body" rows="9" required
+          placeholder="Write your update. Links are made clickable automatically.">{editing?.body ?? ''}</textarea>
+
+        <div class="ann-banner">
+          <label class="ann-check ann-banner-toggle">
+            <input type="checkbox" name="banner" data-banner-toggle checked={editing?.banner ? true : false} />
+            <span><strong>Also show as a site banner</strong><em>A dismissible strip at the top of the public site.</em></span>
+          </label>
+          <div class="ann-banner-opts" data-banner-opts hidden={!editing?.banner}>
+            <div class="ann-field">
+              <label class="ann-label" for="ann-tone">Tone</label>
+              <select class="a-input" id="ann-tone" name="banner_tone">
+                <option value="info" selected={editing?.banner_tone !== 'alert'}>Info (brass)</option>
+                <option value="alert" selected={editing?.banner_tone === 'alert'}>Alert (red)</option>
+              </select>
+            </div>
+            <div class="ann-field">
+              <label class="ann-label" for="ann-until">Hide after</label>
+              <input class="a-input" id="ann-until" name="banner_until" type="date" value={editing?.banner_until ?? ''} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recipients -->
+      <section class="a-card a-card-pad ann-recipients">
+        <div class="ann-card-head">
+          <h2 class="a-section-title">Recipients</h2>
+          <span class="ann-count" data-count>0 selected</span>
+        </div>
+
+        <label class="ann-check ann-subs">
+          <input type="checkbox" name="include_subscribers" checked={editAud.includeSubscribers} />
+          <span><strong>All newsletter subscribers</strong><em>{subCount} active subscriber{subCount === 1 ? '' : 's'}</em></span>
+        </label>
+
+        <div class="ann-search-row">
+          <div class="ann-search">
+            <AdminIcon name="search" size={15} />
+            <input type="text" placeholder="Search team…" data-search aria-label="Search recipients" />
+          </div>
+        </div>
+        <div class="ann-chips">
+          <button type="button" class="ann-chip is-active" data-filter="all">All</button>
+          <button type="button" class="ann-chip" data-filter="staff">Staff</button>
+          <button type="button" class="ann-chip" data-filter="user">Members</button>
+          <span class="ann-quick">
+            <button type="button" class="ann-link" data-select="shown">Select shown</button>
+            <button type="button" class="ann-link" data-select="none">Clear</button>
+          </span>
+        </div>
+
+        <div class="ann-people" data-people>
+          {people.length === 0 && <p class="ann-empty">No team members yet.</p>}
+          {people.map((p) => {
+            const staff = p.role !== 'user';
+            return (
+              <label class="ann-person" data-role={staff ? 'staff' : 'user'} data-text={`${p.name} ${p.email}`.toLowerCase()}>
+                <input type="checkbox" name="selected" value={p.email} checked={selectedSet.has(p.email)} />
+                <span class="ann-avatar">{p.name.trim().split(/\s+/).map((s) => s[0]).slice(0, 2).join('').toUpperCase()}</span>
+                <span class="ann-person-main">
+                  <span class="ann-person-name">{p.name}</span>
+                  <span class="ann-person-email">{p.email}</span>
+                </span>
+                <span class={`a-badge ${roleBadge(p.role)} ann-person-role`}>{p.role}</span>
+              </label>
+            );
+          })}
+        </div>
+      </section>
+    </div>
+
+    <div class="ann-actions">
+      <button type="submit" name="op" value="send" class="a-btn a-btn-primary ann-send" data-confirm="Send this announcement now?">
+        <AdminIcon name="megaphone" size={16} /> Send announcement
+      </button>
+      <button type="submit" name="op" value="test" class="a-btn"><AdminIcon name="mail" size={15} /> Send test to me</button>
+      <button type="submit" name="op" value="save" class="a-btn a-btn-ghost">Save draft</button>
+    </div>
+  </form>
+
+  {drafts.length > 0 && (
+    <section class="ann-list">
+      <h2 class="a-section-title ann-list-title">Drafts</h2>
+      <div class="a-card">
+        <table class="a-table">
+          <thead><tr><th>Subject</th><th>Recipients</th><th>Banner</th><th></th></tr></thead>
+          <tbody>
+            {drafts.map((a) => {
+              const aud = parseAudience(a.audience);
+              const n = aud.selected.length + (aud.includeSubscribers ? subCount : 0);
+              return (
+                <tr>
+                  <td class="ann-td-subject">{a.subject || <em class="ann-muted">Untitled</em>}</td>
+                  <td class="a-num">{n}</td>
+                  <td>{a.banner ? <span class={`a-badge ${a.banner_tone === 'alert' ? 'a-badge-red' : 'a-badge-amber'}`}>Banner</span> : <span class="ann-muted">—</span>}</td>
+                  <td class="ann-td-actions">
+                    <a href={`/admin/announcements?edit=${a.id}`} class="a-btn a-btn-ghost ann-sm"><AdminIcon name="pen-square" size={14} /> Edit</a>
+                    <button type="submit" form="delForm" name="id" value={a.id} class="a-btn a-btn-ghost ann-sm ann-del" data-confirm="Delete this draft?"><AdminIcon name="eye-off" size={14} /> Delete</button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )}
+
+  {sent.length > 0 && (
+    <section class="ann-list">
+      <h2 class="a-section-title ann-list-title">Sent</h2>
+      <div class="a-card">
+        <table class="a-table">
+          <thead><tr><th>Subject</th><th>Delivered</th><th>Sent</th></tr></thead>
+          <tbody>
+            {sent.map((a) => (
+              <tr>
+                <td class="ann-td-subject">{a.subject}{a.banner ? <span class="a-badge a-badge-muted ann-inline-badge">was banner</span> : null}</td>
+                <td class="a-num">{a.sent_count} / {a.recipient_count}</td>
+                <td>{fmtDate(a.sent_at)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )}
+
+  <form method="POST" action="/api/admin/announce" id="delForm" hidden><input type="hidden" name="op" value="delete" /></form>
 </Layout>
 
 <style>
-  .cs-wrap { display: flex; justify-content: center; padding: 2rem 0; }
-  .cs-card { max-width: 480px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding: 2.5rem 2rem; }
-  .cs-icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: var(--a-accent-tint); color: var(--a-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .cs-heading { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.25rem; color: var(--a-ink); margin: 0; }
-  .cs-body { font-size: .9rem; color: var(--a-ink-2); line-height: 1.65; margin: 0; }
-  .cs-badge { margin-top: .25rem; }
+  .ann-flash { display: flex; align-items: center; gap: .6rem; padding: .7rem 1rem; border-radius: 10px; font-size: .9rem; font-weight: 500; margin-bottom: 1.25rem; }
+  .ann-flash.is-ok { background: var(--a-green-bg); color: var(--a-green); }
+  .ann-flash.is-err { background: var(--a-red-bg); color: var(--a-red); }
+
+  .ann-grid { display: grid; grid-template-columns: 1fr; gap: 1.25rem; }
+  @media (min-width: 940px) { .ann-grid { grid-template-columns: 1.1fr .9fr; align-items: start; } }
+
+  .ann-card-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: 1rem; }
+  .ann-label { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: var(--a-muted); margin: 0 0 .35rem; }
+  .ann-compose .a-input + .ann-label { margin-top: 1rem; }
+  .ann-textarea { resize: vertical; line-height: 1.6; min-height: 180px; font-family: inherit; }
+  .ann-save-status { font-size: .75rem; color: var(--a-muted); }
+  .ann-save-status.is-saving { color: var(--a-amber); }
+  .ann-save-status.is-saved { color: var(--a-green); }
+
+  /* Banner block */
+  .ann-banner { margin-top: 1.1rem; border-top: 1px solid var(--a-line-2); padding-top: 1rem; }
+  .ann-check { display: flex; align-items: flex-start; gap: .6rem; cursor: pointer; font-size: .9rem; }
+  .ann-check input { margin-top: .2rem; width: 16px; height: 16px; accent-color: var(--a-accent); flex-shrink: 0; }
+  .ann-check span { display: flex; flex-direction: column; line-height: 1.35; }
+  .ann-check em { font-style: normal; color: var(--a-muted); font-size: .8rem; }
+  .ann-banner-opts { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-top: .9rem; padding-left: 2.2rem; }
+  .ann-banner-opts[hidden] { display: none; }
+
+  /* Recipients */
+  .ann-subs { padding: .7rem .8rem; background: var(--a-panel-2); border: 1px solid var(--a-line-2); border-radius: var(--a-radius-sm); margin-bottom: .9rem; }
+  .ann-count { font-size: .78rem; font-weight: 600; color: var(--a-accent-2); background: var(--a-accent-tint); padding: .2rem .6rem; border-radius: 999px; white-space: nowrap; }
+  .ann-search { display: flex; align-items: center; gap: .5rem; padding: .45rem .7rem; border: 1px solid var(--a-line); border-radius: var(--a-radius-sm); color: var(--a-muted); }
+  .ann-search input { border: none; outline: none; background: transparent; font: inherit; font-size: .9rem; width: 100%; color: var(--a-ink); }
+  .ann-chips { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin: .75rem 0; }
+  .ann-chip { font-size: .78rem; font-weight: 600; padding: .3rem .7rem; border-radius: 999px; border: 1px solid var(--a-line); background: var(--a-panel); color: var(--a-ink-2); cursor: pointer; transition: all .15s; }
+  .ann-chip:hover { border-color: #dcd5c8; }
+  .ann-chip.is-active { background: var(--a-ink); color: #fff; border-color: var(--a-ink); }
+  .ann-quick { margin-left: auto; display: flex; gap: .6rem; }
+  .ann-link { background: none; border: none; color: var(--a-accent-2); font-size: .8rem; font-weight: 600; cursor: pointer; padding: 0; }
+  .ann-link:hover { text-decoration: underline; }
+
+  .ann-people { max-height: 340px; overflow-y: auto; border: 1px solid var(--a-line-2); border-radius: var(--a-radius-sm); }
+  .ann-person { display: flex; align-items: center; gap: .7rem; padding: .55rem .75rem; cursor: pointer; border-bottom: 1px solid var(--a-line-2); transition: background .12s; }
+  .ann-person:last-child { border-bottom: none; }
+  .ann-person:hover { background: var(--a-panel-2); }
+  .ann-person input { width: 16px; height: 16px; accent-color: var(--a-accent); flex-shrink: 0; }
+  .ann-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--a-accent-tint); color: var(--a-accent-2); display: grid; place-items: center; font-size: .7rem; font-weight: 700; flex-shrink: 0; }
+  .ann-person-main { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.25; }
+  .ann-person-name { font-size: .88rem; font-weight: 600; color: var(--a-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ann-person-email { font-size: .76rem; color: var(--a-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ann-person-role { text-transform: capitalize; flex-shrink: 0; }
+  .ann-empty { padding: 1.5rem; text-align: center; color: var(--a-muted); font-size: .85rem; margin: 0; }
+
+  .ann-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1.25rem; }
+  .ann-send { font-size: .92rem; padding: .6rem 1.2rem; }
+
+  .ann-list { margin-top: 2rem; }
+  .ann-list-title { margin-bottom: .75rem; }
+  .ann-td-subject { color: var(--a-ink); font-weight: 500; }
+  .ann-td-actions { display: flex; gap: .4rem; justify-content: flex-end; }
+  .ann-sm { padding: .35rem .6rem; font-size: .78rem; }
+  .ann-del { color: var(--a-red); }
+  .ann-muted { color: var(--a-muted); }
+  .ann-inline-badge, .ann-list .ann-inline-badge { margin-left: .5rem; }
+
+  @media (max-width: 620px) {
+    .ann-banner-opts { grid-template-columns: 1fr; padding-left: 0; }
+    .ann-td-actions { flex-direction: column; }
+  }
 </style>
+
+<script is:inline>
+  (function () {
+    var form = document.getElementById('annForm');
+    if (!form) return;
+    var people = form.querySelector('[data-people]');
+    var search = form.querySelector('[data-search]');
+    var countEl = form.querySelector('[data-count]');
+    var subsBox = form.querySelector('input[name="include_subscribers"]');
+    var boxes = function () { return Array.prototype.slice.call(people.querySelectorAll('input[type=checkbox]')); };
+    var rows = function () { return Array.prototype.slice.call(people.querySelectorAll('.ann-person')); };
+    var subCount = Number(form.getAttribute('data-sub-count')) || 0;
+
+    function updateCount() {
+      var n = boxes().filter(function (b) { return b.checked; }).length;
+      if (subsBox && subsBox.checked) n += subCount;
+      countEl.textContent = n + ' selected';
+    }
+    updateCount();
+
+    // Banner options toggle
+    var bt = form.querySelector('[data-banner-toggle]');
+    var bo = form.querySelector('[data-banner-opts]');
+    if (bt && bo) bt.addEventListener('change', function () { bo.hidden = !bt.checked; });
+
+    // Search filter
+    var filter = 'all';
+    function applyFilter() {
+      var q = (search.value || '').toLowerCase().trim();
+      rows().forEach(function (r) {
+        var role = r.getAttribute('data-role');
+        var matchRole = filter === 'all' || (filter === 'staff' && role === 'staff') || (filter === 'user' && role === 'user');
+        var matchText = !q || r.getAttribute('data-text').indexOf(q) !== -1;
+        r.style.display = (matchRole && matchText) ? '' : 'none';
+      });
+    }
+    if (search) search.addEventListener('input', applyFilter);
+    form.querySelectorAll('.ann-chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        form.querySelectorAll('.ann-chip').forEach(function (c) { c.classList.remove('is-active'); });
+        chip.classList.add('is-active');
+        filter = chip.getAttribute('data-filter');
+        applyFilter();
+      });
+    });
+
+    // Quick select
+    form.querySelectorAll('[data-select]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var mode = btn.getAttribute('data-select');
+        if (mode === 'none') { boxes().forEach(function (b) { b.checked = false; }); }
+        else if (mode === 'shown') {
+          rows().forEach(function (r) { if (r.style.display !== 'none') { var b = r.querySelector('input'); if (b) b.checked = true; } });
+        }
+        updateCount();
+      });
+    });
+
+    people.addEventListener('change', updateCount);
+    if (subsBox) subsBox.addEventListener('change', updateCount);
+
+    // Autosave (debounced) — POST with json=1 so we get an id back without navigating.
+    var status = form.querySelector('[data-status]');
+    var idField = form.querySelector('input[name="id"]');
+    var timer = null, dirty = false;
+    function scheduleSave() {
+      dirty = true;
+      if (status) { status.textContent = 'Unsaved…'; status.className = 'ann-save-status'; }
+      clearTimeout(timer);
+      timer = setTimeout(save, 2500);
+    }
+    async function save() {
+      if (!dirty) return;
+      var subj = form.querySelector('#ann-subject').value.trim();
+      var body = form.querySelector('#ann-body').value.trim();
+      if (!subj && !body) return;
+      if (status) { status.textContent = 'Saving…'; status.className = 'ann-save-status is-saving'; }
+      var fd = new FormData(form);
+      fd.set('op', 'save'); fd.set('json', '1');
+      try {
+        var res = await fetch('/api/admin/announce', { method: 'POST', body: fd });
+        var data = await res.json();
+        if (data && data.id && idField) idField.value = data.id;
+        dirty = false;
+        if (status) { status.textContent = 'Saved'; status.className = 'ann-save-status is-saved'; }
+      } catch (e) {
+        if (status) { status.textContent = 'Save failed'; status.className = 'ann-save-status'; }
+      }
+    }
+    ['input', 'change'].forEach(function (ev) {
+      form.querySelector('#ann-subject').addEventListener(ev, scheduleSave);
+      form.querySelector('#ann-body').addEventListener(ev, scheduleSave);
+    });
+
+    // Confirm dialogs (send / delete)
+    document.querySelectorAll('[data-confirm]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        if (!window.confirm(btn.getAttribute('data-confirm'))) e.preventDefault();
+      });
+    });
+  })();
+</script>

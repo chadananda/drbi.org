@@ -1,0 +1,102 @@
+---
+// Public press hub: published releases + media kit + press contact.
+export const prerender = false;
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import site from "@data/site.json";
+import { listPublished } from "@lib/server/press";
+
+const releases = await listPublished();
+const facts = [
+  ["Organization", site.title],
+  ["Location", "Eloy, Arizona"],
+  ["Address", site.address],
+  ["Focus", "Bahá’í education, the arts & regenerative agriculture"],
+  ["Website", "drbi.org"],
+];
+const fmt = (iso) => iso ? new Date(iso.includes("T") ? iso : iso.replace(" ", "T") + "Z").toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "";
+---
+<Layout title="Press — Desert Rose Bahá'í Institute">
+  <section class="prx">
+    <Container>
+      <header class="prx-head">
+        <p class="prx-kicker">Media resources</p>
+        <h1 class="prx-title">Press</h1>
+        <p class="prx-lede">{site.subtitle}. News, announcements, and resources for journalists covering Desert Rose Bahá'í Institute.</p>
+      </header>
+
+      <div class="prx-grid">
+        <div class="prx-releases">
+          <h2 class="prx-h2">Press releases</h2>
+          {releases.length === 0 ? (
+            <p class="prx-empty">No press releases yet. Please check back soon.</p>
+          ) : (
+            <ul class="prx-list">
+              {releases.map((r) => (
+                <li class="prx-item">
+                  <a href={`/press/${r.slug}`} class="prx-item-link">
+                    <span class="prx-item-date">{fmt(r.published_at)}{r.dateline ? ` · ${r.dateline}` : ""}</span>
+                    <span class="prx-item-title">{r.title}</span>
+                    {r.summary && <span class="prx-item-summary">{r.summary}</span>}
+                    <span class="prx-item-more">Read release &rarr;</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <aside class="prx-kit">
+          <div class="prx-card">
+            <h2 class="prx-h3">Press kit</h2>
+            <dl class="prx-facts">
+              {facts.map(([k, v]) => (
+                <div class="prx-fact"><dt>{k}</dt><dd>{v}</dd></div>
+              ))}
+            </dl>
+          </div>
+          <div class="prx-card">
+            <h2 class="prx-h3">Press contact</h2>
+            <p class="prx-contact-t">For interviews, images, or more information:</p>
+            <a href={`mailto:${site.email}`} class="prx-contact-link">{site.email}</a>
+            <p class="prx-contact-phone">{site.phone}</p>
+          </div>
+        </aside>
+      </div>
+    </Container>
+  </section>
+</Layout>
+
+<style>
+  .prx { padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(3rem, 7vw, 6rem); }
+  .prx-head { max-width: 44rem; margin: 0 0 2.75rem; }
+  .prx-kicker { text-transform: uppercase; letter-spacing: .18em; font-size: .72rem; font-weight: 600; color: var(--color-brand, #a04607); margin: 0 0 .6rem; }
+  .prx-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: clamp(2rem, 5vw, 3rem); color: var(--color-ink, #1d1b17); margin: 0 0 .8rem; }
+  .prx-lede { font-size: 1.05rem; line-height: 1.7; color: var(--color-body, #57524a); margin: 0; }
+
+  .prx-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; align-items: start; }
+  @media (min-width: 900px) { .prx-grid { grid-template-columns: 1fr 19rem; gap: 3.5rem; } }
+  .prx-h2 { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.4rem; color: var(--color-ink, #1d1b17); margin: 0 0 1.25rem; }
+  .prx-empty { color: var(--color-muted, #6b6459); font-size: .98rem; }
+
+  .prx-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; }
+  .prx-item { border-top: 1px solid var(--color-line, #e7e2d8); }
+  .prx-item:last-child { border-bottom: 1px solid var(--color-line, #e7e2d8); }
+  .prx-item-link { display: flex; flex-direction: column; gap: .3rem; padding: 1.4rem 0; text-decoration: none; }
+  .prx-item-date { font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: var(--color-muted, #8b847a); }
+  .prx-item-title { font-family: 'Merriweather', Georgia, serif; font-size: 1.25rem; line-height: 1.3; color: var(--color-ink, #1d1b17); transition: color .15s; }
+  .prx-item-link:hover .prx-item-title { color: var(--color-brand, #a04607); }
+  .prx-item-summary { font-size: .95rem; line-height: 1.6; color: var(--color-body, #57524a); margin-top: .1rem; }
+  .prx-item-more { font-size: .85rem; font-weight: 600; color: var(--color-brand, #a04607); margin-top: .35rem; }
+
+  .prx-kit { display: flex; flex-direction: column; gap: 1.25rem; }
+  .prx-card { background: var(--color-surface, #fbfaf7); border: 1px solid var(--color-line, #e7e2d8); border-radius: 16px; padding: 1.5rem 1.6rem; }
+  .prx-h3 { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.1rem; color: var(--color-ink, #1d1b17); margin: 0 0 1rem; }
+  .prx-facts { margin: 0; display: flex; flex-direction: column; gap: .8rem; }
+  .prx-fact dt { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--color-muted, #8b847a); font-weight: 600; margin-bottom: .12rem; }
+  .prx-fact dd { margin: 0; font-size: .92rem; color: var(--color-ink, #1d1b17); line-height: 1.4; }
+  .prx-contact-t { font-size: .88rem; color: var(--color-body, #57524a); margin: 0 0 .6rem; }
+  .prx-contact-link { font-size: 1rem; font-weight: 600; color: var(--color-brand, #a04607); text-decoration: none; }
+  .prx-contact-link:hover { text-decoration: underline; }
+  .prx-contact-phone { font-size: .92rem; color: var(--color-muted, #6b6459); margin: .5rem 0 0; }
+</style>

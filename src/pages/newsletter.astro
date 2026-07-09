@@ -1,0 +1,55 @@
+---
+// Public newsletter signup page.
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import NewsletterSignup from "@components/NewsletterSignup.astro";
+
+const perks = [
+  { t: "Courses & retreats", d: "Be first to hear when new programs and registration open." },
+  { t: "Harvest & land days", d: "Invitations to seasonal volunteer and community gatherings." },
+  { t: "The arts at Desert Rose", d: "Concerts, exhibitions, and creative happenings on campus." },
+  { t: "Stories from the institute", d: "Occasional reflections on education, agriculture, and service." },
+];
+---
+<Layout title="Newsletter — Desert Rose Bahá'í Institute">
+  <section class="nlp">
+    <Container>
+      <div class="nlp-head">
+        <p class="nlp-kicker">Desert Rose news</p>
+        <h1 class="nlp-title">Stay close to the work at Desert Rose</h1>
+        <p class="nlp-lede">A few times a season, we send a warm note about what's growing — courses, harvest days, the arts, and community life in Eloy. Join us.</p>
+      </div>
+
+      <div class="nlp-signup">
+        <NewsletterSignup variant="panel" tag="newsletter" heading="Subscribe" />
+      </div>
+
+      <ul class="nlp-perks">
+        {perks.map((p) => (
+          <li class="nlp-perk">
+            <span class="nlp-perk-dot" aria-hidden="true"></span>
+            <div>
+              <p class="nlp-perk-t">{p.t}</p>
+              <p class="nlp-perk-d">{p.d}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Container>
+  </section>
+</Layout>
+
+<style>
+  .nlp { padding: clamp(2.5rem, 6vw, 5rem) 0 clamp(3rem, 7vw, 6rem); }
+  .nlp-head { max-width: 40rem; margin: 0 auto 2.25rem; text-align: center; }
+  .nlp-kicker { text-transform: uppercase; letter-spacing: .18em; font-size: .72rem; font-weight: 600; color: var(--color-brand, #a04607); margin: 0 0 .75rem; }
+  .nlp-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, 4.5vw, 2.9rem); line-height: 1.12; color: var(--color-ink, #1d1b17); margin: 0 0 1rem; }
+  .nlp-lede { font-size: 1.05rem; line-height: 1.7; color: var(--color-body, #57524a); margin: 0; }
+  .nlp-signup { max-width: 46rem; margin: 0 auto; }
+  .nlp-perks { list-style: none; padding: 0; margin: 2.75rem auto 0; max-width: 46rem; display: grid; gap: 1.25rem; }
+  @media (min-width: 640px) { .nlp-perks { grid-template-columns: 1fr 1fr; gap: 1.5rem 2.5rem; } }
+  .nlp-perk { display: flex; gap: .85rem; align-items: flex-start; }
+  .nlp-perk-dot { flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; margin-top: .45rem; background: linear-gradient(180deg, #c05f14, #a04607); }
+  .nlp-perk-t { font-weight: 600; font-size: 1rem; color: var(--color-ink, #1d1b17); margin: 0 0 .2rem; }
+  .nlp-perk-d { font-size: .92rem; line-height: 1.55; color: var(--color-muted, #6b6459); margin: 0; }
+</style>

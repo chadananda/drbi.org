@@ -1,0 +1,44 @@
+---
+// Dismissible public banner driven by the most recent "banner" announcement (admin → Announcements).
+// Fail-soft: renders nothing when there's no active banner. Dismissal is per-banner via localStorage.
+import { activeBanner } from '@lib/server/announcements';
+const b = await activeBanner().catch(() => null);
+// One-line teaser from the message body (banners are meant to be short).
+const teaser = b ? String(b.body || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160) : '';
+---
+{b && (
+  <div class={`site-banner tone-${b.banner_tone === 'alert' ? 'alert' : 'info'}`} id="siteBanner" data-banner-id={b.id} hidden>
+    <div class="sb-inner">
+      <span class="sb-text"><strong>{b.subject}</strong>{teaser && <span class="sb-teaser">{teaser}</span>}</span>
+      <button type="button" class="sb-close" id="siteBannerClose" aria-label="Dismiss announcement">&times;</button>
+    </div>
+  </div>
+)}
+
+<style>
+  .site-banner { font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif; color: #fff; }
+  .site-banner.tone-info { background: linear-gradient(90deg, #a04607, #c05f14); }
+  .site-banner.tone-alert { background: linear-gradient(90deg, #98332b, #b8443a); }
+  .sb-inner { max-width: 72rem; margin: 0 auto; display: flex; align-items: center; gap: 1rem; padding: .6rem 1.1rem; }
+  .sb-text { flex: 1; font-size: .9rem; line-height: 1.4; }
+  .sb-text strong { font-weight: 700; }
+  .sb-teaser { opacity: .9; margin-left: .55rem; }
+  .sb-close { flex-shrink: 0; background: rgba(255,255,255,.16); border: none; color: #fff; width: 26px; height: 26px; border-radius: 50%; font-size: 1.1rem; line-height: 1; cursor: pointer; transition: background .15s; }
+  .sb-close:hover { background: rgba(255,255,255,.3); }
+  @media (max-width: 560px) { .sb-teaser { display: none; } }
+</style>
+
+<script is:inline>
+  (function () {
+    var el = document.getElementById('siteBanner');
+    if (!el) return;
+    var id = el.getAttribute('data-banner-id');
+    try { if (localStorage.getItem('drbi-banner-dismissed') === id) return; } catch (e) {}
+    el.hidden = false;
+    var close = document.getElementById('siteBannerClose');
+    if (close) close.addEventListener('click', function () {
+      el.hidden = true;
+      try { localStorage.setItem('drbi-banner-dismissed', id); } catch (e) {}
+    });
+  })();
+</script>

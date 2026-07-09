@@ -1,36 +1,155 @@
 ---
-// Admin social media: post scheduling and social links hub.
+// Admin social: connected-account hub + a share-link composer that builds ready-to-post links.
 export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
 import AdminIcon from '@components/admin/AdminIcon.astro';
+import site from '@data/site.json';
+
 const user = Astro.locals?.user;
+
+// Derive public profile URLs from site.json handles.
+const yt = site.youtube?.channel ? `https://www.youtube.com/channel/${site.youtube.channel}` : (site.youtube?.channel_name ? `https://www.youtube.com/@${site.youtube.channel_name}` : '');
+const accounts = [
+  { key: 'facebook', name: 'Facebook', url: site.facebook?.publisher ? `https://www.facebook.com/${site.facebook.publisher}` : '' },
+  { key: 'twitter', name: 'X (Twitter)', url: site.twitter?.site ? `https://x.com/${String(site.twitter.site).replace(/^@/, '')}` : '' },
+  { key: 'youtube', name: 'YouTube', url: yt },
+  { key: 'linkedin', name: 'LinkedIn', url: site.linkedin?.publisher ? `https://www.linkedin.com/company/${site.linkedin.publisher}` : '' },
+  { key: 'instagram', name: 'Instagram', url: '' },
+];
+const connected = accounts.filter((a) => a.url).length;
+
+const ICON = {
+  facebook: '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
+  twitter: '<path d="M4 4l7.5 10L4 20h2l6.2-6.6L17 20h3l-7.9-10.6L19.5 4h-2l-5.6 6L7 4z"/>',
+  youtube: '<rect x="2" y="5" width="20" height="14" rx="4"/><path d="M10 9l5 3-5 3z" fill="currentColor" stroke="none"/>',
+  linkedin: '<rect x="2" y="2" width="20" height="20" rx="3"/><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M11 17v-7" fill="none" stroke="#fff" stroke-width="2"/>',
+  instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="1" fill="currentColor" stroke="none"/>',
+};
+const brandColor = { facebook: '#1877f2', twitter: '#111', youtube: '#ff0000', linkedin: '#0a66c2', instagram: '#d6249f' };
 ---
 
 <Layout title="Social Media" user={user}>
   <div class="a-page-head">
     <div>
       <h1 class="a-title">Social Media</h1>
-      <p class="a-subtitle">Schedule posts and manage the DRBI social presence from one hub.</p>
+      <p class="a-subtitle">Your channels at a glance, and a quick composer to share any page across networks.</p>
     </div>
   </div>
 
-  <div class="cs-wrap">
-    <div class="a-card a-card-pad cs-card">
-      <div class="cs-icon-wrap">
-        <AdminIcon name="share" size={28} />
-      </div>
-      <h2 class="cs-heading">Social Media</h2>
-      <p class="cs-body">This screen will offer a scheduling interface for social posts across DRBI channels, plus a curated links hub for the active accounts. Connect content from the CMS directly to social drafts without leaving the admin.</p>
-      <span class="a-badge a-badge-amber cs-badge">Coming soon</span>
-    </div>
+  <div class="so-stats">
+    <div class="a-card so-stat"><span class="so-stat-n">{connected}</span><span class="so-stat-l">Connected</span></div>
+    <div class="a-card so-stat"><span class="so-stat-n">{accounts.length}</span><span class="so-stat-l">Channels</span></div>
   </div>
+
+  <section class="so-section">
+    <h2 class="a-section-title so-h2">Channels</h2>
+    <div class="so-accounts">
+      {accounts.map((a) => (
+        <div class={`a-card so-acct ${a.url ? '' : 'is-off'}`}>
+          <span class="so-acct-ic" style={`--bc:${brandColor[a.key]}`}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" set:html={ICON[a.key]} />
+          </span>
+          <div class="so-acct-main">
+            <span class="so-acct-name">{a.name}</span>
+            {a.url
+              ? <a class="so-acct-url" href={a.url} target="_blank" rel="noopener">{a.url.replace(/^https?:\/\/(www\.)?/, '')}</a>
+              : <span class="so-acct-off">Not connected</span>}
+          </div>
+          {a.url
+            ? <a class="a-btn so-sm" href={a.url} target="_blank" rel="noopener"><AdminIcon name="external" size={13} /> Open</a>
+            : <span class="a-badge a-badge-muted">—</span>}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="so-section">
+    <h2 class="a-section-title so-h2">Share composer</h2>
+    <div class="a-card a-card-pad so-compose">
+      <p class="so-compose-note">Paste a page link and a short message, then open a prefilled post for any network — or copy the caption.</p>
+      <div class="so-two">
+        <div>
+          <label class="so-label" for="so-url">Page URL</label>
+          <input class="a-input" id="so-url" type="url" placeholder="https://drbi.org/events/…" value="https://drbi.org/" />
+        </div>
+        <div>
+          <label class="so-label" for="so-msg">Message</label>
+          <input class="a-input" id="so-msg" type="text" maxlength="240" placeholder="Join us this season at Desert Rose…" />
+        </div>
+      </div>
+      <div class="so-share-btns" id="soShare">
+        <a class="so-share so-fb" data-net="facebook" target="_blank" rel="noopener">Facebook</a>
+        <a class="so-share so-tw" data-net="twitter" target="_blank" rel="noopener">X</a>
+        <a class="so-share so-li" data-net="linkedin" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="so-share so-em" data-net="email">Email</a>
+        <button type="button" class="so-share so-copy" id="soCopy">Copy caption</button>
+      </div>
+      <p class="so-hint">Instagram doesn't allow prefilled web posts — copy the caption and paste it in the app.</p>
+    </div>
+  </section>
 </Layout>
 
 <style>
-  .cs-wrap { display: flex; justify-content: center; padding: 2rem 0; }
-  .cs-card { max-width: 480px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding: 2.5rem 2rem; }
-  .cs-icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: var(--a-accent-tint); color: var(--a-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .cs-heading { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.25rem; color: var(--a-ink); margin: 0; }
-  .cs-body { font-size: .9rem; color: var(--a-ink-2); line-height: 1.65; margin: 0; }
-  .cs-badge { margin-top: .25rem; }
+  .so-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 12rem)); gap: .9rem; margin-bottom: 1.75rem; }
+  .so-stat { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: .15rem; }
+  .so-stat-n { font-family: 'Fraunces', Georgia, serif; font-size: 1.7rem; font-weight: 500; color: var(--a-ink); line-height: 1; }
+  .so-stat-l { font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: var(--a-muted); font-weight: 600; }
+
+  .so-section { margin-bottom: 2rem; }
+  .so-h2 { margin-bottom: .9rem; }
+  .so-accounts { display: grid; grid-template-columns: 1fr; gap: .75rem; }
+  @media (min-width: 640px) { .so-accounts { grid-template-columns: 1fr 1fr; } }
+  .so-acct { display: flex; align-items: center; gap: .85rem; padding: .9rem 1.1rem; }
+  .so-acct.is-off { opacity: .7; }
+  .so-acct-ic { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; color: #fff; background: var(--bc, #888); flex-shrink: 0; }
+  .so-acct.is-off .so-acct-ic { background: var(--a-line); color: var(--a-muted); }
+  .so-acct-main { display: flex; flex-direction: column; min-width: 0; flex: 1; line-height: 1.3; }
+  .so-acct-name { font-size: .92rem; font-weight: 600; color: var(--a-ink); }
+  .so-acct-url { font-size: .8rem; color: var(--a-accent-2); text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .so-acct-url:hover { text-decoration: underline; }
+  .so-acct-off { font-size: .8rem; color: var(--a-muted); }
+  .so-sm { padding: .32rem .6rem; font-size: .76rem; flex-shrink: 0; }
+
+  .so-compose-note { font-size: .88rem; color: var(--a-ink-2); margin: 0 0 1.1rem; }
+  .so-two { display: grid; grid-template-columns: 1fr; gap: .9rem; }
+  @media (min-width: 640px) { .so-two { grid-template-columns: 1fr 1.3fr; } }
+  .so-label { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; font-weight: 600; color: var(--a-muted); margin: 0 0 .35rem; }
+  .so-share-btns { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 1.25rem; }
+  .so-share { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem 1rem; border-radius: 999px; font-size: .85rem; font-weight: 600; text-decoration: none; color: #fff; border: none; cursor: pointer; transition: filter .15s, transform .1s; }
+  .so-share:hover { filter: brightness(1.07); transform: translateY(-1px); }
+  .so-fb { background: #1877f2; } .so-tw { background: #111; } .so-li { background: #0a66c2; } .so-em { background: var(--a-accent-2); }
+  .so-copy { background: var(--a-ink); }
+  .so-copy.is-done { background: var(--a-green); }
+  .so-hint { font-size: .78rem; color: var(--a-muted); margin: .9rem 0 0; }
 </style>
+
+<script is:inline>
+  (function () {
+    var urlEl = document.getElementById('so-url');
+    var msgEl = document.getElementById('so-msg');
+    function u() { return encodeURIComponent((urlEl.value || '').trim()); }
+    function m() { return encodeURIComponent((msgEl.value || '').trim()); }
+    function refresh() {
+      var links = {
+        facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + u() + '&quote=' + m(),
+        twitter: 'https://twitter.com/intent/tweet?url=' + u() + '&text=' + m(),
+        linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + u(),
+        email: 'mailto:?subject=' + m() + '&body=' + m() + '%0A%0A' + u()
+      };
+      document.querySelectorAll('#soShare [data-net]').forEach(function (a) {
+        a.setAttribute('href', links[a.getAttribute('data-net')]);
+      });
+    }
+    urlEl.addEventListener('input', refresh);
+    msgEl.addEventListener('input', refresh);
+    refresh();
+    var copy = document.getElementById('soCopy');
+    copy.addEventListener('click', function () {
+      var text = (msgEl.value || '').trim() + '\n' + (urlEl.value || '').trim();
+      navigator.clipboard.writeText(text.trim()).then(function () {
+        copy.textContent = 'Copied!'; copy.classList.add('is-done');
+        setTimeout(function () { copy.textContent = 'Copy caption'; copy.classList.remove('is-done'); }, 1800);
+      });
+    });
+  })();
+</script>

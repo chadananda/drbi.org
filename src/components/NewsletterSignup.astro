@@ -1,0 +1,86 @@
+---
+// Public newsletter signup. Posts to /api/subscribe (honeypot-protected). Two looks via `variant`:
+//   "footer" — dark, inline, sits in the footer strip.  "panel" — light card for /newsletter.
+interface Props { variant?: 'footer' | 'panel'; tag?: string; heading?: string; blurb?: string; }
+const { variant = 'panel', tag = '', heading, blurb } = Astro.props;
+const h = heading ?? (variant === 'footer' ? 'Stay in the loop' : 'Subscribe to Desert Rose news');
+const b = blurb ?? 'Occasional updates on courses, harvest days, and life at the institute. No spam, unsubscribe anytime.';
+const id = `nl-${Math.random().toString(36).slice(2, 8)}`;
+---
+<div class={`nls nls-${variant}`} data-nls>
+  <div class="nls-copy">
+    <p class="nls-heading">{h}</p>
+    <p class="nls-blurb">{b}</p>
+  </div>
+  <form class="nls-form" data-nls-form novalidate>
+    {tag && <input type="hidden" name="tag" value={tag} />}
+    <div class="nls-hp" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+    <div class="nls-row">
+      <label class="nls-vis" for={id}>Email address</label>
+      <input class="nls-input" id={id} type="email" name="email" required placeholder="you@example.com" autocomplete="email" />
+      <button type="submit" class="nls-btn">Subscribe</button>
+    </div>
+    <p class="nls-msg" data-nls-msg role="status" aria-live="polite"></p>
+  </form>
+</div>
+
+<style>
+  .nls-panel { display: grid; gap: 1.25rem; padding: 2rem; border-radius: 18px; background: var(--color-surface, #fff); border: 1px solid var(--color-line, #e7e2d8); }
+  @media (min-width: 720px) { .nls-panel { grid-template-columns: 1fr 1fr; align-items: center; gap: 2.5rem; } }
+  .nls-panel .nls-heading { font-family: 'Merriweather', Georgia, serif; font-size: 1.5rem; font-weight: 400; color: var(--color-ink, #1d1b17); margin: 0 0 .5rem; }
+  .nls-panel .nls-blurb { font-size: .95rem; line-height: 1.6; color: var(--color-body, #57524a); margin: 0; }
+
+  .nls-footer { border-top: 1px solid var(--f-line, #372f24); padding: 1.9rem 0; display: grid; gap: 1.1rem; }
+  @media (min-width: 780px) { .nls-footer { grid-template-columns: 1fr 1fr; align-items: center; gap: 2.5rem; } }
+  .nls-footer .nls-heading { font-family: 'Merriweather', Georgia, serif; font-size: 1.15rem; color: var(--f-rose-soft, #e9b878); margin: 0 0 .3rem; }
+  .nls-footer .nls-blurb { font-size: .84rem; line-height: 1.55; color: var(--f-muted, #a99d88); margin: 0; }
+
+  .nls-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .nls-vis { position: absolute; left: -9999px; }
+  .nls-row { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .nls-input { flex: 1; min-width: 0; font: inherit; font-size: .95rem; padding: .7rem .9rem; border-radius: 999px; border: 1px solid var(--color-line, #d9d2c4); background: #fff; color: #1d1b17; transition: border-color .15s, box-shadow .15s; }
+  .nls-input:focus { outline: none; border-color: #b0813a; box-shadow: 0 0 0 3px rgba(176,129,58,.18); }
+  .nls-btn { flex-shrink: 0; font: inherit; font-weight: 600; font-size: .92rem; padding: .7rem 1.4rem; border-radius: 999px; border: none; cursor: pointer; color: #fff; background: linear-gradient(180deg, #c05f14, #a04607); box-shadow: 0 10px 22px -12px rgba(160,70,7,.7); transition: filter .15s, transform .12s; }
+  .nls-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .nls-btn:disabled { opacity: .6; cursor: default; transform: none; }
+  .nls-msg { font-size: .85rem; margin: .6rem 0 0; min-height: 1.1em; }
+  .nls-msg.is-ok { color: #4b7a52; }
+  .nls-footer .nls-msg.is-ok { color: #9cc48f; }
+  .nls-msg.is-err { color: #c0483c; }
+  .nls-footer .nls-msg.is-err { color: #e8a59b; }
+  @media (max-width: 460px) { .nls-btn { width: 100%; } }
+</style>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll('[data-nls-form]').forEach(function (form) {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var msg = form.querySelector('[data-nls-msg]');
+        var btn = form.querySelector('.nls-btn');
+        var email = form.querySelector('input[name=email]').value.trim();
+        var website = form.querySelector('input[name=website]').value;
+        var tagEl = form.querySelector('input[name=tag]');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          msg.textContent = 'Please enter a valid email address.'; msg.className = 'nls-msg is-err'; return;
+        }
+        btn.disabled = true; msg.textContent = 'Subscribing…'; msg.className = 'nls-msg';
+        try {
+          var res = await fetch('/api/subscribe', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, website: website, tag: tagEl ? tagEl.value : undefined })
+          });
+          var data = await res.json();
+          if (res.ok && data.subscribed) {
+            form.reset();
+            msg.textContent = 'You’re subscribed — thank you!'; msg.className = 'nls-msg is-ok';
+          } else {
+            msg.textContent = (data && data.error) || 'Something went wrong. Please try again.'; msg.className = 'nls-msg is-err';
+          }
+        } catch (err) {
+          msg.textContent = 'Network error. Please try again.'; msg.className = 'nls-msg is-err';
+        } finally { btn.disabled = false; }
+      });
+    });
+  })();
+</script>
