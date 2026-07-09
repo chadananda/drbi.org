@@ -1,0 +1,243 @@
+---
+// Admin style guide: living reference for design tokens, components, and typography.
+export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import AdminIcon from '@components/admin/AdminIcon.astro';
+const user = Astro.locals?.user;
+
+const colorTokens = [
+  { name: 'paper',       hex: '#faf8f3', label: 'Paper',       desc: 'Warm page background' },
+  { name: 'paper-2',     hex: '#f4efe6', label: 'Paper 2',     desc: 'Alt section background' },
+  { name: 'surface',     hex: '#ffffff', label: 'Surface',      desc: 'Cards / panels' },
+  { name: 'ink',         hex: '#2a2521', label: 'Ink',          desc: 'Headings / primary text' },
+  { name: 'body',        hex: '#4b453e', label: 'Body',         desc: 'Body copy' },
+  { name: 'muted',       hex: '#756c60', label: 'Muted',        desc: 'Secondary / captions' },
+  { name: 'line',        hex: '#e9e2d6', label: 'Line',         desc: 'Borders / dividers' },
+  { name: 'line-soft',   hex: '#f2ece1', label: 'Line Soft',    desc: 'Subtle dividers' },
+  { name: 'brand',       hex: '#a84a08', label: 'Brand',        desc: 'Primary accent — terracotta' },
+  { name: 'brand-deep',  hex: '#8a3f0b', label: 'Brand Deep',   desc: 'Hover / emphasis' },
+  { name: 'brand-soft',  hex: '#f6ecdd', label: 'Brand Soft',   desc: 'Tinted background' },
+  { name: 'accent',      hex: '#a9742f', label: 'Accent',       desc: 'Brass secondary accent' },
+  { name: 'success',     hex: '#4b7a52', label: 'Success',       desc: 'Desaturated green' },
+  { name: 'danger',      hex: '#a8443b', label: 'Danger',        desc: 'Desaturated red' },
+];
+---
+
+<Layout title="Style Guide" user={user}>
+  <div class="a-page-head">
+    <div>
+      <h1 class="a-title">Style Guide</h1>
+      <p class="a-subtitle">Living reference for design tokens, component classes, and typography.</p>
+    </div>
+  </div>
+
+  <!-- COLOR TOKENS -->
+  <section class="a-card a-card-pad sg-section">
+    <h2 class="a-section-title">Color Tokens</h2>
+    <p class="sg-hint">Defined in <code>src/styles/tailwind.css</code> under <code>@theme</code>. Available as Tailwind utilities (<code>text-ink</code>, <code>bg-paper</code>, etc.) and CSS variables (<code>var(--color-ink)</code>).</p>
+    <div class="sg-swatches">
+      {colorTokens.map((t) => (
+        <div class="sg-swatch-item">
+          <div class="sg-swatch-block" style={`background:${t.hex}; border: 1px solid rgba(0,0,0,${t.hex === '#ffffff' ? '.12' : '.06'})`}></div>
+          <div class="sg-swatch-meta">
+            <span class="sg-swatch-name">{t.label}</span>
+            <code class="sg-swatch-token">--color-{t.name}</code>
+            <code class="sg-swatch-hex">{t.hex}</code>
+            <span class="sg-swatch-desc">{t.desc}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- ADMIN UI TOKENS (sidebar/canvas) -->
+  <section class="a-card a-card-pad sg-section">
+    <h2 class="a-section-title">Admin UI Tokens</h2>
+    <p class="sg-hint">Scoped to <code>.admin-root</code> in <code>AdminLayout.astro</code>. Use these in admin page <code>&lt;style&gt;</code> blocks.</p>
+    <div class="sg-token-table-wrap">
+      <table class="a-table">
+        <thead><tr><th>Variable</th><th>Value</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr><td><code>--a-bg</code></td><td><span class="sg-inline-swatch" style="background:#f5f3ef"></span><code>#f5f3ef</code></td><td>Canvas background</td></tr>
+          <tr><td><code>--a-panel</code></td><td><span class="sg-inline-swatch" style="background:#ffffff; border:1px solid #e7e2d8"></span><code>#ffffff</code></td><td>Card / panel fill</td></tr>
+          <tr><td><code>--a-panel-2</code></td><td><span class="sg-inline-swatch" style="background:#fbfaf7"></span><code>#fbfaf7</code></td><td>Hover / alt panel</td></tr>
+          <tr><td><code>--a-ink</code></td><td><span class="sg-inline-swatch" style="background:#1d1b17"></span><code>#1d1b17</code></td><td>Primary text</td></tr>
+          <tr><td><code>--a-ink-2</code></td><td><span class="sg-inline-swatch" style="background:#57524a"></span><code>#57524a</code></td><td>Secondary text</td></tr>
+          <tr><td><code>--a-muted</code></td><td><span class="sg-inline-swatch" style="background:#8b847a"></span><code>#8b847a</code></td><td>Muted / captions</td></tr>
+          <tr><td><code>--a-line</code></td><td><span class="sg-inline-swatch" style="background:#e7e2d8; border:1px solid #ccc"></span><code>#e7e2d8</code></td><td>Borders / dividers</td></tr>
+          <tr><td><code>--a-accent</code></td><td><span class="sg-inline-swatch" style="background:#a9742f"></span><code>#a9742f</code></td><td>Brass accent (primary CTA)</td></tr>
+          <tr><td><code>--a-accent-tint</code></td><td><span class="sg-inline-swatch" style="background:#f4ecdd"></span><code>#f4ecdd</code></td><td>Soft accent background</td></tr>
+          <tr><td><code>--a-green</code></td><td><span class="sg-inline-swatch" style="background:#4b7a52"></span><code>#4b7a52</code></td><td>Published / success</td></tr>
+          <tr><td><code>--a-amber</code></td><td><span class="sg-inline-swatch" style="background:#9a6a24"></span><code>#9a6a24</code></td><td>Draft / warning</td></tr>
+          <tr><td><code>--a-red</code></td><td><span class="sg-inline-swatch" style="background:#a8443b"></span><code>#a8443b</code></td><td>Error / danger</td></tr>
+          <tr><td><code>--a-blue</code></td><td><span class="sg-inline-swatch" style="background:#3f5c86"></span><code>#3f5c86</code></td><td>Synced / info</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- COMPONENTS -->
+  <section class="a-card a-card-pad sg-section">
+    <h2 class="a-section-title">Components</h2>
+
+    <h3 class="sg-sub">Buttons</h3>
+    <div class="sg-row">
+      <button class="a-btn"><AdminIcon name="plus" size={15} /> Default button</button>
+      <button class="a-btn a-btn-primary"><AdminIcon name="plus" size={15} /> Primary action</button>
+      <button class="a-btn a-btn-ghost"><AdminIcon name="eye" size={15} /> Ghost</button>
+      <button class="a-btn a-btn-danger"><AdminIcon name="logout" size={15} /> Danger</button>
+    </div>
+    <div class="sg-code">
+      <code>.a-btn</code> &nbsp;&bull;&nbsp;
+      <code>.a-btn .a-btn-primary</code> &nbsp;&bull;&nbsp;
+      <code>.a-btn .a-btn-ghost</code> &nbsp;&bull;&nbsp;
+      <code>.a-btn .a-btn-danger</code>
+    </div>
+
+    <h3 class="sg-sub">Badges</h3>
+    <div class="sg-row">
+      <span class="a-badge">Default</span>
+      <span class="a-badge a-badge-green">Published</span>
+      <span class="a-badge a-badge-amber">Draft</span>
+      <span class="a-badge a-badge-red">Error</span>
+      <span class="a-badge a-badge-blue">Synced</span>
+      <span class="a-badge a-badge-muted">Archived</span>
+    </div>
+    <div class="sg-code">
+      <code>.a-badge</code> + optional: <code>.a-badge-green</code> <code>.a-badge-amber</code> <code>.a-badge-red</code> <code>.a-badge-blue</code> <code>.a-badge-muted</code>
+    </div>
+
+    <h3 class="sg-sub">Card</h3>
+    <div class="a-card a-card-pad sg-card-demo">
+      <h4 class="a-section-title">Sample card heading</h4>
+      <p style="color:var(--a-ink-2); font-size:.9rem; margin:.5rem 0 0">Use <code>.a-card</code> for panels, <code>.a-card-pad</code> for default padding (1.35rem 1.5rem). Add <code>.a-section-title</code> for section headings inside.</p>
+    </div>
+    <div class="sg-code"><code>.a-card</code> &nbsp;&bull;&nbsp; <code>.a-card-pad</code> &nbsp;&bull;&nbsp; <code>.a-section-title</code></div>
+
+    <h3 class="sg-sub">Table</h3>
+    <table class="a-table" style="margin-top:.5rem">
+      <thead><tr><th>Column A</th><th>Column B</th><th>Status</th><th style="text-align:right">Count</th></tr></thead>
+      <tbody>
+        <tr><td>Row one</td><td style="color:var(--a-muted)">Secondary text</td><td><span class="a-badge a-badge-green">Active</span></td><td class="a-num" style="text-align:right">142</td></tr>
+        <tr><td>Row two</td><td style="color:var(--a-muted)">Secondary text</td><td><span class="a-badge a-badge-amber">Pending</span></td><td class="a-num" style="text-align:right">37</td></tr>
+        <tr><td>Row three</td><td style="color:var(--a-muted)">Secondary text</td><td><span class="a-badge a-badge-muted">Archived</span></td><td class="a-num" style="text-align:right">8</td></tr>
+      </tbody>
+    </table>
+    <div class="sg-code"><code>.a-table</code> &mdash; thead th auto-styles; tbody tr hover; numeric cells get <code>.a-num</code></div>
+
+    <h3 class="sg-sub">Inputs</h3>
+    <div class="sg-input-row">
+      <div style="display:flex; flex-direction:column; gap:.35rem; flex:1">
+        <label class="a-eyebrow">Text input</label>
+        <input class="a-input" type="text" placeholder="Placeholder text" />
+      </div>
+      <div style="display:flex; flex-direction:column; gap:.35rem; flex:1">
+        <label class="a-eyebrow">Select</label>
+        <select class="a-input"><option>Option one</option><option>Option two</option></select>
+      </div>
+    </div>
+    <div class="sg-code"><code>.a-input</code> on <code>input</code>, <code>textarea</code>, <code>select</code> &nbsp;&bull;&nbsp; Labels: <code>.a-eyebrow</code></div>
+
+    <h3 class="sg-sub">Eyebrow / helper classes</h3>
+    <div class="sg-row" style="align-items:baseline; gap:1.5rem; flex-wrap:wrap">
+      <span class="a-eyebrow">Eyebrow label (.a-eyebrow)</span>
+      <span style="color:var(--a-muted); font-size:.85rem">Muted helper text (var(--a-muted))</span>
+      <span class="a-page-head" style="display:inline-block; margin:0; font-family:'Fraunces',Georgia,serif; font-size:1.1rem; color:var(--a-ink)">Display heading (Fraunces)</span>
+    </div>
+  </section>
+
+  <!-- ICONS -->
+  <section class="a-card a-card-pad sg-section">
+    <h2 class="a-section-title">Icon Library</h2>
+    <p class="sg-hint">All icons from <code>AdminIcon.astro</code>. Lucide-style, currentColor. Props: <code>name</code>, <code>size</code> (default 20), <code>strokeWidth</code> (default 1.6).</p>
+    <div class="sg-icons">
+      {['dashboard','analytics','content','news','memorial','events','organization','media','team','users','settings','logout','external','chevron','chevron-down','plus','pen-square','calendar-plus','eye','eye-off','search','bell','tag','megaphone','mail','share','palette','layers','book','help'].map((n) => (
+        <div class="sg-icon-item">
+          <AdminIcon name={n} size={20} />
+          <span class="sg-icon-name">{n}</span>
+        </div>
+      ))}
+    </div>
+    <p class="sg-hint" style="margin-top:1rem">To add an icon: add its Lucide SVG path string to the <code>P</code> record in <code>AdminIcon.astro</code>.</p>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section class="a-card a-card-pad sg-section">
+    <h2 class="a-section-title">Typography</h2>
+    <table class="a-table">
+      <thead><tr><th>Font</th><th>Where used</th><th>Class / rule</th><th>Sample</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:600; color:var(--a-ink)">Fraunces</td>
+          <td>Admin display headings, page titles, section titles</td>
+          <td><code>.a-title</code>, <code>.a-section-title</code>, or inline <code>font-family:'Fraunces'</code></td>
+          <td style="font-family:'Fraunces',Georgia,serif; font-size:1.1rem; font-weight:450">The quick brown fox</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600; color:var(--a-ink)">Hanken Grotesk</td>
+          <td>All admin UI text — labels, buttons, table cells, body</td>
+          <td>Inherited from <code>.admin-root</code> body font</td>
+          <td style="font-family:'Hanken Grotesk',sans-serif">The quick brown fox</td>
+        </tr>
+        <tr>
+          <td style="font-weight:600; color:var(--a-ink)">Merriweather</td>
+          <td>Public site body copy and headings (not admin)</td>
+          <td><code>font-family: var(--font-family-serif)</code> in public pages</td>
+          <td style="font-family:Merriweather,Georgia,serif">The quick brown fox</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="sg-type-stack">
+      <div>
+        <p class="a-eyebrow" style="margin-bottom:.5rem">Page title — .a-title (Fraunces 1.75rem)</p>
+        <h1 class="a-title" style="font-size:1.75rem">Dawning of the Day</h1>
+      </div>
+      <div>
+        <p class="a-eyebrow" style="margin-bottom:.5rem">Section title — .a-section-title (Fraunces 1.12rem)</p>
+        <h2 class="a-section-title">Recent events</h2>
+      </div>
+      <div>
+        <p class="a-eyebrow" style="margin-bottom:.5rem">Subtitle — .a-subtitle (Hanken 0.92rem muted)</p>
+        <p class="a-subtitle" style="position:static">Manage and publish content for the DRBI website.</p>
+      </div>
+      <div>
+        <p class="a-eyebrow" style="margin-bottom:.5rem">Eyebrow — .a-eyebrow (Hanken 0.68rem uppercase tracked)</p>
+        <span class="a-eyebrow">Category label</span>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .sg-section { margin-bottom: 1.5rem; }
+  .sg-hint { font-size: .82rem; color: var(--a-muted); margin: .4rem 0 1.2rem; line-height: 1.55; }
+  .sg-sub { font-family: 'Fraunces', Georgia, serif; font-size: .95rem; font-weight: 500; color: var(--a-ink); margin: 1.5rem 0 .6rem; border-bottom: 1px solid var(--a-line-2); padding-bottom: .4rem; }
+  .sg-sub:first-of-type { margin-top: 1rem; }
+  .sg-row { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-bottom: .6rem; }
+  .sg-input-row { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: .6rem; }
+  .sg-code { font-size: .78rem; color: var(--a-muted); margin: .3rem 0 .5rem; }
+  .sg-code code { background: var(--a-panel-2); border: 1px solid var(--a-line); border-radius: 4px; padding: .1rem .35rem; font-size: .76rem; color: var(--a-ink-2); }
+  .sg-card-demo { border: 1px dashed var(--a-line); margin-bottom: .6rem; }
+
+  /* Swatches */
+  .sg-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: .75rem; }
+  .sg-swatch-item { display: flex; gap: .75rem; align-items: flex-start; }
+  .sg-swatch-block { width: 48px; height: 48px; border-radius: 8px; flex-shrink: 0; }
+  .sg-swatch-meta { display: flex; flex-direction: column; gap: .1rem; }
+  .sg-swatch-name { font-weight: 600; font-size: .85rem; color: var(--a-ink); }
+  .sg-swatch-token { font-size: .72rem; color: var(--a-accent); }
+  .sg-swatch-hex { font-size: .75rem; color: var(--a-muted); }
+  .sg-swatch-desc { font-size: .72rem; color: var(--a-muted); }
+  .sg-inline-swatch { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: middle; margin-right: .4rem; }
+  .sg-token-table-wrap { overflow-x: auto; }
+
+  /* Icons */
+  .sg-icons { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: .75rem; }
+  .sg-icon-item { display: flex; flex-direction: column; align-items: center; gap: .35rem; width: 72px; padding: .75rem .5rem; background: var(--a-panel-2); border: 1px solid var(--a-line); border-radius: var(--a-radius-sm); color: var(--a-ink-2); }
+  .sg-icon-name { font-size: .62rem; color: var(--a-muted); text-align: center; word-break: break-all; }
+
+  /* Type stack */
+  .sg-type-stack { display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--a-line); }
+
+  code { background: var(--a-panel-2); border: 1px solid var(--a-line); border-radius: 4px; padding: .1rem .35rem; font-size: .8rem; color: var(--a-ink-2); }
+</style>

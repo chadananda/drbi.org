@@ -1,0 +1,140 @@
+---
+// Admin tech stack reference: one-line descriptions for each layer of the system.
+export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import AdminIcon from '@components/admin/AdminIcon.astro';
+const user = Astro.locals?.user;
+
+const layers = [
+  {
+    category: 'Framework & Hosting',
+    items: [
+      { name: 'Astro 7', role: 'SSR framework', detail: 'File-based routing, Astro components, server-rendered by default (prerender = false). Islands architecture for client JS.' },
+      { name: 'Cloudflare Workers', role: 'Runtime / hosting', detail: 'Worker named drbi-preview is production (custom domain drbi.org). Build output in dist/server; deployed via wrangler.' },
+    ],
+  },
+  {
+    category: 'Data & Storage',
+    items: [
+      { name: 'Cloudflare D1', role: 'Primary database', detail: 'SQLite-compatible edge DB. Database name: drbi-db. All content, users, sessions stored here.' },
+      { name: 'Cloudflare R2', role: 'Object storage', detail: 'CDN bucket at cdn.shrtr.com/drbi.org/. Stores cached images (Humanitix event banners, media uploads).' },
+      { name: 'Cloudflare KV', role: 'Edge cache', detail: 'Used for sessions (auth_session key) and edge-cache version tokens for stale-while-revalidate patterns.' },
+    ],
+  },
+  {
+    category: 'Events & Content',
+    items: [
+      { name: 'Humanitix', role: 'Event ticketing source', detail: 'One-way sync only: Humanitix is the source of truth for events and tickets. Sync runs via API; images are cached to R2. Some events (e.g. Thanksgiving LIVE) publish on request only.' },
+      { name: 'ImageKit', role: 'Image CDN + transforms', detail: 'Endpoint: ik.imagekit.io/1260/cdn/. Handles resize, format conversion, and face-crop (fo-face) for event banners. External images must be cached to R2 first.' },
+    ],
+  },
+  {
+    category: 'Auth',
+    items: [
+      { name: 'Lucia', role: 'Auth library', detail: 'Handles session management. Supports Google OAuth, magic-link email sign-in, and break-glass password login. Whitelist assigns roles; all visitors get base user role.' },
+    ],
+  },
+  {
+    category: 'Email',
+    items: [
+      { name: 'Zoho Mail', role: 'Newsletter + transactional email', detail: 'Pending setup. API keys to be copied from better-company.org. Will serve both transactional emails (invitations, magic links) and newsletter sends.' },
+    ],
+  },
+  {
+    category: 'Frontend & Styling',
+    items: [
+      { name: 'Tailwind v4', role: 'CSS framework', detail: 'Uses @theme design tokens in src/styles/tailwind.css as the single source of truth for site colors. Generates utilities (text-ink, bg-paper, etc.) and CSS variables.' },
+    ],
+  },
+  {
+    category: 'Testing',
+    items: [
+      { name: 'Cucumber + Playwright', role: 'BDD E2E tests', detail: 'BDD feature specs in tests/features/. Run with npm run test:cucumber. Also: npm run test:unit (node:test), test:e2e, test:a11y, test:visual. Pre-deploy gate: scripts/pre-deploy.sh.' },
+    ],
+  },
+];
+
+const deployCmd = 'npm run deploy';
+---
+
+<Layout title="Tech Stack" user={user}>
+  <div class="a-page-head">
+    <div>
+      <h1 class="a-title">Tech Stack</h1>
+      <p class="a-subtitle">Every layer of the DRBI system with a one-line description.</p>
+    </div>
+    <div>
+      <span class="a-badge a-badge-blue"><AdminIcon name="external" size={13} /> drbi-preview = production</span>
+    </div>
+  </div>
+
+  <!-- Quick deploy info -->
+  <div class="ts-deploy-bar a-card a-card-pad">
+    <div class="ts-deploy-row">
+      <div class="ts-deploy-icon"><AdminIcon name="settings" size={18} /></div>
+      <div>
+        <p class="ts-deploy-label a-eyebrow">Deploy command</p>
+        <code class="ts-deploy-cmd">{deployCmd}</code>
+        <p class="ts-deploy-note">Runs build then <code>wrangler deploy -c dist/server/wrangler.json</code>. Always verify visually on drbi-preview before deploying — it IS production.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stack table by category -->
+  {layers.map((layer) => (
+    <section class="a-card ts-layer-card">
+      <div class="ts-layer-head">
+        <span class="a-eyebrow">{layer.category}</span>
+      </div>
+      <table class="a-table">
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Detail</th></tr>
+        </thead>
+        <tbody>
+          {layer.items.map((item) => (
+            <tr>
+              <td class="ts-name">{item.name}</td>
+              <td><span class="a-badge a-badge-blue">{item.role}</span></td>
+              <td class="ts-detail">{item.detail}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ))}
+
+  <!-- Environment note -->
+  <section class="a-card a-card-pad ts-env-card">
+    <h2 class="a-section-title">Environment & Secrets</h2>
+    <p class="ts-note">Secrets are accessed via <code>getEnv()</code> helper — never via <code>import.meta.env</code> directly. The Workers runtime exposes bindings (<code>DB</code>, <code>R2</code>, <code>KV</code>) through <code>Astro.locals.runtime.env</code>.</p>
+    <table class="a-table" style="margin-top:.75rem">
+      <thead><tr><th>Binding</th><th>Type</th><th>What it is</th></tr></thead>
+      <tbody>
+        <tr><td><code>DB</code></td><td><span class="a-badge">D1</span></td><td>Main database (drbi-db)</td></tr>
+        <tr><td><code>R2</code></td><td><span class="a-badge">R2</span></td><td>Media bucket (cdn.shrtr.com/drbi.org)</td></tr>
+        <tr><td><code>KV</code></td><td><span class="a-badge">KV</span></td><td>Sessions + edge-cache version tokens</td></tr>
+        <tr><td><code>GOOGLE_CLIENT_ID</code> / <code>SECRET</code></td><td><span class="a-badge">secret</span></td><td>Google OAuth for Lucia auth</td></tr>
+        <tr><td><code>RESEND_API_KEY</code> / <code>ZOHO_*</code></td><td><span class="a-badge">secret</span></td><td>Email (magic links, newsletter)</td></tr>
+        <tr><td><code>HUMANITIX_API_KEY</code></td><td><span class="a-badge">secret</span></td><td>Humanitix events sync</td></tr>
+      </tbody>
+    </table>
+  </section>
+</Layout>
+
+<style>
+  .ts-deploy-bar { margin-bottom: 1.5rem; }
+  .ts-deploy-row { display: flex; gap: 1rem; align-items: flex-start; }
+  .ts-deploy-icon { color: var(--a-accent); margin-top: .1rem; flex-shrink: 0; }
+  .ts-deploy-label { margin-bottom: .25rem; }
+  .ts-deploy-cmd { display: inline-block; font-size: .9rem; color: var(--a-ink); background: var(--a-accent-tint); border: 1px solid #e0cba8; border-radius: 6px; padding: .25rem .65rem; margin-bottom: .3rem; }
+  .ts-deploy-note { font-size: .82rem; color: var(--a-muted); margin: .2rem 0 0; line-height: 1.5; }
+  .ts-deploy-note code { background: var(--a-panel-2); border: 1px solid var(--a-line); border-radius: 4px; padding: .1rem .3rem; font-size: .77rem; color: var(--a-ink-2); }
+  .ts-layer-card { margin-bottom: 1.25rem; overflow: hidden; }
+  .ts-layer-head { padding: .7rem 1.35rem .5rem; border-bottom: 1px solid var(--a-line); }
+  .ts-name { font-weight: 600; color: var(--a-ink); white-space: nowrap; }
+  .ts-detail { font-size: .85rem; color: var(--a-ink-2); line-height: 1.5; }
+  .ts-env-card { margin-top: .25rem; }
+  .ts-note { font-size: .85rem; color: var(--a-ink-2); line-height: 1.55; margin: .5rem 0 0; }
+  .ts-note code { background: var(--a-panel-2); border: 1px solid var(--a-line); border-radius: 4px; padding: .1rem .3rem; font-size: .78rem; color: var(--a-accent-2); }
+  code { background: var(--a-panel-2); border: 1px solid var(--a-line); border-radius: 4px; padding: .1rem .35rem; font-size: .8rem; color: var(--a-ink-2); }
+</style>

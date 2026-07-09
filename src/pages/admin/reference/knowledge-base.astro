@@ -1,0 +1,147 @@
+---
+// Admin knowledge base: curated index of internal docs and patterns.
+export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import AdminIcon from '@components/admin/AdminIcon.astro';
+const user = Astro.locals?.user;
+
+const docs = [
+  {
+    title: 'Admin Design System',
+    path: 'docs/admin-design.md',
+    icon: 'palette',
+    description: 'Component classes (.a-card, .a-btn, .a-badge, .a-table, etc.), CSS tokens, icon names, and migration rules for bringing admin pages into the unified design system. Start here when creating or updating any admin page.',
+    tags: ['design', 'reference'],
+  },
+  {
+    title: 'Audit & Maintenance Log',
+    path: 'audits/LOG.md',
+    icon: 'analytics',
+    description: 'Append-only log of every quality audit run (a11y, SEO, security, perf, maintain). Each row: date, type, summary, findings. Updated after each audit command run.',
+    tags: ['ops', 'quality'],
+  },
+  {
+    title: 'Proactive Quality Cadence',
+    path: 'CLAUDE.md',
+    icon: 'bell',
+    description: 'Rules for when to offer quality audits without being asked: changed forms -> a11y, changed pages -> SEO, server code -> security, assets -> perf. One offer per session, never blocking.',
+    tags: ['ops', 'ai'],
+  },
+  {
+    title: 'Humanitix Events Sync',
+    path: 'src/pages/api/sync-events.ts',
+    icon: 'events',
+    description: 'One-way sync from Humanitix API into D1. Humanitix is the source of truth for events and ticket data. Event banners are cached to R2 during sync. Some events (e.g. Thanksgiving LIVE) are publish-on-request only and must not be auto-published.',
+    tags: ['events', 'sync'],
+  },
+  {
+    title: 'Image Pipeline',
+    path: 'docs/admin-design.md',
+    icon: 'media',
+    description: 'External images (e.g. Humanitix banners) must be cached to R2 first. ImageKit serves transforms via ik.imagekit.io/1260/cdn/. Face-crop uses fo-face parameter. See MEMORY.md: drbi-image-pipeline for the full flow.',
+    tags: ['media', 'imagekit'],
+  },
+  {
+    title: 'Auth Model',
+    path: 'src/middleware/index.ts',
+    icon: 'users',
+    description: 'Lucia handles sessions. Google OAuth + magic-link + break-glass password. The whitelist assigns roles (not a gate) — all visitors get the base user role. Secrets via getEnv(), never import.meta.env. Admin routes are gated by middleware at /admin/*.',
+    tags: ['auth', 'security'],
+  },
+  {
+    title: 'Content vs Code / Stale-While-Revalidate',
+    path: 'src/lib/',
+    icon: 'content',
+    description: 'Static content (articles, news, memorials) is rendered with stale-while-revalidate via KV edge-cache version tokens. Updating a version token invalidates the cache without a redeploy. Dynamic data (events, users) is always SSR.',
+    tags: ['architecture', 'perf'],
+  },
+  {
+    title: 'Cloudflare Migration Plan',
+    path: 'docs/migration-plan.md',
+    icon: 'organization',
+    description: 'Active migration to Astro 7 + Cloudflare Workers + D1/EmDash. Primary branch: migration/cf-astro7. Covers D1 schema, Worker bindings, R2 setup, and routing changes.',
+    tags: ['migration', 'infra'],
+  },
+  {
+    title: 'Pre-Deploy Gate',
+    path: 'scripts/pre-deploy.sh',
+    icon: 'settings',
+    description: 'Shell script that runs before every deploy: unit tests, BDD Cucumber suite, lint, and type-check. Must pass before npm run deploy. Also: always verify visually on drbi-preview (which IS production) before and after deploying.',
+    tags: ['ops', 'deploy'],
+  },
+];
+
+const tagColors: Record<string, string> = {
+  design: 'a-badge-blue',
+  reference: 'a-badge',
+  ops: 'a-badge-amber',
+  quality: 'a-badge-green',
+  ai: 'a-badge-blue',
+  events: 'a-badge-green',
+  sync: 'a-badge-blue',
+  media: 'a-badge',
+  imagekit: 'a-badge-blue',
+  auth: 'a-badge-amber',
+  security: 'a-badge-red',
+  architecture: 'a-badge-blue',
+  perf: 'a-badge-green',
+  migration: 'a-badge-amber',
+  infra: 'a-badge',
+  deploy: 'a-badge-red',
+};
+---
+
+<Layout title="Knowledge Base" user={user}>
+  <div class="a-page-head">
+    <div>
+      <h1 class="a-title">Knowledge Base</h1>
+      <p class="a-subtitle">Curated index of internal docs, patterns, and architectural decisions.</p>
+    </div>
+    <div>
+      <span class="a-badge">{docs.length} documents</span>
+    </div>
+  </div>
+
+  <div class="kb-note a-card a-card-pad">
+    <p class="kb-note-text"><AdminIcon name="book" size={15} /> These are reference notes pointing to real files in the repository. Paths are relative to the project root. Open them in your editor or ask Claude to read them for full context.</p>
+  </div>
+
+  <div class="kb-grid">
+    {docs.map((doc) => (
+      <div class="a-card kb-card">
+        <div class="kb-card-head">
+          <div class="kb-card-icon">
+            <AdminIcon name={doc.icon} size={20} />
+          </div>
+          <div class="kb-card-meta">
+            <h2 class="kb-card-title">{doc.title}</h2>
+            <code class="kb-card-path">{doc.path}</code>
+          </div>
+        </div>
+        <div class="kb-card-body">
+          <p class="kb-card-desc">{doc.description}</p>
+          <div class="kb-tags">
+            {doc.tags.map((tag) => (
+              <span class={`a-badge ${tagColors[tag] ?? 'a-badge'}`}>{tag}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  .kb-note { margin-bottom: 1.5rem; }
+  .kb-note-text { font-size: .85rem; color: var(--a-ink-2); line-height: 1.55; margin: 0; display: flex; align-items: flex-start; gap: .5rem; }
+  .kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; }
+  .kb-card { overflow: hidden; }
+  .kb-card-head { display: flex; gap: .85rem; align-items: flex-start; padding: 1.1rem 1.25rem .75rem; border-bottom: 1px solid var(--a-line-2); }
+  .kb-card-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--a-accent-tint); color: var(--a-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .kb-card-meta { display: flex; flex-direction: column; gap: .2rem; min-width: 0; }
+  .kb-card-title { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1rem; color: var(--a-ink); }
+  .kb-card-path { font-size: .72rem; color: var(--a-muted); word-break: break-all; background: none; border: none; padding: 0; }
+  .kb-card-body { padding: .85rem 1.25rem 1.1rem; }
+  .kb-card-desc { font-size: .855rem; color: var(--a-ink-2); line-height: 1.6; margin: 0 0 .75rem; }
+  .kb-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+</style>

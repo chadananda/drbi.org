@@ -1,0 +1,36 @@
+---
+// Admin newsletter: compose and send emails to subscribers via Zoho Mail.
+export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import AdminIcon from '@components/admin/AdminIcon.astro';
+const user = Astro.locals?.user;
+---
+
+<Layout title="Newsletter" user={user}>
+  <div class="a-page-head">
+    <div>
+      <h1 class="a-title">Newsletter</h1>
+      <p class="a-subtitle">Compose and send email newsletters to DRBI subscribers via Zoho Mail.</p>
+    </div>
+  </div>
+
+  <div class="cs-wrap">
+    <div class="a-card a-card-pad cs-card">
+      <div class="cs-icon-wrap">
+        <AdminIcon name="mail" size={28} />
+      </div>
+      <h2 class="cs-heading">Newsletter</h2>
+      <p class="cs-body">This screen will provide a compose interface for drafting and sending newsletters to the DRBI subscriber list. Sends will go through Zoho Mail once the API keys are configured — see the Open Questions page for current status.</p>
+      <span class="a-badge a-badge-amber cs-badge">Coming soon</span>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .cs-wrap { display: flex; justify-content: center; padding: 2rem 0; }
+  .cs-card { max-width: 480px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding: 2.5rem 2rem; }
+  .cs-icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: var(--a-accent-tint); color: var(--a-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cs-heading { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.25rem; color: var(--a-ink); margin: 0; }
+  .cs-body { font-size: .9rem; color: var(--a-ink-2); line-height: 1.65; margin: 0; }
+  .cs-badge { margin-top: .25rem; }
+</style>

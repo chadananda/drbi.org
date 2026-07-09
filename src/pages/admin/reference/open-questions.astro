@@ -1,0 +1,172 @@
+---
+// Admin open questions: checklist of open decisions and pending todos.
+export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import AdminIcon from '@components/admin/AdminIcon.astro';
+const user = Astro.locals?.user;
+
+type Status = 'open' | 'in-progress' | 'blocked' | 'done';
+
+interface Question {
+  id: string;
+  title: string;
+  detail: string;
+  status: Status;
+  owner?: string;
+  priority: 'high' | 'medium' | 'low';
+}
+
+const questions: Question[] = [
+  {
+    id: 'newsletter',
+    title: 'Newsletter provider — Zoho Mail setup',
+    detail: 'Use Zoho Mail for newsletter sends and transactional email. API keys exist in better-company.org and need to be copied over. SMTP + API config to add to wrangler secrets.',
+    status: 'open',
+    priority: 'high',
+  },
+  {
+    id: 'dawn-breakers',
+    title: 'Dawn-Breakers program — set evergreen end date before publishing',
+    detail: 'The ongoing Dawn-Breakers program page must have a correct, evergreen end date set (or be configured as open-ended) before it is published to the site. Currently held back to avoid showing a stale date.',
+    status: 'open',
+    priority: 'high',
+  },
+  {
+    id: 'hero-video',
+    title: 'Perf: keep the hero video (~Lighthouse 90) vs drop it for a lab 100',
+    detail: 'The homepage hero video costs ~10 Lighthouse perf points. Decision: accept the trade-off for the visual impact, or remove/defer the video to hit a perfect lab score. Needs an intentional call from the team.',
+    status: 'open',
+    priority: 'medium',
+  },
+  {
+    id: 'content-editing',
+    title: 'Admin content editing + static-page CMS (planned)',
+    detail: 'Plan to add in-admin editing for articles, news posts, and memorial pages — currently these are Markdown files edited in code. Requires a CMS layer wired to D1 or a file-based approach with git.',
+    status: 'open',
+    priority: 'medium',
+  },
+  {
+    id: 'admin-migration',
+    title: 'Migrate remaining admin screens to the design system',
+    detail: 'Several older admin pages still use inline Tailwind color utilities and emoji icons instead of the design system classes. Candidates: analytics, categories, topics, tags, comments. Migrate one at a time using docs/admin-design.md.',
+    status: 'in-progress',
+    priority: 'medium',
+  },
+  {
+    id: 'thanksgiving',
+    title: 'Thanksgiving LIVE — publish only on request',
+    detail: 'This Humanitix event must not be auto-published by the sync. It requires manual review and an explicit publish action each year. Ensure the sync logic keeps it in draft until staff approves.',
+    status: 'open',
+    priority: 'high',
+  },
+  {
+    id: 'zoho-transactional',
+    title: 'Magic-link emails via Zoho or Resend',
+    detail: 'Auth magic-link emails need a confirmed transactional email provider. Zoho Mail is the target (see newsletter question), but a Resend fallback may be simpler for transactional only. Decide and configure before enabling magic-link login in production.',
+    status: 'blocked',
+    owner: 'Depends on newsletter provider decision',
+    priority: 'high',
+  },
+  {
+    id: 'a11y-audit',
+    title: 'Full accessibility audit after design system migration',
+    detail: 'Once the admin migration is complete, run a comprehensive a11y audit (npm run test:a11y) to catch any regressions introduced by the new markup. Color contrast on the brass accent in particular should be verified.',
+    status: 'open',
+    priority: 'low',
+  },
+];
+
+const statusBadge: Record<Status, { cls: string; label: string }> = {
+  'open':        { cls: 'a-badge-amber', label: 'Open' },
+  'in-progress': { cls: 'a-badge-blue',  label: 'In progress' },
+  'blocked':     { cls: 'a-badge-red',   label: 'Blocked' },
+  'done':        { cls: 'a-badge-green', label: 'Done' },
+};
+
+const priorityBadge: Record<string, string> = {
+  high:   'a-badge-red',
+  medium: 'a-badge-amber',
+  low:    'a-badge-muted',
+};
+
+const open = questions.filter((q) => q.status !== 'done').length;
+const done = questions.filter((q) => q.status === 'done').length;
+---
+
+<Layout title="Open Questions" user={user}>
+  <div class="a-page-head">
+    <div>
+      <h1 class="a-title">Open Questions</h1>
+      <p class="a-subtitle">Decisions pending, todos in flight, and known open items.</p>
+    </div>
+    <div style="display:flex; gap:.5rem; align-items:center">
+      <span class="a-badge a-badge-amber">{open} open</span>
+      {done > 0 && <span class="a-badge a-badge-green">{done} done</span>}
+    </div>
+  </div>
+
+  <!-- High priority -->
+  {['high', 'medium', 'low'].map((priority) => {
+    const group = questions.filter((q) => q.priority === priority);
+    if (group.length === 0) return null;
+    return (
+      <section class="oq-section">
+        <div class="oq-group-label">
+          <span class={`a-badge ${priorityBadge[priority]}`}>{priority} priority</span>
+        </div>
+        <div class="a-card oq-card-table">
+          <table class="a-table">
+            <thead>
+              <tr>
+                <th style="width:2rem"></th>
+                <th>Item</th>
+                <th>Status</th>
+                <th style="min-width:160px">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {group.map((q) => (
+                <tr class={q.status === 'done' ? 'oq-done' : ''}>
+                  <td style="text-align:center; color:var(--a-muted)">
+                    {q.status === 'done'
+                      ? <AdminIcon name="eye" size={15} />
+                      : <AdminIcon name="help" size={15} />
+                    }
+                  </td>
+                  <td>
+                    <p class="oq-title">{q.title}</p>
+                    <p class="oq-detail">{q.detail}</p>
+                  </td>
+                  <td style="white-space:nowrap; vertical-align:top; padding-top:1rem">
+                    <span class={`a-badge ${statusBadge[q.status].cls}`}>{statusBadge[q.status].label}</span>
+                  </td>
+                  <td class="oq-owner" style="vertical-align:top; padding-top:1rem">
+                    {q.owner ? q.owner : <span style="color:var(--a-muted)">—</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    );
+  })}
+
+  <div class="a-card a-card-pad oq-footer">
+    <p class="oq-footer-text"><AdminIcon name="pen-square" size={14} /> To add or resolve an item, edit <code>src/pages/admin/reference/open-questions.astro</code> directly. Update the <code>status</code> field to <code>done</code> when resolved, or remove the entry on the next maintain pass.</p>
+  </div>
+</Layout>
+
+<style>
+  .oq-section { margin-bottom: 1.5rem; }
+  .oq-group-label { margin-bottom: .5rem; }
+  .oq-card-table { overflow: hidden; }
+  .oq-title { font-weight: 600; color: var(--a-ink); font-size: .9rem; margin: 0 0 .3rem; }
+  .oq-detail { font-size: .82rem; color: var(--a-ink-2); line-height: 1.55; margin: 0; }
+  .oq-done .oq-title { color: var(--a-muted); text-decoration: line-through; }
+  .oq-done .oq-detail { color: var(--a-muted); }
+  .oq-owner { font-size: .8rem; color: var(--a-muted); }
+  .oq-footer { margin-top: .5rem; }
+  .oq-footer-text { font-size: .82rem; color: var(--a-ink-2); margin: 0; line-height: 1.55; display: flex; align-items: flex-start; gap: .45rem; }
+  .oq-footer-text code { background: var(--a-panel-2); border: 1px solid var(--a-line); border-radius: 4px; padding: .1rem .3rem; font-size: .77rem; color: var(--a-accent-2); }
+</style>

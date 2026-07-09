@@ -1,0 +1,36 @@
+---
+// Admin announcements: post updates to the team and optionally display a site banner.
+export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import AdminIcon from '@components/admin/AdminIcon.astro';
+const user = Astro.locals?.user;
+---
+
+<Layout title="Announcements" user={user}>
+  <div class="a-page-head">
+    <div>
+      <h1 class="a-title">Announcements</h1>
+      <p class="a-subtitle">Post updates to the team and publish optional banners on the public site.</p>
+    </div>
+  </div>
+
+  <div class="cs-wrap">
+    <div class="a-card a-card-pad cs-card">
+      <div class="cs-icon-wrap">
+        <AdminIcon name="megaphone" size={28} />
+      </div>
+      <h2 class="cs-heading">Announcements</h2>
+      <p class="cs-body">This screen will let staff draft and send internal team announcements, as well as publish a dismissible banner strip on the public DRBI site for time-sensitive news — upcoming closures, schedule changes, or important notices.</p>
+      <span class="a-badge a-badge-amber cs-badge">Coming soon</span>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .cs-wrap { display: flex; justify-content: center; padding: 2rem 0; }
+  .cs-card { max-width: 480px; width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 1rem; padding: 2.5rem 2rem; }
+  .cs-icon-wrap { width: 64px; height: 64px; border-radius: 50%; background: var(--a-accent-tint); color: var(--a-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .cs-heading { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.25rem; color: var(--a-ink); margin: 0; }
+  .cs-body { font-size: .9rem; color: var(--a-ink-2); line-height: 1.65; margin: 0; }
+  .cs-badge { margin-top: .25rem; }
+</style>

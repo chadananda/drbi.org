@@ -8,23 +8,43 @@ const role = (user?.role || "staff").replace(/^\w/, (c: string) => c.toUpperCase
 const initials = String(name).trim().split(/\s+/).map((s: string) => s[0]).slice(0, 2).join("").toUpperCase() || "A";
 
 const on = (p: string, exact = false) => exact ? path === p : path.startsWith(p);
-const nav = [
-  { title: "Dashboard", icon: "dashboard", href: "/admin", active: path === "/admin" },
-  { title: "Analytics", icon: "analytics", href: "/admin/analytics", active: on("/admin/analytics") },
-  { title: "Content", icon: "content", href: "/admin/posts", active: on("/admin/posts") || on("/admin/memorial") || on("/admin/news") || on("/admin/articles") },
-  { title: "Events", icon: "events", href: "/admin/events", active: on("/admin/events") },
-  { title: "Organization", icon: "organization", items: [
-    { title: "Categories", href: "/admin/categories", active: on("/admin/categories") },
-    { title: "Topics", href: "/admin/topics", active: on("/admin/topics") },
-    { title: "Tags", href: "/admin/tags", active: on("/admin/tags") },
+const sections = [
+  { label: null, items: [
+    { title: "Dashboard", icon: "dashboard", href: "/admin", active: path === "/admin" },
+    { title: "Analytics", icon: "analytics", href: "/admin/analytics", active: on("/admin/analytics") },
   ]},
-  { title: "Media", icon: "media", items: [
-    { title: "Media Library", href: "/admin/media", active: path === "/admin/media" },
-    { title: "Upload Files", href: "/admin/media/upload", active: path === "/admin/media/upload" },
+  { label: "Content", items: [
+    { title: "Content", icon: "content", href: "/admin/posts", active: on("/admin/posts") || on("/admin/memorial") || on("/admin/news") || on("/admin/articles") },
+    { title: "Events", icon: "events", href: "/admin/events", active: on("/admin/events") },
+    { title: "Media", icon: "media", items: [
+      { title: "Media Library", href: "/admin/media", active: path === "/admin/media" },
+      { title: "Upload Files", href: "/admin/media/upload", active: path === "/admin/media/upload" },
+    ]},
+    { title: "Organization", icon: "organization", items: [
+      { title: "Categories", href: "/admin/categories", active: on("/admin/categories") },
+      { title: "Topics", href: "/admin/topics", active: on("/admin/topics") },
+      { title: "Tags", href: "/admin/tags", active: on("/admin/tags") },
+    ]},
   ]},
-  { title: "Team", icon: "team", href: "/admin/team", active: on("/admin/team") },
-  { title: "Users", icon: "users", href: "/admin/users", active: on("/admin/users") },
-  { title: "Settings", icon: "settings", href: "/admin/settings", active: path === "/admin/settings" },
+  { label: "Outreach", items: [
+    { title: "Announcements", icon: "megaphone", href: "/admin/announcements", active: on("/admin/announcements") },
+    { title: "Newsletter", icon: "mail", href: "/admin/newsletter", active: on("/admin/newsletter") },
+    { title: "Press", icon: "news", href: "/admin/press", active: on("/admin/press") },
+    { title: "Social Media", icon: "share", href: "/admin/social", active: on("/admin/social") },
+  ]},
+  { label: "People", items: [
+    { title: "Team", icon: "team", href: "/admin/team", active: on("/admin/team") },
+    { title: "Users", icon: "users", href: "/admin/users", active: on("/admin/users") },
+  ]},
+  { label: "Reference", items: [
+    { title: "Style guide", icon: "palette", href: "/admin/reference/style-guide", active: on("/admin/reference/style-guide") },
+    { title: "Tech stack", icon: "layers", href: "/admin/reference/tech-stack", active: on("/admin/reference/tech-stack") },
+    { title: "Knowledge base", icon: "book", href: "/admin/reference/knowledge-base", active: on("/admin/reference/knowledge-base") },
+    { title: "Open questions", icon: "help", href: "/admin/reference/open-questions", active: on("/admin/reference/open-questions") },
+  ]},
+  { label: "System", items: [
+    { title: "Settings", icon: "settings", href: "/admin/settings", active: path === "/admin/settings" },
+  ]},
 ];
 ---
 <aside class="admin-sidebar" id="adminSidebar">
@@ -34,24 +54,29 @@ const nav = [
   </a>
 
   <nav class="a-side-nav" aria-label="Admin">
-    {nav.map((item) => item.items ? (
-      <div class="a-nav-group" data-open={item.items.some((s) => s.active) ? "true" : "false"}>
-        <button type="button" class="a-nav-link a-nav-toggle" aria-expanded={item.items.some((s) => s.active) ? "true" : "false"}>
-          <AdminIcon name={item.icon} size={19} class="a-nav-ic" />
-          <span class="a-nav-label">{item.title}</span>
-          <AdminIcon name="chevron" size={15} class="a-nav-caret" />
-        </button>
-        <div class="a-nav-sub">
-          {item.items.map((s) => (
-            <a href={s.href} class={`a-nav-subitem ${s.active ? "is-active" : ""}`}>{s.title}</a>
-          ))}
-        </div>
+    {sections.map((section) => (
+      <div class="a-nav-section">
+        {section.label && <p class="a-nav-section-label">{section.label}</p>}
+        {section.items.map((item) => item.items ? (
+          <div class="a-nav-group" data-open={item.items.some((s) => s.active) ? "true" : "false"}>
+            <button type="button" class="a-nav-link a-nav-toggle" aria-expanded={item.items.some((s) => s.active) ? "true" : "false"}>
+              <AdminIcon name={item.icon} size={19} class="a-nav-ic" />
+              <span class="a-nav-label">{item.title}</span>
+              <AdminIcon name="chevron" size={15} class="a-nav-caret" />
+            </button>
+            <div class="a-nav-sub">
+              {item.items.map((s) => (
+                <a href={s.href} class={`a-nav-subitem ${s.active ? "is-active" : ""}`}>{s.title}</a>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <a href={item.href} class={`a-nav-link ${item.active ? "is-active" : ""}`}>
+            <AdminIcon name={item.icon} size={19} class="a-nav-ic" />
+            <span class="a-nav-label">{item.title}</span>
+          </a>
+        ))}
       </div>
-    ) : (
-      <a href={item.href} class={`a-nav-link ${item.active ? "is-active" : ""}`}>
-        <AdminIcon name={item.icon} size={19} class="a-nav-ic" />
-        <span class="a-nav-label">{item.title}</span>
-      </a>
     ))}
   </nav>
 
@@ -77,9 +102,13 @@ const nav = [
   .a-brand-mark { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1.4rem; letter-spacing: .04em; color: #f4ecdc; }
   .a-brand-sub { font-size: .62rem; text-transform: uppercase; letter-spacing: .28em; color: var(--a-side-accent); font-weight: 600; }
 
-  .a-side-nav { flex: 1; overflow-y: auto; padding: .85rem .7rem; display: flex; flex-direction: column; gap: 2px; }
+  .a-side-nav { flex: 1; overflow-y: auto; padding: .6rem .7rem 1rem; display: flex; flex-direction: column; gap: 0; }
   .a-side-nav::-webkit-scrollbar { width: 8px; }
   .a-side-nav::-webkit-scrollbar-thumb { background: #38322791; border-radius: 8px; }
+
+  .a-nav-section { display: flex; flex-direction: column; gap: 2px; }
+  .a-nav-section + .a-nav-section { margin-top: .95rem; }
+  .a-nav-section-label { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; color: var(--a-side-muted); padding: .35rem .75rem .4rem; margin: 0; }
 
   .a-nav-link { display: flex; align-items: center; gap: .75rem; width: 100%; padding: .6rem .7rem; border-radius: 9px;
     color: var(--a-side-ink); font-size: .9rem; font-weight: 500; text-decoration: none; background: transparent; border: none; cursor: pointer;
