@@ -16,10 +16,7 @@ const sections = [
   { label: "Content", items: [
     { title: "Content", icon: "content", href: "/admin/posts", active: on("/admin/posts") || on("/admin/memorial") || on("/admin/news") || on("/admin/articles") },
     { title: "Events", icon: "events", href: "/admin/events", active: on("/admin/events") },
-    { title: "Media", icon: "media", items: [
-      { title: "Media Library", href: "/admin/media", active: path === "/admin/media" },
-      { title: "Upload Files", href: "/admin/media/upload", active: path === "/admin/media/upload" },
-    ]},
+    { title: "Media", icon: "media", href: "/admin/media", active: on("/admin/media") },
     { title: "Organization", icon: "organization", items: [
       { title: "Categories", href: "/admin/categories", active: on("/admin/categories") },
       { title: "Topics", href: "/admin/topics", active: on("/admin/topics") },

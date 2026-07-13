@@ -1,71 +1,328 @@
 ---
+// Media Library — flat R2 store (drbi.org/media/) + D1 metadata, ImageKit thumbnails.
+// Browse/search by title/description/tags, drag-drop upload (auto-described), edit, reuse.
 export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import AdminIcon from '@components/admin/AdminIcon.astro';
+import { listMedia, listTags, countMedia } from '@lib/server/media';
 
-import AdminLayout from '@layouts/AdminLayout.astro';
-import { Bash } from 'astro:env';
-
-// Get all media files from public directory
-const mediaFiles = [];
-const user = Astro.locals.user;
-
-try {
-  // This would need to be implemented with actual file system access
-  // For now, showing placeholder structure
-} catch (error) {
-  console.error('Error loading media files:', error);
-}
+const user = Astro.locals?.user;
+const isDev = ['superadmin', 'admin'].includes(user?.role);
+const [media, tags, total] = await Promise.all([listMedia({ limit: 500 }), listTags(), countMedia()]);
 ---
 
-<AdminLayout title="Media Library" user={user}>
-  <div class="mb-8">
-    <div class="flex justify-between items-center">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900 mb-2">Media Library</h1>
-        <p class="text-gray-600">Manage uploaded images, documents, and other media files</p>
-      </div>
-      <div>
-        <a href="/admin/media/upload" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
-          <span>📤</span> Upload Files
-        </a>
-      </div>
+<Layout title="Media Library" user={user}>
+  <div class="a-page-head">
+    <div>
+      <h1 class="a-title">Media Library</h1>
+      <p class="a-subtitle">{total} image{total === 1 ? '' : 's'} — search by description or tag, reuse anywhere.</p>
+    </div>
+    <button type="button" class="a-btn a-btn-primary" id="ml-upload-btn">
+      <AdminIcon name="media" size={15} /> Upload
+    </button>
+  </div>
+
+  <!-- Upload dropzone (hidden until toggled) -->
+  <div class="a-card a-card-pad ml-drop" id="ml-drop" hidden>
+    <input type="file" id="ml-file" accept="image/*" multiple hidden />
+    <div class="ml-drop-inner" id="ml-drop-zone">
+      <AdminIcon name="media" size={28} />
+      <p class="ml-drop-title">Drop images here or <button type="button" class="ml-link" id="ml-browse">browse</button></p>
+      <p class="ml-drop-hint">WebP, JPG, PNG, GIF, AVIF — up to 15MB each. Auto-described on upload.</p>
+      {isDev && (
+        <label class="ml-provider">
+          <input type="checkbox" id="ml-provider" /> Describe with Claude (higher quality — developer)
+        </label>
+      )}
+    </div>
+    <div class="ml-queue" id="ml-queue"></div>
+  </div>
+
+  <!-- Search + tag filter -->
+  <div class="ml-controls">
+    <div class="ml-search">
+      <AdminIcon name="search" size={16} />
+      <input class="a-input" id="ml-search" type="search" placeholder="Search title, description, tags…" autocomplete="off" />
+    </div>
+    <div class="ml-tags" id="ml-tags">
+      {tags.slice(0, 24).map((t) => (
+        <button type="button" class="ml-tag" data-tag={t.tag}>{t.tag}<span>{t.count}</span></button>
+      ))}
     </div>
   </div>
 
-  <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-    <div class="flex flex-col sm:flex-row gap-4 mb-6">
-      <div class="flex flex-col">
-        <label class="text-sm font-medium text-gray-700 mb-2">Filter by type:</label>
-        <select class="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <option value="all">All Files</option>
-          <option value="images">Images</option>
-          <option value="documents">Documents</option>
-          <option value="videos">Videos</option>
-        </select>
-      </div>
-      
-      <div class="flex flex-col flex-1">
-        <label class="text-sm font-medium text-gray-700 mb-2">Search:</label>
-        <input type="search" placeholder="Search files..." class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-      </div>
-    </div>
-
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
-      <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
-        <div class="text-4xl mb-4">
-          <span>🖼️</span>
-        </div>
-        <div>
-          <h4 class="text-sm font-medium text-gray-900 mb-2">No media files found</h4>
-          <p class="text-xs text-gray-500">Upload some files to get started</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-      <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Previous</button>
-      <span class="text-sm text-gray-600">Page 1 of 1</span>
-      <button class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>Next</button>
-    </div>
+  <div class="ml-grid" id="ml-grid"></div>
+  <div class="ml-empty" id="ml-empty" hidden>
+    <AdminIcon name="media" size={32} />
+    <p>No images yet. Upload some to start your library.</p>
   </div>
-</AdminLayout>
 
+  <!-- Edit drawer -->
+  <div class="ml-drawer-backdrop" id="ml-drawer-backdrop" hidden></div>
+  <aside class="ml-drawer" id="ml-drawer" hidden aria-label="Edit image">
+    <div class="ml-drawer-head">
+      <h2 class="a-section-title" id="ml-d-title">Edit image</h2>
+      <button type="button" class="ml-icon-btn" id="ml-d-close" aria-label="Close">✕</button>
+    </div>
+    <div class="ml-drawer-body">
+      <div class="ml-d-preview"><img id="ml-d-img" alt="" /></div>
+      <div class="ml-d-meta" id="ml-d-meta"></div>
+
+      <label class="ml-label" for="ml-d-f-title">Title</label>
+      <input class="a-input" id="ml-d-f-title" maxlength="120" />
+
+      <label class="ml-label" for="ml-d-f-alt">Alt text <span class="ml-hint">(screen readers)</span></label>
+      <input class="a-input" id="ml-d-f-alt" maxlength="300" />
+
+      <label class="ml-label" for="ml-d-f-desc">Description</label>
+      <textarea class="a-input ml-textarea" id="ml-d-f-desc" rows="3" maxlength="1000"></textarea>
+
+      <label class="ml-label" for="ml-d-f-tags">Tags <span class="ml-hint">(comma-separated)</span></label>
+      <input class="a-input" id="ml-d-f-tags" placeholder="desert, farm, volunteers" />
+
+      <div class="ml-urls">
+        <button type="button" class="a-btn ml-copy" id="ml-copy-cdn"><AdminIcon name="link" size={14} /> Copy CDN URL</button>
+        <button type="button" class="a-btn ml-copy" id="ml-copy-ik"><AdminIcon name="link" size={14} /> Copy ImageKit URL</button>
+      </div>
+    </div>
+    <div class="ml-drawer-foot">
+      <button type="button" class="a-btn ml-danger" id="ml-d-delete"><AdminIcon name="trash" size={14} /> Delete</button>
+      <div class="ml-foot-right">
+        <button type="button" class="a-btn" id="ml-d-redescribe">Re-describe</button>
+        <button type="button" class="a-btn a-btn-primary" id="ml-d-save">Save</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="ml-toast" id="ml-toast" hidden></div>
+</Layout>
+
+<script define:vars={{ media, isDev }}>
+  const CDN = 'https://cdn.shrtr.com/';
+  const IK = 'https://ik.imagekit.io/1260/cdn/';
+  // Mirror of server imagekitUrl() for client-side thumbnails/copy.
+  const ik = (url, { w = 0, h = 0, face = false, q = 80 } = {}) => {
+    if (!url || !url.startsWith(CDN)) return url;
+    const path = url.slice(CDN.length);
+    const tr = ['f-auto', `q-${q}`];
+    if (w) tr.push(`w-${w}`); if (h) tr.push(`h-${h}`); if (face) tr.push('fo-face', 'c-maintain_ratio');
+    return `${IK}${path}?tr=${tr.join(',')}`;
+  };
+  const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  let items = Array.isArray(media) ? media.slice() : [];
+  let activeTag = '';
+  let q = '';
+  let current = null;
+
+  const $ = (id) => document.getElementById(id);
+  const grid = $('ml-grid'), empty = $('ml-empty');
+
+  const toast = (msg) => {
+    const t = $('ml-toast'); t.textContent = msg; t.hidden = false;
+    clearTimeout(t._t); t._t = setTimeout(() => (t.hidden = true), 2200);
+  };
+
+  function matches(m) {
+    if (activeTag && !String(m.tags || '').toLowerCase().split(',').map((s) => s.trim()).includes(activeTag)) return false;
+    if (q) {
+      const hay = `${m.title} ${m.description} ${m.tags} ${m.filename}`.toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }
+
+  function render() {
+    const shown = items.filter(matches);
+    empty.hidden = items.length !== 0;
+    grid.innerHTML = shown.map((m) => `
+      <button type="button" class="ml-card" data-id="${m.id}">
+        <span class="ml-thumb"><img loading="lazy" src="${ik(m.url, { w: 420, h: 300 })}" alt="${esc(m.alt)}" /></span>
+        <span class="ml-card-body">
+          <span class="ml-card-title">${esc(m.title || m.filename)}</span>
+          <span class="ml-card-tags">${String(m.tags || '').split(',').filter(Boolean).slice(0, 3).map((t) => `<em>${esc(t.trim())}</em>`).join('')}</span>
+        </span>
+      </button>`).join('');
+    if (items.length && !shown.length) grid.innerHTML = `<p class="ml-noresults">No images match “${esc(q || activeTag)}”.</p>`;
+  }
+
+  // ---- search + tag filter ----
+  $('ml-search').addEventListener('input', (e) => { q = e.target.value.trim().toLowerCase(); render(); });
+  $('ml-tags').addEventListener('click', (e) => {
+    const btn = e.target.closest('.ml-tag'); if (!btn) return;
+    const t = btn.dataset.tag;
+    activeTag = activeTag === t ? '' : t;
+    [...document.querySelectorAll('.ml-tag')].forEach((b) => b.classList.toggle('is-active', b.dataset.tag === activeTag));
+    render();
+  });
+
+  // ---- drawer ----
+  const drawer = $('ml-drawer'), backdrop = $('ml-drawer-backdrop');
+  function openDrawer(m) {
+    current = m;
+    $('ml-d-img').src = ik(m.url, { w: 700 });
+    $('ml-d-img').alt = m.alt || '';
+    $('ml-d-f-title').value = m.title || '';
+    $('ml-d-f-alt').value = m.alt || '';
+    $('ml-d-f-desc').value = m.description || '';
+    $('ml-d-f-tags').value = m.tags || '';
+    const dims = m.width && m.height ? `${m.width}×${m.height}` : '';
+    const kb = m.bytes ? `${Math.round(m.bytes / 1024)} KB` : '';
+    $('ml-d-meta').innerHTML = `<span>${esc(m.filename)}</span>${dims ? `<span>${dims}</span>` : ''}${kb ? `<span>${kb}</span>` : ''}${m.described_by ? `<span>AI: ${esc(m.described_by)}</span>` : ''}`;
+    drawer.hidden = false; backdrop.hidden = false;
+    requestAnimationFrame(() => drawer.classList.add('is-open'));
+  }
+  function closeDrawer() { drawer.classList.remove('is-open'); backdrop.hidden = true; setTimeout(() => (drawer.hidden = true), 200); current = null; }
+  grid.addEventListener('click', (e) => {
+    const card = e.target.closest('.ml-card'); if (!card) return;
+    const m = items.find((x) => String(x.id) === card.dataset.id); if (m) openDrawer(m);
+  });
+  $('ml-d-close').addEventListener('click', closeDrawer);
+  backdrop.addEventListener('click', closeDrawer);
+
+  const api = (op, body) => fetch('/api/admin/media/action', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op, ...body }),
+  }).then((r) => r.json());
+
+  $('ml-d-save').addEventListener('click', async () => {
+    if (!current) return;
+    const r = await api('update', {
+      id: current.id, title: $('ml-d-f-title').value, alt: $('ml-d-f-alt').value,
+      description: $('ml-d-f-desc').value, tags: $('ml-d-f-tags').value,
+    });
+    if (r.ok) { Object.assign(current, r.media); items = items.map((x) => (x.id === current.id ? current : x)); render(); toast('Saved'); closeDrawer(); }
+    else toast(r.error || 'Save failed');
+  });
+
+  $('ml-d-redescribe').addEventListener('click', async () => {
+    if (!current) return;
+    const btn = $('ml-d-redescribe'); btn.disabled = true; btn.textContent = 'Describing…';
+    const provider = (isDev && $('ml-provider')?.checked) ? 'claude' : 'workers';
+    const r = await api('redescribe', { id: current.id, provider });
+    btn.disabled = false; btn.textContent = 'Re-describe';
+    if (r.ok) { Object.assign(current, r.media); $('ml-d-f-title').value = current.title; $('ml-d-f-alt').value = current.alt; $('ml-d-f-desc').value = current.description; $('ml-d-f-tags').value = current.tags; toast(`Described (${r.described_by})`); }
+    else toast(r.error || 'Describe failed');
+  });
+
+  $('ml-d-delete').addEventListener('click', async () => {
+    if (!current || !confirm('Delete this image permanently?')) return;
+    const r = await api('delete', { id: current.id });
+    if (r.ok) { items = items.filter((x) => x.id !== current.id); render(); toast('Deleted'); closeDrawer(); }
+    else toast(r.error || 'Delete failed');
+  });
+
+  $('ml-copy-cdn').addEventListener('click', () => { navigator.clipboard?.writeText(current.url); toast('CDN URL copied'); });
+  $('ml-copy-ik').addEventListener('click', () => { navigator.clipboard?.writeText(ik(current.url, { w: 1600 })); toast('ImageKit URL copied'); });
+
+  // ---- upload ----
+  const drop = $('ml-drop'), fileInput = $('ml-file'), queue = $('ml-queue');
+  $('ml-upload-btn').addEventListener('click', () => { drop.hidden = !drop.hidden; if (!drop.hidden) fileInput.click(); });
+  $('ml-browse').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', () => handleFiles([...fileInput.files]));
+  const zone = $('ml-drop-zone');
+  ['dragover', 'dragenter'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('is-drag'); }));
+  ['dragleave', 'drop'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('is-drag'); }));
+  zone.addEventListener('drop', (e) => handleFiles([...e.dataTransfer.files]));
+
+  function measure(file) {
+    return new Promise((res) => {
+      const img = new Image(); const url = URL.createObjectURL(file);
+      img.onload = () => { res({ w: img.naturalWidth, h: img.naturalHeight }); URL.revokeObjectURL(url); };
+      img.onerror = () => { res({ w: 0, h: 0 }); URL.revokeObjectURL(url); };
+      img.src = url;
+    });
+  }
+
+  async function handleFiles(files) {
+    const images = files.filter((f) => f.type.startsWith('image/'));
+    const provider = (isDev && $('ml-provider')?.checked) ? 'claude' : 'workers';
+    for (const file of images) {
+      const row = document.createElement('div');
+      row.className = 'ml-q-row'; row.innerHTML = `<span>${esc(file.name)}</span><em>uploading…</em>`;
+      queue.prepend(row);
+      try {
+        const { w, h } = await measure(file);
+        const fd = new FormData();
+        fd.append('file', file); fd.append('provider', provider);
+        fd.append('width', w); fd.append('height', h);
+        const r = await fetch('/api/admin/media/upload', { method: 'POST', body: fd }).then((x) => x.json());
+        if (r.ok) { items.unshift(r.media); render(); row.querySelector('em').textContent = 'done'; row.classList.add('is-done'); setTimeout(() => row.remove(), 1500); }
+        else { row.querySelector('em').textContent = r.error || 'failed'; row.classList.add('is-err'); }
+      } catch (err) { row.querySelector('em').textContent = 'failed'; row.classList.add('is-err'); }
+    }
+  }
+
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !drawer.hidden) closeDrawer(); });
+  render();
+</script>
+
+<style is:global>
+  /* Global (not scoped): the grid cards are injected client-side and would miss Astro's
+     scoped data-cid. All selectors are ml-* prefixed to avoid collisions. */
+  .a-btn-primary { background: var(--a-accent, #b45309); color: #fff; border-color: transparent; }
+  .ml-drop { margin-bottom: 1rem; }
+  .ml-drop-inner { border: 2px dashed var(--a-border, #d6d3d1); border-radius: 14px; padding: 1.75rem;
+    text-align: center; color: var(--a-muted, #78716c); transition: border-color .15s, background .15s; }
+  .ml-drop-inner.is-drag { border-color: var(--a-accent, #b45309); background: rgba(180,83,9,.05); }
+  .ml-drop-title { margin: .5rem 0 .25rem; font-weight: 600; color: var(--a-ink, #292524); }
+  .ml-drop-hint { font-size: .8rem; }
+  .ml-link { color: var(--a-accent, #b45309); text-decoration: underline; background: none; border: 0; cursor: pointer; font: inherit; }
+  .ml-provider { display: inline-flex; gap: .4rem; align-items: center; margin-top: .75rem; font-size: .8rem; }
+  .ml-queue { margin-top: .75rem; display: grid; gap: .35rem; }
+  .ml-q-row { display: flex; justify-content: space-between; gap: 1rem; font-size: .82rem; padding: .4rem .6rem;
+    background: var(--a-subtle, #f5f5f4); border-radius: 8px; }
+  .ml-q-row em { color: var(--a-muted, #78716c); font-style: normal; }
+  .ml-q-row.is-done em { color: #15803d; } .ml-q-row.is-err em { color: #b91c1c; }
+
+  .ml-controls { display: flex; flex-wrap: wrap; gap: .75rem 1rem; align-items: center; margin-bottom: 1.1rem; }
+  .ml-search { position: relative; flex: 1 1 260px; display: flex; align-items: center; }
+  .ml-search :global(svg) { position: absolute; left: .7rem; color: var(--a-muted, #78716c); pointer-events: none; }
+  .ml-search .a-input { padding-left: 2.1rem; width: 100%; }
+  .ml-tags { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .ml-tag { display: inline-flex; gap: .3rem; align-items: center; padding: .28rem .6rem; border-radius: 999px;
+    border: 1px solid var(--a-border, #d6d3d1); background: #fff; font-size: .78rem; cursor: pointer; color: var(--a-ink, #44403c); }
+  .ml-tag span { color: var(--a-muted, #a8a29e); font-size: .72rem; }
+  .ml-tag:hover { border-color: var(--a-accent, #b45309); }
+  .ml-tag.is-active { background: var(--a-accent, #b45309); color: #fff; border-color: transparent; }
+  .ml-tag.is-active span { color: rgba(255,255,255,.75); }
+
+  .ml-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+  .ml-card { text-align: left; background: var(--a-card, #fff); border: 1px solid var(--a-border, #e7e5e4);
+    border-radius: 12px; overflow: hidden; cursor: pointer; padding: 0; transition: box-shadow .15s, transform .15s; }
+  .ml-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.1); transform: translateY(-2px); }
+  .ml-thumb { display: block; aspect-ratio: 4 / 3; background: var(--a-subtle, #f5f5f4); overflow: hidden; }
+  .ml-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .ml-card-body { display: block; padding: .6rem .7rem .7rem; }
+  .ml-card-title { display: block; font-size: .85rem; font-weight: 600; color: var(--a-ink, #292524);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ml-card-tags { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .35rem; }
+  .ml-card-tags em { font-style: normal; font-size: .68rem; padding: .1rem .4rem; border-radius: 5px;
+    background: var(--a-subtle, #f5f5f4); color: var(--a-muted, #78716c); }
+  .ml-noresults, .ml-empty { grid-column: 1 / -1; text-align: center; color: var(--a-muted, #78716c); padding: 2.5rem 1rem; }
+  .ml-empty { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
+
+  /* Drawer */
+  .ml-drawer-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 60; }
+  .ml-drawer { position: fixed; top: 0; right: 0; height: 100dvh; width: min(440px, 100vw); z-index: 61;
+    background: var(--a-card, #fff); box-shadow: -12px 0 40px rgba(0,0,0,.18); display: flex; flex-direction: column;
+    transform: translateX(100%); transition: transform .2s ease; }
+  .ml-drawer.is-open { transform: translateX(0); }
+  .ml-drawer-head, .ml-drawer-foot { display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.2rem; border-bottom: 1px solid var(--a-border, #e7e5e4); }
+  .ml-drawer-foot { border-bottom: 0; border-top: 1px solid var(--a-border, #e7e5e4); }
+  .ml-foot-right { display: flex; gap: .5rem; }
+  .ml-drawer-body { padding: 1.2rem; overflow-y: auto; flex: 1; }
+  .ml-d-preview { border-radius: 10px; overflow: hidden; background: var(--a-subtle, #f5f5f4); margin-bottom: .75rem; }
+  .ml-d-preview img { width: 100%; display: block; max-height: 260px; object-fit: contain; }
+  .ml-d-meta { display: flex; flex-wrap: wrap; gap: .5rem; font-size: .72rem; color: var(--a-muted, #78716c); margin-bottom: 1rem; }
+  .ml-d-meta span { background: var(--a-subtle, #f5f5f4); padding: .15rem .45rem; border-radius: 5px; }
+  .ml-label { display: block; font-size: .78rem; font-weight: 600; margin: .8rem 0 .3rem; color: var(--a-ink, #44403c); }
+  .ml-hint { font-weight: 400; color: var(--a-muted, #a8a29e); }
+  .ml-textarea { resize: vertical; font: inherit; }
+  .ml-urls { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+  .ml-icon-btn { background: none; border: 0; font-size: 1.1rem; cursor: pointer; color: var(--a-muted, #78716c); line-height: 1; }
+  .ml-danger { color: #b91c1c; border-color: rgba(185,28,28,.3); }
+  .ml-danger:hover { background: rgba(185,28,28,.06); }
+  .ml-toast { position: fixed; bottom: 1.2rem; left: 50%; transform: translateX(-50%); z-index: 70;
+    background: var(--a-ink, #292524); color: #fff; padding: .6rem 1.1rem; border-radius: 999px; font-size: .85rem; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+</style>

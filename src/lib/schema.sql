@@ -198,3 +198,24 @@ CREATE TABLE IF NOT EXISTS press_releases (
 );
 CREATE INDEX IF NOT EXISTS idx_press_slug ON press_releases(slug);
 CREATE INDEX IF NOT EXISTS idx_press_status ON press_releases(status);
+
+-- Media library. Bytes in R2 (drbi.org/media/<slug>.<ext>, served via ImageKit);
+-- this table is the searchable metadata. Organize by title/description/tags, not folders.
+CREATE TABLE IF NOT EXISTS media (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  r2_key TEXT NOT NULL UNIQUE,
+  url TEXT NOT NULL DEFAULT '',
+  filename TEXT NOT NULL DEFAULT '',
+  title TEXT NOT NULL DEFAULT '',
+  alt TEXT NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  tags TEXT NOT NULL DEFAULT '',
+  width INTEGER NOT NULL DEFAULT 0,
+  height INTEGER NOT NULL DEFAULT 0,
+  bytes INTEGER NOT NULL DEFAULT 0,
+  content_type TEXT NOT NULL DEFAULT '',
+  described_by TEXT,
+  uploaded_by TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_media_created ON media(created_at DESC);

@@ -30,5 +30,7 @@
       "binding": "SESSION",
       "id": "7f25aeca4da74de38f5cde68b5bac874"
     }
-  ]
+  ],
+  // Workers AI — on-platform image captioning for in-app media uploads (no external key).
+  "ai": { "binding": "AI" }
 }
