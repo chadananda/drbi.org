@@ -4,7 +4,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "src/components/container.astro";
 import { Image } from "astro:assets";
 
-import aboutusimg from "./_about_us.webp"
+import heroImg from "./history/_farm.webp"
 import rasmussen from "../assets/people/rasmussen.webp"
 import viva from "../assets/people/viva.webp"
 import bonnie from "../assets/people/bonnie.webp"
@@ -197,10 +197,11 @@ const volunteers = [
 
   <!-- Hero -->
   <div class="relative w-full overflow-hidden bg-stone-900">
-    <Image src={aboutusimg} alt="Desert Rose Bahai Institute"
+    <Image src={heroImg} alt="Volunteers serving at Desert Rose Bahai Institute"
+      loading="eager" fetchpriority="high"
       class="w-full h-[50vh] h-[50svh] min-h-[320px] object-cover object-center opacity-40" />
-    <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-      <div class="bg-black/45 rounded-2xl px-8 py-6 max-w-3xl w-full mx-auto">
+    <div class="page-hero-text absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+      <div class="px-8 py-6 max-w-3xl w-full mx-auto">
         <p class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-5">Come and Serve</p>
         <h1 class="text-white text-4xl md:text-6xl font-serif font-light leading-tight max-w-3xl">
           Volunteer at<br>Desert Rose
@@ -377,3 +378,14 @@ const volunteers = [
   </section>
 
 </Layout>
+
+<style>
+  /* Soft, blurry dark glow (no visible box) keeps white hero text legible over
+     lighter parts of the image. */
+  .page-hero-text :is(h1, h2, h3, p, span) {
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.55),
+      0 2px 12px rgba(0, 0, 0, 0.45),
+      0 0 34px rgba(0, 0, 0, 0.35);
+  }
+</style>

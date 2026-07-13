@@ -29,13 +29,15 @@ const {
     <Image
       src={image}
       alt={imageAlt}
+      loading="eager"
+      fetchpriority="high"
       class={`w-full h-[40vh] md:h-[52vh] min-h-[260px] object-cover opacity-40 ${imagePosition}`}
     />
   )}
   {!image && <div class="h-[28vh] md:h-[36vh] min-h-[200px]"></div>}
 
-  <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-    <div class="bg-black/45 rounded-2xl px-8 py-6 max-w-3xl w-full mx-auto">
+  <div class="page-hero-text absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+    <div class="px-8 py-6 max-w-3xl w-full mx-auto">
       {label && (
         <p class="text-xs uppercase tracking-[0.3em] text-amber-400 mb-5">{label}</p>
       )}
@@ -62,3 +64,14 @@ const {
     </div>
   </div>
 </div>
+
+<style>
+  /* Soft, blurry dark glow (no visible box) keeps white hero text legible over
+     lighter parts of the image. */
+  .page-hero-text :is(h1, h2, h3, p, span) {
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.55),
+      0 2px 12px rgba(0, 0, 0, 0.45),
+      0 0 34px rgba(0, 0, 0, 0.35);
+  }
+</style>

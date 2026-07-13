@@ -54,7 +54,7 @@ const quotes = [
 
   <!-- Main headline — upper portion -->
   <div class="relative z-20 flex-1 flex flex-col items-center justify-center text-center px-6 pt-16 pb-8">
-    <div class="bg-black/40 rounded-2xl px-8 py-8 max-w-4xl w-full mx-auto">
+    <div class="px-8 py-8 max-w-4xl w-full mx-auto">
       <p class="text-white/95 text-xs uppercase tracking-[0.3em] mb-7">
         Desert Rose Bahá'í Institute &mdash; Eloy, Arizona
       </p>
@@ -75,7 +75,7 @@ const quotes = [
   <!-- Rotating quote — lower portion -->
   <div class="relative z-20 w-full text-center px-6 pb-14">
     <div class="w-12 h-px bg-amber-400/50 mx-auto mb-8"></div>
-    <div class="bg-black/40 rounded-xl max-w-2xl mx-auto min-h-[90px] flex flex-col items-center justify-center px-6 py-4">
+    <div class="max-w-2xl mx-auto min-h-[90px] flex flex-col items-center justify-center px-6 py-4">
       <p id="hero-quote"
         class="text-white/95 text-base md:text-xl font-serif font-light italic leading-relaxed transition-opacity duration-700 opacity-0">
         {'”' + quotes[0].text + '”'}
@@ -126,10 +126,14 @@ const quotes = [
   /* Video sits invisible over the static still, then gently crossfades in once it plays. */
   .hero-video { opacity: 0; transition: opacity 1.4s ease; }
   .hero-video.is-playing { opacity: 1; }
-  /* Soft, barely-visible dark glow so white hero text stays legible where the
-     background image is light. */
+  /* Soft, blurry dark glow (no visible box) so white hero text stays legible where
+     the background image is light. Two layers: a tight one for crispness, a wide
+     diffuse one for the halo. */
   #superhero :is(h1, h2, h3, p, a, span, blockquote, li) {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 14px rgba(0, 0, 0, 0.30);
+    text-shadow:
+      0 1px 3px rgba(0, 0, 0, 0.55),
+      0 2px 12px rgba(0, 0, 0, 0.45),
+      0 0 34px rgba(0, 0, 0, 0.35);
   }
 </style>
 

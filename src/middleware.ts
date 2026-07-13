@@ -67,6 +67,8 @@ export const onRequest = async (context, next) => {
   const isEventsPath = EVENTS_CACHE.test(path);
   const cacheable = context.request.method === 'GET' && !sessionId && !url.searchParams.has('nocache')
     && !path.startsWith('/admin') && !path.startsWith('/api') && path !== '/login'
+    && !path.startsWith('/_') // skip Astro internal endpoints (e.g. /_image) — their identity
+                              // is in the query string, which this cache key drops (would collide)
     && !/\.[a-z0-9]{2,5}$/i.test(path); // skip asset-like paths (served/cached by the CDN)
   let cache: any, cacheKey: any;
   if (cacheable && typeof caches !== 'undefined') {
