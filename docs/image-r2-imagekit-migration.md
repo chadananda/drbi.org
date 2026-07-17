@@ -1,6 +1,11 @@
 # Static Image Migration → R2 + ImageKit
 
-**Status:** PLAN — awaiting review before execution
+**Status:** ✅ DONE — executed & deployed to prod 2026-07-17 (worker version 659f08ad).
+All 45 unique images uploaded to `drbi.org/site/…`; every import-based page now
+serves via ImageKit (`CdnImage.astro`), zero `/_image` in page HTML. Orphaned source
+files deleted. NOT migrated (out of scope — use markdown `![](./file)`, not ESM
+imports): `src/pages/history/*` and `src/pages/agriculture/*` content-page images;
+home hero poster/mp4 in `public/`; `public/drbi-landscape.webp` (path-referenced).
 **Author:** Claude (Opus 4.8), 2026-07-12
 **Goal:** Move the site's bundled static images off Astro's build-time `astro:assets`
 pipeline (which serves through the in-worker `/_image` endpoint) onto R2 + the ImageKit
