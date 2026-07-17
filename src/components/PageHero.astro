@@ -1,5 +1,5 @@
 ---
-import { Image } from "astro:assets";
+import CdnImage from "@components/CdnImage.astro";
 
 interface Props {
   label?: string;
@@ -7,7 +7,7 @@ interface Props {
   subtitle?: string;
   quote?: string;
   quoteAttrib?: string;
-  image?: any;
+  image?: string;
   imageAlt?: string;
   imagePosition?: string;
 }
@@ -26,9 +26,10 @@ const {
 
 <div class="relative w-full overflow-hidden bg-ink">
   {image && (
-    <Image
+    <CdnImage
       src={image}
       alt={imageAlt}
+      w={1600}
       loading="eager"
       fetchpriority="high"
       class={`w-full h-[40vh] md:h-[52vh] min-h-[260px] object-cover opacity-40 ${imagePosition}`}

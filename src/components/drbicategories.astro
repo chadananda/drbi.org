@@ -1,11 +1,5 @@
 ---
-import { Image } from "astro:assets";
-// DRBI category images - downloaded from production site
-import artsImg from "../assets/drbi/arts.webp"
-import cemeteryImg from "../assets/drbi/cemetery.webp"
-import studyImg from "../assets/drbi/study.webp"
-import soilImg from "../assets/drbi/soil.webp"
-import kureImg from "../assets/drbi/kure.webp"
+import CdnImage from "@components/CdnImage.astro";
 
 ---
 
@@ -13,7 +7,7 @@ import kureImg from "../assets/drbi/kure.webp"
 
  <div class="finearts category-card shadow-lg hover:shadow-2xl">
   <a href="/arts">
-   <Image src={artsImg} alt="The Fine Arts" />
+   <CdnImage src="drbi.org/site/drbi/arts.webp" alt="The Fine Arts" w={400} />
    <h3>The Fine Arts</h3>  </a>
    <p><em>"...the Cause spread like wildfire when its spirit and teachings are presented on the stage or in art and literature as a whole."</em></p>
 
@@ -21,28 +15,28 @@ import kureImg from "../assets/drbi/kure.webp"
 
  <div class="soil category-card shadow-lg hover:shadow-2xl">
    <a href="/agriculture">
-   <Image src={soilImg} alt="The Soil" />
+   <CdnImage src="drbi.org/site/drbi/soil.webp" alt="The Soil" w={400} />
   <h3> The Soil </h3> </a>
   <p><em>"The fundamental basis of the community is agriculture, tillage of the soil. All must be producers."</em></p>
  </div>
 
  <div class="learning category-card shadow-lg hover:shadow-2xl">
    <a href="/events">
-   <Image src={studyImg} alt="Lifelong Learning" />
+   <CdnImage src="drbi.org/site/drbi/study.webp" alt="Lifelong Learning" w={400} />
   <h3> Lifelong Learning</h3> </a>
  <p>Because <em>"By faith is meant, first, conscious knowledge"</em></p>
  </div>
 
  <div class="radio category-card shadow-lg hover:shadow-2xl">
    <a href="/radio">
-   <Image src={kureImg} alt="Radio and Media" />
+   <CdnImage src="drbi.org/site/drbi/kure.webp" alt="Radio and Media" w={400} />
   <h3>Radio and Media</h3> </a>
   <p> KURE-LP 106.1 FM -- service outreach</p>
  </div>
 
  <div class="memorial category-card shadow-lg hover:shadow-2xl">
    <a href="/memorial">
-   <Image src={cemeteryImg} alt="Memorial" />
+   <CdnImage src="drbi.org/site/drbi/cemetery.webp" alt="Memorial" w={400} />
   <h3>Eternal Rest </h3> </a>
   <p><em>"I have made death a messenger of joy to thee. Wherefore dost thou grieve? I made the light to shed on thee its splendor."</em></p>
  </div>

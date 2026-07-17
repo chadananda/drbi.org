@@ -3,36 +3,22 @@ export const prerender = false;
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import PageHero from "@components/PageHero.astro";
-import { Image } from "astro:assets";
+import CdnImage from "@components/CdnImage.astro";
 
-import heroImg    from "../assets/drbi/memories.webp";
-import billMar    from "./history/_bill_and_mar.webp";
-import david      from "./history/_David-Hadden.webp";
-import marguerite from "./history/_marguerite.webp";
-import alai       from "./history/_alai.webp";
-import hall       from "./history/_hall.webp";
-import casas      from "./history/_casas.webp";
-import adminBldg  from "./history/_admin_bldg.webp";
-import guestHouse from "./history/_guest_house.webp";
-import artGallery from "./history/_art_gallery.webp";
-import pavilion   from "./history/_pavilion.webp";
-import roundHouse from "./history/_Round-House.webp";
-import farm       from "./history/_farm.webp";
-import agr1       from "./agriculture/_agr1.webp";
 const photos = [
-  { src: billMar,    caption: "Bill and Marguerite Sears" },
-  { src: marguerite, caption: "Marguerite Sears, DRBI Founder" },
-  { src: david,      caption: "David Hadden, Co-Founder" },
-  { src: alai,       caption: "Desert Rose community" },
-  { src: hall,       caption: "Eleanor Hadden Hall" },
-  { src: casas,      caption: "Our Casa Suites" },
-  { src: pavilion,   caption: "William Sears Pavilion" },
-  { src: roundHouse, caption: "The Round House" },
-  { src: artGallery, caption: "The Art Gallery" },
-  { src: adminBldg,  caption: "Administration Building" },
-  { src: guestHouse, caption: "Guest House" },
-  { src: farm,       caption: "Our Farm" },
-  { src: agr1,       caption: "Working the desert soil" },
+  { src: "drbi.org/site/history/bill-and-mar.webp", caption: "Bill and Marguerite Sears" },
+  { src: "drbi.org/site/history/marguerite.webp",   caption: "Marguerite Sears, DRBI Founder" },
+  { src: "drbi.org/site/history/david-hadden.webp", caption: "David Hadden, Co-Founder" },
+  { src: "drbi.org/site/history/alai.webp",         caption: "Desert Rose community" },
+  { src: "drbi.org/site/history/hall.webp",         caption: "Eleanor Hadden Hall" },
+  { src: "drbi.org/site/history/casas.webp",        caption: "Our Casa Suites" },
+  { src: "drbi.org/site/history/pavilion.webp",     caption: "William Sears Pavilion" },
+  { src: "drbi.org/site/history/round-house.webp",  caption: "The Round House" },
+  { src: "drbi.org/site/history/art-gallery.webp",  caption: "The Art Gallery" },
+  { src: "drbi.org/site/history/admin-bldg.webp",   caption: "Administration Building" },
+  { src: "drbi.org/site/history/guest-house.webp",  caption: "Guest House" },
+  { src: "drbi.org/site/history/farm.webp",         caption: "Our Farm" },
+  { src: "drbi.org/site/agriculture/agr1.webp",     caption: "Working the desert soil" },
 ];
 
 // Temporarily hidden: memory submissions accept user images with no moderation.
@@ -49,7 +35,7 @@ return Astro.redirect('/', 302);
     label="A living archive"
     title="Memories of Desert Rose"
     subtitle="Moments from decades of learning, service, and community in the Sonoran Desert."
-    image={heroImg}
+    image="drbi.org/site/drbi/memories.webp"
     imageAlt="Desert Rose Bahai Institute"
     imagePosition="object-center"
   />
@@ -68,9 +54,10 @@ return Astro.redirect('/', 302);
         {photos.map((photo) => (
           <div class="break-inside-avoid mb-3 group">
             <div class="overflow-hidden rounded-xl bg-paper">
-              <Image
+              <CdnImage
                 src={photo.src}
                 alt={photo.caption}
+                w={600}
                 class="w-full h-auto object-cover transition duration-500 group-hover:scale-105"
               />
             </div>

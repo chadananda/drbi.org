@@ -3,48 +3,35 @@ export const prerender = true;
 import Layout from "./Layout.astro";
 import PageHero from "@components/PageHero.astro";
 import Container from "@components/container.astro";
-
-import artsImg from "../assets/drbi/arts.webp";
-import cemeteryImg from "../assets/drbi/cemetery.webp";
-import studyImg from "../assets/drbi/study.webp";
-import soilImg from "../assets/drbi/soil.webp";
-import kureImg from "../assets/drbi/kure.webp";
-import memoriesImg from "../assets/drbi/memories.webp";
-import contributeImg from "../assets/drbi/contribute.webp";
-import eventsImg from "../assets/drbi/events.webp";
-import faithImg from "../assets/drbi/faith.webp";
-import newsImg from "../assets/drbi/news.webp";
-import casasImg from "../pages/history/_casas.webp";
-import hallImg from "../pages/history/_hall.webp";
-import pavilionImg from "../pages/history/_pavilion.webp";
-import roundhouseImg from "../pages/history/_Round-House.webp";
-import guesthouseImg from "../pages/history/_guest_house.webp";
-import farmImg from "../pages/history/_farm.webp";
+import { imagekitUrl } from "@utils/utils.js";
 
 const { frontmatter } = Astro.props;
 
-const imageMap = {
-  arts: artsImg,
-  cemetery: cemeteryImg,
-  study: studyImg,
-  soil: soilImg,
-  kure: kureImg,
-  casas: casasImg,
-  hall: hallImg,
-  pavilion: pavilionImg,
-  roundhouse: roundhouseImg,
-  guesthouse: guesthouseImg,
-  farm: farmImg,
-  memories: memoriesImg,
-  contribute: contributeImg,
-  events: eventsImg,
-  faith: faithImg,
-  news: newsImg,
+// frontmatter.image (a keyword) → R2 key on cdn.shrtr.com, served via ImageKit.
+const imageMap: Record<string, string> = {
+  arts: "drbi.org/site/drbi/arts.webp",
+  cemetery: "drbi.org/site/drbi/cemetery.webp",
+  study: "drbi.org/site/drbi/study.webp",
+  soil: "drbi.org/site/drbi/soil.webp",
+  kure: "drbi.org/site/drbi/kure.webp",
+  casas: "drbi.org/site/history/casas.webp",
+  hall: "drbi.org/site/history/hall.webp",
+  pavilion: "drbi.org/site/history/pavilion.webp",
+  roundhouse: "drbi.org/site/history/round-house.webp",
+  guesthouse: "drbi.org/site/history/guest-house.webp",
+  farm: "drbi.org/site/history/farm.webp",
+  memories: "drbi.org/site/drbi/memories.webp",
+  contribute: "drbi.org/site/drbi/contribute.webp",
+  events: "drbi.org/site/drbi/events.webp",
+  faith: "drbi.org/site/drbi/faith.webp",
+  news: "drbi.org/site/drbi/news.webp",
 };
-const heroImage = (imageMap as Record<string, any>)[frontmatter.image] ?? undefined;
+const heroImage = imageMap[frontmatter.image] ?? undefined;
 const heroPosition = frontmatter.imagePosition ?? "object-center";
-// Resolve OG image to an absolute URL (heroImage is an Astro image object with .src)
-const ogImageSrc = heroImage?.src ? `https://drbi.org${heroImage.src}` : undefined;
+// OG image: an absolute, sized ImageKit URL from the R2 key.
+const ogImageSrc = heroImage
+  ? imagekitUrl(`https://cdn.shrtr.com/${heroImage}`, { w: 1200 })
+  : undefined;
 ---
 
 <Layout title={frontmatter.title} description={frontmatter.description} image={ogImageSrc}>

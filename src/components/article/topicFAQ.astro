@@ -6,9 +6,7 @@
 //  console.log(Astro.props.faqs);
 
  import brand from "../../data/site.json";
- import { Image } from 'astro:assets';
- import faqimage from '../../assets/faq.jpg';
- import q from '../../assets/q.png';
+ import CdnImage from '@components/CdnImage.astro';
  import { currentURL, hashstr} from '../../utils/utils.js';
 
 const pageURL = currentURL(Astro);
@@ -75,16 +73,15 @@ faqs.forEach(faq => {
 ---
 
 <div id={uniqueID} class="container mx-auto p-4">
- <Image class="faqimage mx-auto opacity-50" src={faqimage} alt="faqs" height="150"
- widths={[150, 188, 300, 372, 788, 1000, 1280]}
- />
+ <CdnImage class="faqimage mx-auto opacity-50" src="drbi.org/site/misc/faq.jpg" alt="faqs"
+ w={700} style="height:150px;width:auto" />
  <h1 class="text-2xl font-bold text-center">{faqs.title}</h1>
  <p class="text-gray-600 text-center">{faqs.description}</p>
  {faqs.map((faq, index) => (
    <div class="p-4 bg-gray-100 rounded-lg mt-4">
      <h2 class="faq-question text-lg font-semibold text-blue-600 cursor-pointer relative" data-target={`faq-answer-${index}`}>
-      <Image class="qimage absolute -top-2 -left-6 opacity-50" src={q} alt=""
-        height="40" width="40" />
+      <CdnImage class="qimage absolute -top-2 -left-6 opacity-50" src="drbi.org/site/misc/q.png" alt=""
+        w={80} style="width:40px;height:40px" />
       <span class="ml-6">{faq.question}</span>
      </h2>
      <div id={`faq-answer-${index}`} class="hidden mt-2 text-gray-700">

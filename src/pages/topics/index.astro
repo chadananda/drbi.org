@@ -5,7 +5,6 @@ import Layout from "@layouts/Layout.astro";
 import Container from "src/components/container.astro";
 import PageHero from "@components/PageHero.astro";
 import { getPublishedArticles, getTopics } from "@utils/utils.js";
-import studyImg from "../../assets/drbi/study.webp";
 
 const allPosts = await getPublishedArticles();
 const allTopics = await getTopics();
@@ -29,7 +28,7 @@ const topicLinks = allTopics.map((topic) => ({
     label="Explore the ideas"
     title="The Big Ideas"
     subtitle="Themes of unity, service, agriculture, spiritual transformation, and the examined life — the ideas that shape what we do here."
-    image={studyImg}
+    image="drbi.org/site/drbi/study.webp"
     imageAlt="Studying the big ideas at Desert Rose"
   />
 

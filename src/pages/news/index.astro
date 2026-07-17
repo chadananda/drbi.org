@@ -6,7 +6,6 @@ import Container from "@components/container.astro";
 import PageHero from "@components/PageHero.astro";
 import PostThumb from "@components/article/postThumb.astro";
 import { getPublishedPostsByType_Content } from "@utils/content-utils.js";
-import newsImg from "../../assets/drbi/news.webp";
 
 const posts = await getPublishedPostsByType_Content('News');
 ---
@@ -17,7 +16,7 @@ const posts = await getPublishedPostsByType_Content('News');
     label="From the community"
     title="Desert Rose News"
     subtitle="Updates, reflections, and stories from our community of learners and servants."
-    image={newsImg}
+    image="drbi.org/site/drbi/news.webp"
     imageAlt="Desert Rose Bahai Institute"
   />
 

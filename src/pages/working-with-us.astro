@@ -2,17 +2,7 @@
 export const prerender = false;
 import Layout from "@layouts/Layout.astro";
 import Container from "src/components/container.astro";
-import { Image } from "astro:assets";
-
-import heroImg from "./history/_farm.webp"
-import rasmussen from "../assets/people/rasmussen.webp"
-import viva from "../assets/people/viva.webp"
-import bonnie from "../assets/people/bonnie.webp"
-import lamont from "../assets/people/lamont.webp"
-import gayle from "../assets/people/gayle.webp"
-import robprater from "../assets/people/rob-prater.webp"
-import johnhanke from "../assets/people/john-hanke.webp"
-import bettie from "../assets/people/bettie-johnston.webp"
+import CdnImage from "@components/CdnImage.astro";
 
 const opportunities = [
   {
@@ -182,14 +172,14 @@ const tagLabel = { "short-term": "Short-term", "long-term": "Long-term", "both":
 const tagColor = { "short-term": "bg-sky-100 text-sky-700", "long-term": "bg-violet-100 text-violet-700", "both": "bg-emerald-100 text-emerald-700", "remote": "bg-amber-100 text-amber-700" };
 
 const volunteers = [
-  { name: "Roger and Doris Rasmussen", img: rasmussen },
-  { name: "The late Viva Tomlin", img: viva },
-  { name: "Bonnie Tozer and grandchildren", img: bonnie },
-  { name: "Lamont Baker", img: lamont },
-  { name: "Gayle Hanke", img: gayle },
-  { name: "Rob Prater", img: robprater },
-  { name: "John Hanke", img: johnhanke },
-  { name: "Bettie Johnston", img: bettie },
+  { name: "Roger and Doris Rasmussen", img: "drbi.org/site/people/rasmussen.webp" },
+  { name: "The late Viva Tomlin", img: "drbi.org/site/people/viva.webp" },
+  { name: "Bonnie Tozer and grandchildren", img: "drbi.org/site/people/bonnie.webp" },
+  { name: "Lamont Baker", img: "drbi.org/site/people/lamont.webp" },
+  { name: "Gayle Hanke", img: "drbi.org/site/people/gayle.webp" },
+  { name: "Rob Prater", img: "drbi.org/site/people/rob-prater.webp" },
+  { name: "John Hanke", img: "drbi.org/site/people/john-hanke.webp" },
+  { name: "Bettie Johnston", img: "drbi.org/site/people/bettie-johnston.webp" },
 ];
 ---
 
@@ -197,8 +187,8 @@ const volunteers = [
 
   <!-- Hero -->
   <div class="relative w-full overflow-hidden bg-stone-900">
-    <Image src={heroImg} alt="Volunteers serving at Desert Rose Bahai Institute"
-      loading="eager" fetchpriority="high"
+    <CdnImage src="drbi.org/site/history/farm.webp" alt="Volunteers serving at Desert Rose Bahai Institute"
+      w={1600} loading="eager" fetchpriority="high"
       class="w-full h-[50vh] h-[50svh] min-h-[320px] object-cover object-center opacity-40" />
     <div class="page-hero-text absolute inset-0 flex flex-col items-center justify-center text-center px-6">
       <div class="px-8 py-6 max-w-3xl w-full mx-auto">
@@ -345,8 +335,8 @@ const volunteers = [
       <div class="flex flex-wrap justify-center gap-10 max-w-4xl mx-auto">
         {volunteers.map(v => (
           <div class="text-center w-36">
-            <Image src={v.img}
-              alt={v.name}
+            <CdnImage src={v.img}
+              alt={v.name} w={220} h={220} face
               class="rounded-full w-28 h-28 mx-auto object-cover object-center border-4 border-white shadow-md mb-3" />
             <p class="text-sm text-body leading-snug">{v.name}</p>
           </div>

@@ -7,7 +7,6 @@ import Container from "src/components/container.astro";
 import PageHero from "@components/PageHero.astro";
 import TopicFAQ from 'src/components/article/topicFAQ.astro';
 import { getCategories, getTopics, getPublishedArticles, getTeam } from "@utils/utils.js";
-import studyImg from "../../assets/drbi/study.webp";
 
 const slug = Astro.params.topic;
 const allTopics = await getTopics();
@@ -26,7 +25,7 @@ const topicSubtitle = topic?.description || 'Explore articles and teachings on t
     label="Articles by topic"
     title={topic?.name ?? slug}
     subtitle={topicSubtitle}
-    image={studyImg}
+    image="drbi.org/site/drbi/study.webp"
     imageAlt={topic?.name ?? slug}
   />
 

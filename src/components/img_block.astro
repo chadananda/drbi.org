@@ -1,14 +1,14 @@
 ---
 // img_block.astro
-import { Image } from "astro:assets";
+import CdnImage from "@components/CdnImage.astro";
 import Gallery from "@components/image_gallery.astro";
 import Header from "@components/fancy_header.astro";
 
 interface Props {
   title: string;
   description?: string;
-  image: ImageMetadata;
-  images: ImageMetadata[];
+  image: string; // R2 key ("drbi.org/site/…") or full cdn.shrtr.com URL
+  images: string[];
   id?: string;
   flip?: boolean;
 }
@@ -36,7 +36,7 @@ const { title = '', description = '', image = '', images = [], id = '', flip = f
     </div>
     <div class="w-full md:w-1/2 text-center">
       {image &&
-        <Image src={image} alt={title} class="h-auto w-full object-cover object-center rounded-lg" />
+        <CdnImage src={image} alt={title} w={800} class="h-auto w-full object-cover object-center rounded-lg" />
       }
     </div>
   </div>

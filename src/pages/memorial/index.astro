@@ -5,7 +5,6 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import PageHero from "@components/PageHero.astro";
 import { getCollection } from 'astro:content';
-import cemeteryImage from "./_memorial-garden-front.jpg";
 
 let residents: any[] = [];
 try {
@@ -28,7 +27,7 @@ try {
     label="Desert Rose Memorial Gardens"
     title="A Place of Peace & Rest"
     subtitle="An oasis of tranquility in the Sonoran Desert — where the lives of those who served are honored and remembered."
-    image={cemeteryImage}
+    image="drbi.org/site/heroes/memorial-garden-front.jpg"
     imageAlt="Desert Rose Memorial Cemetery"
     imagePosition="object-center"
   />

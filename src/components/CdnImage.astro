@@ -1,0 +1,58 @@
+---
+// R2 + ImageKit image. `src` = R2 key ("drbi.org/site/…") or full cdn.shrtr.com URL.
+// Serves an f-auto/resized ImageKit transform (same pipeline as event images) instead
+// of Astro's build-time /_image endpoint. Deps: imagekitUrl (@utils/utils.js).
+import { imagekitUrl } from "@utils/utils.js";
+
+interface Props {
+  src: string;
+  alt?: string;
+  w?: number;
+  h?: number;
+  face?: boolean;
+  quality?: number;
+  class?: string;
+  style?: string;
+  id?: string;
+  loading?: "lazy" | "eager";
+  fetchpriority?: "high" | "low" | "auto";
+  sizes?: string;
+}
+
+const {
+  src,
+  alt = "",
+  w = 0,
+  h = 0,
+  face = false,
+  quality = 80,
+  class: cls = "",
+  style,
+  id,
+  loading = "lazy",
+  fetchpriority,
+  sizes = "",
+} = Astro.props;
+
+const base = src.startsWith("http") ? src : `https://cdn.shrtr.com/${src}`;
+const at = (width: number) =>
+  imagekitUrl(base, { w: width, h: w && h ? Math.round((h * width) / w) : h, face, quality });
+
+const url = imagekitUrl(base, { w, h, face, quality });
+// Retina srcset only when we have an intrinsic width to scale from.
+const srcset = w ? `${at(w)} ${w}w, ${at(w * 2)} ${w * 2}w` : "";
+---
+<img
+  src={url}
+  srcset={srcset || undefined}
+  sizes={srcset && sizes ? sizes : undefined}
+  alt={alt}
+  width={w || undefined}
+  height={h || undefined}
+  loading={loading}
+  fetchpriority={fetchpriority}
+  decoding="async"
+  class={cls}
+  style={style}
+  id={id}
+/>

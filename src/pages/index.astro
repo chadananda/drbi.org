@@ -6,10 +6,7 @@ import SuperHero from "@components/superhero.astro";
 import VideoPlayer from "@components/videoPlayer.astro";
 import Testimonials from "@components/testimonials.astro";
 
-import { Image } from "astro:assets";
-import artsImg from "../assets/drbi/arts.webp";
-import studyImg from "../assets/drbi/study.webp";
-import soilImg from "../assets/drbi/soil.webp";
+import CdnImage from "@components/CdnImage.astro";
 const orgSchema = {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
@@ -79,7 +76,7 @@ const websiteSchema = {
           <!-- Scripture Study -->
           <div class="px-5 md:px-10 py-10 md:py-12 text-center">
             <div class="overflow-hidden rounded-xl aspect-video mb-8">
-              <Image src={studyImg} alt="Deep study of scripture at DRBI" class="w-full h-full object-cover" loading="lazy" />
+              <CdnImage src="drbi.org/site/drbi/study.webp" alt="Deep study of scripture at DRBI" w={800} class="w-full h-full object-cover" loading="lazy" />
             </div>
             <h3 class="text-xl font-serif text-ink mb-4">Scripture Study</h3>
             <p class="text-body text-sm leading-relaxed">
@@ -96,7 +93,7 @@ const websiteSchema = {
           <!-- Arts -->
           <div class="px-5 md:px-10 py-10 md:py-12 text-center">
             <div class="overflow-hidden rounded-xl aspect-video mb-8">
-              <Image src={artsImg} alt="The Fine Arts at DRBI" class="w-full h-full object-cover" loading="lazy" />
+              <CdnImage src="drbi.org/site/drbi/arts.webp" alt="The Fine Arts at DRBI" w={800} class="w-full h-full object-cover" loading="lazy" />
             </div>
             <h3 class="text-xl font-serif text-ink mb-4">The Arts</h3>
             <p class="text-body text-sm leading-relaxed">
@@ -113,7 +110,7 @@ const websiteSchema = {
           <!-- Agriculture -->
           <div class="px-5 md:px-10 py-10 md:py-12 text-center">
             <div class="overflow-hidden rounded-xl aspect-video mb-8">
-              <Image src={soilImg} alt="Agriculture and the soil at DRBI" class="w-full h-full object-cover" loading="lazy" />
+              <CdnImage src="drbi.org/site/drbi/soil.webp" alt="Agriculture and the soil at DRBI" w={800} class="w-full h-full object-cover" loading="lazy" />
             </div>
             <h3 class="text-xl font-serif text-ink mb-4">Agriculture</h3>
             <p class="text-body text-sm leading-relaxed">
@@ -155,7 +152,7 @@ const websiteSchema = {
     <section class="py-0 bg-surface">
       <div class="grid grid-cols-1 md:grid-cols-2 min-h-[500px]">
         <div class="overflow-hidden">
-          <Image src={soilImg} alt="Working the soil at DRBI" class="w-full h-full object-cover min-h-[400px]" loading="lazy" />
+          <CdnImage src="drbi.org/site/drbi/soil.webp" alt="Working the soil at DRBI" w={1000} class="w-full h-full object-cover min-h-[400px]" loading="lazy" />
         </div>
         <div class="flex flex-col justify-center px-6 md:px-12 py-12 md:py-20 bg-brand-soft">
           <p class="text-xs uppercase tracking-[0.25em] text-brand mb-5">Working the Land</p>
