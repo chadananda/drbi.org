@@ -152,6 +152,10 @@ const getEventLocation = (event) => {
           <span>📅</span>
           <span class="toggle-text">Show Old Events</span>
         </button>
+        <button id="sync-now" title="Pull the latest from Humanitix now (title, image, dates, price). Does not change hide/show." class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+          <span id="sync-icon">🔄</span>
+          <span id="sync-label">Sync now</span>
+        </button>
       </div>
       
       <!-- Filters -->
@@ -642,8 +646,38 @@ const getEventLocation = (event) => {
         toggleText.textContent = 'Show Old Events';
       }
     });
-    
-    
+
+
+    // Sync now — pull latest from Humanitix on demand (bypasses the traffic-driven throttle)
+    document.getElementById('sync-now')?.addEventListener('click', async () => {
+      const btn = document.getElementById('sync-now');
+      const icon = document.getElementById('sync-icon');
+      const label = document.getElementById('sync-label');
+      if (btn.disabled) return;
+      btn.disabled = true;
+      icon.classList.add('animate-spin');
+      const prev = label.textContent;
+      label.textContent = 'Syncing…';
+      try {
+        const res = await fetch('/api/admin/events/sync', { method: 'POST' });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          const changed = (data.created || 0) + (data.updated || 0);
+          label.textContent = changed > 0 ? `Synced (${changed} updated)` : 'Up to date';
+          if (changed > 0) { setTimeout(() => window.location.reload(), 700); return; }
+        } else {
+          label.textContent = 'Sync failed';
+          console.error('Sync error:', data.error || res.status);
+        }
+      } catch (e) {
+        label.textContent = 'Sync failed';
+        console.error('Sync error:', e);
+      }
+      icon.classList.remove('animate-spin');
+      setTimeout(() => { label.textContent = prev; btn.disabled = false; }, 2500);
+    });
+
+
     // Toggle visibility
     document.querySelectorAll('.toggle-visibility').forEach(button => {
       button.addEventListener('click', async () => {

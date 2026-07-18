@@ -36,6 +36,14 @@ try {
   const entry = await getEventById(id);
   if (entry) {
     event = entry.data;
+    // Humanitix (and any synced) events are owned by their source — the ONLY website-side
+    // override is hide/show. Never open the internal editor for them: saving here would set
+    // manually_edited and freeze the sync. Send the user to edit on Humanitix instead.
+    if (entry.data.source && entry.data.source !== 'manual') {
+      return Astro.redirect(entry.data.externalId
+        ? `https://console.humanitix.com/console/events/${entry.data.externalId}/overview`
+        : '/admin/events');
+    }
   }
 
   // Pre-populate form data

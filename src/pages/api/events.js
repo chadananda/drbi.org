@@ -101,6 +101,15 @@ async function handleUpdateEvent(eventData) {
   const existing = await getEventById(eventData.id);
   if (!existing) return new Response('Event not found', { status: 404 });
 
+  // Synced events (Humanitix etc.) are owned by their source — the only website-side override
+  // is hide/show (toggle-visibility). Refuse content edits so they always stay in sync.
+  if (existing.data.source && existing.data.source !== 'manual') {
+    return new Response(JSON.stringify({ success: false,
+      error: 'This event is managed on Humanitix. Edit it there — the website only controls hide/show.' }), {
+      status: 403, headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   try {
     await updateEvent(eventData.id, {
       title: eventData.title,
