@@ -28,7 +28,8 @@ const HX_API_BASE = "https://api.humanitix.com/v1";
 
 /**
  * Map one Humanitix API event to the DRBI event `data` object.
- * Deliberately omits `visible` so upsertSyncedEvent can default new rows to DRAFT.
+ * Emits `sourcePublished` (live on Humanitix), never `visible`: DRBI-site visibility is
+ * human-owned, so upsertSyncedEvent starts new rows hidden and never auto-shows them.
  * @param {HumanitixEvent} hx
  */
 // "Sponsor a Youth" donation pages are standalone Humanitix events (one per program) used
@@ -81,8 +82,9 @@ export function mapHumanitixEvent(hx) {
     organizer: "DRBI",
     categories: hx.category ? [hx.category] : [],
     lastModified: hx.updatedAt ?? null,
-    // Auto-show on our site only when the event is live (published + public) on Humanitix.
-    visible: !!(hx.published && hx.public),
+    // Live (published + public) on Humanitix. Gates the admin "Show" button; does NOT
+    // auto-show the event on the DRBI site (site visibility is human-owned).
+    sourcePublished: !!(hx.published && hx.public),
   };
 }
 

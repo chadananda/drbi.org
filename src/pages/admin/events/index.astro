@@ -198,7 +198,7 @@ const getEventLocation = (event) => {
 
     <div id="events-list">
       {filteredEvents.map(event => (
-        <div class={`relative rounded-xl shadow-sm hover:shadow-md transition-shadow mb-4 event-card ${event.isPrimary ? 'p-6' : 'p-4 opacity-75'} ${getEventStatus(event) === 'past' ? 'bg-gray-50 border border-gray-200' : ''} ${event.data.visible === false ? 'bg-orange-50 border-2 border-orange-300 border-dashed opacity-60' : 'bg-white border border-gray-200'}`}>
+        <div class={`relative rounded-xl shadow-sm hover:shadow-md transition-shadow mb-4 event-card ${event.isPrimary ? 'p-6' : 'p-4 opacity-75'} ${getEventStatus(event) === 'past' ? 'bg-gray-50 border border-gray-200' : ''} ${event.data.visible === false ? 'bg-orange-50 border-2 border-orange-300 border-dashed' : 'bg-white border border-gray-200'}`}>
           <div class="flex gap-6">
             {!event.isPrimary && (
               <div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
@@ -324,13 +324,31 @@ const getEventLocation = (event) => {
                     </a>
                   )}
 
-                  <button
-                    class={`inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility ${event.data.visible ? 'text-gray-600 bg-gray-50 hover:bg-gray-100' : 'text-orange-600 bg-orange-50 hover:bg-orange-100'}`}
-                    data-event-id={event.data.id}
-                    title={event.data.visible ? 'Hide event' : 'Show event'}
-                  >
-                    {event.data.visible ? '👁️ Hide' : '🙈 Show'}
-                  </button>
+                  {event.data.visible ? (
+                    <button
+                      class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility text-gray-600 bg-gray-50 hover:bg-gray-100"
+                      data-event-id={event.data.id}
+                      title="Hide on drbi.org (the Humanitix page stays live and shareable)"
+                    >
+                      👁️ Hide
+                    </button>
+                  ) : (event.data.source !== 'humanitix' || event.data.sourcePublished) ? (
+                    <button
+                      class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility text-orange-600 bg-orange-50 hover:bg-orange-100"
+                      data-event-id={event.data.id}
+                      title="Show on drbi.org"
+                    >
+                      🙈 Show
+                    </button>
+                  ) : (
+                    <button
+                      class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed"
+                      disabled
+                      title="Publish this event on Humanitix first — then you can show it on drbi.org"
+                    >
+                      🙈 Show
+                    </button>
+                  )}
                   
                   {event.data.source === 'humanitix' && event.data.externalId ? (
                     <a href={`https://console.humanitix.com/console/events/${event.data.externalId}/overview`} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all" title="Edit on Humanitix — the source of truth for this event">
@@ -381,6 +399,7 @@ const getEventLocation = (event) => {
     externalId: event.data.externalId,
     slug: eventSlug(event),
     visible: event.data.visible,
+    sourcePublished: event.data.sourcePublished,
     registrationUrl: event.data.registrationUrl,
     url: event.data.url,
     mainImage: event.data.mainImage,
@@ -475,7 +494,7 @@ const getEventLocation = (event) => {
         const isPrimary = event.isPrimary !== false; // Default to true if not specified
 
         return `
-          <div class="relative ${status === 'past' ? 'bg-gray-50' : 'bg-white'} border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow mb-4 ${isPrimary ? 'p-6' : 'p-4 opacity-75'} ${!event.visible ? 'opacity-50' : ''}">
+          <div class="relative ${status === 'past' ? 'bg-gray-50' : 'bg-white'} border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow mb-4 ${isPrimary ? 'p-6' : 'p-4 opacity-75'} ${!event.visible ? 'ring-1 ring-orange-300' : ''}">
             ${!isPrimary ? '<div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><span>🔄</span><span>Additional Date</span></div>' : ''}
             <div class="flex gap-6">
               <!-- Left: Large Main Image -->
@@ -569,13 +588,24 @@ const getEventLocation = (event) => {
                       </a>
                     ` : ''}
 
-                    <button
+                    ${event.visible
+                      ? `<button
                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer toggle-visibility"
                       data-event-id="${event.id}"
-                      title="${event.visible ? 'Hide event' : 'Show event'}"
-                    >
-                      ${event.visible ? '👁️ Hide' : '🙈 Show'}
-                    </button>
+                      title="Hide on drbi.org (the Humanitix page stays live and shareable)"
+                    >👁️ Hide</button>`
+                      : (event.source !== 'humanitix' || event.sourcePublished)
+                      ? `<button
+                      class="inline-flex items-center px-4 py-2 text-sm font-medium text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors cursor-pointer toggle-visibility"
+                      data-event-id="${event.id}"
+                      title="Show on drbi.org"
+                    >🙈 Show</button>`
+                      : `<button
+                      class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
+                      disabled
+                      title="Publish this event on Humanitix first — then you can show it on drbi.org"
+                    >🙈 Show</button>`
+                    }
                     
                     <a href="${event.source === 'humanitix' && event.externalId ? `https://console.humanitix.com/console/events/${event.externalId}/overview` : `/admin/events/${event.id}`}" ${event.source === 'humanitix' && event.externalId ? 'target="_blank" rel="noopener noreferrer" title="Edit on Humanitix — the source of truth for this event"' : ''} class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -642,17 +672,17 @@ const getEventLocation = (event) => {
             const result = await response.json();
             button.className = `inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility ${result.visible ? 'text-gray-600 bg-gray-50 hover:bg-gray-100' : 'text-orange-600 bg-orange-50 hover:bg-orange-100'}`;
             button.innerHTML = result.visible ? '👁️ Hide' : '🙈 Show';
-            button.title = result.visible ? 'Hide event' : 'Show event';
+            button.title = result.visible ? 'Hide on drbi.org (the Humanitix page stays live and shareable)' : 'Show on drbi.org';
 
-            // Update card styling
+            // Update card styling (border only — no dimming, so all buttons stay legible)
             const card = button.closest('.event-card');
             if (card) {
               if (result.visible) {
                 card.classList.remove('bg-orange-50', 'border-orange-300', 'border-dashed', 'border-2', 'opacity-60');
                 card.classList.add('bg-white', 'border-gray-200', 'border');
               } else {
-                card.classList.remove('bg-white', 'border-gray-200', 'border');
-                card.classList.add('bg-orange-50', 'border-orange-300', 'border-dashed', 'border-2', 'opacity-60');
+                card.classList.remove('bg-white', 'border-gray-200', 'border', 'opacity-60');
+                card.classList.add('bg-orange-50', 'border-orange-300', 'border-dashed', 'border-2');
               }
             }
 

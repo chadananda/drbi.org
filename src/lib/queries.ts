@@ -142,6 +142,7 @@ export function shapeEvent(row: EventRow) {
       source: row.source,
       externalId: row.external_id ?? '',
       visible: row.visible === 1,
+      sourcePublished: row.source_published === 1,
       featured: row.featured === 1,
       onsite: row.onsite === 1,
       isEventbrite: row.is_eventbrite === 1,
@@ -351,7 +352,11 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
     return { id, action: 'skipped-manual' as const };
   }
 
-  const visible = data.visible ? 1 : 0; // auto-show only if published+public on the source
+  // Whether the event is live (published + public) on Humanitix. Kept fresh on every
+  // sync and used by the admin to gate the "Show" button. Distinct from DRBI-site
+  // `visible`, which is human-owned: new synced rows always start hidden, and a human
+  // reveals them on the site (only possible once source_published is true).
+  const sourcePublished = data.sourcePublished ? 1 : 0;
 
   if (existing) {
     // Change detection: Humanitix stamps every event with `updatedAt` (→ lastModified).
@@ -362,13 +367,16 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
     if (incomingMod && currentMod && incomingMod === currentMod) {
       return { id, action: 'unchanged' as const };
     }
-    // Refresh content + visibility from the source; leave `manually_edited` rows to humans (handled above).
+    // Refresh CONTENT from the source only. Deliberately does NOT touch `visible`:
+    // DRBI-site visibility is a human decision (the admin Hide/Show button) and must
+    // stay independent of Humanitix's published state — otherwise publishing on
+    // Humanitix would re-show an event a human had hidden. See toggleEventVisibility.
     await db.execute({
       sql: `UPDATE events SET
         title = ?, short_description = ?, full_description = ?, start_date = ?, end_date = ?,
         additional_dates = ?, location = ?, price = ?, registration_url = ?, url = ?,
         main_image = ?, images = ?, organizer = ?, categories = ?, source = ?, external_id = ?,
-        visible = ?, last_synced = ?, last_modified = ?, updated_at = ?
+        source_published = ?, last_synced = ?, last_modified = ?, updated_at = ?
         WHERE id = ?`,
       args: [
         data.title ?? '', data.shortDescription ?? '', data.fullDescription ?? '',
@@ -378,20 +386,21 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
         data.registrationUrl ?? '', data.url ?? '', data.mainImage ?? '',
         JSON.stringify(data.images ?? []), data.organizer ?? 'DRBI',
         JSON.stringify(data.categories ?? []), source, data.externalId ?? null,
-        visible, now, data.lastModified ?? null, now, id,
+        sourcePublished, now, data.lastModified ?? null, now, id,
       ]
     });
     return { id, action: 'updated' as const };
   }
 
-  // New synced row — visibility mirrors the source's published state.
+  // New synced row — ALWAYS starts hidden on the DRBI site (visible = 0). A human reveals
+  // it via the admin "Show" button, which is only enabled once source_published is true.
   await db.execute({
     sql: `INSERT INTO events (id, title, short_description, full_description, start_date, end_date,
       additional_dates, location, price, registration_url, url, main_image, teacher_image,
       images, highlights, event_schedule, refund_policy, organizer, categories, source,
-      external_id, visible, featured, onsite, is_eventbrite, eventbrite_id,
+      external_id, visible, source_published, featured, onsite, is_eventbrite, eventbrite_id,
       manually_edited, last_manual_edit, last_synced, last_modified, updated_at)
-      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,1,0,NULL,0,NULL,?,?,?)`,
+      VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,?,0,1,0,NULL,0,NULL,?,?,?)`,
     args: [
       id, data.title ?? '', data.shortDescription ?? '', data.fullDescription ?? '',
       data.startDate ?? '', data.endDate ?? '',
@@ -400,7 +409,7 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
       data.registrationUrl ?? '', data.url ?? '', data.mainImage ?? '', '',
       JSON.stringify(data.images ?? []), JSON.stringify([]), JSON.stringify([]), '',
       data.organizer ?? 'DRBI', JSON.stringify(data.categories ?? []), source,
-      data.externalId ?? null, visible, now, data.lastModified ?? null, now,
+      data.externalId ?? null, sourcePublished, now, data.lastModified ?? null, now,
     ]
   });
   return { id, action: 'created' as const };

@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS events (
   source TEXT DEFAULT 'manual',
   external_id TEXT,
   visible INTEGER NOT NULL DEFAULT 1,
+  source_published INTEGER NOT NULL DEFAULT 0,
   featured INTEGER NOT NULL DEFAULT 0,
   onsite INTEGER NOT NULL DEFAULT 1,
   is_eventbrite INTEGER NOT NULL DEFAULT 0,

@@ -1,6 +1,6 @@
 // Tests for src/lib/humanitix.js — the read-only Humanitix → DRBI event mapper + fetch client.
 // Focus: field mapping correctness, defensive fallbacks, and the never-publish invariant
-// (the mapper must NOT emit a `visible` field so synced rows default to DRAFT).
+// (the mapper emits `sourcePublished`, never `visible` — DRBI-site visibility is human-owned).
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { mapHumanitixEvent, fetchHumanitixEvents, shapeOrder, isSponsorInviteEligible } from "../../src/lib/humanitix.js";
@@ -36,11 +36,13 @@ describe("mapHumanitixEvent", () => {
     assert.equal(m.organizer, "DRBI");
   });
 
-  it("visible mirrors the source published+public state (auto-show when live on Humanitix)", () => {
-    assert.equal(mapHumanitixEvent({ ...sample, published: true, public: true }).visible, true);
-    assert.equal(mapHumanitixEvent({ ...sample, published: false, public: true }).visible, false);
-    assert.equal(mapHumanitixEvent({ ...sample, published: true, public: false }).visible, false);
-    assert.equal(mapHumanitixEvent({ ...sample }).visible, false); // no flags → hidden
+  it("sourcePublished mirrors the source published+public state (live on Humanitix)", () => {
+    assert.equal(mapHumanitixEvent({ ...sample, published: true, public: true }).sourcePublished, true);
+    assert.equal(mapHumanitixEvent({ ...sample, published: false, public: true }).sourcePublished, false);
+    assert.equal(mapHumanitixEvent({ ...sample, published: true, public: false }).sourcePublished, false);
+    assert.equal(mapHumanitixEvent({ ...sample }).sourcePublished, false); // no flags → not live
+    // Never emits `visible`: DRBI-site visibility is human-owned, never set by the sync.
+    assert.equal(mapHumanitixEvent({ ...sample, published: true, public: true }).visible, undefined);
   });
 
   it("builds the registration URL from the slug", () => {
