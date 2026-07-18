@@ -139,9 +139,14 @@ const getEventLocation = (event) => {
 
     <div class="flex flex-col lg:flex-row gap-4 mb-6">
       <div class="flex gap-4">
-        <a href="/admin/events/add" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+        <a href="/admin/events/add" title="Create a non-ticketed on-site event on drbi.org (no Humanitix checkout). Use for free/informational events." class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
           <span>➕</span>
-          Add Event
+          Add Free Event
+        </a>
+        <a href="https://console.humanitix.com/console/events/new/information" target="_blank" rel="noopener noreferrer" title="Opens Humanitix to create a ticketed/paid event. It syncs into the site automatically after you publish it there." class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+          <span>🎟️</span>
+          Create Paid Event
+          <span aria-hidden="true" class="opacity-70 text-xs">↗</span>
         </a>
         <button id="toggle-old-events" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
           <span>📅</span>
