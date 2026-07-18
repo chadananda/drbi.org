@@ -326,11 +326,21 @@ export async function deleteEvent(id: string) {
 }
 
 export async function toggleEventVisibility(id: string) {
+  const ev = await getEventById(id);
+  if (!ev) return { visible: false, blocked: false, notFound: true };
+  const next = !ev.data.visible;
+  // Guardrail: drbi.org visibility is human-set, but a Humanitix event is NEVER shown while
+  // it is unpublished on Humanitix — showing an event nobody can register for is a disaster.
+  // Refuse to make a not-yet-live Humanitix event visible even from a stale page. (Hiding is
+  // always allowed.)
+  if (next && ev.data.source === 'humanitix' && !ev.data.sourcePublished) {
+    return { visible: false, blocked: true };
+  }
   await db.execute({
-    sql: 'UPDATE events SET visible = CASE WHEN visible = 1 THEN 0 ELSE 1 END, updated_at = ? WHERE id = ?',
-    args: [new Date().toISOString(), id]
+    sql: 'UPDATE events SET visible = ?, updated_at = ? WHERE id = ?',
+    args: [next ? 1 : 0, new Date().toISOString(), id]
   });
-  return getEventById(id);
+  return { visible: next, blocked: false };
 }
 
 // Upsert an externally-synced event (e.g. Humanitix). NEVER publishes: new rows land as

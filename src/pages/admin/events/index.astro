@@ -341,13 +341,9 @@ const getEventLocation = (event) => {
                       🙈 Show
                     </button>
                   ) : (
-                    <button
-                      class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg text-gray-400 bg-gray-100 cursor-not-allowed"
-                      disabled
-                      title="Publish this event on Humanitix first — then you can show it on drbi.org"
-                    >
-                      🙈 Show
-                    </button>
+                    <span class="inline-flex items-center px-3 py-2 text-xs font-medium text-gray-400" title="This event is not published on Humanitix yet, so it cannot be shown on drbi.org.">
+                      🔒 Draft on Humanitix
+                    </span>
                   )}
                   
                   {event.data.source === 'humanitix' && event.data.externalId ? (
@@ -600,11 +596,7 @@ const getEventLocation = (event) => {
                       data-event-id="${event.id}"
                       title="Show on drbi.org"
                     >🙈 Show</button>`
-                      : `<button
-                      class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed"
-                      disabled
-                      title="Publish this event on Humanitix first — then you can show it on drbi.org"
-                    >🙈 Show</button>`
+                      : `<span class="inline-flex items-center px-3 py-2 text-xs font-medium text-gray-400" title="This event is not published on Humanitix yet, so it cannot be shown on drbi.org.">🔒 Draft on Humanitix</span>`
                     }
                     
                     <a href="${event.source === 'humanitix' && event.externalId ? `https://console.humanitix.com/console/events/${event.externalId}/overview` : `/admin/events/${event.id}`}" ${event.source === 'humanitix' && event.externalId ? 'target="_blank" rel="noopener noreferrer" title="Edit on Humanitix — the source of truth for this event"' : ''} class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all">
@@ -670,6 +662,10 @@ const getEventLocation = (event) => {
           
           if (response.ok) {
             const result = await response.json();
+            if (result.blocked) {
+              alert(result.error || 'This event cannot be shown until it is published on Humanitix.');
+              return;
+            }
             button.className = `inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility ${result.visible ? 'text-gray-600 bg-gray-50 hover:bg-gray-100' : 'text-orange-600 bg-orange-50 hover:bg-orange-100'}`;
             button.innerHTML = result.visible ? '👁️ Hide' : '🙈 Show';
             button.title = result.visible ? 'Hide on drbi.org (the Humanitix page stays live and shareable)' : 'Show on drbi.org';

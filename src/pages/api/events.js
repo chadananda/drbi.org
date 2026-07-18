@@ -152,6 +152,13 @@ async function handleToggleVisibility(eventData) {
 
   try {
     const result = await toggleEventVisibility(eventData.id);
+    if (result.blocked) {
+      return new Response(JSON.stringify({ success: false, blocked: true, visible: false,
+        error: 'This event is not published on Humanitix yet, so it cannot be shown on drbi.org.' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
     return new Response(JSON.stringify({ success: true, visible: result.visible }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
