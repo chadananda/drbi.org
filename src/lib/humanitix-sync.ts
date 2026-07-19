@@ -7,6 +7,8 @@ import { getEnv } from "./runtime-env";
 import { fetchHumanitixEvents, mapHumanitixEvent, isSponsorPageEvent } from "./humanitix";
 import { upsertSyncedEvent } from "./queries";
 import { uploadR2 } from "../utils/r2-upload";
+import { listThread, addMessage } from "./server/event-thread";
+import { deriveMealSummary } from "./server/meal-summary";
 
 const LAST_CHECK_KEY = "events:lastCheck";      // KV: last time we polled Humanitix
 const VERSION_KEY = "edge:events:v";            // KV: edge-cache content version (middleware key)
@@ -38,6 +40,20 @@ async function cacheExternalImage(url: string): Promise<string> {
   }
 }
 
+// On first import (empty thread), seed the event's coordination thread with an AI meal
+// summary for the kitchen. Upcoming/active events only; best-effort — never breaks the sync.
+async function seedMealSummaryIfEmpty(event: any): Promise<void> {
+  try {
+    const endMs = event.endDate ? new Date(event.endDate).getTime()
+      : event.startDate ? new Date(event.startDate).getTime() : 0;
+    if (!endMs || endMs < Date.now()) return; // past events don't need a meal plan
+    const existing = await listThread(event.id);
+    if (existing.length > 0) return; // already seeded / has discussion
+    const body = await deriveMealSummary(event, (cfEnv as any)?.AI);
+    if (body) await addMessage({ eventId: event.id, userId: 'system', authorName: 'DRBI Web AI', body });
+  } catch { /* best-effort */ }
+}
+
 // Pull all events from Humanitix and upsert into D1. Change-detection (updatedAt) means
 // unchanged events are skipped, and the edge-cache version only bumps on a real change.
 export async function runSync() {
@@ -58,6 +74,8 @@ export async function runSync() {
     else if (r.action === "updated") summary.updated++;
     else if (r.action === "unchanged") summary.unchanged++;
     else summary.skippedManual++;
+    // First-import seed for the kitchen (no-op once the thread has any message).
+    await seedMealSummaryIfEmpty(mapped);
   }
   // Bump the edge-cache version only when content actually changed, so unchanged polls
   // leave the cache intact. Middleware keys /events cache entries on this token.
