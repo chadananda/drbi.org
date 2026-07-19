@@ -11,12 +11,17 @@ import { eventSlug } from '@lib/event-slug';
 import { getEnv } from '@lib/runtime-env';
 import { fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
 import { computeEventStats } from '@lib/event-registrations';
+import { threadCounts } from '@lib/server/event-thread';
 
 const sessionid = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
 const user = Astro.locals?.user;
-if (!['admin', 'superadmin'].includes(user?.role)) {
+// Viewing events + the coordination thread is open to all team members (the middleware already
+// keeps /admin to staff-only). Editing events is admin-only — gated by `canEdit` below.
+if (!user) {
   return Astro.redirect('/admin');
 }
+const canEdit = ['admin', 'superadmin'].includes(user?.role);
+const currentUserName = user?.name || user?.email || 'Team member';
 
 const url = new URL(Astro.request.url);
 const created = url.searchParams.get('created');
@@ -65,6 +70,9 @@ if (hxKey) {
     } catch { /* leave unset on API error */ }
   }));
 }
+
+// Coordination-thread message counts per event id (for the badge on each card).
+const tCounts = await threadCounts();
 
 // Filter old events by default (more than 1 week past)
 const oneWeekAgo = new Date();
@@ -139,15 +147,19 @@ const getEventLocation = (event) => {
 
     <div class="flex flex-col lg:flex-row gap-4 mb-6">
       <div class="flex gap-4">
-        <a href="/admin/events/add" title="Create a non-ticketed on-site event on drbi.org (no Humanitix checkout). Use for free/informational events." class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
-          <span>➕</span>
-          Add Free Event
-        </a>
-        <a href="https://console.humanitix.com/console/events/new/information" target="_blank" rel="noopener noreferrer" title="Opens Humanitix to create a ticketed/paid event. It syncs into the site automatically after you publish it there." class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
-          <span>🎟️</span>
-          Create Paid Event
-          <span aria-hidden="true" class="opacity-70 text-xs">↗</span>
-        </a>
+        {canEdit && (
+          <a href="/admin/events/add" title="Create a non-ticketed on-site event on drbi.org (no Humanitix checkout). Use for free/informational events." class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+            <span>➕</span>
+            Add Free Event
+          </a>
+        )}
+        {canEdit && (
+          <a href="https://console.humanitix.com/console/events/new/information" target="_blank" rel="noopener noreferrer" title="Opens Humanitix to create a ticketed/paid event. It syncs into the site automatically after you publish it there." class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
+            <span>🎟️</span>
+            Create Paid Event
+            <span aria-hidden="true" class="opacity-70 text-xs">↗</span>
+          </a>
+        )}
         <button id="toggle-old-events" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
           <span>📅</span>
           <span class="toggle-text">Show Old Events</span>
@@ -301,9 +313,9 @@ const getEventLocation = (event) => {
                 </div>
                 
                 <!-- Action Buttons -->
-                <div class="flex items-center gap-3 ml-auto">
-                  {event.data.source === 'manual' && (
-                    <button 
+                <div class="flex items-center gap-3 ml-auto flex-wrap justify-end">
+                  {canEdit && event.data.source === 'manual' && (
+                    <button
                       class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors delete-event"
                       data-event-id={event.data.id}
                       title="Delete event"
@@ -311,13 +323,19 @@ const getEventLocation = (event) => {
                       🗑️
                     </button>
                   )}
-                  
+
                   <a href={`/events/${eventSlug(event)}`} target="_blank" class="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors" title="View the public DRBI event page">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
                     </svg>
                     View
                   </a>
+
+                  {event.isPrimary && (
+                    <button type="button" class="coord-toggle inline-flex items-center px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors" data-event-id={event.data.id} aria-expanded="false" title="Internal coordination thread — meals, volunteers, logistics (visible to all team members)">
+                      💬 Coordination{tCounts[event.data.id] ? ` (${tCounts[event.data.id]})` : ''}
+                    </button>
+                  )}
 
                   {event.data.source !== 'manual' && event.isPrimary && (
                     <a href={`/admin/events/${event.data.id}/registrants`} class="inline-flex items-center px-4 py-2 text-sm font-medium text-emerald-700 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors" title="View registrants, stats & checkout answers">
@@ -328,29 +346,39 @@ const getEventLocation = (event) => {
                     </a>
                   )}
 
-                  {event.data.visible ? (
-                    <button
-                      class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility text-gray-600 bg-gray-50 hover:bg-gray-100"
-                      data-event-id={event.data.id}
-                      title="Hide on drbi.org (the Humanitix page stays live and shareable)"
-                    >
-                      👁️ Hide
-                    </button>
-                  ) : (event.data.source !== 'humanitix' || event.data.sourcePublished) ? (
-                    <button
-                      class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility text-orange-600 bg-orange-50 hover:bg-orange-100"
-                      data-event-id={event.data.id}
-                      title="Show on drbi.org"
-                    >
-                      🙈 Show
-                    </button>
+                  {canEdit ? (
+                    event.data.visible ? (
+                      <button
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility text-gray-600 bg-gray-50 hover:bg-gray-100"
+                        data-event-id={event.data.id}
+                        title="Hide on drbi.org (the Humanitix page stays live and shareable)"
+                      >
+                        👁️ Hide
+                      </button>
+                    ) : (event.data.source !== 'humanitix' || event.data.sourcePublished) ? (
+                      <button
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer toggle-visibility text-orange-600 bg-orange-50 hover:bg-orange-100"
+                        data-event-id={event.data.id}
+                        title="Show on drbi.org"
+                      >
+                        🙈 Show
+                      </button>
+                    ) : (
+                      <span class="inline-flex items-center px-3 py-2 text-xs font-medium text-gray-400" title="This event is not published on Humanitix yet, so it cannot be shown on drbi.org.">
+                        🔒 Draft on Humanitix
+                      </span>
+                    )
                   ) : (
-                    <span class="inline-flex items-center px-3 py-2 text-xs font-medium text-gray-400" title="This event is not published on Humanitix yet, so it cannot be shown on drbi.org.">
-                      🔒 Draft on Humanitix
-                    </span>
+                    event.data.visible ? (
+                      <span class="inline-flex items-center px-3 py-2 text-xs font-medium text-green-700 bg-green-50 rounded-lg" title="Showing on drbi.org">🟢 Live on site</span>
+                    ) : (event.data.source === 'humanitix' && !event.data.sourcePublished) ? (
+                      <span class="inline-flex items-center px-3 py-2 text-xs font-medium text-gray-400" title="Draft on Humanitix — not shown on drbi.org">🔒 Draft on Humanitix</span>
+                    ) : (
+                      <span class="inline-flex items-center px-3 py-2 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg" title="Hidden on drbi.org">⚪ Hidden</span>
+                    )
                   )}
-                  
-                  {event.data.source === 'humanitix' && event.data.externalId ? (
+
+                  {canEdit && (event.data.source === 'humanitix' && event.data.externalId ? (
                     <a href={`https://console.humanitix.com/console/events/${event.data.externalId}/overview`} target="_blank" rel="noopener noreferrer" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-green-500 to-green-600 rounded-lg hover:from-green-600 hover:to-green-700 transition-all" title="Edit on Humanitix — the source of truth for this event">
                       <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -364,8 +392,21 @@ const getEventLocation = (event) => {
                       </svg>
                       Edit
                     </a>
-                  )}
+                  ))}
                 </div>
+                <!-- Coordination thread (collapsed; lazy-loaded on first open) -->
+                {event.isPrimary && (
+                  <div class="coord-panel hidden mt-4 border-t border-slate-200 pt-4" data-event-id={event.data.id} data-loaded="false">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-2">💬 Coordination — meals, volunteers, logistics</p>
+                    <div class="coord-messages space-y-2 mb-3 text-sm text-gray-700">
+                      <p class="coord-loading text-gray-400 text-sm">Loading…</p>
+                    </div>
+                    <div class="flex items-start gap-2">
+                      <textarea class="coord-input flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm resize-y focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" rows="2" placeholder="Add a note for the team (meal counts, dietary needs, volunteer sign-ups)…"></textarea>
+                      <button type="button" class="coord-post inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors" data-event-id={event.data.id}>Post</button>
+                    </div>
+                  </div>
+                )}
               </div>
               
               <!-- Bottom: Description -->
@@ -780,6 +821,101 @@ const getEventLocation = (event) => {
           alert('Error deleting event. Check console for details.');
         }
       });
+    });
+  </script>
+
+  <!-- Per-event coordination thread (meals/volunteers). Lazy-loads on open; any team member posts. -->
+  <script define:vars={{ currentUserName, canDeleteAny: canEdit }}>
+    const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const fmtTime = (iso) => { try { return new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch { return ''; } };
+
+    function renderMessages(container, messages) {
+      if (!messages.length) {
+        container.innerHTML = '<p class="text-gray-400 text-sm">No notes yet. Start the coordination thread below.</p>';
+        return;
+      }
+      container.innerHTML = messages.map((m) => {
+        const canDel = canDeleteAny || m.author === currentUserName;
+        const del = canDel ? `<button type="button" class="coord-del text-gray-300 hover:text-red-500 ml-2" data-id="${m.id}" title="Delete">×</button>` : '';
+        return `<div class="coord-msg flex items-start justify-between gap-2 bg-slate-50 rounded-lg px-3 py-2" data-id="${m.id}">
+          <div><span class="font-semibold text-gray-800">${esc(m.author)}</span> <span class="text-gray-400 text-xs">${fmtTime(m.createdAt)}</span><div class="text-gray-700 whitespace-pre-wrap">${esc(m.body)}</div></div>${del}
+        </div>`;
+      }).join('');
+    }
+
+    async function loadThread(panel) {
+      const eventId = panel.dataset.eventId;
+      const box = panel.querySelector('.coord-messages');
+      try {
+        const res = await fetch('/api/admin/events/thread', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'list', eventId }) });
+        const data = await res.json();
+        if (data.ok) { renderMessages(box, data.messages); panel.dataset.loaded = 'true'; }
+        else box.innerHTML = '<p class="text-red-500 text-sm">Could not load the thread.</p>';
+      } catch { box.innerHTML = '<p class="text-red-500 text-sm">Could not load the thread.</p>'; }
+    }
+
+    function bumpBadge(eventId, delta) {
+      const btn = document.querySelector(`.coord-toggle[data-event-id="${eventId}"]`);
+      if (!btn) return;
+      const m = btn.textContent.match(/\((\d+)\)/);
+      const n = Math.max(0, (m ? parseInt(m[1], 10) : 0) + delta);
+      btn.textContent = `💬 Coordination${n ? ` (${n})` : ''}`;
+    }
+
+    document.querySelectorAll('.coord-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const eventId = btn.dataset.eventId;
+        const panel = document.querySelector(`.coord-panel[data-event-id="${eventId}"]`);
+        if (!panel) return;
+        const open = !panel.classList.contains('hidden');
+        panel.classList.toggle('hidden');
+        btn.setAttribute('aria-expanded', String(!open));
+        if (!open && panel.dataset.loaded === 'false') loadThread(panel);
+      });
+    });
+
+    document.querySelectorAll('.coord-post').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const eventId = btn.dataset.eventId;
+        const panel = document.querySelector(`.coord-panel[data-event-id="${eventId}"]`);
+        const input = panel.querySelector('.coord-input');
+        const body = input.value.trim();
+        if (!body) return;
+        btn.disabled = true;
+        try {
+          const res = await fetch('/api/admin/events/thread', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'add', eventId, body }) });
+          const data = await res.json();
+          if (data.ok) {
+            input.value = '';
+            const box = panel.querySelector('.coord-messages');
+            if (box.querySelector('.coord-msg') || box.querySelector('.text-gray-400')) {
+              if (!box.querySelector('.coord-msg')) box.innerHTML = '';
+            }
+            const m = data.message;
+            const wrap = document.createElement('div');
+            wrap.innerHTML = `<div class="coord-msg flex items-start justify-between gap-2 bg-slate-50 rounded-lg px-3 py-2" data-id="${m.id}"><div><span class="font-semibold text-gray-800">${esc(m.author)}</span> <span class="text-gray-400 text-xs">${fmtTime(m.createdAt)}</span><div class="text-gray-700 whitespace-pre-wrap">${esc(m.body)}</div></div><button type="button" class="coord-del text-gray-300 hover:text-red-500 ml-2" data-id="${m.id}" title="Delete">×</button></div>`;
+            box.appendChild(wrap.firstElementChild);
+            bumpBadge(eventId, 1);
+          } else { alert(data.error || 'Could not post.'); }
+        } catch { alert('Could not post.'); }
+        btn.disabled = false;
+      });
+    });
+
+    // Delete (event-delegated, since messages render dynamically)
+    document.addEventListener('click', async (e) => {
+      const del = e.target.closest('.coord-del');
+      if (!del) return;
+      const panel = del.closest('.coord-panel');
+      const eventId = panel?.dataset.eventId;
+      const id = del.dataset.id;
+      if (!id || !eventId) return;
+      try {
+        const res = await fetch('/api/admin/events/thread', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'delete', eventId, id: Number(id) }) });
+        const data = await res.json();
+        if (data.ok) { del.closest('.coord-msg')?.remove(); bumpBadge(eventId, -1); }
+        else alert(data.error || 'Could not delete.');
+      } catch { alert('Could not delete.'); }
     });
   </script>
 

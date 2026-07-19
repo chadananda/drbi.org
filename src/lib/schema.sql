@@ -40,6 +40,18 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_start_date ON events(start_date);
 CREATE INDEX IF NOT EXISTS idx_events_visible ON events(visible);
 
+-- Per-event internal coordination thread (meals, volunteers, logistics). DRBI-only, separate
+-- from the Humanitix-synced event content — any signed-in team member (staff) can read + post.
+CREATE TABLE IF NOT EXISTS event_thread (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id TEXT NOT NULL,
+  user_id TEXT,
+  author_name TEXT NOT NULL DEFAULT '',
+  body TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_event_thread_event ON event_thread(event_id, created_at);
+
 CREATE TABLE IF NOT EXISTS content (
   id TEXT PRIMARY KEY,
   slug TEXT NOT NULL,

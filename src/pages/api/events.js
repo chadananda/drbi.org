@@ -38,7 +38,9 @@ export const POST = async ({ request }) => {
     }
     const { user } = await lucia.validateSession(sessionid);
     if (!user) return new Response('Invalid session', { status: 401 });
-    if (!['superadmin', 'admin', 'editor'].includes(user.role)) {
+    // Editing events (create/update/delete/toggle-visibility) is limited to admins. All other
+    // team members get read-only event access + the coordination thread (see /api/admin/events/thread).
+    if (!['superadmin', 'admin'].includes(user.role)) {
       return new Response(`Access denied`, { status: 403 });
     }
 
