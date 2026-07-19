@@ -2,7 +2,7 @@
 // breakfasts / lunches / dinners the kitchen should prepare. Used to seed the coordination
 // thread on first import (author "DRBI Web AI"). Falls back to a date-based estimate if the
 // AI binding is unavailable or errors. Deps: Cloudflare Workers AI (env.AI).
-const AI_MODEL = '@cf/meta/llama-3.1-8b-instruct';
+const AI_MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const stripHtml = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim();
@@ -61,11 +61,17 @@ Ends: ${endDate || startDate}
 Description: ${stripHtml(description).slice(0, 1500)}
 
 Reply with ONLY compact JSON, no prose: {"breakfasts":N,"lunches":N,"dinners":N,"notes":"one short sentence for the cook"}`;
-      const res = await ai.run(AI_MODEL, { messages: [{ role: 'user', content: prompt }], max_tokens: 200 });
-      const text = res?.response ?? res?.text ?? (typeof res === 'string' ? res : '');
-      const match = String(text).match(/\{[\s\S]*\}/);
-      if (match) {
-        const j = JSON.parse(match[0]);
+      const res = await ai.run(AI_MODEL, { messages: [{ role: 'user', content: prompt }], max_tokens: 250 });
+      // Response shape varies by model: `response` may be a string OR an already-parsed object.
+      let j = null;
+      const resp = res?.response ?? res?.text ?? res;
+      if (resp && typeof resp === 'object') {
+        j = resp;
+      } else {
+        const match = String(resp ?? '').match(/\{[\s\S]*\}/);
+        if (match) { try { j = JSON.parse(match[0]); } catch { /* not JSON */ } }
+      }
+      if (j) {
         const num = (v) => (Number.isFinite(Number(v)) ? Math.max(0, Math.round(Number(v))) : null);
         const b = num(j.breakfasts), l = num(j.lunches), d = num(j.dinners);
         if (b !== null && l !== null && d !== null) {
@@ -73,7 +79,7 @@ Reply with ONLY compact JSON, no prose: {"breakfasts":N,"lunches":N,"dinners":N,
         }
       }
     }
-  } catch { /* keep the date-based fallback */ }
+  } catch (e) { console.error('[meal-summary] AI error:', (e && e.message) ? e.message : String(e)); }
 
   return formatMessage(meals, startDate, endDate);
 }
