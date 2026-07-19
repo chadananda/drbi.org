@@ -5,7 +5,7 @@
 import { env as cfEnv } from "cloudflare:workers";
 import { getEnv } from "./runtime-env";
 import { fetchHumanitixEvents, mapHumanitixEvent, isSponsorPageEvent } from "./humanitix";
-import { upsertSyncedEvent } from "./queries";
+import { upsertSyncedEvent, getEvents } from "./queries";
 import { uploadR2 } from "../utils/r2-upload";
 import { listThread, addMessage } from "./server/event-thread";
 import { deriveMealSummary } from "./server/meal-summary";
@@ -40,18 +40,28 @@ async function cacheExternalImage(url: string): Promise<string> {
   }
 }
 
-// On first import (empty thread), seed the event's coordination thread with an AI meal
-// summary for the kitchen. Upcoming/active events only; best-effort — never breaks the sync.
-async function seedMealSummaryIfEmpty(event: any): Promise<void> {
+// Seed the coordination thread with an AI meal summary for any upcoming event whose thread is
+// still empty (i.e. first import). Runs AI calls, so callers should NOT block a response on it —
+// invoke it in the background (waitUntil). Idempotent: skips events that already have a message.
+export async function seedMealSummaries(): Promise<number> {
+  let seeded = 0;
   try {
-    const endMs = event.endDate ? new Date(event.endDate).getTime()
-      : event.startDate ? new Date(event.startDate).getTime() : 0;
-    if (!endMs || endMs < Date.now()) return; // past events don't need a meal plan
-    const existing = await listThread(event.id);
-    if (existing.length > 0) return; // already seeded / has discussion
-    const body = await deriveMealSummary(event, (cfEnv as any)?.AI);
-    if (body) await addMessage({ eventId: event.id, userId: 'system', authorName: 'DRBI Web AI', body });
+    const events = await getEvents();
+    const now = Date.now();
+    for (const ev of events) {
+      const d = ev.data;
+      const endMs = d.endDate ? new Date(d.endDate).getTime()
+        : d.startDate ? new Date(d.startDate).getTime() : 0;
+      if (!endMs || endMs < now) continue; // only upcoming/active events need a meal plan
+      if ((await listThread(ev.id)).length > 0) continue; // already seeded / has discussion
+      const body = await deriveMealSummary(
+        { title: d.name || d.title, startDate: d.startDate, endDate: d.endDate, description: d.fullDescription || d.shortDescription },
+        (cfEnv as any)?.AI,
+      );
+      if (body) { await addMessage({ eventId: ev.id, userId: 'system', authorName: 'DRBI Web AI', body }); seeded++; }
+    }
   } catch { /* best-effort */ }
+  return seeded;
 }
 
 // Pull all events from Humanitix and upsert into D1. Change-detection (updatedAt) means
@@ -74,8 +84,6 @@ export async function runSync() {
     else if (r.action === "updated") summary.updated++;
     else if (r.action === "unchanged") summary.unchanged++;
     else summary.skippedManual++;
-    // First-import seed for the kitchen (no-op once the thread has any message).
-    await seedMealSummaryIfEmpty(mapped);
   }
   // Bump the edge-cache version only when content actually changed, so unchanged polls
   // leave the cache intact. Middleware keys /events cache entries on this token.
@@ -97,7 +105,8 @@ export async function revalidateEventsIfStale(cfContext: any): Promise<void> {
     const last = Number((await kv.get(LAST_CHECK_KEY)) || 0);
     if (Date.now() - last < REVALIDATE_MS) return;
     await kv.put(LAST_CHECK_KEY, String(Date.now())); // claim immediately so peers skip
-    const job = runSync().then(() => {}, () => {});
+    // Refresh content, then seed any new event's meal summary — both in the background.
+    const job = runSync().then(() => seedMealSummaries()).then(() => {}, () => {});
     if (cfContext?.waitUntil) cfContext.waitUntil(job);
     else await job;
   } catch {
