@@ -50,9 +50,14 @@ const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).to
 
 <AdminLayout title={`Registrants — ${event?.data?.title ?? 'Event'}`} user={user}>
   <div class="w-full">
-    <div class="mb-6">
-      <a href="/admin/events" class="text-sm text-gray-500 hover:text-amber-700">← Events</a>
-      <h1 class="text-2xl font-bold text-gray-900 mt-1">{event?.data?.title ?? 'Event'} — registrants</h1>
+    <div class="mb-6 flex items-start justify-between gap-3 flex-wrap">
+      <div>
+        <a href="/admin/events" class="no-print text-sm text-gray-500 hover:text-amber-700">← Events</a>
+        <h1 class="text-2xl font-bold text-gray-900 mt-1">{event?.data?.title ?? 'Event'} — registrants</h1>
+      </div>
+      {stats && rows.length > 0 && (
+        <button type="button" id="print-registrants" class="no-print inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">🖨 Print list</button>
+      )}
     </div>
 
     {!isHx && <p class="text-gray-500">This isn't a synced Humanitix event, so there are no live registrations to show.</p>}
@@ -68,9 +73,9 @@ const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).to
       <div class:list={[isExample && "opacity-60"]}>
         {rows.length > 0 && (
           <input id="registrant-search" type="search" placeholder="Search name or email…"
-            class="w-full sm:w-72 mb-4 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            class="no-print w-full sm:w-72 mb-4 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
         )}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+        <div class="no-print grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           <div class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
             <div class="text-2xl font-bold text-gray-900 tabular-nums">{stats.registrations}</div>
             <div class="text-xs text-gray-500">Registered</div>
@@ -90,22 +95,23 @@ const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).to
         </div>
 
         {Object.keys(stats.byTicketType).length > 0 && (
-          <div class="flex flex-wrap gap-2 mb-6">
+          <div class="no-print flex flex-wrap gap-2 mb-6">
             {Object.entries(stats.byTicketType).map(([name, n]) => (
               <span class="text-xs bg-amber-50 text-amber-800 border border-amber-200 rounded-full px-3 py-1">{name}: {n}</span>
             ))}
           </div>
         )}
 
-        <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-x-auto">
+        <div class="reg-table-wrap bg-white border border-gray-200 rounded-2xl shadow-sm overflow-x-auto">
           {rows.length === 0 ? (
             <p class="text-gray-400 text-sm p-6">No registrations yet.</p>
           ) : (
-            <table class="w-full text-sm">
+            <table class="reg-table w-full text-sm">
               <thead>
                 <tr class="text-left text-gray-500 border-b border-gray-100">
                   <th class="py-3 px-4 font-medium">Name</th>
                   <th class="py-3 px-4 font-medium">Email</th>
+                  <th class="py-3 px-4 font-medium whitespace-nowrap">Phone</th>
                   <th class="py-3 px-4 font-medium">Ticket</th>
                   <th class="py-3 px-4 font-medium whitespace-nowrap">Registered</th>
                   {questionCols.map((q) => <th class="py-3 px-4 font-medium">{q}</th>)}
@@ -114,9 +120,10 @@ const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).to
               </thead>
               <tbody id="registrant-rows">
                 {rows.map((r) => (
-                  <tr class="border-b border-gray-50 hover:bg-gray-50" data-search={`${r.name} ${r.email}`.toLowerCase()}>
+                  <tr class="border-b border-gray-50 hover:bg-gray-50" data-search={`${r.name} ${r.email} ${r.phone}`.toLowerCase()}>
                     <td class="py-2.5 px-4 text-gray-900">{r.name}</td>
                     <td class="py-2.5 px-4 text-gray-500">{r.email}</td>
+                    <td class="py-2.5 px-4 text-gray-600 whitespace-nowrap">{r.phone}</td>
                     <td class="py-2.5 px-4 text-gray-600">{r.ticketType}</td>
                     <td class="py-2.5 px-4 text-gray-500 whitespace-nowrap">{regTime(r.registeredAt)}</td>
                     {questionCols.map((q) => <td class="py-2.5 px-4 text-gray-600">{answerFor(r, q)}</td>)}
@@ -132,6 +139,7 @@ const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).to
   </div>
 
   <script is:inline>
+    document.getElementById('print-registrants')?.addEventListener('click', () => window.print());
     (() => {
       const box = document.getElementById('registrant-search');
       const body = document.getElementById('registrant-rows');
@@ -144,4 +152,34 @@ const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).to
       });
     })();
   </script>
+
+  <style is:global>
+    @media print {
+      @page { size: landscape; margin: 8mm; }
+      /* Strip the admin chrome: navbar + overlay (body children), sidebar, mobile menu. */
+      body.admin-root > :not(.admin-shell) { display: none !important; }
+      .admin-sidebar, .admin-mobile-menu, .admin-overlay { display: none !important; }
+      .admin-shell { display: block !important; min-height: 0 !important; }
+      .admin-main { display: block !important; }
+      .admin-content { padding: 0 !important; max-width: none !important; }
+      .no-print { display: none !important; }
+      .opacity-60 { opacity: 1 !important; } /* example-data dimming would print faint */
+
+      /* Compact registrant table. */
+      .reg-table-wrap { overflow: visible !important; border: none !important; box-shadow: none !important; border-radius: 0 !important; background: none !important; }
+      table.reg-table { width: 100% !important; font-size: 7.5pt !important; border-collapse: collapse !important; }
+      table.reg-table thead { display: table-header-group; } /* repeat header each page */
+      table.reg-table th, table.reg-table td {
+        padding: 1.5px 5px !important; border: 0.5px solid #bbb !important;
+        white-space: normal !important; word-break: break-word; vertical-align: top;
+        line-height: 1.15 !important; color: #000 !important;
+      }
+      table.reg-table thead th {
+        background: #eaeaea !important; font-weight: 600; text-align: left;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      table.reg-table tr { page-break-inside: avoid; }
+      h1 { font-size: 12pt !important; margin: 0 0 6px !important; }
+    }
+  </style>
 </AdminLayout>

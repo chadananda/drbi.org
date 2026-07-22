@@ -33,10 +33,10 @@ export function sampleRegistrants() {
   const q1 = 'Where will you stay?', q2 = 'Meal preference';
   const ago = (h) => new Date(Date.now() - h * 3600e3).toISOString(); // newest first
   const rows = [
-    { name: 'Amelia Hart', email: 'amelia@example.com', ticketType: 'Full Weekend — Adult', checkedIn: false, registeredAt: ago(2), answers: [{ label: q1, value: 'Dorm A' }, { label: q2, value: 'Vegetarian' }] },
-    { name: 'Noah Reed', email: 'noah@example.com', ticketType: 'Full Weekend — Adult', checkedIn: true, registeredAt: ago(20), answers: [{ label: q1, value: 'Apartment' }, { label: q2, value: 'No preference' }] },
-    { name: 'Sofia Marín', email: 'sofia@example.com', ticketType: 'Full Weekend — Minor (under 18)', checkedIn: false, registeredAt: ago(52), answers: [{ label: q1, value: 'Dorm B' }, { label: q2, value: 'Gluten-free' }] },
-    { name: 'Liam Osei', email: 'liam@example.com', ticketType: 'Local / Commuter', checkedIn: false, registeredAt: ago(74), answers: [{ label: q1, value: 'Commuting' }, { label: q2, value: 'Vegan' }] },
+    { name: 'Amelia Hart', email: 'amelia@example.com', phone: '+1 480-555-0142', ticketType: 'Full Weekend — Adult', checkedIn: false, registeredAt: ago(2), answers: [{ label: q1, value: 'Dorm A' }, { label: q2, value: 'Vegetarian' }] },
+    { name: 'Noah Reed', email: 'noah@example.com', phone: '+1 602-555-0199', ticketType: 'Full Weekend — Adult', checkedIn: true, registeredAt: ago(20), answers: [{ label: q1, value: 'Apartment' }, { label: q2, value: 'No preference' }] },
+    { name: 'Sofia Marín', email: 'sofia@example.com', phone: '+1 520-555-0170', ticketType: 'Full Weekend — Minor (under 18)', checkedIn: false, registeredAt: ago(52), answers: [{ label: q1, value: 'Dorm B' }, { label: q2, value: 'Gluten-free' }] },
+    { name: 'Liam Osei', email: 'liam@example.com', phone: '', ticketType: 'Local / Commuter', checkedIn: false, registeredAt: ago(74), answers: [{ label: q1, value: 'Commuting' }, { label: q2, value: 'Vegan' }] },
   ];
   const stats = { registrations: 4, orders: 3, revenue: 1360, donationTotal: 170, donationCount: 1, byTicketType: { 'Full Weekend — Adult': 2, 'Full Weekend — Minor (under 18)': 1, 'Local / Commuter': 1 } };
   return { rows, stats, questionCols: [q1, q2] };
@@ -48,10 +48,12 @@ export function sampleRegistrants() {
  * order at the bottom. */
 export function buildRegistrantRows(tickets = [], orders = [], questions = []) {
   const emailByOrder = new Map();
+  const phoneByOrder = new Map();
   const dateByOrder = new Map();
   for (const o of orders) {
     const oid = o?._id ?? o?.id;
     emailByOrder.set(oid, o?.email ?? "");
+    phoneByOrder.set(oid, o?.mobile ?? o?.phone ?? o?.buyerDetails?.mobile ?? o?.buyer?.mobile ?? "");
     dateByOrder.set(oid, o?.createdAt ?? o?.orderDate ?? o?.createdDate ?? o?.date ?? null);
   }
   const labels = questionLabels(questions);
@@ -60,6 +62,7 @@ export function buildRegistrantRows(tickets = [], orders = [], questions = []) {
     .map((t) => ({
       name: [t?.firstName, t?.lastName].filter(Boolean).join(" ").trim() || "(no name)",
       email: t?.email || emailByOrder.get(t?.orderId) || "",
+      phone: t?.mobile ?? t?.phone ?? phoneByOrder.get(t?.orderId) ?? "",
       ticketType: t?.ticketTypeName || "",
       checkedIn: !!(t?.checkIn?.checkedIn ?? t?.checkedIn),
       registeredAt: t?.createdAt ?? t?.orderDate ?? dateByOrder.get(t?.orderId) ?? null,
