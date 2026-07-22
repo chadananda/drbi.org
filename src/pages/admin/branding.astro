@@ -12,7 +12,7 @@ if (!['admin','superadmin'].includes(user?.role)) return Astro.redirect('/admin'
 const table = JSONTable(site);
 ---
 <Layout user={user} >
-  <div class="mx-20 w-full prose">
+  <div class="mx-4 sm:mx-8 lg:mx-20 prose">
 
     <h1> Site Planning: site.json Branding File </h1>
     <p class="ml-2 -mt-8"> <a href="/">home</a> / <a href="/admin">admin</a> / branding </p>
@@ -24,7 +24,7 @@ const table = JSONTable(site);
 
     <p> Here are the values contained in the file: </p>
 
-    <div set:html={table}></div>
+    <div class="overflow-x-auto" set:html={table}></div>
  </div>
 </Layout>
 

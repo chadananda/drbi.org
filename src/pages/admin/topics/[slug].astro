@@ -76,7 +76,7 @@ const displayImage = formData.image ? transformS3Url(formData.image, 800, 0, 'we
     </div>
   </div>
 
-  <div class="mx-20 w-full prose">
+  <div class="mx-4 sm:mx-8 lg:mx-20 prose">
     <!-- Page Title and Breadcrumbs -->
     <h1>Site Planning: Topics: {!isNew ? (<span>Edit Category</span>) : (<span>Add New Category</span>)}</h1>
     <p class="ml-2 -mt-8"><a href="/">home</a> / <a href="/admin">admin</a> / <a href="/admin/topics">topics</a> / {!isNew ? 'edit' : 'add'}</p>

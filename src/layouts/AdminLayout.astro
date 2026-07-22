@@ -124,6 +124,10 @@ const user = Astro.props.user ?? Astro.locals.user ?? null;
 
     /* Tables */
     .a-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    /* A card/panel that holds a data table scrolls it horizontally on narrow screens
+       instead of stretching the whole page (long emails, code tokens, nowrap dates). */
+    .a-card:has(.a-table) { overflow-x: auto; }
+    .a-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .a-table thead th { text-align: left; font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; font-weight: 600; color: var(--a-muted); padding: .5rem .85rem; border-bottom: 1px solid var(--a-line); }
     .a-table tbody td { padding: .8rem .85rem; border-bottom: 1px solid var(--a-line-2); color: var(--a-ink-2); }
     .a-table tbody tr:last-child td { border-bottom: none; }

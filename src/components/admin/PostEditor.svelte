@@ -49,11 +49,11 @@ let meta_props = { postid, sessionid, site, authorList, topicList, categoryList,
 <div class="editor p-0 w-full h-auto my-4 ml-6 -mt-2">
   <!-- this content shows up in between the split panes in side-by-side editing mode -->
   <h3 class="text-xl mx-2 font-semibold ml-2 inline"> {postid} </h3>
-  <div class="grid grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1">
-    <div class="col-span-4">
+  <div class="grid grid-cols-1 md:grid-cols-[repeat(4,minmax(0,1fr))_auto] gap-1">
+    <div class="col-span-1 md:col-span-4">
       <TabSwitcher {tabs} {activeTab} on:tabSwitch={handleTabSwitch} />
     </div>
-    <div class="col-span-4 min-w-[580px]">
+    <div class="col-span-1 md:col-span-4 min-w-0 md:min-w-[580px]">
       <Editor bind:postid={postid} {sessionid} {post}
               visible={activeTab === 'content'}
               on:fullScreenModeChanged={handleFullScreenModeChange}/>

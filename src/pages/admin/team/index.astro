@@ -55,7 +55,7 @@ const teamMembers = (await getTeamWithRole()).map(member => {
     <div class="mb-8">
       {teamMembers.map(member => (
         <div class="relative bg-white border border-gray-200 p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 mb-6">
-          <div class="flex items-start gap-6">
+          <div class="flex flex-col sm:flex-row items-start gap-3 sm:gap-6">
             <div class="flex-shrink-0">
               <img src={member.image_sm} alt={member.image_alt || member.name} referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='/favicon.svg'" class="rounded-full h-20 w-20 object-cover bg-gray-50 ring-1 ring-gray-200" />
               <span class="inline-block bg-gray-100 text-xs text-gray-600 px-3 py-1 rounded-full mt-2">

@@ -146,7 +146,7 @@ const getEventLocation = (event) => {
     )}
 
     <div class="flex flex-col lg:flex-row gap-4 mb-6">
-      <div class="flex gap-4">
+      <div class="flex gap-4 flex-wrap">
         {canEdit && (
           <a href="/admin/events/add" title="Create a non-ticketed on-site event on drbi.org (no Humanitix checkout). Use for free/informational events." class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
             <span>➕</span>
@@ -171,7 +171,7 @@ const getEventLocation = (event) => {
       </div>
       
       <!-- Filters -->
-      <div class="flex gap-3">
+      <div class="flex gap-3 flex-wrap">
         <select id="status-filter" class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
           <option value="all">All Status</option>
           <option value="upcoming">Upcoming</option>
@@ -215,7 +215,7 @@ const getEventLocation = (event) => {
     <div id="events-list">
       {filteredEvents.map(event => (
         <div class={`relative rounded-xl shadow-sm hover:shadow-md transition-shadow mb-4 event-card ${event.isPrimary ? 'p-6' : 'p-4 opacity-75'} ${getEventStatus(event) === 'past' ? 'bg-gray-50 border border-gray-200' : ''} ${event.data.visible === false ? 'bg-orange-50 border-2 border-orange-300 border-dashed' : 'bg-white border border-gray-200'}`}>
-          <div class="flex gap-6">
+          <div class="flex flex-col sm:flex-row gap-6">
             {!event.isPrimary && (
               <div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1">
                 <span>🔄</span>
@@ -228,11 +228,11 @@ const getEventLocation = (event) => {
                 <img
                   src={transformS3Url(event.data.mainImage, 400, 240)}
                   alt={event.data.name}
-                  class="w-48 h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
+                  class="w-full sm:w-48 h-40 sm:h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
                   loading="lazy"
                 />
               ) : (
-                <div class="w-48 h-32 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                <div class="w-full sm:w-48 h-40 sm:h-32 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
                   <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                   </svg>
@@ -300,7 +300,7 @@ const getEventLocation = (event) => {
               </div>
               
               <!-- Middle: Data Row with Location, Status, and Action Buttons -->
-              <div class="flex items-center gap-6 mb-4">
+              <div class="flex items-center gap-6 mb-4 flex-wrap">
                 <!-- Tags -->
                 <div class="flex items-center gap-3">
                   <span class="inline-flex px-2 py-1 text-xs font-medium rounded border bg-gray-50 text-gray-700 border-gray-200">
@@ -542,18 +542,18 @@ const getEventLocation = (event) => {
         return `
           <div class="relative ${status === 'past' ? 'bg-gray-50' : 'bg-white'} border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow mb-4 ${isPrimary ? 'p-6' : 'p-4 opacity-75'} ${!event.visible ? 'ring-1 ring-orange-300' : ''}">
             ${!isPrimary ? '<div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><span>🔄</span><span>Additional Date</span></div>' : ''}
-            <div class="flex gap-6">
+            <div class="flex flex-col sm:flex-row gap-6">
               <!-- Left: Large Main Image -->
               <div class="flex-shrink-0">
                 ${event.mainImage ? `
                   <img
                     src="${transformS3Url(event.mainImage, 400, 240)}"
                     alt="${event.name}"
-                    class="w-48 h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
+                    class="w-full sm:w-48 h-40 sm:h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
                     loading="lazy"
                   />
                 ` : `
-                  <div class="w-48 h-32 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                  <div class="w-full sm:w-48 h-40 sm:h-32 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
                     <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -594,7 +594,7 @@ const getEventLocation = (event) => {
                 </div>
                 
                 <!-- Middle: Data Row with Tags and Action Buttons -->
-                <div class="flex items-center gap-6 mb-4">
+                <div class="flex items-center gap-6 mb-4 flex-wrap">
                   <!-- Tags -->
                   <div class="flex items-center gap-3">
                     <span class="inline-flex px-2 py-1 text-xs font-medium rounded border bg-gray-50 text-gray-700 border-gray-200">
@@ -607,7 +607,7 @@ const getEventLocation = (event) => {
                   </div>
                   
                   <!-- Action Buttons -->
-                  <div class="flex items-center gap-3 ml-auto">
+                  <div class="flex items-center gap-3 ml-auto flex-wrap justify-end">
                     ${event.source === 'manual' ? `
                       <button 
                         class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors delete-event"

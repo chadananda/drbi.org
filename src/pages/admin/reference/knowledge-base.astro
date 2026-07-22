@@ -134,7 +134,7 @@ const tagColors: Record<string, string> = {
 <style>
   .kb-note { margin-bottom: 1.5rem; }
   .kb-note-text { font-size: .85rem; color: var(--a-ink-2); line-height: 1.55; margin: 0; display: flex; align-items: flex-start; gap: .5rem; }
-  .kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; }
+  .kb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr)); gap: 1rem; }
   .kb-card { overflow: hidden; }
   .kb-card-head { display: flex; gap: .85rem; align-items: flex-start; padding: 1.1rem 1.25rem .75rem; border-bottom: 1px solid var(--a-line-2); }
   .kb-card-icon { width: 36px; height: 36px; border-radius: 8px; background: var(--a-accent-tint); color: var(--a-accent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
