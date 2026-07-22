@@ -45,6 +45,7 @@ if (isHx && !error && stats && stats.registrations === 0) {
 }
 const money = (n) => '$' + Math.round(n).toLocaleString('en-US');
 const answerFor = (row, label) => row.answers.find((a) => a.label === label)?.value ?? '';
+const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch { return '—'; } };
 ---
 
 <AdminLayout title={`Registrants — ${event?.data?.title ?? 'Event'}`} user={user}>
@@ -106,6 +107,7 @@ const answerFor = (row, label) => row.answers.find((a) => a.label === label)?.va
                   <th class="py-3 px-4 font-medium">Name</th>
                   <th class="py-3 px-4 font-medium">Email</th>
                   <th class="py-3 px-4 font-medium">Ticket</th>
+                  <th class="py-3 px-4 font-medium whitespace-nowrap">Registered</th>
                   {questionCols.map((q) => <th class="py-3 px-4 font-medium">{q}</th>)}
                   <th class="py-3 px-4 font-medium">In</th>
                 </tr>
@@ -116,6 +118,7 @@ const answerFor = (row, label) => row.answers.find((a) => a.label === label)?.va
                     <td class="py-2.5 px-4 text-gray-900">{r.name}</td>
                     <td class="py-2.5 px-4 text-gray-500">{r.email}</td>
                     <td class="py-2.5 px-4 text-gray-600">{r.ticketType}</td>
+                    <td class="py-2.5 px-4 text-gray-500 whitespace-nowrap">{regTime(r.registeredAt)}</td>
                     {questionCols.map((q) => <td class="py-2.5 px-4 text-gray-600">{answerFor(r, q)}</td>)}
                     <td class="py-2.5 px-4">{r.checkedIn ? '✅' : ''}</td>
                   </tr>

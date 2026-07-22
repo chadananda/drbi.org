@@ -31,28 +31,48 @@ function fieldValue(f) {
 /** Grayed placeholder data — shown (clearly labelled) when an event has no registrations yet. */
 export function sampleRegistrants() {
   const q1 = 'Where will you stay?', q2 = 'Meal preference';
+  const ago = (h) => new Date(Date.now() - h * 3600e3).toISOString(); // newest first
   const rows = [
-    { name: 'Amelia Hart', email: 'amelia@example.com', ticketType: 'Full Weekend — Adult', checkedIn: false, answers: [{ label: q1, value: 'Dorm A' }, { label: q2, value: 'Vegetarian' }] },
-    { name: 'Noah Reed', email: 'noah@example.com', ticketType: 'Full Weekend — Adult', checkedIn: true, answers: [{ label: q1, value: 'Apartment' }, { label: q2, value: 'No preference' }] },
-    { name: 'Sofia Marín', email: 'sofia@example.com', ticketType: 'Full Weekend — Minor (under 18)', checkedIn: false, answers: [{ label: q1, value: 'Dorm B' }, { label: q2, value: 'Gluten-free' }] },
-    { name: 'Liam Osei', email: 'liam@example.com', ticketType: 'Local / Commuter', checkedIn: false, answers: [{ label: q1, value: 'Commuting' }, { label: q2, value: 'Vegan' }] },
+    { name: 'Amelia Hart', email: 'amelia@example.com', ticketType: 'Full Weekend — Adult', checkedIn: false, registeredAt: ago(2), answers: [{ label: q1, value: 'Dorm A' }, { label: q2, value: 'Vegetarian' }] },
+    { name: 'Noah Reed', email: 'noah@example.com', ticketType: 'Full Weekend — Adult', checkedIn: true, registeredAt: ago(20), answers: [{ label: q1, value: 'Apartment' }, { label: q2, value: 'No preference' }] },
+    { name: 'Sofia Marín', email: 'sofia@example.com', ticketType: 'Full Weekend — Minor (under 18)', checkedIn: false, registeredAt: ago(52), answers: [{ label: q1, value: 'Dorm B' }, { label: q2, value: 'Gluten-free' }] },
+    { name: 'Liam Osei', email: 'liam@example.com', ticketType: 'Local / Commuter', checkedIn: false, registeredAt: ago(74), answers: [{ label: q1, value: 'Commuting' }, { label: q2, value: 'Vegan' }] },
   ];
   const stats = { registrations: 4, orders: 3, revenue: 1360, donationTotal: 170, donationCount: 1, byTicketType: { 'Full Weekend — Adult': 2, 'Full Weekend — Minor (under 18)': 1, 'Local / Commuter': 1 } };
   return { rows, stats, questionCols: [q1, q2] };
 }
 
-/** One row per attendee: name, email (from their order), ticket type, check-in, and answers. */
+/** One row per attendee: name, email (from their order), ticket type, check-in, answers, and
+ * when they registered. Ordered NEWEST-FIRST (most recent registration at the top) so new
+ * sign-ups appear as they come in. Rows with no usable timestamp keep their original (API)
+ * order at the bottom. */
 export function buildRegistrantRows(tickets = [], orders = [], questions = []) {
   const emailByOrder = new Map();
-  for (const o of orders) emailByOrder.set(o?._id ?? o?.id, o?.email ?? "");
+  const dateByOrder = new Map();
+  for (const o of orders) {
+    const oid = o?._id ?? o?.id;
+    emailByOrder.set(oid, o?.email ?? "");
+    dateByOrder.set(oid, o?.createdAt ?? o?.orderDate ?? o?.createdDate ?? o?.date ?? null);
+  }
   const labels = questionLabels(questions);
-  return tickets
+  const rows = tickets
     .filter((t) => !isCancelled(t))
     .map((t) => ({
       name: [t?.firstName, t?.lastName].filter(Boolean).join(" ").trim() || "(no name)",
       email: t?.email || emailByOrder.get(t?.orderId) || "",
       ticketType: t?.ticketTypeName || "",
       checkedIn: !!(t?.checkIn?.checkedIn ?? t?.checkedIn),
+      registeredAt: t?.createdAt ?? t?.orderDate ?? dateByOrder.get(t?.orderId) ?? null,
       answers: (t?.additionalFields ?? []).map((f) => ({ label: labels.get(f?.questionId) ?? "Question", value: fieldValue(f) })).filter((a) => a.value),
     }));
+  // Newest first; undated rows keep original order at the bottom (stable via original index).
+  return rows
+    .map((r, i) => ({ r, i, t: r.registeredAt ? Date.parse(r.registeredAt) : NaN }))
+    .sort((a, b) => {
+      if (Number.isNaN(a.t) && Number.isNaN(b.t)) return a.i - b.i;
+      if (Number.isNaN(a.t)) return 1;
+      if (Number.isNaN(b.t)) return -1;
+      return b.t - a.t || a.i - b.i;
+    })
+    .map((x) => x.r);
 }
