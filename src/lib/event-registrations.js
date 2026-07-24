@@ -15,6 +15,27 @@ export function computeEventStats(orders = [], tickets = []) {
   return { registrations: live.length, orders: orders.length, revenue, donationTotal, donationCount, byTicketType };
 }
 
+/** Tally where attendees are staying, from the "where will you stay?" checkout answer, bucketed
+ * into Apartments / Male dorm / Female dorm / Off-site (+ Other for anything unrecognized).
+ * Value-matched (not option-id) so it survives wording tweaks. Returns ordered [label, count]
+ * pairs for non-empty buckets, or [] if the event has no housing question. */
+export function computeHousingSummary(rows = []) {
+  const buckets = { "Apartments": 0, "Male dorm": 0, "Female dorm": 0, "Off-site": 0, "Other": 0 };
+  let found = 0;
+  for (const r of rows) {
+    const a = (r?.answers ?? []).find((x) => /stay/i.test(x?.label ?? ""));
+    const v = String(a?.value ?? "").toLowerCase();
+    if (!v) continue;
+    found++;
+    if (v.includes("apartment") || v.includes("apt") || v.includes("casa")) buckets["Apartments"]++;
+    else if (v.includes("female") || v.includes("women")) buckets["Female dorm"]++; // before "male" (female contains "male")
+    else if (v.includes("male") || v.includes("men")) buckets["Male dorm"]++;
+    else if (v.includes("off") || v.includes("commut") || v.includes("home") || v.includes("friend") || v.includes("hotel")) buckets["Off-site"]++;
+    else buckets["Other"]++;
+  }
+  return found === 0 ? [] : Object.entries(buckets).filter(([, n]) => n > 0);
+}
+
 /** questionId → label map, from the event's additionalQuestions. */
 export function questionLabels(questions = []) {
   const m = new Map();
@@ -33,10 +54,10 @@ export function sampleRegistrants() {
   const q1 = 'Where will you stay?', q2 = 'Meal preference';
   const ago = (h) => new Date(Date.now() - h * 3600e3).toISOString(); // newest first
   const rows = [
-    { name: 'Amelia Hart', email: 'amelia@example.com', phone: '+1 480-555-0142', ticketType: 'Full Weekend — Adult', checkedIn: false, registeredAt: ago(2), answers: [{ label: q1, value: 'Dorm A' }, { label: q2, value: 'Vegetarian' }] },
+    { name: 'Amelia Hart', email: 'amelia@example.com', phone: '+1 480-555-0142', ticketType: 'Full Weekend — Adult', checkedIn: false, registeredAt: ago(2), answers: [{ label: q1, value: 'Dorm Female (Free)' }, { label: q2, value: 'Vegetarian' }] },
     { name: 'Noah Reed', email: 'noah@example.com', phone: '+1 602-555-0199', ticketType: 'Full Weekend — Adult', checkedIn: true, registeredAt: ago(20), answers: [{ label: q1, value: 'Apartment' }, { label: q2, value: 'No preference' }] },
-    { name: 'Sofia Marín', email: 'sofia@example.com', phone: '+1 520-555-0170', ticketType: 'Full Weekend — Minor (under 18)', checkedIn: false, registeredAt: ago(52), answers: [{ label: q1, value: 'Dorm B' }, { label: q2, value: 'Gluten-free' }] },
-    { name: 'Liam Osei', email: 'liam@example.com', phone: '', ticketType: 'Local / Commuter', checkedIn: false, registeredAt: ago(74), answers: [{ label: q1, value: 'Commuting' }, { label: q2, value: 'Vegan' }] },
+    { name: 'Sofia Marín', email: 'sofia@example.com', phone: '+1 520-555-0170', ticketType: 'Full Weekend — Minor (under 18)', checkedIn: false, registeredAt: ago(52), answers: [{ label: q1, value: 'Dorm Male (Free)' }, { label: q2, value: 'Gluten-free' }] },
+    { name: 'Liam Osei', email: 'liam@example.com', phone: '', ticketType: 'Local / Commuter', checkedIn: false, registeredAt: ago(74), answers: [{ label: q1, value: 'Off Campus' }, { label: q2, value: 'Vegan' }] },
   ];
   const stats = { registrations: 4, orders: 3, revenue: 1360, donationTotal: 170, donationCount: 1, byTicketType: { 'Full Weekend — Adult': 2, 'Full Weekend — Minor (under 18)': 1, 'Local / Commuter': 1 } };
   return { rows, stats, questionCols: [q1, q2] };

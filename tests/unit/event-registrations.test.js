@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { computeEventStats, buildRegistrantRows, questionLabels } from "../../src/lib/event-registrations.js";
+import { computeEventStats, buildRegistrantRows, questionLabels, computeHousingSummary } from "../../src/lib/event-registrations.js";
 
 const orders = [
   { _id: "o1", email: "a@x.com", clientDonation: 170, totals: { total: 510 } },
@@ -39,5 +39,27 @@ describe("buildRegistrantRows", () => {
   });
   it("questionLabels maps id → label", () => {
     assert.equal(questionLabels(questions).get("q1"), "Where will you stay?");
+  });
+});
+
+describe("computeHousingSummary", () => {
+  const mk = (stay) => ({ answers: stay != null ? [{ label: "Where will you stay?", value: stay }] : [] });
+  it("buckets housing; female matched before male; unknown → Other; empty ignored", () => {
+    const h = Object.fromEntries(computeHousingSummary([
+      mk("Apartment"), mk("Apartment"),
+      mk("Dorm Male (Free)"),
+      mk("Dorm Female (Free)"),      // must NOT count as Male (female contains "male")
+      mk("Off Campus"), mk("Staying with friends"),
+      mk("Yurt"),                    // → Other
+      mk(""), mk(),                  // ignored
+    ]));
+    assert.equal(h["Apartments"], 2);
+    assert.equal(h["Male dorm"], 1);
+    assert.equal(h["Female dorm"], 1);
+    assert.equal(h["Off-site"], 2);
+    assert.equal(h["Other"], 1);
+  });
+  it("returns [] when there is no housing answer", () => {
+    assert.deepEqual(computeHousingSummary([{ answers: [{ label: "Meal preference", value: "Vegan" }] }]), []);
   });
 });
