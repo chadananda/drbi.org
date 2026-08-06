@@ -28,6 +28,10 @@ export interface EventRow {
   source: string;
   external_id: string | null;
   visible: number;
+  source_published: number;
+  capacity: number | null;
+  registered_count: number;
+  waitlist_override: string | null;
   featured: number;
   onsite: number;
   is_eventbrite: number;
@@ -143,6 +147,9 @@ export function shapeEvent(row: EventRow) {
       externalId: row.external_id ?? '',
       visible: row.visible === 1,
       sourcePublished: row.source_published === 1,
+      capacity: row.capacity != null ? Number(row.capacity) : null,
+      registeredCount: Number(row.registered_count ?? 0),
+      waitlistOverride: row.waitlist_override ?? null,
       featured: row.featured === 1,
       onsite: row.onsite === 1,
       isEventbrite: row.is_eventbrite === 1,
@@ -341,6 +348,26 @@ export async function toggleEventVisibility(id: string) {
     args: [next ? 1 : 0, new Date().toISOString(), id]
   });
   return { visible: next, blocked: false };
+}
+
+// DRBI-internal event metadata (capacity + waitlist override). NEVER sets manually_edited, so the
+// Humanitix content sync keeps flowing. capacity: integer or null; override: 'open'|'closed'|null.
+export async function setEventMeta(id: string, { capacity, waitlistOverride }: { capacity: number | null; waitlistOverride: string | null }) {
+  const cap = capacity == null || Number.isNaN(capacity) ? null : Math.max(0, Math.round(capacity));
+  const ov = waitlistOverride === 'open' || waitlistOverride === 'closed' ? waitlistOverride : null;
+  await db.execute({
+    sql: 'UPDATE events SET capacity = ?, waitlist_override = ?, updated_at = ? WHERE id = ?',
+    args: [cap, ov, new Date().toISOString(), id],
+  });
+  return getEventById(id);
+}
+
+// Live registration count for capacity-gated events, refreshed by the sync. DRBI-internal.
+export async function setRegisteredCount(id: string, n: number) {
+  await db.execute({
+    sql: 'UPDATE events SET registered_count = ? WHERE id = ?',
+    args: [Math.max(0, Math.round(Number(n) || 0)), id],
+  });
 }
 
 // Upsert an externally-synced event (e.g. Humanitix). NEVER publishes: new rows land as

@@ -1,0 +1,140 @@
+---
+// Per-event announcements: compose + send an email to all registrants (noreply@drbi.org), with a
+// test-send + confirm, and a log of what's already gone out. Admin/superadmin only.
+export const prerender = false;
+
+import AdminLayout from '@layouts/AdminLayout.astro';
+import { getEventById } from '@lib/queries';
+import { getEnv } from '@lib/runtime-env';
+import { fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
+import { buildRegistrantRows } from '@lib/event-registrations';
+import { listAnnouncements } from '@lib/server/event-announcements';
+
+const user = Astro.locals?.user;
+if (!['admin', 'superadmin'].includes(user?.role)) return Astro.redirect('/admin');
+
+const { id } = Astro.params;
+const event = await getEventById(id);
+const extId = event?.data?.externalId;
+const isHx = event?.data?.source === 'humanitix' && extId;
+
+// Live count of unique registrant emails (who a send would reach).
+let recipientCount = 0, countError = null;
+if (isHx) {
+  const apiKey = getEnv('HUMANITIX_API_KEY');
+  if (!apiKey) countError = 'HUMANITIX_API_KEY not set';
+  else {
+    try {
+      const [orders, tickets] = await Promise.all([
+        fetchHumanitixOrders(apiKey, extId).catch(() => []),
+        fetchHumanitixTickets(apiKey, extId).catch(() => []),
+      ]);
+      const emails = new Set();
+      for (const r of buildRegistrantRows(tickets, orders, [])) {
+        const e = String(r.email || '').trim().toLowerCase();
+        if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) emails.add(e);
+      }
+      recipientCount = emails.size;
+    } catch (e) { countError = String(e?.message ?? e); }
+  }
+}
+
+const past = await listAnnouncements(id);
+const fmt = (iso) => { if (!iso) return ''; try { return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }); } catch { return ''; } };
+---
+
+<AdminLayout title={`Announcements — ${event?.data?.title ?? 'Event'}`} user={user}>
+  <div class="w-full max-w-3xl">
+    <div class="mb-6">
+      <a href={`/admin/events/${id}/registrants`} class="text-sm text-gray-500 hover:text-amber-700">← Registrants</a>
+      <h1 class="text-2xl font-bold text-gray-900 mt-1">{event?.data?.title ?? 'Event'} — announcements</h1>
+      <p class="text-sm text-gray-500 mt-1">Email follow-up info to everyone registered for this event. Sent from <strong>noreply@drbi.org</strong>.</p>
+    </div>
+
+    {!isHx && <p class="text-gray-500">This isn't a synced Humanitix event, so there are no registrants to email.</p>}
+    {countError && <p class="text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-4 py-2 mb-4">{countError}</p>}
+
+    {isHx && (
+      <div id="announce" data-event-id={id} data-recipients={recipientCount} class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm mb-8">
+        <div class="mb-4">
+          <label for="an-subject" class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+          <input id="an-subject" type="text" maxlength="200" placeholder="e.g. Arrival details for the Dawn-Breakers Challenge"
+            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </div>
+        <div class="mb-4">
+          <label for="an-body" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+          <textarea id="an-body" rows="10" placeholder="Write your update. Plain text is fine — links become clickable automatically."
+            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg resize-y focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="button" id="an-test" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">Send test to me</button>
+          <button type="button" id="an-send" class="inline-flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors">
+            Send to all {recipientCount} registrant{recipientCount === 1 ? '' : 's'}
+          </button>
+          <span id="an-msg" class="text-sm" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    )}
+
+    <h2 class="text-lg font-bold text-gray-900 mb-3">Sent announcements</h2>
+    {past.length === 0 ? (
+      <p class="text-gray-400 text-sm">Nothing sent yet.</p>
+    ) : (
+      <ul class="space-y-3">
+        {past.map((a) => (
+          <li class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+            <div class="flex items-start justify-between gap-3 flex-wrap">
+              <p class="font-semibold text-gray-900 m-0">{a.subject}</p>
+              <span class="text-xs text-gray-400 whitespace-nowrap">{fmt(a.sentAt || a.createdAt)} · {a.recipientCount} sent</span>
+            </div>
+            <p class="text-sm text-gray-600 mt-2 whitespace-pre-wrap line-clamp-4 m-0">{a.body}</p>
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+
+  <script is:inline>
+    (() => {
+      const root = document.getElementById('announce');
+      if (!root) return;
+      const eventId = root.dataset.eventId;
+      const recipients = Number(root.dataset.recipients) || 0;
+      const subjEl = document.getElementById('an-subject');
+      const bodyEl = document.getElementById('an-body');
+      const msg = document.getElementById('an-msg');
+      const testBtn = document.getElementById('an-test');
+      const sendBtn = document.getElementById('an-send');
+      const set = (t, cls) => { msg.textContent = t; msg.className = 'text-sm ' + (cls || 'text-gray-500'); };
+
+      async function post(op) {
+        const subject = subjEl.value.trim();
+        const body = bodyEl.value.trim();
+        if (!subject || !body) { set('Add a subject and a message first.', 'text-red-600'); return null; }
+        const res = await fetch('/api/admin/events/announce', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ op, eventId, subject, body }),
+        });
+        return res.json();
+      }
+
+      testBtn.addEventListener('click', async () => {
+        testBtn.disabled = true; set('Sending test…');
+        try { const d = await post('test'); if (d && d.ok) set('Test sent to ' + d.to + ' ✓', 'text-green-600'); else if (d) set(d.error || 'Test failed', 'text-red-600'); }
+        catch { set('Network error', 'text-red-600'); }
+        testBtn.disabled = false;
+      });
+
+      sendBtn.addEventListener('click', async () => {
+        if (!subjEl.value.trim() || !bodyEl.value.trim()) { set('Add a subject and a message first.', 'text-red-600'); return; }
+        if (!confirm('Send this announcement to all ' + recipients + ' registrant' + (recipients === 1 ? '' : 's') + '? This cannot be undone.')) return;
+        sendBtn.disabled = true; testBtn.disabled = true; set('Sending to ' + recipients + '…');
+        try {
+          const d = await post('send');
+          if (d && d.ok) { set('Sent to ' + d.sent + ' of ' + d.total + (d.failed ? (' (' + d.failed + ' failed)') : '') + ' ✓', 'text-green-600'); subjEl.value = ''; bodyEl.value = ''; setTimeout(() => location.reload(), 1500); }
+          else if (d) { set(d.error || 'Send failed', 'text-red-600'); sendBtn.disabled = false; testBtn.disabled = false; }
+        } catch { set('Network error', 'text-red-600'); sendBtn.disabled = false; testBtn.disabled = false; }
+      });
+    })();
+  </script>
+</AdminLayout>

@@ -3,7 +3,7 @@
 // Read-only re: publish; never changes site visibility (that is human-owned hide/show).
 export const prerender = false;
 import { getAdmin } from '@lib/server/admin-guard';
-import { runSync, seedMealSummaries } from '@lib/humanitix-sync';
+import { runSync, seedMealSummaries, refreshRegisteredCounts } from '@lib/humanitix-sync';
 
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json' } });
 
@@ -14,9 +14,9 @@ export const POST = async (context) => {
     const result = await runSync();
     // Seed meal summaries for any newly-imported events in the BACKGROUND — AI calls are slow,
     // so we don't make the caller wait. waitUntil keeps the worker alive after the response.
-    const seed = seedMealSummaries();
+    const bg = seedMealSummaries().then(() => refreshRegisteredCounts());
     const ctx = context.locals?.cfContext;
-    if (ctx?.waitUntil) ctx.waitUntil(seed); else seed.catch(() => {});
+    if (ctx?.waitUntil) ctx.waitUntil(bg); else bg.catch(() => {});
     return json({ ok: !!result.ok, ...result });
   } catch (err) {
     return json({ ok: false, error: String(err?.message || err) }, 500);

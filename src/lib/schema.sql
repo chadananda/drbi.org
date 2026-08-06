@@ -25,6 +25,9 @@ CREATE TABLE IF NOT EXISTS events (
   external_id TEXT,
   visible INTEGER NOT NULL DEFAULT 1,
   source_published INTEGER NOT NULL DEFAULT 0,
+  capacity INTEGER,
+  registered_count INTEGER NOT NULL DEFAULT 0,
+  waitlist_override TEXT,
   featured INTEGER NOT NULL DEFAULT 0,
   onsite INTEGER NOT NULL DEFAULT 1,
   is_eventbrite INTEGER NOT NULL DEFAULT 0,
@@ -51,6 +54,30 @@ CREATE TABLE IF NOT EXISTS event_thread (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 CREATE INDEX IF NOT EXISTS idx_event_thread_event ON event_thread(event_id, created_at);
+
+-- Public waitlist signups (once an event is over capacity, the site shows a waitlist form).
+CREATE TABLE IF NOT EXISTS event_waitlist (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id TEXT NOT NULL,
+  name TEXT NOT NULL DEFAULT '',
+  email TEXT NOT NULL DEFAULT '',
+  phone TEXT NOT NULL DEFAULT '',
+  party_size INTEGER NOT NULL DEFAULT 1,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_event_waitlist_event ON event_waitlist(event_id, created_at);
+
+-- Per-event email announcements sent to registrants (log of what went out).
+CREATE TABLE IF NOT EXISTS event_announcements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_id TEXT NOT NULL,
+  subject TEXT NOT NULL DEFAULT '',
+  body TEXT NOT NULL DEFAULT '',
+  recipient_count INTEGER NOT NULL DEFAULT 0,
+  sent_at TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_event_announcements_event ON event_announcements(event_id, created_at);
 
 CREATE TABLE IF NOT EXISTS content (
   id TEXT PRIMARY KEY,

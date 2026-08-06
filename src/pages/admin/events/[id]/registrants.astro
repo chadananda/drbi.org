@@ -8,12 +8,21 @@ import { getEventById } from '@lib/queries';
 import { getEnv } from '@lib/runtime-env';
 import { fetchHumanitixEvents, fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
 import { computeEventStats, buildRegistrantRows, sampleRegistrants, computeHousingSummary } from '@lib/event-registrations';
+import { listWaitlist } from '@lib/server/event-waitlist';
 
 const user = Astro.locals?.user;
+const canEdit = ['admin', 'superadmin'].includes(user?.role);
 const { id } = Astro.params;
 const event = await getEventById(id);
 const extId = event?.data?.externalId;
 const isHx = event?.data?.source === 'humanitix' && extId;
+
+// DRBI-side capacity + waitlist (independent of Humanitix).
+const capacity = event?.data?.capacity ?? null;
+const registeredCount = event?.data?.registeredCount ?? 0;
+const waitlistOverride = event?.data?.waitlistOverride ?? null;
+const waitlist = await listWaitlist(id);
+const waitlistPeople = waitlist.reduce((s, w) => s + (w.partySize || 1), 0);
 
 let stats = null, rows = [], error = null, questionCols = [];
 if (isHx) {
@@ -56,10 +65,41 @@ const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).to
         <a href="/admin/events" class="no-print text-sm text-gray-500 hover:text-amber-700">← Events</a>
         <h1 class="text-2xl font-bold text-gray-900 mt-1">{event?.data?.title ?? 'Event'} — registrants</h1>
       </div>
-      {stats && rows.length > 0 && (
-        <button type="button" id="print-registrants" class="no-print inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">🖨 Print list</button>
-      )}
+      <div class="no-print flex items-center gap-2 flex-wrap">
+        {isHx && canEdit && (
+          <a href={`/admin/events/${id}/announcements`} class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">📣 Announce</a>
+        )}
+        {stats && rows.length > 0 && (
+          <button type="button" id="print-registrants" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">🖨 Print list</button>
+        )}
+      </div>
     </div>
+
+    {isHx && canEdit && (
+      <div class="no-print mb-6 bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex flex-wrap items-end gap-4" id="capacity-card" data-event-id={id}>
+        <div>
+          <div class="text-xs text-gray-500 mb-1">Registered</div>
+          <div class="text-lg font-bold text-gray-900 tabular-nums leading-none">
+            <span id="cap-registered">{registeredCount}</span>{capacity != null && <span class="text-gray-400"> / {capacity}</span>}
+          </div>
+        </div>
+        <label class="block">
+          <span class="text-xs text-gray-500">Capacity</span>
+          <input type="number" id="cap-input" min="0" value={capacity ?? ''} placeholder="—" class="mt-1 w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </label>
+        <label class="block">
+          <span class="text-xs text-gray-500">Waitlist</span>
+          <select id="cap-override" class="mt-1 block px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="" selected={waitlistOverride == null}>Auto (by capacity)</option>
+            <option value="open" selected={waitlistOverride === 'open'}>Force waitlist ON</option>
+            <option value="closed" selected={waitlistOverride === 'closed'}>Force waitlist OFF</option>
+          </select>
+        </label>
+        <button type="button" id="cap-save" class="px-4 py-2 text-sm font-medium text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors">Save</button>
+        <span id="cap-msg" class="text-sm"></span>
+        <p class="basis-full text-xs text-gray-400 m-0 mt-1">At capacity, the public event page swaps the ticket button for a waitlist form. "Force" overrides the live count. Humanitix is never changed.</p>
+      </div>
+    )}
 
     {!isHx && <p class="text-gray-500">This isn't a synced Humanitix event, so there are no live registrations to show.</p>}
     {error && <p class="text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-4 py-2">{error}</p>}
@@ -146,10 +186,64 @@ const regTime = (iso) => { if (!iso) return '—'; try { return new Date(iso).to
         </div>
       </div>
     )}
+
+    {waitlist.length > 0 && (
+      <div class="mt-8">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">Waitlist <span class="text-gray-400 font-normal">({waitlist.length} {waitlist.length === 1 ? 'entry' : 'entries'} · {waitlistPeople} {waitlistPeople === 1 ? 'person' : 'people'})</span></h2>
+        <p class="no-print text-sm text-gray-500 mb-3">People who signed up after the event filled — in the order they joined. Contact them as spots open.</p>
+        <div class="reg-table-wrap bg-white border border-gray-200 rounded-2xl shadow-sm overflow-x-auto">
+          <table class="reg-table w-full text-sm">
+            <thead>
+              <tr class="text-left text-gray-500 border-b border-gray-100">
+                <th class="py-3 px-4 font-medium">#</th>
+                <th class="py-3 px-4 font-medium">Name</th>
+                <th class="py-3 px-4 font-medium">Email</th>
+                <th class="py-3 px-4 font-medium whitespace-nowrap">Phone</th>
+                <th class="py-3 px-4 font-medium whitespace-nowrap">Party</th>
+                <th class="py-3 px-4 font-medium whitespace-nowrap">Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {waitlist.map((w, i) => (
+                <tr class="border-b border-gray-50 hover:bg-gray-50">
+                  <td class="py-2.5 px-4 text-gray-400 tabular-nums">{i + 1}</td>
+                  <td class="py-2.5 px-4 text-gray-900">{w.name}</td>
+                  <td class="py-2.5 px-4 text-gray-500">{w.email}</td>
+                  <td class="py-2.5 px-4 text-gray-600 whitespace-nowrap">{w.phone}</td>
+                  <td class="py-2.5 px-4 text-gray-600 tabular-nums">{w.partySize}</td>
+                  <td class="py-2.5 px-4 text-gray-500 whitespace-nowrap">{regTime(w.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )}
   </div>
 
   <script is:inline>
     document.getElementById('print-registrants')?.addEventListener('click', () => window.print());
+    (() => {
+      const card = document.getElementById('capacity-card');
+      if (!card) return;
+      const btn = document.getElementById('cap-save');
+      const msg = document.getElementById('cap-msg');
+      btn?.addEventListener('click', async () => {
+        const capVal = document.getElementById('cap-input').value.trim();
+        const override = document.getElementById('cap-override').value;
+        btn.disabled = true; msg.textContent = 'Saving…'; msg.className = 'text-sm text-gray-400';
+        try {
+          const res = await fetch('/api/admin/events/meta', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventId: card.dataset.eventId, capacity: capVal === '' ? null : Number(capVal), waitlistOverride: override || null }),
+          });
+          const data = await res.json();
+          if (res.ok && data.ok) { msg.textContent = 'Saved ✓'; msg.className = 'text-sm text-green-600'; setTimeout(() => { msg.textContent = ''; }, 2500); }
+          else { msg.textContent = data.error || 'Failed'; msg.className = 'text-sm text-red-600'; }
+        } catch { msg.textContent = 'Network error'; msg.className = 'text-sm text-red-600'; }
+        btn.disabled = false;
+      });
+    })();
     (() => {
       const box = document.getElementById('registrant-search');
       const body = document.getElementById('registrant-rows');

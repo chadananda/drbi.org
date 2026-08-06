@@ -34,6 +34,11 @@ const ticketsUrl = !hasReg ? "" :
   /humanitix\.com/i.test(d.registrationUrl)
     ? d.registrationUrl.replace(/[?#].*$/, "").replace(/\/+$/, "").replace(/\/tickets$/i, "") + "/tickets"
     : d.registrationUrl;
+// DRBI-side capacity gate: when full, the site shows a waitlist form instead of the ticket link
+// (Humanitix stays live and untouched — we just stop handing out the registration link here).
+// A manual override wins over the count.
+const isFull = d.waitlistOverride === 'open' ||
+  (d.waitlistOverride !== 'closed' && d.capacity != null && (d.registeredCount ?? 0) >= d.capacity);
 // Face-centered ImageKit crops (falls through to the raw URL for uncached externals).
 const heroImage = imagekitUrl(d.mainImage, { w: 1600, h: 640, face: true });
 const ogImage = imagekitUrl(d.mainImage, { w: 1200, h: 630, face: true });
@@ -179,7 +184,22 @@ const eventSchema = (!hidden && d.startDate) ? {
                 ))}
               </ul>
             )}
-            {hasReg ? (
+            {isFull ? (
+              <div class="waitlist-box" data-event-id={event.id}>
+                <p class="waitlist-full">This program is full.</p>
+                <p class="waitlist-lede">Join the waitlist and we'll contact you if a spot opens up.</p>
+                <form class="waitlist-form" novalidate>
+                  <input class="wl-in" type="text" name="name" placeholder="Your name" required autocomplete="name" />
+                  <input class="wl-in" type="email" name="email" placeholder="Email" required autocomplete="email" />
+                  <input class="wl-in" type="tel" name="phone" placeholder="Phone" autocomplete="tel" />
+                  <label class="wl-party">How many in your party?
+                    <input class="wl-in wl-num" type="number" name="partySize" min="1" max="20" value="1" />
+                  </label>
+                  <button type="submit" class="reg-btn wl-submit">Join the waitlist</button>
+                  <p class="wl-msg" role="status" aria-live="polite"></p>
+                </form>
+              </div>
+            ) : hasReg ? (
               <a href={ticketsUrl} target="_blank" rel="noopener noreferrer" class="reg-btn">
                 Get tickets
               </a>
@@ -484,4 +504,49 @@ const eventSchema = (!hidden && d.startDate) ? {
     color: var(--brass-deep);
   }
   .event-detail .share-link:hover { color: var(--brass); }
+
+  /* Waitlist form — shown in place of the ticket button when the program is full. */
+  .event-detail .waitlist-full { font-family: 'Fraunces', Georgia, serif; font-weight: 600; color: var(--ink); font-size: 1.05rem; margin: 0 0 .3rem; }
+  .event-detail .waitlist-lede { font-family: 'Newsreader', Georgia, serif; color: var(--body); font-size: .95rem; line-height: 1.5; margin: 0 0 1rem; }
+  .event-detail .waitlist-form { display: flex; flex-direction: column; gap: .6rem; }
+  .event-detail .wl-in { width: 100%; box-sizing: border-box; border: 1px solid var(--rule); border-radius: 9px; padding: .6rem .75rem; font-family: 'Newsreader', Georgia, serif; font-size: .95rem; background: #fff; color: var(--ink); }
+  .event-detail .wl-in:focus { outline: none; border-color: var(--brass); box-shadow: 0 0 0 3px rgba(180,140,60,.15); }
+  .event-detail .wl-party { display: flex; align-items: center; justify-content: space-between; gap: .6rem; font-family: 'Newsreader', Georgia, serif; font-size: .9rem; color: var(--body); }
+  .event-detail .wl-num { width: 4.5rem; flex: none; text-align: center; }
+  .event-detail .wl-submit { width: 100%; margin-top: .3rem; border: none; cursor: pointer; }
+  .event-detail .wl-msg { font-family: 'Newsreader', Georgia, serif; font-size: .9rem; margin: .2rem 0 0; }
+  .event-detail .wl-msg.ok { color: #2f7d4f; }
+  .event-detail .wl-msg.err { color: #b4462e; }
 </style>
+
+<script>
+  document.querySelectorAll('.waitlist-form').forEach((form) => {
+    const box = form.closest('.waitlist-box');
+    const msg = form.querySelector('.wl-msg');
+    const btn = form.querySelector('.wl-submit');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const name = String(fd.get('name') || '').trim();
+      const email = String(fd.get('email') || '').trim();
+      if (!name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        msg.className = 'wl-msg err'; msg.textContent = 'Please enter your name and a valid email.'; return;
+      }
+      btn.disabled = true; msg.className = 'wl-msg'; msg.textContent = 'Adding you…';
+      try {
+        const res = await fetch('/api/events/waitlist', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventId: box.dataset.eventId, name, email, phone: String(fd.get('phone') || '').trim(), partySize: fd.get('partySize') }),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          form.innerHTML = '<p class="wl-msg ok">You’re on the waitlist — we’ll be in touch if a spot opens. Thank you!</p>';
+        } else {
+          msg.className = 'wl-msg err'; msg.textContent = data.error || 'Something went wrong. Please try again.'; btn.disabled = false;
+        }
+      } catch {
+        msg.className = 'wl-msg err'; msg.textContent = 'Network error. Please try again.'; btn.disabled = false;
+      }
+    });
+  });
+</script>

@@ -4,11 +4,12 @@
 // (rows land as DRAFT; humans own publish). See memory [[humanitix-drbi-events]].
 import { env as cfEnv } from "cloudflare:workers";
 import { getEnv } from "./runtime-env";
-import { fetchHumanitixEvents, mapHumanitixEvent, isSponsorPageEvent } from "./humanitix";
-import { upsertSyncedEvent, getEvents } from "./queries";
+import { fetchHumanitixEvents, mapHumanitixEvent, isSponsorPageEvent, fetchHumanitixTickets } from "./humanitix";
+import { upsertSyncedEvent, getEvents, setRegisteredCount } from "./queries";
 import { uploadR2 } from "../utils/r2-upload";
 import { listThread, addMessage } from "./server/event-thread";
 import { deriveMealSummary } from "./server/meal-summary";
+import { computeEventStats } from "./event-registrations";
 
 const LAST_CHECK_KEY = "events:lastCheck";      // KV: last time we polled Humanitix
 const VERSION_KEY = "edge:events:v";            // KV: edge-cache content version (middleware key)
@@ -64,6 +65,33 @@ export async function seedMealSummaries(): Promise<number> {
   return seeded;
 }
 
+// Refresh the live registered_count for capacity-gated upcoming events, so the PUBLIC event page
+// can decide when to swap the ticket link for the waitlist form. Runs independently of the
+// content change-detection (registrations don't bump the event's updatedAt). Only touches events
+// with a capacity set, so cost stays low. Best-effort; background-only (has AI/HTTP latency).
+export async function refreshRegisteredCounts(): Promise<number> {
+  let updated = 0;
+  try {
+    const apiKey = getEnv("HUMANITIX_API_KEY");
+    if (!apiKey) return 0;
+    const events = await getEvents();
+    const now = Date.now();
+    for (const ev of events) {
+      const d: any = ev.data;
+      if (d.capacity == null) continue;
+      if (d.source !== "humanitix" || !d.externalId) continue;
+      const endMs = d.endDate ? new Date(d.endDate).getTime() : d.startDate ? new Date(d.startDate).getTime() : 0;
+      if (endMs && endMs < now) continue; // skip past events
+      try {
+        const tickets = await fetchHumanitixTickets(apiKey, d.externalId).catch(() => []);
+        await setRegisteredCount(ev.id, computeEventStats([], tickets).registrations);
+        updated++;
+      } catch { /* skip this event */ }
+    }
+  } catch { /* best-effort */ }
+  return updated;
+}
+
 // Pull all events from Humanitix and upsert into D1. Change-detection (updatedAt) means
 // unchanged events are skipped, and the edge-cache version only bumps on a real change.
 export async function runSync() {
@@ -105,8 +133,8 @@ export async function revalidateEventsIfStale(cfContext: any): Promise<void> {
     const last = Number((await kv.get(LAST_CHECK_KEY)) || 0);
     if (Date.now() - last < REVALIDATE_MS) return;
     await kv.put(LAST_CHECK_KEY, String(Date.now())); // claim immediately so peers skip
-    // Refresh content, then seed any new event's meal summary — both in the background.
-    const job = runSync().then(() => seedMealSummaries()).then(() => {}, () => {});
+    // Refresh content, seed new-event meal summaries, and refresh capacity counts — all background.
+    const job = runSync().then(() => seedMealSummaries()).then(() => refreshRegisteredCounts()).then(() => {}, () => {});
     if (cfContext?.waitUntil) cfContext.waitUntil(job);
     else await job;
   } catch {
