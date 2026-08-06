@@ -87,7 +87,7 @@ const fmt = (iso) => { if (!iso) return ''; try { return new Date(iso).toLocaleS
               <p class="font-semibold text-gray-900 m-0">{a.subject}</p>
               <span class="text-xs text-gray-400 whitespace-nowrap">{fmt(a.sentAt || a.createdAt)} · {a.recipientCount} sent</span>
             </div>
-            <p class="text-sm text-gray-600 mt-2 whitespace-pre-wrap line-clamp-4 m-0">{a.body}</p>
+            <p class="text-sm text-gray-600 mt-2 whitespace-pre-wrap break-words line-clamp-4 m-0">{a.body}</p>
           </li>
         ))}
       </ul>

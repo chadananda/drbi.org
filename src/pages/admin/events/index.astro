@@ -255,7 +255,7 @@ const getEventLocation = (event) => {
               <!-- Top: Title, Date, and Teacher Thumbnail -->
               <div class="flex items-start justify-between mb-4">
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-3 mb-2">
+                  <div class="flex flex-wrap items-center gap-3 mb-2">
                     <h3 class="text-2xl font-bold text-gray-900 leading-tight">{event.data.name}</h3>
                     {event.data.source && event.data.source !== 'manual' && (
                       <span class="inline-flex items-center px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 border border-blue-300 rounded capitalize" title="Synced from an external source — publish is manual">
@@ -277,7 +277,7 @@ const getEventLocation = (event) => {
                       </a>
                     )}
                   </div>
-                  <div class="flex items-center gap-3">
+                  <div class="flex flex-wrap items-center gap-3">
                     <span class="text-lg font-semibold text-blue-700">{formatDate(event.data.startDate)}</span>
                     {event.data.endDate && event.data.endDate !== event.data.startDate && (
                       <span class="text-base text-gray-600">to {formatDate(event.data.endDate)}</span>
@@ -575,7 +575,7 @@ const getEventLocation = (event) => {
                 <div class="flex items-start justify-between mb-4">
                   <div class="flex-1 min-w-0">
                     <h3 class="text-2xl font-bold text-gray-900 leading-tight mb-2">${event.name}</h3>
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-wrap items-center gap-3">
                       <span class="text-lg font-semibold text-blue-700">${formatDate(event.startDate)}</span>
                       ${endDateStr}
                     </div>
