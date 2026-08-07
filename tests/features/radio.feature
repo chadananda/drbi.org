@@ -9,13 +9,13 @@ Feature: KURE Radio Section
   @smoke
   Scenario: Radio page loads with title and navigation
     When I visit "/radio"
-    Then I should see the page title containing "Radio"
+    Then I should see the page title containing "KURE"
     And I should see the main navigation
     And I should see the footer section
 
   Scenario: Radio page shows a heading
     When I visit "/radio"
-    Then I should see a heading containing "Radio"
+    Then I should see a heading containing "KURE"
 
   Scenario: Radio page does not crash
     When I visit "/radio"

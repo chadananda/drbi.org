@@ -26,5 +26,5 @@ Feature: Thematic section pages
 
   Scenario: Radio section has content
     When I visit "/radio"
-    Then I should see a heading containing "Radio"
+    Then I should see a heading containing "KURE"
     And the page should have a meta description
