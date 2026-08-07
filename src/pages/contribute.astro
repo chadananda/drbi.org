@@ -1,0 +1,554 @@
+---
+// Contribute page — bespoke "desert dawn" editorial giving page. Cinematic hero, a donor
+// testimonial centerpiece, clearly-named funds, and each Givebutter campaign in its own band.
+// Deps: Layout (nav/footer/SEO), CdnImage (ImageKit), Givebutter widget script. Fonts: Fraunces + Newsreader.
+export const prerender = true;
+
+import Layout from "@layouts/Layout.astro";
+import CdnImage from "@components/CdnImage.astro";
+
+const title = "Contribute to DRBI";
+const description =
+  "Help Desert Rose Bahá'í Institute grow — green the campus, sustain the Firm Foundation study program, expand accommodations, or give where it's needed most. Every gift plants something lasting.";
+
+// The four ways to give. Each is its own editorial band; Givebutter ids are the live donation forms.
+const campaigns = [
+  {
+    key: "bloom",
+    kicker: "The Greening Fund",
+    title: "Make the Desert Bloom",
+    lede:
+      "Brooke and Telahoun Molla are planting hundreds of trees and desert shrubs — shade to sit and study beneath, and a campus that feels like the garden its name promises.",
+    body:
+      "Your gift funds trees, native plantings, and the concrete benches that turn bare ground into places of reflection.",
+    image: "drbi.org/site/agriculture/agr1.webp",
+    tone: "sage",
+    widgets: ["prMRQg", "g8AYAp"],
+    flip: false,
+  },
+  {
+    key: "ffa",
+    kicker: "The Firm Foundation",
+    title: "Our Winter School of Deep Study",
+    lede:
+      "Where else can Bahá'ís gather to study the Íqán, Gleanings, God Passes By, and the Dawn-Breakers together? Desert Rose is built for exactly this.",
+    body:
+      "The Firm Foundation is DRBI's own program in Eloy, Arizona — a winter retreat for reflection and serious study. Help us keep it running and welcoming.",
+    image: "drbi.org/site/drbi/winter-school.webp",
+    tone: "ember",
+    widgets: ["gBA2OL", "gJBA8g"],
+    flip: true,
+  },
+  {
+    key: "grow",
+    kicker: "The Growth Fund",
+    title: "Room to Welcome More",
+    lede:
+      "Desert Rose is 100% volunteer and self-sufficient — our revenue comes from hosting the very community we serve. Better accommodations mean more people can come, study, and stay.",
+    body:
+      "Help us improve dorms, guest rooms, and gathering spaces so no one is turned away for lack of a bed.",
+    image: "drbi.org/site/history/pavilion.webp",
+    tone: "gold",
+    widgets: ["g6dwxj"],
+    flip: false,
+  },
+];
+---
+
+<Layout title={title} description={description} image="/drbi-landscape.webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap"
+  />
+  <script async src="https://widgets.givebutter.com/latest.umd.cjs?acct=1qYQLHeWtFc20ZMq&p=other"></script>
+
+  <main class="give">
+    <!-- ────────────────────────  HERO  ──────────────────────── -->
+    <section class="hero">
+      <div class="hero__media">
+        <CdnImage
+          src="drbi.org/site/drbi/contribute.webp"
+          alt="Dawn over the Desert Rose campus in Eloy, Arizona"
+          w={2000}
+          class="hero__img"
+          loading="eager"
+        />
+      </div>
+      <div class="hero__scrim"></div>
+      <div class="hero__grain" aria-hidden="true"></div>
+
+      <div class="hero__inner">
+        <p class="eyebrow eyebrow--light reveal" style="--d:0ms">Support our mission</p>
+        <h1 class="hero__title">
+          <span class="reveal" style="--d:90ms">Help the</span>
+          <span class="reveal hero__accent" style="--d:220ms">desert bloom</span>
+        </h1>
+        <p class="hero__sub reveal" style="--d:360ms">
+          Every dollar, every hour, every act of service helps build a place of learning and
+          beauty in the Arizona desert.
+        </p>
+        <div class="hero__cta reveal" style="--d:500ms">
+          <a href="#ways" class="btn btn--solid">Ways to give</a>
+          <a href="#volunteer" class="btn btn--ghost">Give your time</a>
+        </div>
+        <ul class="hero__stats reveal" style="--d:640ms" aria-label="About Desert Rose">
+          <li><strong>100%</strong><span>volunteer-run</span></li>
+          <li><strong>Eloy, AZ</strong><span>in the open desert</span></li>
+          <li><strong>Arts · Land · Study</strong><span>one mission</span></li>
+        </ul>
+      </div>
+      <a href="#intro" class="hero__scroll" aria-label="Scroll down">
+        <span></span>
+      </a>
+    </section>
+
+    <!-- ────────────────────────  INTRO  ──────────────────────── -->
+    <section class="intro" id="intro">
+      <div class="intro__rose" aria-hidden="true">
+        <!-- eight-petal desert rose motif -->
+        <svg viewBox="0 0 100 100" width="72" height="72">
+          <g fill="none" stroke="currentColor" stroke-width="1.4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ellipse cx="50" cy="50" rx="12" ry="34" transform={`rotate(${i * 45} 50 50)`} />
+            ))}
+            <circle cx="50" cy="50" r="6" />
+          </g>
+        </svg>
+      </div>
+      <p class="intro__kicker eyebrow">A note from Desert Rose</p>
+      <h2 class="intro__head">
+        There are so many ways to give &mdash;<br />and every one of them plants something lasting.
+      </h2>
+      <p class="intro__body">
+        Providing you the freedom to explore, learn, collaborate, and inspire is &mdash; and will
+        always be &mdash; at the heart of our mission. Choose a fund that moves you below, or simply
+        give where it's needed most and let our board direct it well.
+      </p>
+    </section>
+
+    <!-- ────────────────────────  TESTIMONIAL  ──────────────────────── -->
+    <section class="quote" aria-label="Donor testimonial">
+      <div class="quote__media">
+        <CdnImage
+          src="drbi.org/site/drbi/study.webp"
+          alt="Study and reflection at Desert Rose"
+          w={1400}
+          class="quote__img"
+          loading="lazy"
+        />
+        <div class="quote__wash"></div>
+      </div>
+      <figure class="quote__inner">
+        <span class="quote__mark" aria-hidden="true">&ldquo;</span>
+        <blockquote class="quote__text">
+          DRBI is the only opportunity to study the writings in depth. I have never forgotten the
+          incredible time I spent at Desert Rose.
+        </blockquote>
+        <figcaption class="quote__cite">
+          <span class="quote__name">A longtime friend of Desert Rose</span>
+          <span class="quote__role">From a recent letter</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- ────────────────────────  WAYS TO GIVE  ──────────────────────── -->
+    <section class="ways" id="ways">
+      <header class="ways__head">
+        <p class="eyebrow">Choose your fund</p>
+        <h2 class="ways__title">Ways to give</h2>
+        <p class="ways__note">
+          Each fund supports a specific corner of Desert Rose. Not sure? The general fund below lets
+          the board send your gift where it will do the most good.
+        </p>
+      </header>
+
+      {campaigns.map((c, i) => (
+        <article class={`band band--${c.tone} ${c.flip ? "band--flip" : ""} reveal-up`}>
+          <div class="band__media">
+            <CdnImage src={c.image} alt={c.title} w={1200} class="band__img" loading="lazy" />
+            <span class="band__index" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+          </div>
+          <div class="band__body">
+            <p class="band__kicker">{c.kicker}</p>
+            <h3 class="band__title">{c.title}</h3>
+            <p class="band__lede">{c.lede}</p>
+            <p class="band__desc">{c.body}</p>
+            <div class="band__give">
+              {c.widgets.map((id) => (
+                <givebutter-widget id={id}></givebutter-widget>
+              ))}
+            </div>
+          </div>
+        </article>
+      ))}
+
+      <!-- General fund + Amazon: the two "simplest" ways, side by side -->
+      <div class="simple">
+        <article class="simple__card simple__card--fund">
+          <p class="band__kicker">Where it's needed most</p>
+          <h3 class="simple__title">The General Fund</h3>
+          <p class="simple__desc">
+            Prefer to let us decide? Send a gift to the general fund and our board will direct it to
+            the greatest need &mdash; or mail a check to Desert Rose Bahá'í Institute, Eloy, Arizona.
+          </p>
+          <div class="band__give">
+            <a href="mailto:info@drbi.org?subject=Contribution%20to%20the%20DRBI%20General%20Fund" class="btn btn--solid">Give to the fund</a>
+          </div>
+        </article>
+
+        <article class="simple__card simple__card--amazon">
+          <p class="band__kicker">A gift on the shelf</p>
+          <h3 class="simple__title">Our Amazon Wishlist</h3>
+          <p class="simple__desc">
+            Gearing up the dorms for a busy season &mdash; pillows, sheets, blankets, shower
+            curtains, an Instant Pot or two, a reverse-osmosis filter. Buy an item and have it
+            shipped straight to us.
+          </p>
+          <div class="band__give">
+            <a
+              href="https://www.amazon.com/hz/wishlist/ls/K3TB7OCO64UF/ref=nav_wishlist_lists_1"
+              target="_blank"
+              rel="noopener"
+              class="btn btn--outline"
+            >View the wishlist &rarr;</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ────────────────────────  VOLUNTEER  ──────────────────────── -->
+    <section class="volunteer" id="volunteer">
+      <div class="volunteer__media">
+        <CdnImage
+          src="drbi.org/site/history/admin-bldg.webp"
+          alt="Volunteers at work at Desert Rose"
+          w={1200}
+          class="volunteer__img"
+          loading="lazy"
+        />
+      </div>
+      <div class="volunteer__body">
+        <p class="eyebrow">Work-study volunteers</p>
+        <h2 class="volunteer__title">Give your time, not just your treasure</h2>
+        <p class="volunteer__desc">
+          We need help delivering a solid educational experience &mdash; especially in the kitchen
+          and with cleaning. Our schedule is built so volunteers never miss the content: work in the
+          mornings and during the long breaks after meals, and attend every program and event.
+        </p>
+        <a href="mailto:info@drbi.org?subject=Work-study%20volunteering%20at%20DRBI" class="btn btn--solid">
+          Email info@drbi.org
+        </a>
+      </div>
+    </section>
+
+    <!-- ────────────────────────  CLOSING  ──────────────────────── -->
+    <section class="closing">
+      <p class="closing__line">Dear community — thank you, from the desert.</p>
+      <div class="closing__rose" aria-hidden="true">✦</div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .give {
+    --sand: #f7f1e6;
+    --sand-deep: #efe2cd;
+    --cream: #fdfaf3;
+    --ink: #2a2018;
+    --body: #574c40;
+    --muted: #8a7d6c;
+    --line: #e7dcc7;
+    --brand: #a84a08;
+    --brand-deep: #7f3506;
+    --ember: #c05a1a;
+    --rose: #bf6a52;
+    --sage: #6f7a4f;
+    --sage-deep: #515a37;
+    --gold: #bd9542;
+
+    background: var(--cream);
+    color: var(--body);
+    font-family: "Newsreader", Georgia, serif;
+    font-size: 1.06rem;
+    line-height: 1.7;
+    overflow-x: clip;
+  }
+  .give :is(h1, h2, h3) {
+    font-family: "Fraunces", Georgia, serif;
+    color: var(--ink);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.06;
+  }
+
+  /* ── shared bits ─────────────────────────────────────────── */
+  .eyebrow {
+    font-family: "Fraunces", Georgia, serif;
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--brand);
+    margin: 0;
+  }
+  .eyebrow--light { color: #ffe0b8; text-shadow: 0 1px 10px rgba(40, 20, 8, 0.75); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 0.94rem;
+    letter-spacing: 0.01em;
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+  }
+  .btn--solid {
+    color: #fff;
+    background: linear-gradient(180deg, var(--ember), var(--brand-deep));
+    box-shadow: 0 14px 30px -12px rgba(127, 53, 6, 0.7);
+  }
+  .btn--solid:hover { transform: translateY(-2px); box-shadow: 0 20px 38px -14px rgba(127, 53, 6, 0.8); }
+  .btn--ghost {
+    color: #fdf6ec;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(3px);
+  }
+  .btn--ghost:hover { background: rgba(255, 255, 255, 0.14); transform: translateY(-2px); }
+  .btn--outline {
+    color: var(--brand-deep);
+    border: 1.5px solid var(--brand);
+    background: transparent;
+  }
+  .btn--outline:hover { background: var(--brand); color: #fff; transform: translateY(-2px); }
+
+  /* reveal-on-load (hero) + reveal-on-scroll (sections) */
+  .reveal { opacity: 0; transform: translateY(18px); animation: rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) forwards; animation-delay: var(--d, 0ms); }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .reveal-up { opacity: 0; transform: translateY(34px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .reveal-up.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal-up { animation: none !important; opacity: 1 !important; transform: none !important; transition: none !important; }
+  }
+
+  /* ── HERO ────────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .hero__media, .hero__scrim, .hero__grain { position: absolute; inset: 0; }
+  .hero__media :global(.hero__img),
+  .hero :global(.hero__img) { width: 100%; height: 100%; object-fit: cover; object-position: center 60%; }
+  .hero__scrim {
+    background:
+      /* focused wash behind the left text column; the right (seedling) stays vivid */
+      linear-gradient(96deg, rgba(18, 10, 5, 0.72) 0%, rgba(18, 10, 5, 0.44) 26%, rgba(18, 10, 5, 0.1) 48%, transparent 64%),
+      linear-gradient(180deg, rgba(24, 14, 8, 0.22) 0%, transparent 30%, rgba(20, 12, 6, 0.5) 100%);
+  }
+  .hero__grain {
+    opacity: 0.5; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 2;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 7rem 1.6rem 8rem;
+    width: 100%;
+  }
+  .give .hero__title {
+    font-size: clamp(3.2rem, 12vw, 8.5rem);
+    color: #fdf4e7;
+    margin: 1rem 0 0;
+    font-weight: 400;
+    text-shadow: 0 2px 24px rgba(18, 10, 4, 0.55);
+  }
+  .hero__title span { display: block; }
+  .hero__accent {
+    font-style: italic;
+    background: linear-gradient(92deg, #ffd7a0, #f0975a 52%, #e07b42);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+  }
+  .hero__sub {
+    color: #f2e6d6;
+    font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+    max-width: 34ch;
+    margin: 1.7rem 0 0;
+    line-height: 1.55;
+    text-shadow: 0 1px 16px rgba(0, 0, 0, 0.4);
+  }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 2.3rem; }
+  .hero__stats {
+    list-style: none; padding: 0; margin: 3.4rem 0 0;
+    display: flex; flex-wrap: wrap; gap: 2.4rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.18); padding-top: 1.6rem; max-width: 640px;
+  }
+  .hero__stats li { display: flex; flex-direction: column; }
+  .hero__stats strong { font-family: "Fraunces", Georgia, serif; color: #fff; font-size: 1.5rem; font-weight: 500; }
+  .hero__stats span { color: #d9c6ac; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.14em; }
+  .hero__scroll {
+    position: absolute; bottom: 1.6rem; left: 50%; transform: translateX(-50%);
+    width: 26px; height: 42px; border: 1.5px solid rgba(255, 255, 255, 0.55); border-radius: 999px; z-index: 2;
+  }
+  .hero__scroll span {
+    position: absolute; top: 8px; left: 50%; width: 3px; height: 8px; margin-left: -1.5px; border-radius: 2px;
+    background: #fff; animation: drop 1.7s infinite;
+  }
+  @keyframes drop { 0% { opacity: 0; transform: translateY(0); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(14px); } }
+
+  /* ── INTRO ───────────────────────────────────────────────── */
+  .intro {
+    position: relative; text-align: center;
+    max-width: 760px; margin: 0 auto; padding: 6.5rem 1.6rem 4rem;
+  }
+  .intro__rose { color: var(--brand); opacity: 0.55; display: flex; justify-content: center; margin-bottom: 1.6rem; }
+  .intro__head {
+    font-size: clamp(1.9rem, 4.4vw, 3.1rem);
+    font-weight: 400; margin: 0.6rem 0 0; color: var(--ink);
+  }
+  .intro__body { font-size: 1.2rem; color: var(--body); margin: 1.6rem auto 0; max-width: 60ch; }
+
+  /* ── TESTIMONIAL ─────────────────────────────────────────── */
+  .quote {
+    position: relative; margin: 3rem auto; max-width: 1180px; border-radius: 26px; overflow: hidden; isolation: isolate;
+    display: flex; align-items: center; min-height: 460px;
+  }
+  .quote__media { position: absolute; inset: 0; z-index: -1; }
+  .quote__media :global(.quote__img) { width: 100%; height: 100%; object-fit: cover; }
+  .quote__wash {
+    position: absolute; inset: 0;
+    background: linear-gradient(100deg, rgba(38, 22, 12, 0.94) 0%, rgba(46, 27, 14, 0.8) 45%, rgba(120, 62, 24, 0.35) 100%);
+  }
+  .quote__inner { position: relative; padding: 4rem clamp(1.6rem, 6vw, 5.5rem); max-width: 900px; }
+  .quote__mark {
+    font-family: "Fraunces", Georgia, serif; font-size: 8rem; line-height: 0.6; color: var(--gold);
+    display: block; height: 3rem; opacity: 0.9;
+  }
+  .quote__text {
+    font-family: "Fraunces", Georgia, serif; font-style: italic; font-weight: 400;
+    color: #fdf4e6; font-size: clamp(1.6rem, 3.8vw, 2.9rem); line-height: 1.24; margin: 0; letter-spacing: -0.01em;
+  }
+  .quote__cite { margin-top: 2rem; display: flex; flex-direction: column; gap: 0.15rem; }
+  .quote__name { font-family: "Fraunces", Georgia, serif; color: #fff; font-size: 1.15rem; font-weight: 600; }
+  .quote__role { color: #e4c9a6; font-size: 0.9rem; letter-spacing: 0.02em; }
+
+  /* ── WAYS TO GIVE ────────────────────────────────────────── */
+  .ways { max-width: 1180px; margin: 0 auto; padding: 4.5rem 1.6rem 2rem; }
+  .ways__head { text-align: center; max-width: 640px; margin: 0 auto 3.5rem; }
+  .ways__title { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 400; margin: 0.6rem 0 0; }
+  .ways__note { margin: 1.1rem auto 0; color: var(--muted); font-size: 1.05rem; }
+
+  .band {
+    display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.6rem, 4vw, 3.4rem);
+    align-items: center; margin-bottom: 3rem; padding: 1.4rem; border-radius: 24px;
+    background: var(--cream); border: 1px solid var(--line);
+    box-shadow: 0 1px 2px rgba(80, 55, 20, 0.04);
+  }
+  .band--flip .band__media { order: 2; }
+  .band__media {
+    position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 4 / 3;
+    box-shadow: 0 24px 46px -26px rgba(60, 40, 15, 0.5);
+  }
+  /* corner scrim so the white index numeral reads on light OR dark images */
+  .band__media::after {
+    content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    background: linear-gradient(to top right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.12) 34%, transparent 52%);
+  }
+  .band__media :global(.band__img) { width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+  .band:hover .band__media :global(.band__img) { transform: scale(1.055); }
+  .band__index {
+    position: absolute; left: 1rem; bottom: 0.4rem; z-index: 2; font-family: "Fraunces", Georgia, serif;
+    font-size: 4.2rem; font-weight: 600; color: #fff; opacity: 0.95; line-height: 1;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 8px 26px rgba(0, 0, 0, 0.45);
+  }
+  .band__body { padding: 0.6rem 1rem 0.6rem 0; }
+  .band--flip .band__body { padding: 0.6rem 0 0.6rem 1rem; }
+  .band__kicker {
+    font-family: "Fraunces", Georgia, serif; text-transform: uppercase; letter-spacing: 0.2em;
+    font-size: 0.72rem; font-weight: 600; margin: 0 0 0.6rem;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+  }
+  .band__kicker::before { content: ""; width: 26px; height: 2px; background: currentColor; display: inline-block; }
+  .band__title { font-size: clamp(1.7rem, 3.4vw, 2.5rem); font-weight: 400; margin: 0 0 0.9rem; }
+  .band__lede { font-size: 1.14rem; color: var(--body); margin: 0 0 0.9rem; }
+  .band__desc { color: var(--muted); margin: 0 0 1.4rem; font-size: 0.99rem; }
+  .band__give { display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: center; }
+  .band__give :global(givebutter-widget) { display: inline-block; }
+
+  /* per-fund accent colors */
+  .band--sage .band__kicker { color: var(--sage-deep); }
+  .band--sage:hover { border-color: #cdd3b4; }
+  .band--ember .band__kicker { color: var(--brand); }
+  .band--ember:hover { border-color: #eccba6; }
+  .band--gold .band__kicker { color: #9a7a2f; }
+  .band--gold:hover { border-color: #e6d4a4; }
+
+  /* general fund + amazon */
+  .simple { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 1rem; }
+  .simple__card { border-radius: 22px; padding: 2.4rem; border: 1px solid var(--line); }
+  .simple__card--fund { background: linear-gradient(150deg, #fff, var(--sand)); }
+  .simple__card--amazon { background: var(--sand); }
+  .simple__title { font-size: 1.7rem; font-weight: 400; margin: 0 0 0.8rem; }
+  .simple__desc { color: var(--body); margin: 0 0 1.5rem; font-size: 1.02rem; }
+
+  /* ── VOLUNTEER ───────────────────────────────────────────── */
+  .volunteer {
+    max-width: 1180px; margin: 4.5rem auto; border-radius: 26px; overflow: hidden;
+    display: grid; grid-template-columns: 0.9fr 1.1fr; background: var(--ink);
+  }
+  .volunteer__media { position: relative; min-height: 340px; }
+  .volunteer__media :global(.volunteer__img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .volunteer__body { padding: clamp(2.4rem, 5vw, 4rem); color: #f3e7d6; }
+  .volunteer__body .eyebrow { color: #f0b673; }
+  .volunteer__title { color: #fff; font-size: clamp(1.8rem, 3.6vw, 2.7rem); font-weight: 400; margin: 0.7rem 0 1.1rem; }
+  .volunteer__desc { color: #e6d6c1; margin: 0 0 1.8rem; }
+
+  /* ── CLOSING ─────────────────────────────────────────────── */
+  .closing { text-align: center; padding: 4rem 1.6rem 5.5rem; }
+  .closing__line { font-family: "Fraunces", Georgia, serif; font-style: italic; font-size: clamp(1.3rem, 3vw, 2rem); color: var(--ink); margin: 0; }
+  .closing__rose { color: var(--brand); font-size: 1.4rem; margin-top: 1rem; opacity: 0.6; }
+
+  /* ── RESPONSIVE ──────────────────────────────────────────── */
+  @media (max-width: 860px) {
+    .band, .simple, .volunteer { grid-template-columns: 1fr; }
+    .band--flip .band__media { order: 0; }
+    .band__body, .band--flip .band__body { padding: 0.4rem 0.3rem 0.6rem; }
+    .volunteer__media { min-height: 260px; }
+    .quote { border-radius: 0; }
+  }
+  @media (max-width: 520px) {
+    .give { font-size: 1.02rem; }
+    .hero__inner { padding: 6rem 1.3rem 6.5rem; }
+    .hero__stats { gap: 1.4rem; }
+  }
+</style>
+
+<script>
+  // Reveal sections as they scroll into view (progressive enhancement — content shows without JS).
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) {
+          e.target.classList.add("in");
+          io.unobserve(e.target);
+        }
+      }
+    },
+    { rootMargin: "0px 0px -12% 0px", threshold: 0.08 }
+  );
+  document.querySelectorAll(".reveal-up").forEach((el) => io.observe(el));
+</script>
