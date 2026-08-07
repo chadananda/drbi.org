@@ -12,6 +12,8 @@ import { getEnv } from '@lib/runtime-env';
 import { fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
 import { computeEventStats } from '@lib/event-registrations';
 import { threadCounts } from '@lib/server/event-thread';
+import { invoiceTotalsByEvent } from '@lib/server/event-invoices';
+import { refreshOpenInvoices } from '@lib/server/invoice-sync';
 
 const sessionid = Astro.cookies.get(lucia.sessionCookieName)?.value ?? null;
 const user = Astro.locals?.user;
@@ -73,6 +75,13 @@ if (hxKey) {
 
 // Coordination-thread message counts per event id (for the badge on each card).
 const tCounts = await threadCounts();
+
+// Accommodation-invoice totals per event (billed/paid). Poll open invoices' PayPal status in the
+// background (stale-while-revalidate): this load shows current D1 totals; the refresh updates them
+// for the next load without blocking. The invoice modal also has a live "Refresh" button.
+const invoiceTotals = await invoiceTotalsByEvent();
+try { Astro.locals?.cfContext?.waitUntil?.(refreshOpenInvoices(20)); } catch { /* not on CF (dev) */ }
+const money = (cents) => `$${(Math.round(cents) / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
 // Filter old events by default (more than 1 week past)
 const oneWeekAgo = new Date();
@@ -276,6 +285,15 @@ const getEventLocation = (event) => {
                         <span class="text-emerald-600">→</span>
                       </a>
                     )}
+                    {event.isPrimary && invoiceTotals.get(event.id) && invoiceTotals.get(event.id).count > 0 && (
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-full" title="Accommodation invoices — billed / paid">
+                        <span>🏠</span>
+                        <span>{money(invoiceTotals.get(event.id).billedCents)} billed</span>
+                        <span class="text-amber-400">·</span>
+                        <span>{money(invoiceTotals.get(event.id).paidCents)} paid</span>
+                        {invoiceTotals.get(event.id).openCount > 0 && (<><span class="text-amber-400">·</span><span>{invoiceTotals.get(event.id).openCount} open</span></>)}
+                      </span>
+                    )}
                   </div>
                   <div class="flex flex-wrap items-center gap-3">
                     <span class="text-lg font-semibold text-blue-700">{formatDate(event.data.startDate)}</span>
@@ -314,6 +332,15 @@ const getEventLocation = (event) => {
                 
                 <!-- Action Buttons -->
                 <div class="flex items-center gap-3 ml-auto flex-wrap justify-end">
+                  {canEdit && event.isPrimary && (
+                    <button type="button"
+                      class="invoice-btn inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
+                      data-event-id={event.id}
+                      data-event-title={event.data.name}
+                      title="Send / track accommodation invoices for this event">
+                      🧾 Invoice
+                    </button>
+                  )}
                   {canEdit && event.data.source === 'manual' && (
                     <button
                       class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors delete-event"
@@ -945,4 +972,137 @@ const getEventLocation = (event) => {
     });
   </script>
 
+  {/* Accommodation invoice modal — shared, opened from any card's 🧾 Invoice button */}
+  <div id="invoice-modal" class="hidden fixed inset-0 z-[60] items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="inv-modal-title">
+    <div id="invoice-backdrop" class="absolute inset-0 bg-black/40"></div>
+    <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between p-5 border-b border-gray-100">
+        <div>
+          <h2 id="inv-modal-title" class="text-lg font-bold text-gray-900">Accommodation invoice</h2>
+          <p id="inv-modal-event" class="text-sm text-gray-500 mt-0.5"></p>
+        </div>
+        <button type="button" id="inv-close" aria-label="Close" class="w-8 h-8 inline-flex items-center justify-center text-gray-500 hover:text-gray-800 rounded">✕</button>
+      </div>
+
+      <form id="inv-form" class="p-5 space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="inv-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+            <input id="inv-name" type="text" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+          <div>
+            <label for="inv-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input id="inv-email" type="email" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+        </div>
+        <div>
+          <label for="inv-accom" class="block text-sm font-medium text-gray-700 mb-1">Accommodation</label>
+          <input id="inv-accom" type="text" placeholder="e.g. Private studio · 3 nights" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+        </div>
+        <div>
+          <label for="inv-amount" class="block text-sm font-medium text-gray-700 mb-1">Amount (USD)</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+            <input id="inv-amount" type="number" min="1" step="0.01" required class="w-full pl-7 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+          </div>
+        </div>
+        <div class="flex items-center gap-3 pt-1">
+          <button type="submit" id="inv-send" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-amber-600 rounded-lg hover:bg-amber-700 transition-colors">Send PayPal invoice</button>
+          <span id="inv-msg" class="text-sm" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+
+      <div class="px-5 pb-5">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-sm font-semibold text-gray-700">Invoices for this event</h3>
+          <button type="button" id="inv-refresh" class="text-xs text-amber-700 hover:text-amber-900">↻ Refresh status</button>
+        </div>
+        <div id="inv-list" class="space-y-2 text-sm"><p class="text-gray-400">Loading…</p></div>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const modal = document.getElementById('invoice-modal');
+      if (!modal) return;
+      const backdrop = document.getElementById('invoice-backdrop');
+      const titleEvent = document.getElementById('inv-modal-event');
+      const form = document.getElementById('inv-form');
+      const listEl = document.getElementById('inv-list');
+      const msg = document.getElementById('inv-msg');
+      const sendBtn = document.getElementById('inv-send');
+      let eventId = null;
+
+      const money = (c) => '$' + (Math.round(c) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
+      const setMsg = (t, cls) => { msg.textContent = t; msg.className = 'text-sm ' + (cls || 'text-gray-500'); };
+
+      const STATUS_STYLE = {
+        PAID: 'text-green-700 bg-green-50 border-green-200',
+        MARKED_AS_PAID: 'text-green-700 bg-green-50 border-green-200',
+        SENT: 'text-amber-700 bg-amber-50 border-amber-200',
+        UNPAID: 'text-amber-700 bg-amber-50 border-amber-200',
+        PARTIALLY_PAID: 'text-blue-700 bg-blue-50 border-blue-200',
+        CANCELLED: 'text-gray-500 bg-gray-50 border-gray-200',
+        REFUNDED: 'text-gray-500 bg-gray-50 border-gray-200',
+      };
+
+      function render(invoices) {
+        if (!invoices || !invoices.length) { listEl.innerHTML = '<p class="text-gray-400">No invoices yet.</p>'; return; }
+        listEl.innerHTML = invoices.map((inv) => {
+          const cls = STATUS_STYLE[inv.status] || 'text-gray-600 bg-gray-50 border-gray-200';
+          const paid = inv.paid || inv.status === 'PAID' || inv.status === 'MARKED_AS_PAID';
+          return '<div class="flex items-center justify-between gap-2 p-2 border border-gray-100 rounded-lg">' +
+            '<div class="min-w-0"><div class="font-medium text-gray-900 truncate">' + esc(inv.name) + ' · ' + money(inv.amountCents) + '</div>' +
+            '<div class="text-xs text-gray-500 truncate">' + esc(inv.email) + (inv.accommodation ? ' · ' + esc(inv.accommodation) : '') + '</div></div>' +
+            '<div class="flex items-center gap-2 flex-shrink-0">' +
+            '<span class="px-2 py-0.5 text-xs font-semibold rounded-full border ' + cls + '">' + (paid ? 'Paid' : esc((inv.status || '').replace(/_/g, ' ').toLowerCase())) + '</span>' +
+            (inv.paymentUrl ? '<a href="' + esc(inv.paymentUrl) + '" target="_blank" rel="noopener" class="text-xs text-amber-700 hover:text-amber-900">view</a>' : '') +
+            '</div></div>';
+        }).join('');
+      }
+
+      async function api(payload) {
+        const r = await fetch('/api/admin/events/invoice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        return r.json();
+      }
+      async function loadList() {
+        listEl.innerHTML = '<p class="text-gray-400">Loading…</p>';
+        try { const d = await api({ op: 'list', eventId }); render(d.invoices || []); } catch { listEl.innerHTML = '<p class="text-red-500">Failed to load.</p>'; }
+      }
+      function open(id, title) {
+        eventId = id; titleEvent.textContent = title || '';
+        form.reset(); setMsg('');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+        loadList();
+      }
+      function close() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+
+      document.querySelectorAll('.invoice-btn').forEach((b) => b.addEventListener('click', () => open(b.dataset.eventId, b.dataset.eventTitle)));
+      document.getElementById('inv-close').addEventListener('click', close);
+      backdrop.addEventListener('click', close);
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) close(); });
+      document.getElementById('inv-refresh').addEventListener('click', async () => {
+        listEl.innerHTML = '<p class="text-gray-400">Checking PayPal…</p>';
+        try { const d = await api({ op: 'refresh', eventId }); render(d.invoices || []); } catch { loadList(); }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('inv-name').value.trim();
+        const email = document.getElementById('inv-email').value.trim();
+        const accommodation = document.getElementById('inv-accom').value.trim();
+        const amount = parseFloat(document.getElementById('inv-amount').value);
+        if (!name || !email || !(amount > 0)) { setMsg('Fill in name, email and amount.', 'text-red-600'); return; }
+        sendBtn.disabled = true; setMsg('Sending invoice…');
+        try {
+          const d = await api({ op: 'create', eventId, name, email, accommodation, amount });
+          if (d && d.ok) { setMsg('Invoice sent ✓' + (d.env === 'sandbox' ? ' (sandbox)' : ''), 'text-green-600'); form.reset(); loadList(); }
+          else setMsg((d && d.error) || 'Failed to send.', 'text-red-600');
+        } catch { setMsg('Network error.', 'text-red-600'); }
+        sendBtn.disabled = false;
+      });
+    })();
+  </script>
 </Layout>
