@@ -13,7 +13,7 @@ export const selectors = {
   heroSection: '[data-testid="hero"], #superhero, .superhero',
   categoriesSection: '[data-testid="categories"], #programs, #drbicategories, .drbicategories, .category-card, .event-calendar',
   videoPlayer: '[data-testid="video-player"], video, iframe[src*="youtube"], .video-player-thumbnail',
-  eventsSection: '[data-testid="events-section"], .event-calendar',
+  eventsSection: '[data-testid="events-section"], .event-calendar, .home-events',
   newsletterLink: 'a[href*="eepurl"], a[href*="newsletter"]',
 
   // Events

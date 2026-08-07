@@ -40,6 +40,16 @@ Then('the video thumbnail image should load successfully', async function () {
   }
 
   const img = thumbnail.first();
+  // The thumbnail is loading="lazy" and below the fold, so it only fetches once
+  // scrolled into view — bring it in and await the load before checking naturalWidth.
+  await img.scrollIntoViewIfNeeded();
+  await img.evaluate(el => el.complete && el.naturalWidth > 0
+    ? true
+    : new Promise((resolve) => {
+        el.addEventListener('load', resolve, { once: true });
+        el.addEventListener('error', resolve, { once: true });
+        setTimeout(resolve, 5000);
+      }));
   const naturalWidth = await img.evaluate(el => el.naturalWidth);
   if (naturalWidth === 0) {
     throw new Error('Video thumbnail image failed to load');
