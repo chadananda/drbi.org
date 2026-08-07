@@ -40,13 +40,20 @@ export const POST = async (context) => {
         fetchHumanitixOrders(apiKey, extId).catch(() => []),
         fetchHumanitixTickets(apiKey, extId).catch(() => []),
       ]);
-      const seen = new Map();
+      // Dedupe by person (name + email), not email alone — so two people sharing one booking
+      // email both appear, while a single person's duplicate tickets collapse to one entry.
+      const seen = new Set();
+      const registrants = [];
       for (const r of buildRegistrantRows(tickets, orders, [])) {
         const email = String(r.email || '').trim().toLowerCase();
-        if (!EMAIL_RE.test(email) || seen.has(email)) continue;
-        seen.set(email, { name: String(r.name || '').trim() || email, email });
+        if (!EMAIL_RE.test(email)) continue;
+        const name = String(r.name || '').trim();
+        const key = name.toLowerCase() + '|' + email;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        registrants.push({ name: name || email, email });
       }
-      const registrants = [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+      registrants.sort((a, b) => a.name.localeCompare(b.name));
       return json({ ok: true, registrants });
     } catch (e) {
       return json({ ok: true, registrants: [], error: String(e?.message || e) });
