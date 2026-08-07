@@ -34,6 +34,9 @@ src/data/analytics-imports/
 .DS_Store
 .vscode
 
+# auto-generated runtime files
+cron-last-run.json
+
 # misc
 extra/
 public/posts/
