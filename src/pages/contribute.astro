@@ -1,7 +1,7 @@
 ---
 // Contribute page — bespoke "desert dawn" editorial giving page. Cinematic hero, a donor
 // testimonial centerpiece, clearly-named funds, and each Givebutter campaign in its own band.
-// Deps: Layout (nav/footer/SEO), CdnImage (ImageKit), Givebutter widget script. Fonts: Fraunces + Newsreader.
+// Deps: Layout (nav/footer/SEO), CdnImage (ImageKit), Givebutter (lazy). Fonts: self-hosted Fraunces (display) + Merriweather (body).
 export const prerender = true;
 
 import Layout from "@layouts/Layout.astro";
@@ -13,9 +13,6 @@ const heroBase = "https://cdn.shrtr.com/drbi.org/site/drbi/contribute.webp";
 const heroWidths = [480, 768, 1080, 1440, 1920];
 const heroSrcset = heroWidths.map((w) => `${imagekitUrl(heroBase, { w, quality: 62 })} ${w}w`).join(", ");
 const heroSrc = imagekitUrl(heroBase, { w: 1200, quality: 62 });
-
-const fontsHref =
-  "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap";
 
 const title = "Contribute to DRBI";
 const description =
@@ -68,11 +65,8 @@ const campaigns = [
 <Layout title={title} description={description} image="/drbi-landscape.webp">
   {/* Preload the LCP hero image (responsive) so it starts before CSS/JS */}
   <link rel="preload" as="image" imagesrcset={heroSrcset} imagesizes="100vw" fetchpriority="high" />
-  {/* Fonts: non-render-blocking (preload → promote to stylesheet on load) */}
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="preload" as="style" href={fontsHref} onload="this.onload=null;this.rel='stylesheet'" />
-  <noscript><link rel="stylesheet" href={fontsHref} /></noscript>
+  {/* Fraunces (display) is self-hosted same-origin (@font-face below); body copy reuses the
+      already-loaded Merriweather. No external font origins on the critical path. */}
 
   <main class="give">
     <!-- ────────────────────────  HERO  ──────────────────────── -->
@@ -266,6 +260,23 @@ const campaigns = [
 </Layout>
 
 <style>
+  /* Self-hosted Fraunces (variable) — same origin, no external font request. Body falls back to
+     the already-loaded Merriweather while these swap in (both serif → negligible shift). */
+  @font-face {
+    font-family: "Fraunces";
+    src: url("/fonts/fraunces-vf.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Fraunces";
+    src: url("/fonts/fraunces-italic-vf.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+  }
+
   .give {
     --sand: #f7f1e6;
     --sand-deep: #efe2cd;
@@ -284,8 +295,8 @@ const campaigns = [
 
     background: var(--cream);
     color: var(--body);
-    font-family: "Newsreader", Georgia, serif;
-    font-size: 1.06rem;
+    font-family: "Merriweather", Georgia, serif;
+    font-size: 1.04rem;
     line-height: 1.7;
     overflow-x: clip;
   }
