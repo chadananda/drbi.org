@@ -6,6 +6,16 @@ export const prerender = true;
 
 import Layout from "@layouts/Layout.astro";
 import CdnImage from "@components/CdnImage.astro";
+import { imagekitUrl } from "@utils/utils.js";
+
+// LCP hero — responsive AVIF/WebP (f-auto), lower quality for a watercolor, preloaded in <head>.
+const heroBase = "https://cdn.shrtr.com/drbi.org/site/drbi/contribute.webp";
+const heroWidths = [480, 768, 1080, 1440, 1920];
+const heroSrcset = heroWidths.map((w) => `${imagekitUrl(heroBase, { w, quality: 62 })} ${w}w`).join(", ");
+const heroSrc = imagekitUrl(heroBase, { w: 1200, quality: 62 });
+
+const fontsHref =
+  "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap";
 
 const title = "Contribute to DRBI";
 const description =
@@ -56,24 +66,28 @@ const campaigns = [
 ---
 
 <Layout title={title} description={description} image="/drbi-landscape.webp">
+  {/* Preload the LCP hero image (responsive) so it starts before CSS/JS */}
+  <link rel="preload" as="image" imagesrcset={heroSrcset} imagesizes="100vw" fetchpriority="high" />
+  {/* Fonts: non-render-blocking (preload → promote to stylesheet on load) */}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap"
-  />
-  <script async src="https://widgets.givebutter.com/latest.umd.cjs?acct=1qYQLHeWtFc20ZMq&p=other"></script>
+  <link rel="preload" as="style" href={fontsHref} onload="this.onload=null;this.rel='stylesheet'" />
+  <noscript><link rel="stylesheet" href={fontsHref} /></noscript>
 
   <main class="give">
     <!-- ────────────────────────  HERO  ──────────────────────── -->
     <section class="hero">
       <div class="hero__media">
-        <CdnImage
-          src="drbi.org/site/drbi/contribute.webp"
+        <img
+          src={heroSrc}
+          srcset={heroSrcset}
+          sizes="100vw"
           alt="Dawn over the Desert Rose campus in Eloy, Arizona"
-          w={2000}
+          width="1600"
+          height="1067"
           class="hero__img"
-          loading="eager"
+          fetchpriority="high"
+          decoding="async"
         />
       </div>
       <div class="hero__scrim"></div>
@@ -551,4 +565,23 @@ const campaigns = [
     { rootMargin: "0px 0px -12% 0px", threshold: 0.08 }
   );
   document.querySelectorAll(".reveal-up").forEach((el) => io.observe(el));
+
+  // Load the Givebutter widget script only as the funds section approaches — keeps the
+  // third-party JS entirely off the initial load (better LCP / no unused JS at start).
+  const fundsSection = document.querySelector(".ways");
+  if (fundsSection) {
+    const gio = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          const s = document.createElement("script");
+          s.src = "https://widgets.givebutter.com/latest.umd.cjs?acct=1qYQLHeWtFc20ZMq&p=other";
+          s.async = true;
+          document.body.appendChild(s);
+          gio.disconnect();
+        }
+      },
+      { rootMargin: "700px 0px" }
+    );
+    gio.observe(fundsSection);
+  }
 </script>
