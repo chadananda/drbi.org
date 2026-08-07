@@ -142,7 +142,8 @@ const campaigns = [
         <CdnImage
           src="drbi.org/site/drbi/study.webp"
           alt="Study and reflection at Desert Rose"
-          w={1400}
+          w={1100}
+          quality={60}
           class="quote__img"
           loading="lazy"
         />
@@ -175,7 +176,7 @@ const campaigns = [
       {campaigns.map((c, i) => (
         <article class={`band band--${c.tone} ${c.flip ? "band--flip" : ""} reveal-up`}>
           <div class="band__media">
-            <CdnImage src={c.image} alt={c.title} w={1200} class="band__img" loading="lazy" />
+            <CdnImage src={c.image} alt={c.title} w={900} quality={60} class="band__img" loading="lazy" />
             <span class="band__index" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
           </div>
           <div class="band__body">
@@ -232,7 +233,8 @@ const campaigns = [
         <CdnImage
           src="drbi.org/site/history/admin-bldg.webp"
           alt="Volunteers at work at Desert Rose"
-          w={1200}
+          w={900}
+          quality={60}
           class="volunteer__img"
           loading="lazy"
         />

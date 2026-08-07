@@ -231,7 +231,8 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
         auto-open our own popover (below the profile button) — see the script below. This
         g_id_onload only configures GIS so the rendered "Sign in with Google" button works. */}
     <div id="g_id_onload" data-client_id={googleClientId} data-callback="handleNavGoogle" data-auto_prompt="false"></div>
-    <script is:inline src="https://accounts.google.com/gsi/client" async></script>
+    {/* gsi/client (~200KB incl. its button + font) is lazy-loaded on first interaction — see the
+        loader in the script below — so it never sits on the initial/LCP critical path. */}
   </Fragment>
 )}
 
@@ -241,6 +242,23 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
     const menu = document.getElementById('account-menu');
     const msgEl = () => document.getElementById('nav-auth-msg');
     const setMsg = (text, ok) => { const m = msgEl(); if (m) { m.textContent = text; m.className = 'text-sm mt-2 ' + (ok ? 'text-green-600' : 'text-red-500'); } };
+
+    // Lazy-load Google Identity Services on first interaction — keeps ~200KB of third-party JS off
+    // the initial/LCP critical path. GIS auto-renders #g_id_onload + .g_id_signin once it loads.
+    if (document.getElementById('g_id_onload')) {
+      let gsiLoaded = false;
+      const loadGsi = () => {
+        if (gsiLoaded || document.getElementById('gsi-client-script')) return;
+        gsiLoaded = true;
+        const s = document.createElement('script');
+        s.id = 'gsi-client-script';
+        s.src = 'https://accounts.google.com/gsi/client';
+        s.async = true;
+        document.head.appendChild(s);
+      };
+      ['pointermove', 'pointerdown', 'keydown', 'touchstart', 'scroll'].forEach((ev) =>
+        window.addEventListener(ev, loadGsi, { once: true, passive: true }));
+    }
 
     if (btn && menu) {
       const loggedOut = !!document.getElementById('nav-magic-form');
