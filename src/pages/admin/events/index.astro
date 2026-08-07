@@ -985,14 +985,20 @@ const getEventLocation = (event) => {
       </div>
 
       <form id="inv-form" class="p-5 space-y-3">
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label for="inv-person" class="block text-sm font-medium text-gray-700 mb-1">Registrant</label>
+          <select id="inv-person" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-amber-500">
+            <option value="">Loading registrants…</option>
+          </select>
+        </div>
+        <div id="inv-manual" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label for="inv-name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
-            <input id="inv-name" type="text" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            <input id="inv-name" type="text" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
           </div>
           <div>
             <label for="inv-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input id="inv-email" type="email" required class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            <input id="inv-email" type="email" class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500" />
           </div>
         </div>
         <div>
@@ -1032,7 +1038,12 @@ const getEventLocation = (event) => {
       const listEl = document.getElementById('inv-list');
       const msg = document.getElementById('inv-msg');
       const sendBtn = document.getElementById('inv-send');
+      const personSel = document.getElementById('inv-person');
+      const manualBox = document.getElementById('inv-manual');
+      const nameInput = document.getElementById('inv-name');
+      const emailInput = document.getElementById('inv-email');
       let eventId = null;
+      let people = [];
 
       const money = (c) => '$' + (Math.round(c) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]));
@@ -1071,15 +1082,34 @@ const getEventLocation = (event) => {
         listEl.innerHTML = '<p class="text-gray-400">Loading…</p>';
         try { const d = await api({ op: 'list', eventId }); render(d.invoices || []); } catch { listEl.innerHTML = '<p class="text-red-500">Failed to load.</p>'; }
       }
+      async function loadPeople() {
+        personSel.innerHTML = '<option value="">Loading registrants…</option>';
+        try {
+          const d = await api({ op: 'registrants', eventId });
+          people = d.registrants || [];
+          const opts = people.map((p, i) => '<option value="' + i + '">' + esc(p.name) + ' — ' + esc(p.email) + '</option>').join('');
+          personSel.innerHTML =
+            '<option value="">' + (people.length ? 'Select a registrant…' : 'No registrants found') + '</option>' +
+            opts + '<option value="__manual__">✏️ Someone else…</option>';
+        } catch {
+          personSel.innerHTML = '<option value="">Could not load registrants</option><option value="__manual__">✏️ Enter manually…</option>';
+        }
+      }
       function open(id, title) {
         eventId = id; titleEvent.textContent = title || '';
-        form.reset(); setMsg('');
+        form.reset(); setMsg(''); manualBox.classList.add('hidden');
         modal.classList.remove('hidden'); modal.classList.add('flex');
+        loadPeople();
         loadList();
       }
       function close() { modal.classList.add('hidden'); modal.classList.remove('flex'); }
 
       document.querySelectorAll('.invoice-btn').forEach((b) => b.addEventListener('click', () => open(b.dataset.eventId, b.dataset.eventTitle)));
+      personSel.addEventListener('change', () => {
+        const manual = personSel.value === '__manual__';
+        manualBox.classList.toggle('hidden', !manual);
+        if (manual) nameInput.focus();
+      });
       document.getElementById('inv-close').addEventListener('click', close);
       backdrop.addEventListener('click', close);
       document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) close(); });
@@ -1090,11 +1120,19 @@ const getEventLocation = (event) => {
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const name = document.getElementById('inv-name').value.trim();
-        const email = document.getElementById('inv-email').value.trim();
+        let name = '', email = '';
+        if (personSel.value === '__manual__') {
+          name = nameInput.value.trim(); email = emailInput.value.trim();
+        } else if (personSel.value !== '') {
+          const p = people[Number(personSel.value)];
+          name = p?.name || ''; email = p?.email || '';
+        } else {
+          setMsg('Choose a registrant first.', 'text-red-600'); return;
+        }
         const accommodation = document.getElementById('inv-accom').value.trim();
         const amount = parseFloat(document.getElementById('inv-amount').value);
-        if (!name || !email || !(amount > 0)) { setMsg('Fill in name, email and amount.', 'text-red-600'); return; }
+        if (!name || !email) { setMsg('Pick a registrant, or enter a name and email.', 'text-red-600'); return; }
+        if (!(amount > 0)) { setMsg('Enter an amount.', 'text-red-600'); return; }
         sendBtn.disabled = true; setMsg('Sending invoice…');
         try {
           const d = await api({ op: 'create', eventId, name, email, accommodation, amount });

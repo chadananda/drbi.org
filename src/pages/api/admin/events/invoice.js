@@ -4,6 +4,9 @@
 export const prerender = false;
 import { getAdmin } from '@lib/server/admin-guard';
 import { getEventById } from '@lib/queries';
+import { getEnv } from '@lib/runtime-env';
+import { fetchHumanitixOrders, fetchHumanitixTickets } from '@lib/humanitix';
+import { buildRegistrantRows } from '@lib/event-registrations';
 import { createAndSendInvoice, paypalEnv } from '@lib/server/paypal';
 import { addEventInvoice, listEventInvoices, deleteEventInvoice } from '@lib/server/event-invoices';
 import { refreshOpenInvoices } from '@lib/server/invoice-sync';
@@ -23,6 +26,31 @@ export const POST = async (context) => {
 
   if (op === 'list') {
     return json({ ok: true, invoices: await listEventInvoices(eventId) });
+  }
+
+  // Unique registrants (name + email) for the invoice picker — one entry per person.
+  if (op === 'registrants') {
+    const event = await getEventById(eventId);
+    const extId = event?.data?.externalId;
+    if (event?.data?.source !== 'humanitix' || !extId) return json({ ok: true, registrants: [] });
+    const apiKey = getEnv('HUMANITIX_API_KEY');
+    if (!apiKey) return json({ ok: true, registrants: [] });
+    try {
+      const [orders, tickets] = await Promise.all([
+        fetchHumanitixOrders(apiKey, extId).catch(() => []),
+        fetchHumanitixTickets(apiKey, extId).catch(() => []),
+      ]);
+      const seen = new Map();
+      for (const r of buildRegistrantRows(tickets, orders, [])) {
+        const email = String(r.email || '').trim().toLowerCase();
+        if (!EMAIL_RE.test(email) || seen.has(email)) continue;
+        seen.set(email, { name: String(r.name || '').trim() || email, email });
+      }
+      const registrants = [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
+      return json({ ok: true, registrants });
+    } catch (e) {
+      return json({ ok: true, registrants: [], error: String(e?.message || e) });
+    }
   }
 
   if (op === 'refresh') {
