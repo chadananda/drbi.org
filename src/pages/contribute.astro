@@ -18,8 +18,23 @@ const title = "Contribute to DRBI";
 const description =
   "Help Desert Rose Bahá'í Institute grow — green the campus, sustain the Firm Foundation study program, expand accommodations, or give where it's needed most. Every gift plants something lasting.";
 
-// The four ways to give. Each is its own editorial band; Givebutter ids are the live donation forms.
+// Each way to give is its own editorial band; Givebutter ids are the live donation forms.
+// The General Fund leads — it's where undirected gifts and current facilities needs go.
+const MAIL_TO = "Desert Rose Bahá'í Institute, 1950 W. William Sears Dr., Eloy, AZ 85131";
 const campaigns = [
+  {
+    key: "general",
+    kicker: "The General Fund",
+    title: "Give Where It's Needed Most",
+    lede:
+      "Desert Rose runs entirely on volunteers and the community it serves. A gift to the General Fund goes wherever the need is greatest — and our board directs it under its stewardship.",
+    body:
+      "Right now that means our facilities: crucial repairs, painting, building maintenance, and expanding housing so we can host more events and welcome more people to study and stay. Prefer to mail a check? Send it to " + MAIL_TO + ".",
+    image: "drbi.org/site/history/pavilion.webp",
+    tone: "gold",
+    widgets: ["g6dwxj"],
+    flip: false,
+  },
   {
     key: "bloom",
     kicker: "The Greening Fund",
@@ -31,7 +46,7 @@ const campaigns = [
     image: "drbi.org/site/agriculture/agr1.webp",
     tone: "sage",
     widgets: ["prMRQg", "g8AYAp"],
-    flip: false,
+    flip: true,
   },
   {
     key: "ffa",
@@ -44,19 +59,6 @@ const campaigns = [
     image: "drbi.org/site/drbi/winter-school.webp",
     tone: "ember",
     widgets: ["gBA2OL", "gJBA8g"],
-    flip: true,
-  },
-  {
-    key: "grow",
-    kicker: "The Growth Fund",
-    title: "Room to Welcome More",
-    lede:
-      "Desert Rose is 100% volunteer and self-sufficient — our revenue comes from hosting the very community we serve. Better accommodations mean more people can come, study, and stay.",
-    body:
-      "Help us improve dorms, guest rooms, and gathering spaces so no one is turned away for lack of a bed.",
-    image: "drbi.org/site/history/pavilion.webp",
-    tone: "gold",
-    widgets: ["g6dwxj"],
     flip: false,
   },
 ];
@@ -168,8 +170,8 @@ const campaigns = [
         <p class="eyebrow">Choose your fund</p>
         <h2 class="ways__title">Ways to give</h2>
         <p class="ways__note">
-          Each fund supports a specific corner of Desert Rose. Not sure? The general fund below lets
-          the board send your gift where it will do the most good.
+          Start with the General Fund below &mdash; the board sends it where it will do the most
+          good &mdash; or choose a fund that supports a specific corner of Desert Rose.
         </p>
       </header>
 
@@ -193,38 +195,6 @@ const campaigns = [
         </article>
       ))}
 
-      <!-- General fund + Amazon: the two "simplest" ways, side by side -->
-      <div class="simple">
-        <article class="simple__card simple__card--fund">
-          <p class="band__kicker">Where it's needed most</p>
-          <h3 class="simple__title">The General Fund</h3>
-          <p class="simple__desc">
-            Prefer to let us decide? Send a gift to the general fund and our board will direct it to
-            the greatest need &mdash; or mail a check to Desert Rose Bahá'í Institute, Eloy, Arizona.
-          </p>
-          <div class="band__give">
-            <a href="mailto:info@drbi.org?subject=Contribution%20to%20the%20DRBI%20General%20Fund" class="btn btn--solid">Give to the fund</a>
-          </div>
-        </article>
-
-        <article class="simple__card simple__card--amazon">
-          <p class="band__kicker">A gift on the shelf</p>
-          <h3 class="simple__title">Our Amazon Wishlist</h3>
-          <p class="simple__desc">
-            Gearing up the dorms for a busy season &mdash; pillows, sheets, blankets, shower
-            curtains, an Instant Pot or two, a reverse-osmosis filter. Buy an item and have it
-            shipped straight to us.
-          </p>
-          <div class="band__give">
-            <a
-              href="https://www.amazon.com/hz/wishlist/ls/K3TB7OCO64UF/ref=nav_wishlist_lists_1"
-              target="_blank"
-              rel="noopener"
-              class="btn btn--outline"
-            >View the wishlist &rarr;</a>
-          </div>
-        </article>
-      </div>
     </section>
 
     <!-- ────────────────────────  VOLUNTEER  ──────────────────────── -->
@@ -524,14 +494,6 @@ const campaigns = [
   .band--gold .band__kicker { color: #9a7a2f; }
   .band--gold:hover { border-color: #e6d4a4; }
 
-  /* general fund + amazon */
-  .simple { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 1rem; }
-  .simple__card { border-radius: 22px; padding: 2.4rem; border: 1px solid var(--line); }
-  .simple__card--fund { background: linear-gradient(150deg, #fff, var(--sand)); }
-  .simple__card--amazon { background: var(--sand); }
-  .simple__title { font-size: 1.7rem; font-weight: 400; margin: 0 0 0.8rem; }
-  .simple__desc { color: var(--body); margin: 0 0 1.5rem; font-size: 1.02rem; }
-
   /* ── VOLUNTEER ───────────────────────────────────────────── */
   .volunteer {
     max-width: 1180px; margin: 4.5rem auto; border-radius: 26px; overflow: hidden;
@@ -551,7 +513,7 @@ const campaigns = [
 
   /* ── RESPONSIVE ──────────────────────────────────────────── */
   @media (max-width: 860px) {
-    .band, .simple, .volunteer { grid-template-columns: 1fr; }
+    .band, .volunteer { grid-template-columns: 1fr; }
     .band--flip .band__media { order: 0; }
     .band__body, .band--flip .band__body { padding: 0.4rem 0.3rem 0.6rem; }
     .volunteer__media { min-height: 260px; }

@@ -7,7 +7,8 @@
    {"title": "Our Facilities", "path": "/facilities-and-rentals", "children": null},
    {"title": "Radio", "path": "/radio", "children": null},
    {"title": "Cemetery", "path": "/memorial", "children": null},
-   {"title": "Contact", "path": "/contact-us", "children": null}
+   {"title": "Contact", "path": "/contact-us", "children": null},
+   {"title": "Contribute", "path": "/contribute", "children": null}
  ],
   "companyLinks": [
     {"title": "About", "path": "/about-us", "children": null},
