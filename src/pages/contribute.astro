@@ -2,7 +2,10 @@
 // Contribute page — bespoke "desert dawn" editorial giving page. Cinematic hero, a donor
 // testimonial centerpiece, clearly-named funds, and each Givebutter campaign in its own band.
 // Deps: Layout (nav/footer/SEO), CdnImage (ImageKit), Givebutter (lazy). Fonts: self-hosted Fraunces (display) + Merriweather (body).
-export const prerender = true;
+// SSR (not prerendered): the shared navbar reads the per-request session (Astro.locals.user).
+// Prerendering froze it in a logged-out state here — the page was static from deploy time.
+// The page is still fast: hero is preloaded, fonts self-hosted, Givebutter lazy-loaded.
+export const prerender = false;
 
 import Layout from "@layouts/Layout.astro";
 import CdnImage from "@components/CdnImage.astro";
