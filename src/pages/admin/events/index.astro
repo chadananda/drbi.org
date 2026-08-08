@@ -286,12 +286,14 @@ const getEventLocation = (event) => {
                       </a>
                     )}
                     {event.isPrimary && invoiceTotals.get(event.id) && invoiceTotals.get(event.id).count > 0 && (
-                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-full" title="Accommodation invoices — billed / paid">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-full" title="Accommodation invoices — billed / collected / outstanding">
                         <span>🏠</span>
-                        <span>{money(invoiceTotals.get(event.id).billedCents)} billed</span>
+                        <span>{invoiceTotals.get(event.id).count} {invoiceTotals.get(event.id).count === 1 ? 'invoice' : 'invoices'}</span>
                         <span class="text-amber-400">·</span>
-                        <span>{money(invoiceTotals.get(event.id).paidCents)} paid</span>
-                        {invoiceTotals.get(event.id).openCount > 0 && (<><span class="text-amber-400">·</span><span>{invoiceTotals.get(event.id).openCount} open</span></>)}
+                        <span class="text-emerald-700">{money(invoiceTotals.get(event.id).paidCents)} paid</span>
+                        {(invoiceTotals.get(event.id).billedCents - invoiceTotals.get(event.id).paidCents) > 0 && (
+                          <><span class="text-amber-400">·</span><span class="text-amber-700 font-semibold">{money(invoiceTotals.get(event.id).billedCents - invoiceTotals.get(event.id).paidCents)} due{invoiceTotals.get(event.id).openCount > 0 ? ` (${invoiceTotals.get(event.id).openCount})` : ''}</span></>
+                        )}
                       </span>
                     )}
                   </div>

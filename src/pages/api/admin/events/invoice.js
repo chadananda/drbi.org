@@ -14,6 +14,20 @@ import { refreshOpenInvoices } from '@lib/server/invoice-sync';
 const json = (o, status = 200) => new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json' } });
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
+// "Nov 3–7, 2026" style range for the invoice; empty string if no valid start date.
+function formatEventDates(startStr, endStr) {
+  const start = startStr ? new Date(startStr) : null;
+  if (!start || isNaN(start)) return '';
+  const end = endStr ? new Date(endStr) : null;
+  const opts = { month: 'short', day: 'numeric' };
+  const startFmt = start.toLocaleDateString('en-US', opts);
+  const year = start.getFullYear();
+  if (!end || isNaN(end) || end.toDateString() === start.toDateString()) return `${startFmt}, ${year}`;
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+  const endFmt = end.toLocaleDateString('en-US', sameMonth ? { day: 'numeric' } : opts);
+  return `${startFmt}–${endFmt}, ${end.getFullYear()}`;
+}
+
 export const POST = async (context) => {
   const admin = await getAdmin(context, ['superadmin', 'admin']);
   if (!admin) return json({ ok: false, error: 'Unauthorized' }, 403);
@@ -84,16 +98,22 @@ export const POST = async (context) => {
 
     const amountCents = Math.round(amount * 100);
     const eventTitle = event.data?.name || event.data?.title || 'DRBI event';
-    const note = `Accommodations for ${eventTitle}${accommodation ? ` — ${accommodation}` : ''}.\nDesert Rose Bahá'í Institute, Eloy, Arizona.`;
+    const dateRange = formatEventDates(event.data?.startDate, event.data?.endDate);
+    const eventLabel = dateRange ? `${eventTitle} (${dateRange})` : eventTitle;
+    const note = `Accommodations arranged for you at Desert Rose Bahá'í Institute for ${eventLabel}.`
+      + `${accommodation ? `\nArrangement: ${accommodation}.` : ''}`
+      + `\nThank you — Desert Rose Bahá'í Institute, Eloy, Arizona.`;
 
     try {
       const inv = await createAndSendInvoice({
         name,
         email,
         itemName: `Accommodations — ${eventTitle}`,
-        description: accommodation || 'Accommodations at Desert Rose',
+        description: [accommodation || 'Accommodations at Desert Rose', dateRange && `Event dates: ${dateRange}`].filter(Boolean).join(' · '),
         amountCents,
         note,
+        reference: eventLabel,
+        memo: `event:${eventId}`,
       });
       const saved = await addEventInvoice({
         eventId, name, email, accommodation, amountCents,

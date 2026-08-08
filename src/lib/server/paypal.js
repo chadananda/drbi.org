@@ -19,7 +19,9 @@ const INVOICER = {
   phones: [{ country_code: '1', national_number: '5204667961', phone_type: 'MOBILE' }],
   address: { address_line_1: '1950 W. William Sears Dr.', admin_area_2: 'Eloy', admin_area_1: 'AZ', postal_code: '85131', country_code: 'US' },
   website: 'https://drbi.org',
-  logo_url: 'https://drbi.org/favicon.png',
+  email_address: 'info@drbi.org',
+  // Rose logo shown in the invoice header. Must be a public HTTPS raster image.
+  logo_url: 'https://drbi.org/invoice-logo.png',
 };
 
 async function accessToken() {
@@ -42,7 +44,7 @@ const splitName = (full) => {
 };
 
 // Create a draft invoice, send it, and return { id, status, paymentUrl }.
-export async function createAndSendInvoice({ name, email, itemName, description, amountCents, currency = 'USD', note, dueDays = 30 }) {
+export async function createAndSendInvoice({ name, email, itemName, description, amountCents, currency = 'USD', note, reference, memo, dueDays = 30 }) {
   const token = await accessToken();
   const value = (amountCents / 100).toFixed(2);
   const today = new Date().toISOString().split('T')[0];
@@ -53,6 +55,9 @@ export async function createAndSendInvoice({ name, email, itemName, description,
       invoice_date: today,
       currency_code: currency,
       note: note || '',
+      // reference (shown to payer) + memo (private) tie the invoice to its event.
+      ...(reference ? { reference: String(reference).slice(0, 120) } : {}),
+      ...(memo ? { memo: String(memo).slice(0, 500) } : {}),
       payment_term: { term_type: 'DUE_ON_DATE_SPECIFIED', due_date: due },
     },
     invoicer: INVOICER,
