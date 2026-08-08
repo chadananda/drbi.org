@@ -2,10 +2,10 @@
 // Contribute page — bespoke "desert dawn" editorial giving page. Cinematic hero, a donor
 // testimonial centerpiece, clearly-named funds, and each Givebutter campaign in its own band.
 // Deps: Layout (nav/footer/SEO), CdnImage (ImageKit), Givebutter (lazy). Fonts: self-hosted Fraunces (display) + Merriweather (body).
-// SSR (not prerendered): the shared navbar reads the per-request session (Astro.locals.user).
-// Prerendering froze it in a logged-out state here — the page was static from deploy time.
-// The page is still fast: hero is preloaded, fonts self-hosted, Givebutter lazy-loaded.
-export const prerender = false;
+// Prerendered → served identically to everyone from the CDN edge (fully cacheable, instant).
+// The navbar's per-user account button hydrates client-side (see navbar.astro's session island),
+// so no per-user data is baked into this cached HTML.
+export const prerender = true;
 
 import Layout from "@layouts/Layout.astro";
 import CdnImage from "@components/CdnImage.astro";
@@ -63,6 +63,45 @@ const campaigns = [
     tone: "ember",
     widgets: ["gBA2OL", "gJBA8g"],
     flip: false,
+  },
+  {
+    key: "arts",
+    kicker: "The Fund for the Arts",
+    title: "Music, Art, and the Life of the Spirit",
+    lede:
+      "From gallery walls to the piano in the hall, the arts are woven through life at Desert Rose — a language for the soul that draws the community together.",
+    body:
+      "Support exhibitions, instruments, and the artists and teachers who make Desert Rose a home for beauty.",
+    image: "drbi.org/site/drbi/arts.webp",
+    tone: "rose",
+    link: "https://givebutter.com/drbi-arts",
+    flip: true,
+  },
+  {
+    key: "memorial",
+    kicker: "The Memorial Garden",
+    title: "A Place of Peace and Remembrance",
+    lede:
+      "The Desert Rose Memorial Garden is a serene resting place in the open desert — tended with care for families and friends who wish to be remembered here.",
+    body:
+      "Your gift helps us care for the grounds, plantings, and pathways that keep the garden a place of quiet beauty.",
+    image: "drbi.org/site/heroes/memorial-garden-front.jpg",
+    tone: "sage",
+    link: "https://givebutter.com/hT7V0i",
+    flip: false,
+  },
+  {
+    key: "music",
+    kicker: "Music Education & Piano",
+    title: "Fill the Halls with Music",
+    lede:
+      "Desert Rose is raising support for music education and a fine piano — so recitals, lessons, and song can flourish in the hall and beyond.",
+    body:
+      "Help fund instruments, instruction, and the joy of music-making at Desert Rose.",
+    image: "drbi.org/site/history/hall.webp",
+    tone: "gold",
+    link: "https://givebutter.com/R452wn",
+    flip: true,
   },
 ];
 ---
@@ -190,9 +229,11 @@ const campaigns = [
             <p class="band__lede">{c.lede}</p>
             <p class="band__desc">{c.body}</p>
             <div class="band__give">
-              {c.widgets.map((id) => (
-                <givebutter-widget id={id}></givebutter-widget>
-              ))}
+              {c.widgets
+                ? c.widgets.map((id) => <givebutter-widget id={id}></givebutter-widget>)
+                : (
+                  <a href={c.link} target="_blank" rel="noopener" class="btn btn--solid">Donate &rarr;</a>
+                )}
             </div>
           </div>
         </article>
@@ -496,6 +537,8 @@ const campaigns = [
   .band--ember:hover { border-color: #eccba6; }
   .band--gold .band__kicker { color: #9a7a2f; }
   .band--gold:hover { border-color: #e6d4a4; }
+  .band--rose .band__kicker { color: #a85543; }
+  .band--rose:hover { border-color: #e6cabf; }
 
   /* ── VOLUNTEER ───────────────────────────────────────────── */
   .volunteer {

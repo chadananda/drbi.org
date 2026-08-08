@@ -240,56 +240,23 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
   (function () {
     const btn = document.getElementById('account-btn');
     const menu = document.getElementById('account-menu');
+    if (!btn || !menu) return;
     const msgEl = () => document.getElementById('nav-auth-msg');
     const setMsg = (text, ok) => { const m = msgEl(); if (m) { m.textContent = text; m.className = 'text-sm mt-2 ' + (ok ? 'text-green-600' : 'text-red-500'); } };
+    const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-    // Lazy-load Google Identity Services on first interaction — keeps ~200KB of third-party JS off
-    // the initial/LCP critical path. GIS auto-renders #g_id_onload + .g_id_signin once it loads.
-    if (document.getElementById('g_id_onload')) {
-      let gsiLoaded = false;
-      const loadGsi = () => {
-        if (gsiLoaded || document.getElementById('gsi-client-script')) return;
-        gsiLoaded = true;
-        const s = document.createElement('script');
-        s.id = 'gsi-client-script';
-        s.src = 'https://accounts.google.com/gsi/client';
-        s.async = true;
-        document.head.appendChild(s);
-      };
-      ['pointermove', 'pointerdown', 'keydown', 'touchstart', 'scroll'].forEach((ev) =>
-        window.addEventListener(ev, loadGsi, { once: true, passive: true }));
-    }
+    const isOpen = () => !menu.classList.contains('hidden');
+    const open = () => { menu.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); };
+    const close = () => { menu.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); };
+    // Wire the button/click-away/escape toggle. onClose lets the signed-out popover also mark
+    // itself "seen" so it doesn't auto-reopen.
+    const wireToggle = (onClose) => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); isOpen() ? onClose() : open(); });
+      document.addEventListener('click', (e) => { if (isOpen() && !menu.contains(e.target) && !btn.contains(e.target)) onClose(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) onClose(); });
+    };
 
-    if (btn && menu) {
-      const loggedOut = !!document.getElementById('nav-magic-form');
-      const PROMPTED = 'drbi_login_prompted';
-      const wasPrompted = () => { try { return sessionStorage.getItem(PROMPTED) === '1'; } catch (e) { return false; } };
-      const markPrompted = () => { try { sessionStorage.setItem(PROMPTED, '1'); } catch (e) {} };
-      const isOpen = () => !menu.classList.contains('hidden');
-      const open = () => { menu.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); };
-      const close = () => { menu.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); };
-      // Closing the sign-in popover counts as "seen it" — don't auto-reopen this session.
-      const dismiss = () => { close(); markPrompted(); };
-      btn.addEventListener('click', (e) => { e.stopPropagation(); isOpen() ? dismiss() : open(); });
-      document.addEventListener('click', (e) => { if (isOpen() && !menu.contains(e.target) && !btn.contains(e.target)) dismiss(); });
-      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen()) dismiss(); });
-      document.getElementById('nav-signin-close')?.addEventListener('click', (e) => { e.stopPropagation(); dismiss(); });
-
-      // Arriving from a bounce (?signin=1) or a failed magic link (?auth_error=…): open the popover.
-      const params = new URLSearchParams(location.search);
-      const forced = params.get('signin') === '1' || !!params.get('auth_error');
-      if (params.get('signin') === '1') open();
-      const err = params.get('auth_error');
-      if (err) { setMsg(err === 'invalid-or-expired' ? 'That sign-in link was invalid or expired. Request a new one.' : 'That account has been disabled. Contact an administrator.', false); open(); }
-
-      // Auto-open our sign-in popover below the navbar (replaces Google's over-the-navbar One Tap).
-      // Once per session for logged-out visitors, after the page settles; dismissing stops it.
-      if (loggedOut && !forced && !wasPrompted()) {
-        setTimeout(() => { if (!isOpen()) { open(); markPrompted(); } }, 900);
-      }
-    }
-
-    // Google One Tap / button callback (auto-prompts when signed into Google).
+    // Google One Tap / button callback (auto-prompts when signed into Google). Always defined.
     window.handleNavGoogle = async (response) => {
       try {
         const r = await fetch('/api/auth/google', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ credential: response.credential }) });
@@ -298,26 +265,109 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
         else { setMsg(data.error === 'account-disabled' ? 'That account has been disabled. Contact an administrator.' : 'Google sign-in failed.', false); }
       } catch { setMsg('Google sign-in failed.', false); }
     };
-
-    document.getElementById('nav-magic-form')?.addEventListener('submit', async (e) => {
+    // Sign out — delegated, so it works whether the menu was server-rendered or hydrated in.
+    document.addEventListener('click', (e) => {
+      const t = e.target.closest && e.target.closest('#signout-btn');
+      if (!t) return;
       e.preventDefault();
-      const email = document.getElementById('nav-magic-email').value.trim();
-      await fetch('/api/auth/request-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }).catch(() => {});
-      setMsg('If that email is authorized, a sign-in link is on its way. Check your inbox.', true);
+      fetch('/api/auth/logout', { method: 'POST' }).catch(() => {}).then(() => location.reload());
     });
 
-    document.getElementById('nav-pass-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const r = await fetch('/api/auth/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: fd.get('email'), password: fd.get('password') }) }).catch(() => null);
-      const data = r && await r.json().catch(() => null);
-      if (data && data.ok) { location.href = data.redirect || '/admin'; }
-      else { setMsg('Invalid email or password.', false); }
-    });
+    // Line-icon set (subset of AdminIcon) for the hydrated account menu's admin links.
+    const ICONS = {
+      dashboard: '<rect width="7" height="9" x="3" y="3" rx="1.5"/><rect width="7" height="5" x="14" y="3" rx="1.5"/><rect width="7" height="9" x="14" y="12" rx="1.5"/><rect width="7" height="5" x="3" y="16" rx="1.5"/>',
+      content: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v5h5"/><path d="M8 13h8"/><path d="M8 17h6"/>',
+      media: '<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+      events: '<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 2v4"/><path d="M16 2v4"/>',
+      tag: '<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/><circle cx="7.5" cy="7.5" r="1.2"/>',
+      organization: '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/>',
+      analytics: '<path d="M3 3v18h18"/><rect x="7" y="13" width="3" height="5" rx="1"/><rect x="12" y="9" width="3" height="9" rx="1"/><rect x="17" y="5" width="3" height="13" rx="1"/>',
+      team: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+      settings: '<path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7V20a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+      users: '<path d="M2.6 17.4A2 2 0 0 0 2 18.8V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.2a2 2 0 0 0 1.4-.6l.8-.8a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".6" fill="currentColor" stroke="none"/>',
+      logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+    };
+    const icon = (name) => `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`;
 
-    document.getElementById('signout-btn')?.addEventListener('click', async () => {
-      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
-      location.reload();
-    });
+    // The signed-out UI: lazy Google, magic-link/password forms, and the once-per-session
+    // auto-open popover that replaces Google's over-the-navbar One Tap.
+    const setupSignedOut = () => {
+      if (document.getElementById('g_id_onload')) {
+        let gsiLoaded = false;
+        const loadGsi = () => {
+          if (gsiLoaded || document.getElementById('gsi-client-script')) return;
+          gsiLoaded = true;
+          const s = document.createElement('script');
+          s.id = 'gsi-client-script'; s.src = 'https://accounts.google.com/gsi/client'; s.async = true;
+          document.head.appendChild(s);
+        };
+        ['pointermove', 'pointerdown', 'keydown', 'touchstart', 'scroll'].forEach((ev) =>
+          window.addEventListener(ev, loadGsi, { once: true, passive: true }));
+      }
+
+      const PROMPTED = 'drbi_login_prompted';
+      const wasPrompted = () => { try { return sessionStorage.getItem(PROMPTED) === '1'; } catch (e) { return false; } };
+      const markPrompted = () => { try { sessionStorage.setItem(PROMPTED, '1'); } catch (e) {} };
+      const dismiss = () => { close(); markPrompted(); };
+      wireToggle(dismiss);
+      document.getElementById('nav-signin-close')?.addEventListener('click', (e) => { e.stopPropagation(); dismiss(); });
+
+      const params = new URLSearchParams(location.search);
+      const forced = params.get('signin') === '1' || !!params.get('auth_error');
+      if (params.get('signin') === '1') open();
+      const err = params.get('auth_error');
+      if (err) { setMsg(err === 'invalid-or-expired' ? 'That sign-in link was invalid or expired. Request a new one.' : 'That account has been disabled. Contact an administrator.', false); open(); }
+      if (!forced && !wasPrompted()) setTimeout(() => { if (!isOpen()) { open(); markPrompted(); } }, 900);
+
+      document.getElementById('nav-magic-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('nav-magic-email').value.trim();
+        await fetch('/api/auth/request-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) }).catch(() => {});
+        setMsg('If that email is authorized, a sign-in link is on its way. Check your inbox.', true);
+      });
+      document.getElementById('nav-pass-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const r = await fetch('/api/auth/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: fd.get('email'), password: fd.get('password') }) }).catch(() => null);
+        const data = r && await r.json().catch(() => null);
+        if (data && data.ok) { location.href = data.redirect || '/admin'; }
+        else { setMsg('Invalid email or password.', false); }
+      });
+    };
+
+    // Replace the anonymous popover with the signed-in account menu (built from the session probe).
+    const renderSignedIn = (s) => {
+      const gid = document.getElementById('g_id_onload'); if (gid) gid.remove();
+      const u = s.user || {};
+      btn.classList.remove('ring-1', 'ring-gray-200', 'ring-amber-500', 'ring-green-500');
+      btn.classList.add('ring-2', s.isStaff ? 'ring-green-500' : 'ring-amber-500');
+      btn.innerHTML = u.avatar
+        ? `<img src="${esc(u.avatar)}" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover">`
+        : `<span class="acct-avatar" style="width:100%;height:100%">${esc(s.initials)}</span>`;
+      const links = (s.adminLinks || []).map((l) => `<a href="${esc(l.href)}" class="acct-item">${icon(l.icon)} ${esc(l.title)}</a>`).join('');
+      menu.innerHTML =
+        '<div>' +
+          '<div class="acct-head">' +
+            (u.avatar ? `<img src="${esc(u.avatar)}" alt="" referrerpolicy="no-referrer" class="acct-avatar-img">` : `<span class="acct-avatar">${esc(s.initials)}</span>`) +
+            `<div class="acct-id"><p class="acct-name">${esc(u.name || u.email)}</p>${u.email ? `<p class="acct-email">${esc(u.email)}</p>` : ''}</div>` +
+          '</div>' +
+          `<span class="acct-role">${esc(s.roleLabel)}</span>` +
+          (links ? `<nav aria-label="Admin sections" class="acct-links">${links}</nav>` : '') +
+          '<div class="acct-foot"><button id="signout-btn" type="button" class="acct-item acct-signout">' + icon('logout') + ' Sign out</button></div>' +
+        '</div>';
+      wireToggle(close);
+    };
+
+    if (document.getElementById('nav-magic-form')) {
+      // Navbar was rendered anonymous (prerendered / edge-cached page, or a real signed-out visitor).
+      // Probe the session and hydrate the account button if we're actually signed in.
+      fetch('/api/auth/session', { headers: { Accept: 'application/json' } })
+        .then((r) => (r.ok ? r.json() : { user: null }))
+        .then((s) => { s && s.user ? renderSignedIn(s) : setupSignedOut(); })
+        .catch(() => setupSignedOut());
+    } else {
+      // Server already rendered the signed-in menu (SSR page) — just wire the dropdown.
+      wireToggle(close);
+    }
   })();
 </script>
