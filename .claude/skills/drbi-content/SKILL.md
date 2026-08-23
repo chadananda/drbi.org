@@ -30,10 +30,16 @@ Other content: **`events`** (title, short/full_description, start_date, main_ima
 
 Images: drop them into the editor's image upload — it POSTs to `/api/upload_s3`, which writes to R2 via the `env.R2` binding (**no AWS keys**) and returns a `https://cdn.shrtr.com/drbi.org/...` URL. New uploads land under `drbi.org/uploads/`, `drbi.org/events/`, `drbi.org/team/`.
 
-## Programmatic (API) — for scripts/bulk
-Admin API routes require a valid session (`sessionid` from the `auth_session` cookie, or `Authorization: Bearer <sessionid>`), and Astro CSRF requires an `Origin` header matching the site.
-- **Content**: `POST /api/posts` or `POST /api/post_db` → `createContent`/`updateContent` (fields mirror the `content` columns; pass `content` for the markdown body).
-- **Events**: `POST /api/events` (create/update; `{id, ...}` updates).
+## Programmatic (API) — for scripts/bulk / Claude Code
+**Machine-readable contract:** `GET https://drbi.org/api/openapi.json` (OpenAPI 3.1) — the source of truth for the content + events API. Fetch it first.
+
+**Auth:** send the dedicated service token as `Authorization: Bearer <API_TOKEN>` (or `X-API-Key: <API_TOKEN>`) — it maps to superadmin and is set via `wrangler secret put API_TOKEN`. A Lucia session JWT also works as `Authorization: Bearer <jwt>`. Cross-origin writes also need `Origin: https://drbi.org` (Astro CSRF). All writes hit D1 and are **live immediately — no redeploy**.
+
+- **Events (free/manual only)** — clean REST; Humanitix (paid) events are read-only (create/edit them in Humanitix):
+  - `GET /api/events` (public: visible; `?all=1` staff: incl. hidden; `?source=manual|humanitix`, `?upcoming=1`)
+  - `POST /api/events` → create (body = camelCase event fields; `source` is forced `manual`; returns `{id,slug,url,event}`)
+  - `GET|PATCH|DELETE /api/events/{id}` → read / partial-update / delete a manual event (`PATCH` also does `visible`, `capacity`, `waitlistOverride`)
+- **Content**: `POST /api/posts` `{action:'create'|'delete', type, title, content, frontmatter}`, `PUT /api/posts?id=<id>`, `GET /api/posts?type=&search=`.
 - **Users**: `POST /api/users` `{name, email, role}` (password optional — passwordless whitelist), `DELETE /api/users?id=<id>`.
 
 ## Direct D1 (power user only — verify before writing)

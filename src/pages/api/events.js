@@ -1,182 +1,105 @@
 export const prerender = false;
-
+// :arch: public + admin events API. GET lists events; POST creates a manual (free) event.
+//        Per-event GET/PATCH/DELETE live in ./events/[id].js. Humanitix events are read-only.
+// :why: extends the internal content-CRUD API (see /api/posts) so Claude Code can manage
+//       non-ticketed events without a redeploy — writes hit D1 and are live immediately.
+// :rules: writes only ever create source='manual'. Auth via getAdmin (cookie / API token /
+//         Bearer JWT). Legacy {action,...} POST (admin UI, sessionid-in-body) kept working.
 import { lucia } from "../../lib/auth";
 import {
-  getVisibleEvents,
-  getEventById,
-  createEvent,
-  updateEvent,
-  deleteEvent,
-  toggleEventVisibility,
+  getVisibleEvents, getUpcomingEvents, getEvents, getEventById,
+  createEvent, updateEvent, deleteEvent, toggleEventVisibility, setEventMeta,
 } from "../../lib/queries";
+import { getAdmin } from "../../lib/server/admin-guard";
+import { pickEventContent, pickEventMeta, validateEventInput } from "../../lib/event-input.js";
+import { eventSlug } from "../../lib/event-slug.js";
 
-// GET - Retrieve all visible events from Turso, sorted by start date
-export const GET = async ({ request }) => {
+const json = (o, status = 200, headers = {}) =>
+  new Response(JSON.stringify(o), { status, headers: { 'Content-Type': 'application/json', ...headers } });
+
+export const GET = async (context) => {
   try {
-    const events = await getVisibleEvents();
-    return new Response(JSON.stringify(events), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=300',
-      }
-    });
+    const url = new URL(context.request.url);
+    const wantAll = ['1', 'true'].includes(url.searchParams.get('all') || '');
+    const source = url.searchParams.get('source');
+    if (wantAll) {
+      const admin = await getAdmin(context);
+      if (!admin) return json({ ok: false, error: 'Unauthorized' }, 401);
+      let events = await getEvents();
+      if (source) events = events.filter(e => e.data.source === source);
+      return json(events, 200, { 'Cache-Control': 'private, no-store' });
+    }
+    let events = url.searchParams.get('upcoming') ? await getUpcomingEvents() : await getVisibleEvents();
+    if (source) events = events.filter(e => e.data.source === source);
+    return json(events, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=300' });
   } catch (error) {
-    console.error('Error retrieving events:', error);
-    return new Response('Error retrieving events', { status: 500 });
+    console.error('GET /api/events error:', error);
+    return json({ ok: false, error: 'Error retrieving events' }, 500);
   }
 };
 
-// POST - Event operations (create, update, delete, sync)
-export const POST = async ({ request }) => {
+export const POST = async (context) => {
+  let body;
+  try { body = await context.request.json(); }
+  catch { return json({ ok: false, error: 'Invalid JSON body' }, 400); }
+  // Legacy action-based path (admin UI: create/update/delete/toggle-visibility, sessionid in body).
+  if (body && body.action !== undefined) return legacyDispatch(body);
+  // Clean REST create — cookie / API-token / Bearer-JWT auth.
+  const admin = await getAdmin(context, ['superadmin', 'admin']);
+  if (!admin) return json({ ok: false, error: 'Unauthorized' }, 401);
+  const errors = validateEventInput(body);
+  if (errors.length) return json({ ok: false, errors }, 422);
   try {
-    const { action, eventData, sessionid } = await request.json();
-
-    // Auth required for all write operations
-    if (!sessionid) {
-      return new Response('Session ID required', { status: 401 });
-    }
-    const { user } = await lucia.validateSession(sessionid);
-    if (!user) return new Response('Invalid session', { status: 401 });
-    // Editing events (create/update/delete/toggle-visibility) is limited to admins. All other
-    // team members get read-only event access + the coordination thread (see /api/admin/events/thread).
-    if (!['superadmin', 'admin'].includes(user.role)) {
-      return new Response(`Access denied`, { status: 403 });
-    }
-
-    switch (action) {
-      case 'create':
-        return await handleCreateEvent(eventData);
-      case 'update':
-        return await handleUpdateEvent(eventData);
-      case 'delete':
-        return await handleDeleteEvent(eventData);
-      case 'toggle-visibility':
-        return await handleToggleVisibility(eventData);
-      default:
-        return new Response('Invalid action', { status: 400 });
-    }
+    const slug = eventSlug({ data: { title: body.title, name: body.name, startDate: body.startDate } });
+    const clash = (await getEvents()).find(e => eventSlug(e) === slug);
+    if (clash) return json({ ok: false, error: 'An event with this title and year already exists', conflictSlug: slug, conflictId: clash.id }, 409);
+    const created = await createEvent({ ...pickEventContent(body), source: 'manual' });
+    const meta = pickEventMeta(body);
+    if (Object.keys(meta).length) await setEventMeta(created.id, { capacity: meta.capacity ?? null, waitlistOverride: meta.waitlistOverride ?? null });
+    const event = await getEventById(created.id);
+    return json({ ok: true, id: event.id, slug, url: `/events/${slug}`, event }, 201);
   } catch (error) {
-    console.error('Error in events API:', error);
-    return new Response('Server error', { status: 500 });
+    console.error('POST /api/events (create) error:', error);
+    return json({ ok: false, error: 'Error creating event' }, 500);
   }
 };
 
-async function handleCreateEvent(eventData) {
-  if (!eventData?.title || !eventData?.startDate) {
-    return new Response('Title and start date are required', { status: 400 });
-  }
-
+// ─── Legacy action dispatch (admin UI) — auth via sessionid in the JSON body ──────────────
+async function legacyDispatch(body) {
+  const { action, eventData, sessionid } = body;
+  if (!sessionid) return json({ ok: false, error: 'Session ID required' }, 401);
+  const { user } = await lucia.validateSession(sessionid);
+  if (!user) return json({ ok: false, error: 'Invalid session' }, 401);
+  if (!['superadmin', 'admin'].includes(user.role)) return json({ ok: false, error: 'Access denied' }, 403);
   try {
-    const result = await createEvent({
-      title: eventData.title,
-      short_description: eventData.shortDescription ?? '',
-      full_description: eventData.fullDescription ?? '',
-      start_date: eventData.startDate,
-      end_date: eventData.endDate ?? eventData.startDate,
-      location: eventData.location ?? {},
-      price: eventData.price ?? null,
-      registration_url: eventData.registrationUrl ?? null,
-      main_image: eventData.mainImage ?? '',
-      teacher_image: eventData.teacherImage ?? '',
-      highlights: eventData.highlights ?? [],
-      event_schedule: eventData.eventSchedule ?? [],
-      organizer: eventData.organizer ?? 'DRBI',
-      categories: eventData.categories ?? [],
-      source: 'manual',
-      visible: 1,
-    });
-
-    return new Response(JSON.stringify({ success: true, eventId: result.id }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
-    console.error('Error creating event:', error);
-    return new Response('Error creating event', { status: 500 });
-  }
-}
-
-async function handleUpdateEvent(eventData) {
-  if (!eventData?.id) return new Response('Event ID required', { status: 400 });
-
-  const existing = await getEventById(eventData.id);
-  if (!existing) return new Response('Event not found', { status: 404 });
-
-  // Synced events (Humanitix etc.) are owned by their source — the only website-side override
-  // is hide/show (toggle-visibility). Refuse content edits so they always stay in sync.
-  if (existing.data.source && existing.data.source !== 'manual') {
-    return new Response(JSON.stringify({ success: false,
-      error: 'This event is managed on Humanitix. Edit it there — the website only controls hide/show.' }), {
-      status: 403, headers: { 'Content-Type': 'application/json' }
-    });
-  }
-
-  try {
-    await updateEvent(eventData.id, {
-      title: eventData.title,
-      short_description: eventData.shortDescription,
-      full_description: eventData.fullDescription,
-      start_date: eventData.startDate,
-      end_date: eventData.endDate,
-      location: eventData.location,
-      price: eventData.price,
-      registration_url: eventData.registrationUrl,
-      sponsorPageUrl: eventData.sponsorPageUrl,
-      main_image: eventData.mainImage,
-      teacher_image: eventData.teacherImage,
-      highlights: eventData.highlights,
-      event_schedule: eventData.eventSchedule,
-      organizer: eventData.organizer,
-      categories: eventData.categories,
-      manually_edited: 1,
-      last_manual_edit: new Date().toISOString(),
-    });
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
-    console.error('Error updating event:', error);
-    return new Response('Error updating event', { status: 500 });
-  }
-}
-
-async function handleDeleteEvent(eventData) {
-  if (!eventData?.id) return new Response('Event ID required', { status: 400 });
-
-  try {
-    await deleteEvent(eventData.id);
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch (error) {
-    console.error('Error deleting event:', error);
-    return new Response('Error deleting event', { status: 500 });
-  }
-}
-
-async function handleToggleVisibility(eventData) {
-  if (!eventData?.id) return new Response('Event ID required', { status: 400 });
-
-  try {
-    const result = await toggleEventVisibility(eventData.id);
-    if (result.blocked) {
-      return new Response(JSON.stringify({ success: false, blocked: true, visible: false,
-        error: 'This event is not published on Humanitix yet, so it cannot be shown on drbi.org.' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
+    if (action === 'create') {
+      if (!eventData?.title || !eventData?.startDate) return json({ ok: false, error: 'Title and start date are required' }, 400);
+      const created = await createEvent({ ...pickEventContent(eventData), source: 'manual' });
+      return json({ success: true, eventId: created.id });
     }
-    return new Response(JSON.stringify({ success: true, visible: result.visible }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    if (action === 'update') {
+      if (!eventData?.id) return json({ ok: false, error: 'Event ID required' }, 400);
+      const existing = await getEventById(eventData.id);
+      if (!existing) return json({ ok: false, error: 'Event not found' }, 404);
+      if (existing.data.source && existing.data.source !== 'manual')
+        return json({ success: false, error: 'This event is managed on Humanitix. Edit it there — the website only controls hide/show.' }, 403);
+      await updateEvent(eventData.id, { ...pickEventContent(eventData), sponsorPageUrl: eventData.sponsorPageUrl });
+      return json({ success: true });
+    }
+    if (action === 'delete') {
+      if (!eventData?.id) return json({ ok: false, error: 'Event ID required' }, 400);
+      await deleteEvent(eventData.id);
+      return json({ success: true });
+    }
+    if (action === 'toggle-visibility') {
+      if (!eventData?.id) return json({ ok: false, error: 'Event ID required' }, 400);
+      const result = await toggleEventVisibility(eventData.id);
+      if (result.blocked) return json({ success: false, blocked: true, visible: false, error: 'This event is not published on Humanitix yet, so it cannot be shown on drbi.org.' });
+      return json({ success: true, visible: result.visible });
+    }
+    return json({ ok: false, error: 'Invalid action' }, 400);
   } catch (error) {
-    console.error('Error toggling visibility:', error);
-    return new Response('Error toggling visibility', { status: 500 });
+    console.error('POST /api/events (legacy) error:', error);
+    return json({ ok: false, error: 'Server error' }, 500);
   }
 }
-
