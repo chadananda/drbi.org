@@ -1,0 +1,5 @@
+---
+// Canonical alias: /contact → /contact-us. The house standard expects /contact to resolve.
+export const prerender = false;
+return Astro.redirect("/contact-us", 301);
+---

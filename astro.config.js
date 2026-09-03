@@ -55,7 +55,7 @@ const minifyConfig = {
 
 // https://astro.build/config
 export default defineConfig({
-  server: { port: 4850 },
+  server: { port: 4314 }, // pinned dev port, reserved in ~/Projects/DEV-PORTS.md
   devToolbar: {
     enabled: false
   },

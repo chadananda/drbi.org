@@ -1,0 +1,5 @@
+---
+// Canonical alias: /about → /about-us. The house standard expects /about to resolve.
+export const prerender = false;
+return Astro.redirect("/about-us", 301);
+---

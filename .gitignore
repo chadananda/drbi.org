@@ -30,8 +30,9 @@ src/data/analytics-imports/
 !src/data/analytics-summary.json
 .env.development.local
 
-# macOS-specific files and dev
+# macOS / Windows junk files
 .DS_Store
+Thumbs.db
 .vscode
 
 # auto-generated runtime files
@@ -56,6 +57,7 @@ cron-last-run.json
 tests/reports/
 .dev.vars
 
-# --- standard hygiene ---
-Thumbs.db
+# Dropbox conflict artifacts — these defeat rules anchored on `.env$`
+# (e.g. ".env (Chad's conflicted copy 2026-04-01)") and have leaked keys before.
 *conflicted copy*
+*Conflicted Copy*
