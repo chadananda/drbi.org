@@ -55,3 +55,7 @@ cron-last-run.json
 /playwright/.cache/
 tests/reports/
 .dev.vars
+
+# --- standard hygiene ---
+Thumbs.db
+*conflicted copy*
