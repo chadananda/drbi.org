@@ -150,3 +150,17 @@ export async function resolvePage({ route, getRow, enabled = false, cdnBase = ''
   if (debug) console.log(`[d1-pages] ${route}: SERVED FROM D1 (${verdict.html.length} chars)`);
   return { row, html: verdict.html };
 }
+
+/**
+ * Make the pre-rendered HTML match what Astro's own page pipeline emits, so a
+ * body served from D1 is character-equivalent to the same page from its file.
+ * Applied at ingest, so the Worker needs no Markdown dependency to run it.
+ */
+export function normalizeRenderedHtml(html = '') {
+  const s = String(html ?? '');
+  if (!s) return s;
+  // Astro emits the named `&amp;`; the standalone processor emits numeric `&#x26;` — same character.
+  const named = s.replace(/&#x26;/g, '&amp;');
+  // Astro's slot render ends the markdown block with a newline; the processor does not.
+  return named.endsWith('\n') ? named : `${named}\n`;
+}

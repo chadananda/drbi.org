@@ -15,7 +15,8 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
-import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import { createMarkdownProcessor, markdownConfigDefaults } from '@astrojs/markdown-remark';
+import { normalizeRenderedHtml } from '../src/lib/page-render.js';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -69,13 +70,14 @@ const usesComponents = (body) =>
 // Astro's own processor with the project's (default) markdown config, so the
 // stored HTML matches what Astro produces for the same file. Running it here,
 // at ingest time, keeps ~2.1 MB gzipped of shiki out of the Worker bundle.
-const processor = await createMarkdownProcessor({});
+const processor = await createMarkdownProcessor(markdownConfigDefaults);
 
 async function renderBody(md) {
   const src = String(md ?? '').trim();
   if (!src) return '';
   const { code } = await processor.render(src);
-  return code;
+  // Match Astro's own page output exactly — see normalizeRenderedHtml.
+  return normalizeRenderedHtml(code);
 }
 
 async function collectPages() {

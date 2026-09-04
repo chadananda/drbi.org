@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   hasRelativeImages, relativeImages, baseDirFor, normalisePath,
-  rewriteImagePaths, canRenderFromD1, hasCodeBlock, skipReason, decidePage, resolvePage,
+  rewriteImagePaths, canRenderFromD1, hasCodeBlock, skipReason, decidePage, resolvePage, normalizeRenderedHtml,
 } from '../../src/lib/page-render.js';
 
 const CDN = 'https://cdn.example.com/drbi.org';
@@ -253,5 +253,50 @@ test('resolvePage — loader behaviour', async (t) => {
   await t.test('relative images with no CDN base -> null rather than a 404 image', async () => {
     const dirty = { ...row, html: '<img src="./_a.webp">', body: '![a](./_a.webp)' };
     assert.equal(await resolvePage({ route: '/history/x', enabled: true, getRow: stub(dirty) }), null);
+  });
+});
+
+// normalizeRenderedHtml runs at ingest so the stored HTML matches what Astro's
+// own page pipeline emits. Without it the D1 path served &#x26; where the file
+// path served &amp; — the same character, spelled differently.
+test('normalizeRenderedHtml', async (t) => {
+  await t.test('numeric &#x26; becomes the named &amp;', () => {
+    assert.equal(normalizeRenderedHtml('<p>Terms &#x26; Conditions</p>'), '<p>Terms &amp; Conditions</p>\n');
+  });
+
+  await t.test('every occurrence is converted, not just the first', () => {
+    assert.equal(
+      normalizeRenderedHtml('<a href="?a=1&#x26;b=2">x &#x26; y</a>'),
+      '<a href="?a=1&amp;b=2">x &amp; y</a>\n',
+    );
+  });
+
+  await t.test('an already-named &amp; is left alone', () => {
+    assert.equal(normalizeRenderedHtml('<p>A &amp; B</p>\n'), '<p>A &amp; B</p>\n');
+  });
+
+  await t.test('other entities are untouched', () => {
+    assert.equal(normalizeRenderedHtml('<p>&#39;quoted&#39; &lt;tag&gt;</p>\n'), '<p>&#39;quoted&#39; &lt;tag&gt;</p>\n');
+  });
+
+  await t.test('a trailing newline is added when absent', () => {
+    assert.equal(normalizeRenderedHtml('<p>x</p>'), '<p>x</p>\n');
+  });
+
+  await t.test('a trailing newline is not doubled when present', () => {
+    assert.equal(normalizeRenderedHtml('<p>x</p>\n'), '<p>x</p>\n');
+    assert.equal(normalizeRenderedHtml('<p>x</p>\n').match(/\n+$/)[0], '\n');
+  });
+
+  await t.test('empty and nullish input return without throwing', () => {
+    assert.equal(normalizeRenderedHtml(''), '');
+    assert.equal(normalizeRenderedHtml(), '');
+    assert.equal(normalizeRenderedHtml(null), '');
+    assert.equal(normalizeRenderedHtml(undefined), '');
+  });
+
+  await t.test('is idempotent — re-running the ingest cannot drift', () => {
+    const once = normalizeRenderedHtml('<p>A &#x26; B</p>');
+    assert.equal(normalizeRenderedHtml(once), once);
   });
 });
