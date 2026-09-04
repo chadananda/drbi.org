@@ -15,6 +15,7 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
 
 const ROOT = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -65,11 +66,23 @@ const usesComponents = (body) =>
   /^import\s+\{[^}]*\}\s+from\s+['"]astro:/m.test(body) ||
   /<[A-Z][A-Za-z0-9]*[\s/>]/.test(body);
 
-function collectPages() {
+// Astro's own processor with the project's (default) markdown config, so the
+// stored HTML matches what Astro produces for the same file. Running it here,
+// at ingest time, keeps ~2.1 MB gzipped of shiki out of the Worker bundle.
+const processor = await createMarkdownProcessor({});
+
+async function renderBody(md) {
+  const src = String(md ?? '').trim();
+  if (!src) return '';
+  const { code } = await processor.render(src);
+  return code;
+}
+
+async function collectPages() {
   const files = fg
     .sync(['src/pages/**/*.md', 'src/pages/**/*.mdx'], { cwd: ROOT, dot: false })
     .sort();
-  return files.map((rel, i) => {
+  return await Promise.all(files.map(async (rel, i) => {
     const raw = readFileSync(join(ROOT, rel), 'utf8');
     const { data: fm, content: body } = matter(raw);
     const routed = isRouted(rel);
@@ -92,12 +105,13 @@ function collectPages() {
       has_components: bool(usesComponents(body)),
       is_route: bool(routed),
       body: qs(body.trim()),
+      html: qs(await renderBody(body)),
       source_path: q(rel),
       draft: bool(fm.draft),
       sort_order: qn(i),
       _meta: { rel, routed, format, components: usesComponents(body), bytes: body.length },
     };
-  });
+  }));
 }
 
 // ─── 2. site.json -> options rows ────────────────────────────────────────────
@@ -200,7 +214,7 @@ function collectBoard() {
 
 // ─── build the file ──────────────────────────────────────────────────────────
 
-const pages = collectPages();
+const pages = await collectPages();
 const settings = collectSettings();
 const links = collectLinks();
 const board = collectBoard();
@@ -216,7 +230,7 @@ const sql = [
     'site_pages',
     ['slug', 'route', 'title', 'label', 'subtitle', 'description', 'image', 'image_position',
      'author', 'date_published', 'layout', 'format', 'has_components', 'is_route', 'body',
-     'source_path', 'draft', 'sort_order'],
+     'html', 'source_path', 'draft', 'sort_order'],
     pages,
   ),
   '',

@@ -1,0 +1,15 @@
+-- Pre-rendered HTML for the Markdown pages.
+--
+-- Why store derived HTML rather than render at request time: Astro's own
+-- Markdown processor (@astrojs/markdown-remark) statically imports shiki, which
+-- adds ~2.1 MB gzipped to the Worker — and it lands in the bundle even when the
+-- D1 page feature is switched off, so the change would not be inert. Rendering
+-- during ingest instead keeps the Worker free of any Markdown library and makes
+-- the output identical by construction: the same processor renders both paths.
+--
+-- `html` is DERIVED from `body`. Editing body alone will not change the page —
+-- re-run scripts/ingest-site-content.mjs to regenerate both.
+--
+-- NOTE: ALTER TABLE ADD COLUMN is not idempotent in SQLite; this migration is
+-- run-once. The ingest script checks for the column before it writes.
+ALTER TABLE site_pages ADD COLUMN html TEXT;

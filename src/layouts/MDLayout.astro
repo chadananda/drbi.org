@@ -4,6 +4,7 @@ import Layout from "./Layout.astro";
 import PageHero from "@components/PageHero.astro";
 import Container from "@components/container.astro";
 import { imagekitUrl } from "@utils/utils.js";
+import { resolveD1Page } from "@lib/server/d1-pages";
 
 const { frontmatter } = Astro.props;
 
@@ -26,6 +27,17 @@ const imageMap: Record<string, string> = {
   faith: "drbi.org/site/drbi/faith.webp",
   news: "drbi.org/site/drbi/news.webp",
 };
+// D1-backed body, when PAGES_FROM_D1 is on and the row is eligible. Null means
+// "render the file" — the default, and the fallback on any error at all.
+let d1Html = null;
+try {
+  const resolved = await resolveD1Page(Astro.url.pathname.replace(/\/$/, "") || "/");
+  if (resolved) d1Html = resolved.html;
+} catch (err) {
+  console.warn("[MDLayout] D1 page render failed, using file:", err?.message ?? err);
+  d1Html = null;
+}
+
 const heroImage = imageMap[frontmatter.image] ?? undefined;
 const heroPosition = frontmatter.imagePosition ?? "object-center";
 // OG image: an absolute, sized ImageKit URL from the R2 key.
@@ -56,7 +68,7 @@ const ogImageSrc = heroImage
         prose-blockquote:border-brand prose-blockquote:text-body prose-blockquote:italic
         prose-strong:text-ink
         max-w-[80ch]">
-        <slot />
+        {d1Html ? <Fragment set:html={d1Html} /> : <slot />}
       </div>
     </Container>
   </div>

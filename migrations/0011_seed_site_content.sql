@@ -3,7 +3,7 @@
 -- Generated 2026-09-04 from 22 pages, 30 settings, 17 links, 12 people.
 -- Requires 0010_site_content.sql. Idempotent: INSERT OR REPLACE throughout.
 
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('agriculture/_haiti-project', NULL, 'The Haiti Project', NULL, NULL, ' ', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 0, '![](./_agr2.webp)
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('agriculture/_haiti-project', NULL, 'The Haiti Project', NULL, NULL, ' ', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 0, '![](./_agr2.webp)
 
 Great news! The DRBI Agricultural Project is up and running with its first 3,000 sq ft plot leased to
 project manager Dwight Cox’s friend of nearly 40 years, Gene Kraay. By mid-February, the two friends –
@@ -108,8 +108,100 @@ commitment is cast in concrete.
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<p><img src="./_agr2.webp" alt=""></p>
+<p>Great news! The DRBI Agricultural Project is up and running with its first 3,000 sq ft plot leased to
+project manager Dwight Cox’s friend of nearly 40 years, Gene Kraay. By mid-February, the two friends –
+with help from their wives and Kraay’s youngest son, daughter-in-law and two grandsons – enclosed a
+full acre with fence to deter rodents from entering the plot. With that job finished, they tilled and
+plowed the plot, making it ready to accept plants. Now nearly 1,000 seeds and plants in the hoop house
+are sprouting and soon will be transferred to the field. The incentive to move forward without delay on
+this initial plot came from Kraay’s friend Justin, a boxer in Cité Soleil, Haiti.</p>
+<p>The Lost Children of Haiti: Kraay, who boxed in college and was an All-American soccer player, brought
+U.S. soccer great Tony Sanneh to give soccer clinics to Haitian children in the Cité Soleil ghetto outside
+Haiti’s capital Port-au-Prince. The International Red Cross calls this ghetto “a microcosm of all the ills in
+Haitian society: endemic unemployment, illiteracy, non-existent public services, unsanitary conditions,
+rampant crime and armed violence.”\</p>
+<p>Kraay organized and led four more clinics to Haiti that year for the children to keep them occupied and
+limit their exposure to the gangs that rule the streets. On his final trip, Kraay met a young boxer named
+Justin who was training on the periphery of the gravel park he used for the clinics. Despite each man’s
+lack of proficiency in the other’s language, they connected and forged a strong friendship.</p>
+<p>When Justin expressed his desire to organize a boxing club for the ghetto children, Kraay was ready to
+help. Together and with a small circle of friends – including Dwight Cox and his wife Letty – he worked
+with Justin to create the Guepard Boxing Club of Cité Soleil [GBCCS].</p>
+<p>The program was simple. Justin rented space in the ghetto to train up
+to 300 young people as well as additional space for a kitchen and dining
+hall to feed the children after every training session. GBCCS trains and
+operates four days each week, and the simple meal they provide the
+children is often the only meal these children receive that day. While
+Justin managed the operation in Haiti, Kraay raised what money he
+could to support the effort.</p>
+<p>An Idea Germinates: In October 2020, Justin posted a picture on
+Facebook and asked, “…are they the ones who make the choice to live
+like this?… children don’t deserve [this] treatment.”</p>
+<p>Kraay shared the picture with his friend Dwight, and they pondered it
+for many days. Then one morning, last October, while contemplating
+their next move with the DRBI Agricultural project they simultaneously
+said: “WHAT IF we could grow food through the Agricultural Project,
+sell it in local farmer’s markets, and distribute ALL gross revenues
+DIRECTLY to Justin and GBCCS?”</p>
+<p>“WHAT IF we could expand the idea and develop other plots to directly support other marginalized
+people around the world in places like the Philippines, Syria, Somalia, Ecuador…” the list was limitless,
+and the idea expanded like yeast.</p>
+<p>It was at that moment that Kraay decided to lease the initial 3,000 sq.ft. plot and with Dwight’s help to
+grow vegetables to support the children in Haiti. They discussed the
+idea with management at Desert Rose Farm and Black Orchard
+Trading Company and both organizations are eager to help so that
+Cox and Kraay can focus on the Agricultural Project and not have to
+divert their attention to the marketing aspects of moving produce.
+To put the Haiti Project into a more measurable perspective… in
+October, Justin explained that he can feed 180 children, four days
+each week for just over $1,000 a month. It is important to note that
+all of the food is grown and purchased in Haiti. The operation in Haiti
+is managed and operated by Haitians on an extremely small stipend. Most Haitians who work the
+program in-country – most notably the boxers like Justin who train the children – are volunteers. ALL of
+the money from the Haiti Project will go DIRECTLY to Haiti and supports Haitians.
+The Value of an Eggplant: DRBI long-time volunteer Bonnie Tozer has taken an active part with the
+Haitian project and recently, as she prepared to drive to Casa Grande on an errand, she asked Kraay if
+there was anything he needed. Recognizing that the Haitian Project needed more seeds to plant, he
+asked her to secure more seeds, specifically eggplant seeds.</p>
+<p>True to form, Bonnie had the seeds in the hoop house so Kraay could plant them the next morning. He
+found a note with the seeds, “Happy Ayyam-i-Ha! Please accept this donation for this noble project.”
+Moved by her generosity, Kraay responded, “To make some sense of how significant your act of
+kindness is… As of this morning, I’ve planted 200 seeds… Although it is unlikely and would qualify as
+miraculous, if all 200 seeds produce 200 plants, and if each plant produced 12 eggplants, just those 200
+seeds can produce – in a perfect climate – 2,400 eggplants. I plan to ‘wholesale’ the vegetables from
+our Haiti plot at $2/eggplant. Assuming they retail at $4/eggplant – those 200 planted seeds have the
+potential to yield $4,800. My friend Justin feeds 180 children, four meals each week at $1,000/month…
+that’s over 3,000 meals each month. Your eggplant seeds have the potential to feed 180 children for
+nearly five months! Unfortunately, the world and the climate are not perfect and the children, Justin,
+Dwight and I will be thankful and grateful for however many eggplants we can harvest.”
+It is amazing how a few packets of seed can potentially feed so many hungry children for nearly half a
+year!</p>
+<p>Moving Forward: With support from committed people like Bonnie Tozer, Halen Jimenez from
+Southwest Airmotive, James Wilson, Chico Benitez who works the Desert Rose Farm acres and other
+family and friends, Cox and Kraay are poised to prove this unique concept to feed marginalized children
+around the world starting in Haiti. Although the Haitian Project is international in scope and Cox and
+Kraay hope to duplicate it in other international venues, working with DRBI, they hope to serve other
+organizations in the local community and surrounding areas as well.</p>
+<p>The upcoming months will be critical as the two transfer the seedlings from the hoop house to the tilled
+ground. The challenges are significant, but Cox and Kraay have been together for nearly 40 years and
+have never walked away from adversity. The payoff on the Haiti Project affects so many lives, their
+commitment is cast in concrete.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/agriculture/_haiti-project.md', 0, 0);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('agriculture/greening-sonora', '/agriculture/greening-sonora', 'Greening the Sonora', NULL, NULL, 'Ever heard of greening the Sahara?', NULL, NULL, 'Janet Ruhe-Schoen', NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '![](./_agr2.webp)
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('agriculture/greening-sonora', '/agriculture/greening-sonora', 'Greening the Sonora', NULL, NULL, 'Ever heard of greening the Sahara?', NULL, NULL, 'Janet Ruhe-Schoen', NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '![](./_agr2.webp)
 
 
 
@@ -148,8 +240,32 @@ Our Greening the Sonora project, unique in Arizona, is working with the 71/2 acr
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<p><img src="./_agr2.webp" alt=""></p>
+<p>Ever heard of greening the Sahara? In the Sahara and other places where increasing desertification seemed inevitable, a new kind of agriculture is making the desert bloom. Here at Desert Rose, we’re taking steps to bring that bloom to the Sonora with the same new methods: permaculture, mixed with hugelkultur.</p>
+<p>Methods   Permaculture is organic farming, plus. Organic farming grows soil. Conventional farming, which is now to a large extent corporate farming, depletes the soil. Conventional methods cover ground with imported topsoil; get water by damming and diverting watercourses for irrigation that’s often inefficient; and sow monocrops — all cotton, all soya, all corn, all wheat. Monocrops are often not natural to the land where they’re being grown. They easily fall prey to disease and insects unless sprayed with pesticides and herbicides, chemicals harmful to other plants and animals. Such farming eventually causes desertification, such as the infamous Dust Bowl of the 1930s.</p>
+<p>Organic farmers grow healthy soil with compost, natural pest control, and other methods. But organic farms, like conventional farms, usually produce monocrops, because they’re competing in the same markets, so they often use sprays for pest control.</p>
+<p>Although the sprays are organic, they’re not without ill-effects. A permaculture farmer or gardener, on the other hand, grows diverse crops that love the climate and land where they’re planted; they don’t need artificial encouragement to grow — they’re less prone to disease because they’re in their natural habitat, and they attract beneficial insects. And instead of over-using water, permaculture con” serves and re-uses rainwater and other water; raises water levels in the ground; and lets greenery flourish which protects and feeds the soil and creates rain. That’s why, in deserts, permaculture, with the addition of hugelkultur, can change the environment for the better with water, the elixir of life for people, animals, and plants.</p>
+<p>Hugelkultur is basically permaculture, plus. Hugelkultur is a system of hugels, which are small berms, or swales — hills. Hugels are made of soil mounded over the fill of tree branches and other biodegradable waste. The fill is wetted down with water and compost tea. In the desert, hugels begin as ditches that are filled in, then covered.</p>
+<p>Crops are planted atop the hugels — including trees and other vegetation with water-holding root systems. Trees are also planted all along the earthworks to provide much-needed shade for soil and smaller plants. Inside the earthwork, the fill absorbs and holds water, and as it rots and the roots work, new, fertile soil grows even while crops are tended and harvested. A prospering permaculture garden or farm is a food forest with fruit and nut trees crowning an undergrowth of smaller crop plants.</p>
+<p>Another feature of greening the desert projects are hoop houses, a kind of greenhouse that intelligently uses water, shade and naturally enriched soil to grow fresh produce for home use; at DRBI a hoop house is in the works to supply our kitchen at Hadden Hall.</p>
+<p>3 Board Members and managers at Desert Rose found out about greening the desert with permaculture and hugelkultur while researching ways to develop 7 1/2 acres here for which we have water rights. The acres stretch from Tweedy Road to A’la’i Drive.</p>
+<p>According to the International Declaration of Human Rights, free access to water is the right of every person on earth. But currently, especially in desert places, access to water is limited. For most Desert Rose land, we have limited water rights and rely on our own wells.</p>
+<p>Our Greening the Sonora project, unique in Arizona, is working with the 71/2 acres that can use corporately-owned irrigation water, and also will use acreage outside that area, nearer to the Casa de Rosas apartments. All our land is starting out barren, arid, sunburned and saline, just like the land you’ve seen if you clicked on the video links above. In the videos, you saw that land transformed, as we hope to transform our land at Desert Rose.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/agriculture/greening-sonora.md', 0, 1);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('agriculture', '/agriculture', 'The Soil: Agriculture at DRBI', NULL, NULL, 'Explore our sustainable agriculture initiatives at Desert Rose Bahá''í Institute. Learn about our organic market gardens, desert farming techniques, and community-focused approach to growing food in the Sonoran Desert of Arizona.', 'soil', 'object-center', NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Sustainable, Organic Farming at Desert Rose: Greening the Sonora
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('agriculture', '/agriculture', 'The Soil: Agriculture at DRBI', NULL, NULL, 'Explore our sustainable agriculture initiatives at Desert Rose Bahá''í Institute. Learn about our organic market gardens, desert farming techniques, and community-focused approach to growing food in the Sonoran Desert of Arizona.', 'soil', 'object-center', NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Sustainable, Organic Farming at Desert Rose: Greening the Sonora
 
 [How Desert Rose is creating market gardens in the Arizona desert ->](/agriculture/greening-sonora)
 
@@ -223,8 +339,54 @@ Dwight worked 43 years in aviation, far from that little farm of his youth, but 
     max-width: 200px;
     border-radius: 9999px;
   }
+</style>', '<h2 id="sustainable-organic-farming-at-desert-rose-greening-the-sonora">Sustainable, Organic Farming at Desert Rose: Greening the Sonora</h2>
+<p><a href="/agriculture/greening-sonora">How Desert Rose is creating market gardens in the Arizona desert -></a></p>
+<div class="flex justify-around w-full space-x-4 square">
+<p><img src="./_agr1.webp" alt="from"></p>
+<p><img src="./_agr2.webp" alt="to"></p>
+</div>
+<hr>
+<h2 id="meet-the-drbi-farmer">Meet the DRBI Farmer:</h2>
+<div class="profile">
+<p><img src="./_dwight.jpg" alt="Dwight Cox"></p>
+</div>
+<p>When Dwight Cox was a teenager all he could think of was escaping from his family’s small Illinois farm.  The last thing he expected was to be running an even smaller farm in the Arizona desert!</p>
+<p>Now passionate about DRBI Agriculture, Dwight Cox had no interest in his family’s Indiana farm when he was young. He preferred machines to crops, so he left the farm and joined the army.</p>
+<p>His military service changed the path of his life in two ways. First, he became a Bahá’í in 1975 – a wonderful consequence of being stationed in a MASH unit in Hawaii. Second, when he left the military, thanks to his GI Bill benefits, Dwight attended college for aviation mechanics, and then received his pilot’s licence.  This was the start of a long, successful career in aviation. As a tech rep for Rockwell International, he worked in the Philippines, Japan, Singapore, Mexico and Florida, eventually starting his own aviation engine company, Southwest Airmotive in Tucson in 2004.</p>
+<p>Yet Dwight had never forgotten his farming roots. As part of his deep belief in service to humanity, Dwight had participated in several endeavours that improved food distribution both at home and abroad.  When he moved his business to the nearby Eloy Airport in 2015, Dwight found DRBI not far away and became a Board Member.  He soon recognized an opportunity to turn a segment of Desert Rose into an organic, sustainable farm.</p>
+<p>Dwight quickly established that the ground was incapable of supporting life. He evaluated various approaches for bringing microbial life back to the soil and became excited by the possibilities of permaculture. Permaculture is the development of agricultural ecosystems intended to be sustainable and self-sufficient.  After taking an extensive 28-week course from global expert Geoff Lawton, Dwight is now certified as a Permaculture Designer.</p>
+<p>Dwight brought in Desert Rose Farms LLC  to grow Pichuberries (Tomatitos) on 10 acres of the land.  Desert Rose Farms  will also be assisting with establishment of market gardens, one of Dwight’s earliest dreams for the property.  Dwight’s intent is to teach some of the central ideas and techniques of permaculture, such as composting and water preservation, in order to create a self-sustaining ecosystem based on soil health.</p>
+<p>To do this, DRBI has work to do.  A new well is needed to support the farm and an old well at the Institute has gone bad.  Drilling wells is expensive, so further developments are in limbo until adequate funds can be raised.</p>
+<p>Dwight worked 43 years in aviation, far from that little farm of his youth, but now he has circled back, and he is loving it.  When asked, “what would you tell that impatient boy back in Indiana?”  Dwight replied, “Just wait! You aren’t going to believe your life!”</p>
+<hr>
+<h2 id="permaculture-greening-the-desert-by-geoff-lawton">Permaculture: Greening the Desert by Geoff Lawton</h2>
+<div style="padding:56.25% 0 0 0;position:relative;">
+<iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/2xcZS7arcgk?si=glWhZtOOv2x7zm49" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>
+<hr>
+<h3 id="barry-lewis-green-with-kelly-hadden-and-dwight-cox-on-agriculture">Barry Lewis Green with Kelly Hadden and Dwight Cox on agriculture</h3>
+<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/809823609?h=cb2bf5077a" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>
+<p><a href="https://vimeo.com/809823609">TUGtalks DRBI and Agriculture</a> from <a href="https://vimeo.com/user100352308">Barry Lewis Green</a> on <a href="https://vimeo.com">Vimeo</a>.</p>
+<p>Barry Lewis Green, TUG, The Unity Guy holds cool conversation with Kelly Hadden and Dwight Cox of the Desert Rose Baha''i Institute... focusing thought on the important work DRBI is doing around agriculture, community and Service.
+</p><hr>
+<style>
+  .prose img {
+    display: block;
+    max-width: 350px;
+    max-height: 350px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    /* margin-left: auto; */
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .prose .profile img {
+    max-width: 200px;
+    border-radius: 9999px;
+  }
 </style>', 'src/pages/agriculture/index.md', 0, 2);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('api/_comment-submit', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'md', 0, 0, '# Serverless API for Comment Submission
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('api/_comment-submit', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'md', 0, 0, '# Serverless API for Comment Submission
 
 ## Overview
 
@@ -293,8 +455,84 @@ Comprehensive testing should cover:
 
 ## Deployment
 
-Deploy the serverless function on Vercel, ensuring that all environment variables and permissions are correctly set up.', 'src/pages/api/_comment-submit.md', 0, 3);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('arts/duffy-awarded', '/arts/duffy-awarded', 'DUFFY SHERIDAN AWARDED COVETED HONOR', NULL, NULL, 'In June 2023 we learned that Duffy’s painting “What Will Tomorrow Bring” received the Best of Show and Director’s Choice Awards at the International Guild of Realism (IGOR) 17th annual juried exhibition.', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## DUFFY SHERIDAN AWARDED COVETED HONOR
+Deploy the serverless function on Vercel, ensuring that all environment variables and permissions are correctly set up.', '<h1 id="serverless-api-for-comment-submission">Serverless API for Comment Submission</h1>
+<h2 id="overview">Overview</h2>
+<p>This document specifies the serverless function deployed on Vercel for handling comment submissions to blog posts. The function will receive POST requests containing comment data, update the relevant post’s comment file in the repository on a separate <code>comments</code> branch, and commit the changes.</p>
+<h2 id="endpoint">Endpoint</h2>
+<ul>
+<li><strong>URL:</strong> <code>/api/submit-comment</code></li>
+<li><strong>Method:</strong> <code>POST</code></li>
+<li><strong>Content-Type:</strong> <code>application/json</code></li>
+</ul>
+<h2 id="request-body">Request Body</h2>
+<p>The request body must be a JSON object containing the following fields:</p>
+<ul>
+<li><code>postId</code>: The unique identifier of the post to which the comment is being added.</li>
+<li><code>commentParentId</code>: The identifier of the parent comment (if any) to support threaded comments. This can be <code>null</code> for top-level comments.</li>
+<li><code>name</code>: The name of the person submitting the comment.</li>
+<li><code>email</code>: The email address of the person submitting the comment. (Note: This will not be published but may be used for validation or notifications.)</li>
+<li><code>commentText</code>: The text of the comment.</li>
+</ul>
+<h2 id="functionality">Functionality</h2>
+<ol>
+<li>
+<p><strong>Parse Request:</strong> Extract <code>postId</code>, <code>commentParentId</code>, <code>name</code>, <code>email</code>, and <code>commentText</code> from the incoming request.</p>
+</li>
+<li>
+<p><strong>Repository Setup:</strong></p>
+<ul>
+<li>Clone the repository to a temporary directory, ensuring security measures are in place for access.</li>
+<li>Configure Git for sparse checkout, focusing on the <code>src/content/comments/</code> directory.</li>
+</ul>
+</li>
+<li>
+<p><strong>Comment File Update:</strong></p>
+<ul>
+<li>Check if <code>src/content/comments/[postId].json</code> exists; create it if not.</li>
+<li>Read the current contents of the file, add the new comment with an ‘unapproved’ status, and update the file.</li>
+</ul>
+</li>
+<li>
+<p><strong>Commit and Push:</strong></p>
+<ul>
+<li>Commit the changes with a clear message, e.g., “Add new comment to post [postId].”</li>
+<li>Push the commit to the <code>comments</code> branch of the repository.</li>
+</ul>
+</li>
+<li>
+<p><strong>Cleanup:</strong> Ensure temporary files and the cloned repository are cleaned up after the operation.</p>
+</li>
+</ol>
+<h2 id="security-and-best-practices">Security and Best Practices</h2>
+<ul>
+<li>Use secure methods for repository authentication, storing credentials as environment variables.</li>
+<li>Implement input validation and sanitization to prevent injection and other attacks.</li>
+<li>Consider rate limiting and error handling to manage abuse and operational issues gracefully.</li>
+</ul>
+<h2 id="dependencies">Dependencies</h2>
+<ul>
+<li>Git and any necessary authentication mechanisms for repository access.</li>
+<li>A JSON parser for handling the request body and updating comment files.</li>
+</ul>
+<h2 id="error-handling">Error Handling</h2>
+<p>The function should gracefully handle and log errors, including:</p>
+<ul>
+<li>Invalid request data.</li>
+<li>Failures in cloning the repository or checking out files.</li>
+<li>Issues with file operations (read/write).</li>
+<li>Errors during the commit and push process.</li>
+</ul>
+<h2 id="testing">Testing</h2>
+<p>Comprehensive testing should cover:</p>
+<ul>
+<li>Submission of comments with valid and invalid data.</li>
+<li>Handling of non-existent post IDs.</li>
+<li>Correct file update and commit operations.</li>
+<li>Error scenarios and rate limiting.</li>
+</ul>
+<h2 id="deployment">Deployment</h2>
+<p>Deploy the serverless function on Vercel, ensuring that all environment variables and permissions are correctly set up.</p>', 'src/pages/api/_comment-submit.md', 0, 3);
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('arts/duffy-awarded', '/arts/duffy-awarded', 'DUFFY SHERIDAN AWARDED COVETED HONOR', NULL, NULL, 'In June 2023 we learned that Duffy’s painting “What Will Tomorrow Bring” received the Best of Show and Director’s Choice Awards at the International Guild of Realism (IGOR) 17th annual juried exhibition.', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## DUFFY SHERIDAN AWARDED COVETED HONOR
 
 ![Duffy Sheridan](./../history/_duffy.jpg)
 
@@ -333,8 +571,38 @@ Instagram: #theofficialduffysheridan
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="duffy-sheridan-awarded-coveted-honor">DUFFY SHERIDAN AWARDED COVETED HONOR</h2>
+<p><img src="./../history/_duffy.jpg" alt="Duffy Sheridan"></p>
+<p>Friends of DRBI will not be surprised to learn that Duffy Sheridan, who has been a member of the DRBI
+community since it’s inception, continues to earn international accolades for his extraordinary artwork.
+It wasn’t long ago that we celebrated the selection of one of Duffy’s images to be included in the Lunar
+Codex, “Nova Collection”. 3,000 artworks were laser-etched on a nickel microfiche, enclosed in a time
+capsule on a lunar lander, and placed on the Moon in November 2022, where they will remain in
+perpetuity.</p>
+<p>In June 2023 we learned that Duffy’s painting “What Will Tomorrow Bring” received the Best of Show
+and Director’s Choice Awards at the International Guild of Realism (IGOR) 17th annual juried exhibition.</p>
+<p>Over 400 exceptional artworks were entered, and the final selection representing 98 pieces from 94
+IGOR artist members. Founded in 2004 by a group of renowned artists, IGOR (realismguild.com) now
+represents the work of more than 450 members from over 35 countries and prides itself in and
+honoring the finest examples of realism in the world.</p>
+<p>Our congratulations to Duffy for this latest achievement!</p>
+<p>To learn more about Duffy please visit his website at: <a href="https://duffysheridan.com">duffysheridan.com</a></p>
+<p>Instagram: #theofficialduffysheridan</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/arts/duffy-awarded.md', 0, 4);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('arts/i-am-human', '/arts/i-am-human', 'Roman Orona: iamHUMAN', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Roman Orona: iamHUMAN
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('arts/i-am-human', '/arts/i-am-human', 'Roman Orona: iamHUMAN', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Roman Orona: iamHUMAN
 
 ### “Creating art to challenge, unify and elevate humanity”
 
@@ -365,8 +633,30 @@ Roman has been a part of the DRBI KURE LP FM team for about 2 years now and call
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="roman-orona-iamhuman">Roman Orona: iamHUMAN</h2>
+<h3 id="creating-art-to-challenge-unify-and-elevate-humanity">“Creating art to challenge, unify and elevate humanity”</h3>
+<p><img src="./_RomanOrano.webp" alt="Roman Orona"></p>
+<p>Born in New Mexico in the heart of Chiricahua country Roman proudly carries Apache, Pueblo and Yaqui blood.  That background, combined with being raised in a Bahá’í household, meant that Roman has always been inspired to unite humanity.</p>
+<p>But how do you turn your beliefs into your life’s work?  The functional concept came to him over the course of 2 weeks where Roman found himself waking with a start at 3:00 every morning completely unable to return to sleep until he’d downloaded the thoughts that were swirling through his brain.  On the very last night he awoke with the name for his new not-for-profit company, “iamHuman” Media.</p>
+<p>Through “iamHuman”, Roman creates platforms where musicians and artists from around the globe can work together and shine.  Using community outreach activities, pop-up events, festivals, panels and more he is pushing to build both art and even more artists. He is also sending the message of unity out to the broader community through other media.  The video “7 Generations” on this website’s landing page was created by “iamHuman” to draw attention to how aboriginal children look at the impact of their actions in terms of their effect on subsequent generations.</p>
+<p>Roman can be heard on KURE LP FM where he hosts ‘Indigenous Café’ twice a week.  His aim with the program is that listeners will feel like they are comfortably seated in a small café, sipping wonderful coffee, listening to elevated conversations with fascinating artists while Indigenous music from around the world plays.  It’s an energizing program that you really shouldn’t miss.</p>
+<p>Roman has been a part of the DRBI KURE LP FM team for about 2 years now and calls Desert Rose a hidden gem.  The encouragement and support he has received has allowed him the freedom to grow his program organically, something that’s not always possible at the larger stations.  And when asked what guidance he would provide to new artists trying to break into the big time he said:</p>
+<p>“How dedicated are you?  Are you willing to put your heart, soul, money, time into this? If you are then you may just succeed”.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/arts/i-am-human.md', 0, 5);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('arts', '/arts', 'The Arts: Fine Arts at DRBI', NULL, NULL, 'Discover the vibrant arts programs at Desert Rose Bahá''í Institute, where creativity meets spirituality. Experience our diverse offerings in visual arts, music, dance, and creative expression, fostering cultural enrichment in our Arizona community.', 'arts', 'object-center', NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## PROGRAMS & LEARNING - ARTS
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('arts', '/arts', 'The Arts: Fine Arts at DRBI', NULL, NULL, 'Discover the vibrant arts programs at Desert Rose Bahá''í Institute, where creativity meets spirituality. Experience our diverse offerings in visual arts, music, dance, and creative expression, fostering cultural enrichment in our Arizona community.', 'arts', 'object-center', NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## PROGRAMS & LEARNING - ARTS
 
 
 
@@ -419,8 +709,37 @@ After 3 weeks of fitful sleep, this musician, painter and multi media artist arr
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="programs--learning---arts">PROGRAMS &#x26; LEARNING - ARTS</h2>
+<p><img src="./../history/_duffy.jpg" alt="Duffy Sheridan"></p>
+<h2 id="duffy-sheridan">Duffy Sheridan</h2>
+<p>Received the Best of Show and Director’s Choice Awards at the International Guild of Realism (IGOR) 17th annual juried exhibition.</p>
+<p><a href="/arts/duffy-awarded">Click here to read more</a>.</p>
+<hr>
+<p><img src="/documents/Anne-Perry-201x300.webp" alt="ANNE GORDON PERRY"></p>
+<h2 id="what-is-write-life">What is Write Life?</h2>
+<p>Anne Perry  reveals that answer and more in her write up on the Write Life, and introduces some of the contributing authors.</p>
+<p><a href="/arts/write-life">Click here to read more</a>.</p>
+<hr>
+<p><img src="./_RomanOrano.webp" alt="Roman Orano"></p>
+<h2 id="iamhuman-with-roman-orano">iamHUMAN with Roman Orano</h2>
+<p>After 3 weeks of fitful sleep, this musician, painter and multi media artist arrived at what we wanted to do with his life and what that venture would be called.</p>
+<p><a href="/arts/i-am-human">Click here to read more</a>.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 150px;
+    max-height: 150px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-bottom: 20px;
+    float: right;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/arts/index.md', 0, 6);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('arts/write-life', '/arts/write-life', 'Write Life', NULL, NULL, 'Join our annual writers'' retreat at Desert Rose Bahá''í Institute, where writers gather to explore creativity, share their work, and develop their craft. Founded by Anne Perry, Write Life offers a supportive environment for writers of all levels in the inspiring Arizona desert setting.', NULL, NULL, 'Anne Perry', NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Write Life    by Anne Perry
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('arts/write-life', '/arts/write-life', 'Write Life', NULL, NULL, 'Join our annual writers'' retreat at Desert Rose Bahá''í Institute, where writers gather to explore creativity, share their work, and develop their craft. Founded by Anne Perry, Write Life offers a supportive environment for writers of all levels in the inspiring Arizona desert setting.', NULL, NULL, 'Anne Perry', NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Write Life    by Anne Perry
 
 Write Life began when Marlene Macke and I invited some writers to come to Desert Rose for a week-long writers’ retreat held in February 2018. In preparing and designing the flier for the retreat, one of the local writers connected to Desert Rose called it “Write Life.” The name stuck, and we have continued to hold retreats every February since. The one in 2021 was held on Zoom, and we anticipate another online retreat in 2022.
 
@@ -831,8 +1150,322 @@ is plein air painting which she has great opportunities for in the wilds of Alas
    object-fit: cover; /* Ensure image fits within the circle */
    float: right;
   }
+</style>', '<h2 id="write-life----by-anne-perry">Write Life    by Anne Perry</h2>
+<p>Write Life began when Marlene Macke and I invited some writers to come to Desert Rose for a week-long writers’ retreat held in February 2018. In preparing and designing the flier for the retreat, one of the local writers connected to Desert Rose called it “Write Life.” The name stuck, and we have continued to hold retreats every February since. The one in 2021 was held on Zoom, and we anticipate another online retreat in 2022.</p>
+<p>Marlene was a “snowbird”—a Canadian looking for a winter retreat when she wrote to me in 2014 to get advice on where she could go to write for a couple of months in the winter of 2015. “Desert Rose!” I answered. “Where’s that?” she asked. She acted on the suggestion, acclimating to the creative atmosphere of Desert Rose, making friends there, and generally deciding to return in subsequent winters. In 2017 we planned the first retreat and co-hosted the retreats of 2018 and 2019, and then Marlene’s health began failing. She wasn’t able to come in 2020, and she passed away in January 2021. Write Life owes a huge debt of gratitude to her!</p>
+<p>Jaine Toth and I co-hosted the on-ground retreat of 2020, and then Joyce Litoff and I co-hosted the online retreat in 2021. We also started a twice monthly Zoom event—one session as a writers’ “check in” and goal setting time: one session for critique of our work. In addition, we sponsor online workshops through Desert Rose and occasional public readings of our works. All of these activities continue, with Michelle Goering taking on aspects of the leadership as well. A group of local writers have also met at Desert Rose, under the name “Pen and Prayer.”</p>
+<p>We invite you to look at our authors’ profiles and see what Write Life writers are up to!  Some have published books and articles recently; some are working on longer projects; some dabble in multiple genres; one is a storyteller who has performed stories publicly—all of us are finding our way through our writing, in the context of a supportive network. Check us out!</p>
+<h2 id="some-of-our-authors">Some of Our Authors:</h2>
+<h3 id="joyce-litoff">Joyce Litoff</h3>
+<p><img src="/documents/Joyce-Litoff.jpg" alt="Joyce Litoff"></p>
+<p>JOYCE LITOFF is a life-long resident of Chicago, and a world citizen at heart.
+She is a communications professional who has won multiple awards for her
+writing, podcasting and video work. Joyce sees storytelling as central to all of
+these efforts and her interests have led her to recently delve into memoir and
+live-stage storytelling. Her preferred genres of writing include Reportage,
+creative non-fiction, live storytelling
+Joyce works in the Office of Communications at the US Baha’i National Center.
+The office is responsible for the content of bahai.us, the public website of the
+Baha’i Faith, The American Baha’i magazine, the US Baha’i News, an electronic newsletter, and special
+publications.</p>
+<p>Joyce has worked in a variety of publishing, media production, and public relations positions in the course
+of her career, both in corporations and in the not-for-profit sector. She holds a degree in Journalism from
+the University of Illinois. Joyce and her husband, Dan Litoff, have been married for 30-plus years and live in
+a lovingly restored arts and crafts bungalow in Chicago’s North Center neighborhood.
+Joyce’s current projects include Ongoing coverage for The American Baha’i and US Baha’i News and
+crafting a memoir for live-stage storytelling. You may access some of Joyce’s other works by clicking on the
+following links:</p>
+<p>US Baha’i News Select Archive: <a href="https://www.bahai.us/us-bahai-news-archive/">https://www.bahai.us/us-bahai-news-archive/</a></p>
+<p>SoundCloud Podcast Collection: <a href="https://soundcloud.com/usbahainews">https://soundcloud.com/usbahainews</a></p>
+<hr>
+<h3 id="janet-ruhe-schoen">Janet Ruhe-Schoen</h3>
+<p><img src="/documents/Janet-Ruhe-Schoen.jpg" alt="Janet Ruhe-Schoen"></p>
+<p>JANET RUHE-SCHOEN, writer-in-residence at Desert Rose
+Bahá’í Institute, has lived in the Casa de Rosas since winter of
+2016, having moved there from New York State, where she’d
+lived for some 20 years. She’s a native of Allentown,
+Pennsylvania and lived in many other places including the
+Mescalero Apache Reservation in New Mexico; Piura, Peru
+and Santiago de Chile.
+She’s the author of books of biography:</p>
+<p>Her books are available via Baha’i Bookstore, Amazon.com, and various other websites. A Love
+Which Does Not Wait has been published in Portuguese and Spanish and will soon be published
+in German. She recently completed the book Son of Spirit: The Master in the Mirror of
+Meditation and Memory.
+Janet worked as an investigative environmental journalist in Chile, and as a feature writer on
+the arts and other topics for magazines and newspapers in the U.S. She has presented
+programs on the subjects of her biographies at Desert Rose as well as at Green Acre Baha’i
+School in Maine; Bosch Baha’i School in California; Women’s Rights National Historical Park in
+Seneca Falls, NY; the Louis Gregory Race Unity Symposium at Austin-Tillotson University in
+Texas; and other venues. She currently curates and presents two radio shows for the Desert
+Rose radio station, Kure-lp 106.1 fm: Spirit Stories, a show about Messengers of the Sacred
+from all ages and all parts of the world; and the poetry show, A Wave in the Mind.</p>
+<hr>
+<h3 id="michelle-goering">Michelle Goering</h3>
+<p><img src="/documents/Michelle-Goering.jpg" alt="Michelle Goering"></p>
+<p>MICHELLE GOERING has been writing all her life, but
+only for fun and her own mental health until
+recently. A poet, essayist, singer, and guitarist, with
+a professional background in publishing, she
+specializes in Creative Nonfiction, Memoir and
+Poetry. Michelle is married and the mother of twin
+college-aged sons. An enthusiastic San Diegan,
+Michelle grew up on a Kansas farm and still misses
+aspects of rural life. She is interested in building community across all boundaries and is a
+member of the Baha’i Faith.</p>
+<p>Michelle is currently busy writing, revising, and sending pieces out, and when they’re rejected,
+polishing a little more and sending them out again to someone else! Also putting together a
+collection of memoir pieces for possible self-publishing.</p>
+<p>LIST OF PUBLICATIONS</p>
+<ul>
+<li>Drink Some Water Means I Love You (Scary Mommy, July 2021)</li>
+<li>How to Save a New Mother’s Life (Motherwell Magazine, July 2021)</li>
+<li>Ice Cream with the Dead (June 2021 issue of Communion Arts Journal)</li>
+<li>Honoring the Role of Our Fathers (Baha’i Teachings, June 2021)</li>
+<li>Summer Fair Gives Mennonite Girl a Glimpse of Her Future (US Baha’i News, July 2021)</li>
+<li>Making Each Day International Friendship Day (Baha’i Teachings, July 24, 2021)</li>
+<li>Raising a Challenged Child (Baha’i Teachings, August 11, 2021)</li>
+<li>No Dancing (Sasee Magazine, September 1, 2021, page 26, print and online)</li>
+<li>Give So Much to Everyone Else Nothing Left for Me (Woman Pie, retitled. Her View From
+Home, October 3, 2021)</li>
+<li>For the Record (Minerva Rising’s The Keeping Room, October 8, 2021)</li>
+<li>We’re Happily Married and Sleeping in Separate Beds (Her View from Home, October 26, 2021)</li>
+<li>Better After 50 (Perks of Post-Menopausal Life, Better After 50, November 15, 2021)</li>
+<li>Saying Goodbye to My College Child Never Gets Easier (Saying Goodbye in a Tenuous Time, Her
+View from Home, November 18, 2021)</li>
+<li>You Call that Weather? A Kansas and California Debate (Christian Science Monitor: Home
+Forum, 11/29/2021, print and online)</li>
+</ul>
+<hr>
+<h3 id="doris-dejwakh-rasmussen">Doris Dejwakh Rasmussen</h3>
+<p><img src="/documents/Doris-Rasmussen.webp" alt="Doris Dejwakh Rasmussen"></p>
+<p>DORIS RASMUSSEN grew up in Reno, NV, attended college in southern
+California, and after graduation in 1971 pioneered to Niger and Benin,
+West Africa. She met and married Amin Dejwakh there, and they had
+three children. She taught English as a Second Language in Africa,
+then worked in administration at the American Embassy.
+After returning to the States in 1996, the family lived in Silver Spring
+MD, and Scottsdale AZ. Her husband died in 2004, and she moved in
+with her daughter’s family in Scottsdale.</p>
+<p>She received her Master’s in Library Science in 2009 and resided in
+China from 2010 to 2013. She began working as a writer in China and later at Desert Rose Baha’i
+Institute where she moved in 2014. She met Roger Rasmussen online in 2014, and they were
+married at Desert Rose in October 2015.</p>
+<p>Doris writes in the genres of dramatic readings, autobiography and memoir. She has written
+several short dramatic readings and is almost finished with her autobiography.</p>
+<hr>
+<h3 id="lida-berghuis">LIDA BERGHUIS</h3>
+<p><img src="/documents/Lida-Berguis-150x150.webp" alt="LIDA BERGHUIS"></p>
+<p>LIDA BERGHUIS has self-published three books of poetry: ‘Feeling
+Fortunate but Awful’, ‘Collage of Me’ and ‘A Bottle of Joy’. She has
+a poetry blog, ‘Lida’s Musings’, and a YouTube channel by the
+same name and regularly posts poetry on them.</p>
+<p>Lida grew up in Iran but left that country with her family when she was a teenager. The Islamic
+revolution caused many members of the Baha’i Faith to flee for fear of persecution. Lida has
+now completed the manuscript of a memoir about her teenage years.</p>
+<p>When not writing poetry Lida is a teacher of English as a second language. She lives in Montreal
+with her husband and three adult children.</p>
+<p>Books:</p>
+<ul>
+<li><a href="https://www.amazon.com/Feeling-Fortunate-but-Awful-depression/dp/1707871574">Feeling Fortunate but Awful!: Poems on depression and healing </a></li>
+<li><a href="hhttps://www.amazon.com/Collage-Me-Reflections-identity-belonging/dp/1727652428">Collage of Me: Reflections on identity and belonging</a></li>
+<li><a href="https://www.amazon.com/Bottle-Joy-Poems-tickle-fancy-ebook/dp/B0CCWW2CWD">Bottle of Joy: Poems to tickle your fancy</a></li>
+<li><a href="https://www.amazon.com/Leaving-Iran-My-Persian-diaries-ebook/dp/B0C152PTYJ">Leaving Iran: My Persian diaries</a></li>
+</ul>
+<p>Poetry:</p>
+<ul>
+<li>Poetry Blog: <a href="https://lidasmusings.com/">Linda’s Musings</a></li>
+<li><a href="https://www.youtube.com/channel/UCHj89KP0xjIz9GK_wh0Znvg">Linda’s Musings YouTube</a></li>
+<li><a href="https://www.instagram.com/lidas_musings/">Instagram</a></li>
+</ul>
+<hr>
+<h3 id="anne-gordon-perry">ANNE GORDON PERRY</h3>
+<p><img src="/documents/Anne-Perry-201x300.webp" alt="ANNE GORDON PERRY"></p>
+<p>ANNE GORDON PERRY writes and sometimes publishes essays, fiction, poetry,
+biography, and children’s books. She teaches writing and humanities at the Art
+Institute of Dallas and Dallas College.</p>
+<p>Among other works, Anne has published numerous <a href="https://bahaiteachings.org/search/anne%20perry">articles for BahaiTeachings.org</a>
+and:</p>
+<ul>
+<li><a href="https://www.bahaibookstore.com/Green-Acre-on-the-Piscataqua-Originally-16-P6883.aspx">Green Acre on the Piscataqua</a></li>
+<li><a href="https://www.amazon.com/Magnificent-Moles-Meadow-Gordon-Perry/dp/0998425605/ref=sr_1_3?keywords=Anne+Gordon+Perry&#x26;qid=1638682315&#x26;sr=8-3">Magnificent Moles of Mede Meadow</a></li>
+<li><a href="https://www.amazon.com/Makes-Knees-Bees-Gordon-Perry/dp/0998425672/ref=sr_1_1?keywords=Anne+Gordon+Perry&#x26;qid=1638682315&#x26;sr=8-1">Who Makes Knees for Bees?</a></li>
+<li><a href="https://www.amazon.com/Unseen-Witness-Farmer-Portsmouth-Treaty/dp/0998425613/ref=sr_1_4?keywords=Anne+Gordon+Perry&#x26;qid=1638682315&#x26;sr=8-4">Unseen Witness: Sarah Farmer &#x26; the Portsmouth Peace Treaty</a></li>
+</ul>
+<p>She lives in Duncanville, Texas with her husband and five cats.
+Anne is currently working on books on Sarah Farmer and Roger White, a film project on ‘Abdu’l-Bahá in
+France, plus various stories, poems, and articles.</p>
+<p><a href="https://ninepetalpress.com/">https://ninepetalpress.com/</a></p>
+<hr>
+<h3 id="joyce-jackson">Joyce Jackson</h3>
+<p><img src="/documents/Joyce-Oct-2021-247x300.webp" alt="Joyce Jackson"></p>
+<p>JOYCE JACKSON was raised in Nashville, Tennessee, but has had
+the bounty of living in and visiting other parts of the world. She
+has a degree in English and Journalism and for 10 years was the
+associate editor for a small speciality publisher in Nashville. She
+later spent five years as the publications manager for the
+Fraternal Order of Police.</p>
+<p>In 2004 she self-published her memoir, “<a href="https://www.amazon.com/Child-Tender-Years-Haydens-Journey/dp/0974873098">A Child of Tender Years:
+Hayden’s Journey</a>. In 2011 she left the United States for Uganda,
+where she served the National Spiritual Assembly of the Baha’i’s
+of Uganda for 18 months. That experience inspired a children’s
+book titled ‘Agnes and Angella: A Tale of Two Cows in Uganda’</p>
+<p><img src="/documents/child-tender-years-cover.jpg" alt="A Child of Tender Years:
+Hayden’s Journey"></p>
+<p>Upon returning from Uganda, Joyce has worked for the last 7 years in the Office of Community
+Administration at the American Baha’i National Centre.</p>
+<p>Joyce’s current writing project, ‘A Drop of Water Into Rivers and Seas: The Bahai Faith in
+Nashville Tennessee’, will hopefully be published in 2022.</p>
+<p>After six years in Chicago’s North Shore, during the pandemic Joyce returned to Tennessee to
+be closer to her family, including her four adorable grandchildren. She currently resides in
+Smyrna, Tennessee, just outside Nashville, with her beloved greyhound, Zelda.</p>
+<hr>
+<h3 id="beverly-bassett">Beverly Bassett</h3>
+<p><img src="/documents/Beverly-Bassett.webp" alt="Beverly Bassett"></p>
+<p>BEVERLY BASSETT grew up in Hyannis, Massachusetts and attended community
+college there. In 1972, she married her husband, Robert. Upon discovering the
+Baha’i Faith in 1974 they joined and served on the Local Spiritual Assembly in
+Barnstable. There they raised two sons and resided on the Cape and until 1993.</p>
+<p>That year the family decided to relocate to Oregon. Selling their home and most
+possessions they packed up their Honda Civic Wagon. Then headed out on a travel
+teaching trip to Oregon. Visiting communities along route 80 they presented programs about unity in
+diversity. The programs, complied by Beverly, included commentary, writings from multiple religions
+and Indigenous peoples along with musical selections written by Robert.</p>
+<p>Upon arrival in Oregon, they traveled to share their unity in diversity programs statewide. The family
+settled into their new home in Milwaukie. Beverly continued her education at Marylhurst University,
+earning a BA in Human Studies combined with a Montessori Primary Diploma. She taught or
+administrated in Montessori schools for a 21-year duration. During this period, she wrote journals,
+papers for school, reporting and periodicals.</p>
+<p>Now, Beverly writes in the genres of non-fiction, fiction, poetry, personal remembrances, and children’s
+books. Presently, she is working on a book to provide a parenting tool kit for young parents. Recently,
+during the Writer’s Life Retreat, Story Commons published her 100-word story.</p>
+<p>Our Yellowstone Greeter:</p>
+<blockquote>
+<p>A mystical, swirling mist greeted us at Yellowstone
+one morn. Out of the mist loomed a magnificent bull
+moose. Our family and traveling companion were
+awestruck and agreed to stop the car.</p>
+</blockquote>
+<blockquote>
+<p>The bull sauntered onto the road. Bulls can be
+aggressive, charge, knock people down and stomp
+on them! We wondered if the car would stimulate
+him into aggression. In stillness we recited a special
+prayer for removal of difficulties.</p>
+</blockquote>
+<blockquote>
+<p>The bull regarded us closely, then with a backward regal look sauntered on. Off we went, to a
+yummy saddle cake (gargantuan pancake) breakfast at Cody Inn!</p>
+</blockquote>
+<hr>
+<h3 id="duane-l-herrmann">Duane L. Herrmann</h3>
+<p><img src="/documents/DLH-speaking-bw.webp" alt=" Duane L. Herrmann"></p>
+<p>Duane L. Herrmann, born in Topeka, is a fifth generation Kansan who was farming
+on a tractor by age 13. His continued connection to the land is reflected in his
+stories and poems. An internationally published, award-winning poet and
+historian, his work has been published in a dozen countries in several languages
+and his books can be found in Libraries in the US, Europe and the Middle East.</p>
+<p>Duane is an educator who has been adjunct faculty for Allen College and university
+guest lecturer. His work has received the Robert Hayden Poetry Fellowship, the
+Ferguson Kansas History Book Award and included in the Kansas Poet’s Trail, the
+Map of Kansas Literature and American Poets of the 1990s. He has seven full-length collections of
+poetry: Prairies of Possibilities, Ichnographical:173, Praise the King of Glory, Remnants of a Life, Gedichte
+aus Prairies of Possibilities, Family Plowing and other poems, and No Known Address. A collection of
+short stories, Institor Gleg, is in process. Much of his published work can be found on Amazon.com,
+Baha’i Library Online (.com) and Academia.edu. He’s managed this, despite a traumatic childhood
+embellished with dyslexia, ADHD, the resulting PTSD, cyclothymia and an anxiety disorder.</p>
+<p>A sampling of titles includes:</p>
+<ul>
+<li><a href="https://www.amazon.com/Fasting-Bahai-Handbook-Duane-Herrmann/dp/0853982805">Fasting; A Baha’i Handbook</a></li>
+<li><a href="https://www.amazon.com/Prairies-Possibilities-New-Selected-Poems/dp/0595801315">Praries of Possibilities</a></li>
+<li><a href="https://www.amazon.com/Remnants-Life-Duane-L-Herrmann-ebook/dp/B081J6W93T">Remnants of a Life</a></li>
+<li><a href="https://www.amazon.com/Escape-Earth-Journal-Planetary-Pioneer/dp/1989225187">Escape from Earth</a></li>
+<li><a href="https://www.amazon.com/s?k=Duane+L.+Herrmann&#x26;crid=22JW37B2RP814&#x26;sprefix=a+child+of+tender+years+hayden+s+journey%2Caps%2C617&#x26;ref=nb_sb_noss">And many others…</a></li>
+</ul>
+<hr>
+<h3 id="linda-oneil">Linda O’Neil</h3>
+<p><img src="/documents/Linda-ONeil-2023.webp" alt="Linda O’Neil"></p>
+<p>LINDA O’NEIL is a writer and editor living in Ottawa, Ontario. She
+studied journalism at Carleton University, Ottawa and had a long
+career working in communications for a number of NGOs involved in
+education, women’s issues and mental health, and has edited a
+number of books, including “The Origins of the Baha’i Community in
+Canada 1898-1948”and “A Legacy of Courage: the Life of Ola
+Pawlowska, Knight of Baha’u’llah”.</p>
+<p>She took an intensive scriptwriting program, creating a portfolio of one-act plays, film and radio
+scripts, and a television documentary for the Canadian NSA’s Baha’i Perspectives series. A
+founding member of the Ottawa Baha’i Creative Writers Group, her creative work includes
+writing plays, short stories, memoir and poetry. She created a small production company,
+Stigma Busters, to mount two mental health-themed plays for the Ottawa Fringe Festival in
+2003 and 2004.</p>
+<p>Linda investigated the Bahai Faith as a first year university student. She rapidly fell in love with
+the Faith and began a spiritual adventure that has lasted more than 50 years. A highlight was
+her service as a Baha’i community development volunteer in the Democratic Republic of the
+Congo 1977-78 where she taught ESL and spent a year travelling by truck and on foot, meeting
+Baha’is in many remote villages. She has also travelled and met Baha’is in India, Pakistan,
+Kenya, Uganda, Rwanda, Martinique and Guadeloupe, Australia, the Solomon Islands, and
+Papua New Guinea.</p>
+<p>Linda is happily and busily retired and currently concentrates her efforts on promoting the arts
+in the Baha’i community, and, with Heather Harvey, organizing arts events and coordinating the
+Big Ideas presentation series.</p>
+<hr>
+<h3 id="jaine-toth">Jaine Toth</h3>
+<p><img src="/documents/Jaine-Toth-2022-150x150.webp" alt="Jaine Toth"></p>
+<p>Brooklyn born and California raised, Jaine now resides in Eloy, Arizona, close to
+the Desert Rose Bahá’í Institute which drew her to the area.</p>
+<p>Jaine’s interest in writing developed gradually, beginning with the need to
+compose talks for presentations at Bahá’í Holy Day commemorations and public
+events. After taking poetry and memoir writing workshops through the Santa
+Barbara Adult Education system, she began working on Dizzy Izzy
+and the Red Witch, a series of stories about her parents which was published by
+Nine Petal Press.</p>
+<p>While living in Carpinteria, California, Jaine wrote two different monthly columns: “Snapshot’s of
+Carpinteria’s Past,” and later, “Art Matters,” both for Carpinteria’s Coastal View News. She also wrote
+several articles for the Carpinteria Valley Historical Museum’s newsletter, The Grapevine, and one of her
+history columns was adapted for publication in the Carpinteria Chamber of Commerce’s annual
+magazine. She’s had a few stories and poems published, as well.
+After moving to Arizona, her weekly column, “Faith — and Action!” ran for six years in the Eloy
+Enterprise.</p>
+<p>The website <a href="https://bahaiteachings.org/author/jaine-toth/">bahaiteachings.org has published over 140 of Jaine’s essays</a>.</p>
+<p>Her current book-in-progress grew out of one of her arts-related workshops: The Arts: A Key to Spiritual Transformation.</p>
+<p>Jaine is also busy creating Reader’s Theater scripts for her performing group, ReGeneration.
+As much as Jaine loves to write, there’s another art form that holds a special place in her heart. Her
+vehicle’s license plate frame says it all: “I’d Rather Be Acting.”</p>
+<hr>
+<h3 id="kristine-leonard-young">Kristine Leonard Young</h3>
+<p><img src="/documents/Kristine-L.-Young.webp" alt="Kristine Leonard Young"></p>
+<p>Kristine has been creating tiny books, writing and fine artwork
+ever since she can remember. A Bahá’í pioneer all her life,
+she has lived in six different countries on four different
+continents and now lives in Alaska. She has written and
+edited over the years – journals, newsletters, book reviews,
+advertising, art books, photographs, and is currently co-editor
+of the Bahá’í news for Alaska, Bahá’í Alaska.</p>
+<p>‘Art and writing have always been intertwined for me
+however, writing became a core part of my life beginning with
+my first research questions written in 1981 to the International Bahá’í Centre about the life of my
+great aunt Counsellor Leonora Holsapple Armstrong who passed away in Brazil in 1980. With
+the arrival of my first package of photocopied Tablets and letters from Haifa, I was hooked. Little
+did I know that it would be a life-long path!’</p>
+<p>Over the years the research paper binders travelled with Kristine from Indiana to South Africa to
+California, to Haifa and then to Alaska. Her research in addition to the five months spent living
+with her great aunt in Brazil promise to become an inspiring life story of dedication and stalwart
+perseverance.</p>
+<p>Writing and art have always been connected in Kristine’s life and she has been an avid reader,
+painter and ‘creative’ over her career including teaching art for ten years. Her recent great love
+is plein air painting which she has great opportunities for in the wilds of Alaska.</p>
+<style>
+  .prose img {
+   width: 200px; /* Adjust as needed */
+   height: 200px; /* Adjust as needed */
+   border-radius: 50%; /* Fully rounded */
+   border-right: 5px solid #ccc; /* Curved border on the right */
+   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3); /* Partial shadow */
+   object-fit: cover; /* Ensure image fits within the circle */
+   float: right;
+  }
 </style>', 'src/pages/arts/write-life.md', 0, 7);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('events', '/events', 'Programs & Events', 'Come join us', 'Classes, workshops, retreats, and gatherings — open to everyone, Bahá''í and non-Bahá''í alike.', 'Discover and participate in transformative learning events at Desert Rose Bahá''í Institute. View our calendar of workshops, seminars, and study circles designed to foster spiritual and intellectual growth.', 'events', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'mdx', 1, 1, 'import EventCalendar from "@components/EventCalendar.astro";
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('events', '/events', 'Programs & Events', 'Come join us', 'Classes, workshops, retreats, and gatherings — open to everyone, Bahá''í and non-Bahá''í alike.', 'Discover and participate in transformative learning events at Desert Rose Bahá''í Institute. View our calendar of workshops, seminars, and study circles designed to foster spiritual and intellectual growth.', 'events', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'mdx', 1, 1, 'import EventCalendar from "@components/EventCalendar.astro";
 
 <EventCalendar view="list-full" />
 
@@ -847,8 +1480,18 @@ INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, descript
     class="inline-block bg-amber-600 hover:bg-amber-500 text-white px-8 py-3.5 rounded-full text-sm tracking-[0.15em] uppercase transition duration-200">
     Join Our Newsletter
   </a>
-</div>', 'src/pages/events/index.mdx', 0, 8);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('facilities-and-rentals', '/facilities-and-rentals', 'Facilities & Rentals', 'Come stay with us', 'A retreat center, private apartments, a dormitory, a pavilion, a pool — in the heart of the Sonoran Desert.', 'Desert Rose Institute facilities and rental information — retreat center, casas, dormitory, pavilion, pool, RV park, campsite.', 'casas', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'mdx', 1, 1, 'import ImgBlock from "@components/img_block.astro";
+</div>', '<p>import EventCalendar from “@components/EventCalendar.astro”;</p>
+<eventcalendar view="list-full">
+<div class="mt-20 py-12 bg-amber-50 rounded-2xl text-center not-prose">
+  <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-3">Stay informed</p>
+  <h2 class="text-2xl md:text-3xl font-serif font-light text-slate-800 mb-5">
+    Never miss a program
+  </h2>
+  <a href="http://eepurl.com/gTGwNH" target="_blank" rel="noopener noreferrer" class="inline-block bg-amber-600 hover:bg-amber-500 text-white px-8 py-3.5 rounded-full text-sm tracking-[0.15em] uppercase transition duration-200">
+    Join Our Newsletter
+  </a>
+</div></eventcalendar>', 'src/pages/events/index.mdx', 0, 8);
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('facilities-and-rentals', '/facilities-and-rentals', 'Facilities & Rentals', 'Come stay with us', 'A retreat center, private apartments, a dormitory, a pavilion, a pool — in the heart of the Sonoran Desert.', 'Desert Rose Institute facilities and rental information — retreat center, casas, dormitory, pavilion, pool, RV park, campsite.', 'casas', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'mdx', 1, 1, 'import ImgBlock from "@components/img_block.astro";
 
 export const drbiimg = "drbi.org/site/misc/drbi-landscape.webp"
 export const hallbell = "drbi.org/site/history/hall.webp"
@@ -993,8 +1636,94 @@ Some participants will not want to sleep in a dormitory and they can book a priv
   flip
   image={dronerv}
 />
-<hr/>', 'src/pages/facilities-and-rentals.mdx', 0, 9);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('history/david-hadden', '/history/david-hadden', 'Who was David Hadden?', NULL, NULL, 'A brief biography of David Hadden', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was David Hadden?
+<hr/>', '<p>import ImgBlock from “@components/img_block.astro”;</p>
+<p>export const drbiimg = “drbi.org/site/misc/drbi-landscape.webp”
+export const hallbell = “drbi.org/site/history/hall.webp”
+export const roundhouse = “drbi.org/site/history/round-house.webp”
+export const pavilion = “drbi.org/site/history/pavilion.webp”
+export const guffy1 = “drbi.org/site/history/guest-house.webp”
+export const poolwide = “drbi.org/site/misc/drbi-landscape.webp”
+export const casas = “drbi.org/site/history/casas.webp”</p>
+<p>{/* casa pictures */}
+export const casa1 = “drbi.org/site/history/casas.webp”;
+export const casa2 = “drbi.org/site/history/guest-house.webp”;
+export const casa3 = “drbi.org/site/history/admin-bldg.webp”;
+export const casa4 = “drbi.org/site/history/hall.webp”;
+export const casa5 = “drbi.org/site/history/art-gallery.webp”;
+export const casa6 = “drbi.org/site/history/pavilion.webp”;
+export const casa7 = “drbi.org/site/history/farm.webp”;
+export const casa8 = “drbi.org/site/agriculture/agr1.webp”;
+export const casa9 = “drbi.org/site/agriculture/agr2.webp”;
+export const casa10 = “drbi.org/site/misc/drbi-landscape.webp”;
+export const casa11 = “drbi.org/site/history/bill-and-mar.webp”;
+export const casa12 = “drbi.org/site/history/david-hadden.webp”;
+export const casa13 = “drbi.org/site/history/marguerite.webp”;
+export const casa14 = “drbi.org/site/history/alai.webp”;</p>
+<p>{/* EHH pictures */}
+export const ehh1 = “drbi.org/site/history/hall.webp”;
+export const ehh2 = “drbi.org/site/history/admin-bldg.webp”;
+export const ehh3 = “drbi.org/site/history/hall.webp”;
+export const ehh4 = “drbi.org/site/history/guest-house.webp”;
+export const ehh5 = “drbi.org/site/history/art-gallery.webp”;
+export const ehh6 = “drbi.org/site/history/pavilion.webp”;
+export const ehh7 = “drbi.org/site/history/round-house.webp”;
+export const ehh8 = “drbi.org/site/agriculture/agr1.webp”;
+export const ehh9 = “drbi.org/site/agriculture/agr2.webp”;
+export const ehh10 = “drbi.org/site/misc/drbi-landscape.webp”;
+export const ehh11 = “drbi.org/site/history/farm.webp”;</p>
+<p>{/* Round house pictures */}
+export const rh1 = “drbi.org/site/history/round-house.webp”;
+export const rh2 = “drbi.org/site/history/hall.webp”;
+export const rh3 = “drbi.org/site/history/guest-house.webp”;
+export const rh4 = “drbi.org/site/history/art-gallery.webp”;
+export const rh5 = “drbi.org/site/history/pavilion.webp”;
+export const rh6 = “drbi.org/site/history/round-house.webp”;
+export const rh7 = “drbi.org/site/history/admin-bldg.webp”;
+export const rh8 = “drbi.org/site/history/farm.webp”;
+export const rh9 = “drbi.org/site/agriculture/agr1.webp”;
+export const rh10 = “drbi.org/site/agriculture/agr2.webp”;
+export const rh11 = “drbi.org/site/history/casas.webp”;</p>
+<p>{/* Pavilion pictures */}
+export const pp1 = “drbi.org/site/misc/drbi-landscape.webp”;
+export const pp2 = “drbi.org/site/history/pavilion.webp”;
+export const pp3 = “drbi.org/site/history/hall.webp”;
+export const pp4 = “drbi.org/site/misc/drbi-landscape.webp”;</p>
+<p>{/* Pool — TODO: add actual pool photos */}
+export const poolImg = “drbi.org/site/misc/drbi-landscape.webp”;</p>
+<p>{/* RV Park — TODO: add actual RV park photos */}
+export const dronerv = “drbi.org/site/misc/drbi-landscape.webp”;</p>
+<h2 id="desert-rose-is-a-great-venue-for-retreats-and-events">Desert Rose is a great Venue for Retreats and Events</h2>
+<p>Conveniently located between Tucson and Phoenix, Desert Rose is a great venue for retreats, workshops, and events. Our facilities include a large meeting hall, a commercial kitchen, a dormitory which sleeps 40, a boondocking RV park, a campground and a dozen apartments.</p>
+<p>We use AirBnb to rent our facilities and apartments when not in use. This provides us with required insurance and a single calendar.</p>
+<h2 id="for-retreats-rent-our-entire-retreat-center-1100night-includes-the-main-hall-the-roundhouse-the-dorms-and-use-of-the-pool">For Retreats, rent our entire <b>Retreat Center</b>: ($1,100/night) <br><strong>Includes <a href="#ehh">the main Hall</a>, <a href="#rh">the Roundhouse</a>, <a href="#guf">the Dorms</a> and use of <a href="#pool">the Pool</a></strong></h2>
+<p>Groups wanting a retreat center can book this complete package. Note: we do not yet provide cooking and cleaning services during events. You will be responsible for running the kitchen or catering in meals.</p>
+<p><a class="text-sm text-white bg-brand hover:bg-brand-deep rounded-full px-6 py-2.5 no-underline transition duration-200 ml-8 float-right" href="https://www.airbnb.com/rooms/784712974810930244?guests=1&#x26;adults=1&#x26;s=67&#x26;unique_share_id=4ec9c928-c71c-4db1-969d-761dc1003bc3" target="_blank"> Check Facilities Availability   📅 </a></p>
+<p><br><br></p>
+<h2 id="for-personal-accommodation-rent-our-casa-suites--90night--these-are-individual-apartments-rented-separately">For Personal Accommodation, rent our <b>Casa Suites</b>: (~ $90/night)<br>  <strong>These are <a href="#casas">individual apartments</a> rented separately</strong></h2>
+<p>Some participants will not want to sleep in a dormitory and they can book a private apartment individually. We have one and two-bedroom apartments. Note: these are on a first-come first-serve basis and they fill quickly, so tell participants to book well in advance.</p>
+<p><strong>Long-term Rentals:</strong> For stays of 30 days or more, we offer approximately 50% discount on our standard rates. These extended stays are managed through <a href="https://www.evolve.com/">Evolve</a>. Contact us for availability and pricing.</p>
+<p><a class="text-sm text-white bg-brand hover:bg-brand-deep rounded-full px-6 py-2.5 no-underline transition duration-200 ml-8 float-right" href="https://bit.ly/drbi-rentals" target="_blank"> Check Casa Availability   📅 </a></p>
+<p><br><br></p>
+<p><imgblock title="Eleanor Hadden Hall" id="ehh" description="Eleanor Hadden Hall was the first structure to be built at Desert Rose and is named after the mother of David Hadden, one of DRBI’s founding members.  It is fully air-conditioned with a large meeting area with 20’ projection screen, two breakout rooms, a full commercial kitchen, bathrooms, showers, and two covered patios. Seating for meals: 125, for presentations: 200." image="{hallbell}" images="{[]}"></imgblock></p>
+<p><imgblock title="Our Casa Suites" id="casas" description="Not every participant will be excited to sleep in a dormitory. For such cases, we have a dozen comfortable little apartment units which can be rented independently. These units each share a green central courtyard with gurgling fountains and a complimentary laundry facility." image="{casas}" flip="" images="{[]}"></imgblock></p>
+<p><a class="text-sm text-white bg-brand hover:bg-brand-deep rounded-full px-6 py-2.5 no-underline transition duration-200 ml-8 float-right" href="https://bit.ly/drbi-rentals" target="_blank"> Check Casa Availability   📅 </a></p>
+ 
+<p>&#x3C;ImgBlock title=“The Round House” id=“rh”
+description=“The Round House is a 4,000 square foot space with a kitchen and expansive seating area. Originally built as a private home, this unique and wonderful building is a favorite meeting place. A cupola crowning the building floods the rooms with light.”
+image={roundhouse}
+images={ [rh1,rh2,rh3,rh4,rh5,rh7,rh8,rh9,rh10,rh11] } /></p>
+<p>&#x3C;ImgBlock title=“William Sears Pavilion” id=“pav”
+description=“The William Sears Pavilion, framed by Italian Cyprus and backed by mountains is a beautiful venue for any outdoor occasion. The landscaped gardens are accessed through a gated wall and the Pavilion has both gentle steps and a ramp to accommodate all users. Think of the Pavilion for your next wedding, memorial or devotional gathering.”
+image={pavilion} flip
+images={ [pp1,pp2,pp3,pp4] }/></p>
+<p><imgblock title="Our Dormitory" id="guf" description="Our dormitory bulding (Guffy Center) has two wings, each with 20-beds and an attached studio apartment. Each dormitory wing sleeps 20 and includes a commercial bathroom with showers. The dormitory is rustic, but comfortable." image="{guffy1}"></imgblock></p>
+<p><imgblock title="Take a Dip in our Pool" id="pool" description="Every oasis in the desert needs a watering hole. In our case we were required to have a large fire suppression reservoir onsite, so the creative architects decided to fulfill the requirement with a large beautiful swimming pool (connected, of course, to the fire suppression system). Our pool is wheelchair accessible and a fun additional activity for any event." image="{poolImg}" flip=""></imgblock></p>
+<p>{/*
+<imgblock title="Campsite" id="camp" description="This year we will be developing an experimental campsite to provide overflow housing for appropriate events. Our initial camp will have a dozen sites spread out in a Mesquite grove near the guffy center." image="{poolImg}">
+*/}</imgblock></p>
+<p><imgblock title="RV Park" id="rv" description="Our new 5-acre RV Park is in the early stages, with only boondocking capabilities (which means parking, water and dump-station only). We hope to expand this in the future to provide a destination for snowbirding winter participants and volunteers." flip="" image="{dronerv}"></imgblock></p>
+<hr>', 'src/pages/facilities-and-rentals.mdx', 0, 9);
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('history/david-hadden', '/history/david-hadden', 'Who was David Hadden?', NULL, NULL, 'A brief biography of David Hadden', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was David Hadden?
 
 ![David Hadden](./_David-Hadden.webp)
 
@@ -1020,8 +1749,26 @@ He derived the greatest pleasure from enabling others to reach their goals and s
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="who-was-david-hadden">Who was David Hadden?</h2>
+<p><img src="./_David-Hadden.webp" alt="David Hadden"></p>
+<p>David Hadden (1929-2017) was a devoted Canadian Bahá’í and long-time friend of Bill and Marguerite Sears who stepped forward with experience, construction expertise and funds to help lay the foundation for DRBI.  He had already designed and built previous Bahá’í structures, including the Yukon Bahá’í Institute, and was instrumental in restoring the dome of the House of Worship in Wilmette Illinois.</p>
+<p>A civil engineer, David ran a reinforcing steel business in Toronto, Canada, while serving the Faith in a variety of capacities, including as Treasurer on the Canadian National Spiritual Assembly and as a member of the DRBI Board of Directors until 2005.</p>
+<p>He derived the greatest pleasure from enabling others to reach their goals and served as pilot and companion for Hands of the Cause William Sears, John Robarts and Rúhíyyih Khánum (nee Mary Maxwell) as they made cross-country trips to visit both urban and isolated Bahá’í communities in Canada, the United States and abroad.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/history/david-hadden.md', 0, 10);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('history/duffy-jeanne-sheridan', '/history/duffy-jeanne-sheridan', 'Who are Duffy and Jeanne Sheridan?', NULL, NULL, 'A brief biography of Duffy and Jeanne Sheridan', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '![Duffy and Jeanne Sheridan](./_duffy.jpg)
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('history/duffy-jeanne-sheridan', '/history/duffy-jeanne-sheridan', 'Who are Duffy and Jeanne Sheridan?', NULL, NULL, 'A brief biography of Duffy and Jeanne Sheridan', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '![Duffy and Jeanne Sheridan](./_duffy.jpg)
 
 Duffy and Jeanne are two of the original DRBI community members and, with the exception of a few years’ absence, have lived near the Institute since its inception.
 
@@ -1044,8 +1791,26 @@ Jeanne has joined Duffy as an artist in her own right after years in the corpora
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<p><img src="./_duffy.jpg" alt="Duffy and Jeanne Sheridan"></p>
+<p>Duffy and Jeanne are two of the original DRBI community members and, with the exception of a few years’ absence, have lived near the Institute since its inception.</p>
+<p>Duffy is a world-renowned realist painter who has accumulated a number of awards and accolades over his career, including the recent honour of receiving First Place – Best in Show from the International Guild Of Realism for his painting “Something I Don’t Know”.</p>
+<p><img src="./_duffy_painting.jpg" alt="Something I Don’t Know"></p>
+<p>Jeanne has joined Duffy as an artist in her own right after years in the corporate arena and is instrumental in the programming of events and activities around the Institute.  Jeanne also served as a member of the DRBI Board of Directors.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/history/duffy-jeanne-sheridan.md', 0, 11);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('history/eleanor-hadden', '/history/eleanor-hadden', 'Who was Eleanor Hadden?', NULL, NULL, 'A brief biography of Eleanor Hadden', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was Eleanor Hadden?
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('history/eleanor-hadden', '/history/eleanor-hadden', 'Who was Eleanor Hadden?', NULL, NULL, 'A brief biography of Eleanor Hadden', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was Eleanor Hadden?
 
 ![Eleanor Hadden](./_eleanor-hadden.webp)
 
@@ -1071,8 +1836,27 @@ Unfortunately, there was local opposition to changes in zoning and many months, 
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="who-was-eleanor-hadden">Who was Eleanor Hadden?</h2>
+<p><img src="./_eleanor-hadden.webp" alt="Eleanor Hadden"></p>
+<p>Eleanor Elizabeth Hadden,  David Hadden’s mother, was a beloved Bahá’í who selflessly served the faith with her husband Lyall in Ghana, Zimbabwe (then Rhodesia) and the United States.  Eleanor Hadden’s dedication to the Faith was an inspiration to many.  She was particularly known for her way to keep isolated believers connected through her story-telling and written bulletins. In their early years, the Sears and the Haddens lived near to each other outside Philadelphia, Pennsylvania, and this led to a lifetime bond between the families.</p>
+<p>For eleven years Marguerite and Bill Sears lived next door to David and Nancy Hadden in Port Hope, Ontario, Canada. For six of those years Bill hosted the Bahá’í ‘Gatherings’, summer weekend of spiritual deepening that drew friends from around the world.  To accommodate the 150+ people who came each year, David decided to build a dormitory in his mother’s name. A beautifully carved granite stone was fashioned to mark the place where the Eleanor Elizabeth Hadden House would stand and the stone was dedicated by Hands of the Cause William Sears and John Robarts.</p>
+<p><img src="./_lyall-guy-and-david-hadden.webp" alt="Lyall-Guy-and-David-Hadden"></p>
+<p>Unfortunately, there was local opposition to changes in zoning and many months, tears and prayers later the project was abandoned.  According to DRBI Board Meeting minutes:  “The dining hall has been officially named by resolution, the ‘Eleanor Elizabeth Hadden Dining Hall’.  Had it not been for David Hadden, this building would have been built for much more than was projected.  What better way to say thank you than to honor his mother.”</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/history/eleanor-hadden.md', 0, 12);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('history', '/history', 'DRBI History', NULL, NULL, 'The outline history of Desert Rose Bahá’í Institute', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## DRBI History
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('history', '/history', 'DRBI History', NULL, NULL, 'The outline history of Desert Rose Bahá’í Institute', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## DRBI History
 
 ###  1988 - Desert Rose Bahá’í School:
 
@@ -1231,8 +2015,91 @@ DRBI is deeply indebted to a number of people who aided in the initial funding, 
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="drbi-history">DRBI History</h2>
+<h3 id="1988---desert-rose-baháí-school">1988 - Desert Rose Bahá’í School:</h3>
+<p><img src="./_bill_and_mar.webp" alt="Bill and Marguerite Sears"></p>
+<p>Hand of the Cause of God William Sears and his wife Marguerite Reimer Sears initiated the first Desert Rose Bahá’í School with the assistance of a core group of dedicated friends. This became an annual event for the Southern Arizona Bahá’í’s each Thanksgiving weekend and was held in a rented hall in Tucson, Arizona.</p>
+<p><a href="/history/william-sears">Click here to read more about William Sears -></a></p>
+<p><a href="/history/marguerite-sears">Click here to read more about Marguerite Sears -></a></p>
+<hr>
+<h3 id="1992---william-sears-passes-away">1992 - William Sears passes away</h3>
+<p><img src="./_bill_sears_grave.jpg" alt="Bill Sears Grave"></p>
+<p>Mr. Sears is interred at East Lawn Palms Cemetery in Tucson, Arizona. Marguerite was encouraged by the Universal House of Justice to expand the four-day Desert Rose Bahá’í school to a permanent institute.</p>
+<hr>
+<h3 id="1996--land-was-purchased">1996 – Land was purchased</h3>
+<p><img src="./_Round-House.webp" alt="roundhouse"></p>
+<p>Marguerite Sears, with the help of many friends, purchased land near Eloy, Arizona for the development of the Desert Rose Bahá’í Institute, which she envisioned as an Institute for education in the arts and agriculture. When the land was purchased, the Round House was the only building on the property.</p>
+<hr>
+<h3 id="1996--sears-cottage-alai-library--office">1996 – Sears Cottage, Ala’i Library &#x26; Office</h3>
+<p><img src="./_admin_bldg.webp" alt="Sears Cottage and Alá’í Library"></p>
+<p>A cottage was constructed for Mrs. Sears that provided both comfortable living space and room where she could work with partners on cataloguing and publishing some of Bill Sears’ remaining works while building a library.</p>
+<hr>
+<h3 id="1997--dedication">1997 – Dedication</h3>
+<p>DRBI was dedicated on November 29, in honor of the two Hands of the Cause of God, General Shuá’u’lláh `Alá’í and, William Sears whose resting places are within an hour’s drive of the property. Two roads within the Institute are named in their honor.</p>
+<p><a href="/history/shuallah-alai">Click here to read about Shua’u’llah Ala’i -></a></p>
+<hr>
+<h3 id="1997--incorporation">1997 – Incorporation</h3>
+<p>Desert Rose Bahá’í Institute incorporates with 501(c)3 Not-For-Profit status.</p>
+<hr>
+<h3 id="1999--meeting-and-dining-hall-built">1999 – Meeting and Dining Hall Built</h3>
+<p><img src="./_hall.webp" alt="Eleanor Hadden Hall"></p>
+<p>David Hadden designed and acted as general contractor for the first new structure at Desert Rose. As a surprise to David it was named Eleanor Hadden Hall in honor of his late mother.</p>
+<p><a href="/history/eleanor-hadden">Eleanor Hadden and the naming of the dining hall</a></p>
+<hr>
+<h3 id="1999-guest-house-is-built">1999– Guest House is Built</h3>
+<p><img src="./_guest_house.webp" alt="guest-house"></p>
+<p>There was a need for additional housing at Desert Rose for guests. David Hadden built a guest house at his expense near the Sears’ cottage for he and his family to use in the winter. The house was given to the Institute for use by visiting dignitaries and kept free for the Haddens whenever they were at Desert Rose.</p>
+<p><a href="/history/david-hadden">David Hadden -></a></p>
+<hr>
+<h3 id="2001--casa-de-rosas-are-built">2001 – Casa de Rosas are Built</h3>
+<p><img src="./_casas.webp" alt="casas"></p>
+<p>As with any not-for-profit organization, DRBI requires reliable sources of income to offset operational costs. An inventive response to this need was the design and construction of the Casas de Rosas. The 16 rental apartments built around a restful courtyard allow for the perfect combination of privacy and community living while providing regular revenue to DRBI.</p>
+<hr>
+<h3 id="2004---william-sears-pavilion">2004 - William Sears Pavilion</h3>
+<p><img src="./_pavilion.webp" alt="pavilion"></p>
+<p>It was a vision of the Board of Directors to embody the spiritual peace of the desert in a structure where people could go to reflect, pray, meditate, or celebrate. The Pavilion was dedicated on November 27, 2000. The picture above shows David Hadden and Marguerite Sears preparing to place a box containing the names of all the friends of DRBI who donated towards the Pavilion’s construction.</p>
+<hr>
+<h3 id="2005--drbi-welcomes-the-guffey-center">2005 – DRBI Welcomes the Guffey Center</h3>
+<p><img src="./_guffy.webp" alt="guffey"></p>
+<p>As weekend camps and retreats became more common it became apparent that DRBI needed more accommodations. The Guffey Center enables up to 50 people to stay during sessions. The Center honors two of DRBI’s steadfast volunteers, Ray and Gloria Guffey. Ray’s impact can be seen in every sidewalk and stone while Gloria continues to serve the Institute in any way she can.</p>
+<hr>
+<h3 id="2006--marguerite-sears-passes">2006 – Marguerite Sears passes</h3>
+<p><img src="./_marguerite_passing.webp" alt="passing"></p>
+<p>After many years of devoted service Mrs. Sears passes on at the age of 94. She is buried in the Memorial Garden at DRBI.</p>
+<hr>
+<h3 id="2017---kure-lp-fm">2017 - KURE LP FM</h3>
+<p><img src="./_kure_lp.webp" alt="radio"></p>
+<p>Volunteer Virginia Healey, then part of the DRBI Management learned that the FCC was opening a new license for a low power (LP) radio station for Eloy Arizona. Recognizing the opportunity to serve the community Virginia leapt at the chance. We are thrilled to have KURE LP 106.1 FM as a part of the Institute.</p>
+<hr>
+<h3 id="2018---guest-house-becomes-the-art-gallery">2018 - Guest House becomes the Art Gallery</h3>
+<p>Early residents and resident artists Duffy and Jeanne Sheridan proposed moving DRBI one step closer to the founders’ original vision by turning the Guest House into an Art Gallery. Using their own funds they converted what had been a two-bedroom home into an art space with room for shows, classes, and both painting and working pottery studios.</p>
+<p><a href="/history/duffy-jeanne-sheridan">Duffy and Jeanne Sheridan -></a></p>
+<hr>
+<h3 id="2019---art-gallery-opening">2019 - Art Gallery opening</h3>
+<p><img src="./_art_gallery.webp" alt="art gallery"></p>
+<p>Since January 2019, the renovated Art Center has hosted close to one thousand people. In four months alone, one hundred and twenty-two students took 24 classes in everything from painting, pastels, tile glazing and beading techniques to Musubi Stones, Pysanky Egg decorating and Silk Scarf dying. These classes were organized by local artist Bonnie Light, who volunteered her services to DRBI.</p>
+<hr>
+<h3 id="2019---drbi-farm">2019 - DRBI Farm</h3>
+<p><img src="./_farm.webp" alt="farm"></p>
+<p>The Agriculture project, led by Board Member Dwight Cox, launched with the vision of converting untillable land to soil-rich land that can produce and support healthy organic food.</p>
+<hr>
+<h2 id="a-legacy-of-collaboration">A Legacy of Collaboration…</h2>
+<p>DRBI is deeply indebted to a number of people who aided in the initial funding, design, planning and construction of the Institute, including David and Nancy Hadden, Ray and Gloria Guffey, George Decker, Guy and Grant Hadden, Dan Popov, the Heydarian family, the Taleberza family, the Rowhani extended family (Navid and David), and innumerable other persons who pitched in to help in any way their talents allowed.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 400px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/history/index.md', 0, 13);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('history/marguerite-sears', '/history/marguerite-sears', 'Who was Marguerite Sears? ', NULL, NULL, 'A brief biography of Marguerite Sears', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was Marguerite Sears
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('history/marguerite-sears', '/history/marguerite-sears', 'Who was Marguerite Sears? ', NULL, NULL, 'A brief biography of Marguerite Sears', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was Marguerite Sears
 
 ![Marguerite Sears](./_marguerite.webp)
 
@@ -1270,8 +2137,33 @@ A lifelong supporter of the arts, she envisioned Desert Rose blossoming into a c
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="who-was-marguerite-sears">Who was Marguerite Sears</h2>
+<p><img src="./_marguerite.webp" alt="Marguerite Sears"></p>
+<p>Marguerite Reimer Sears was born in November 23, 1912. Her mother Viola Reimer was of French ancestry and her father, Charles Reimer, was a well-known businessman in the meat packing and sausage business. Unlike many families, her parents were successful and did not suffer financially during the depression. Marguerite attended mostly private Catholic schools and her love for Jesus was quite deep.  Marguerite’s education includes attendance at Stout College in Wisconsin, Marquette University, Duke University and Curry School of Speech in Boston. She also enjoyed watercolor art.</p>
+<p>Her father, Charles Reimer, studied various philosophies and found the Bahá’í Faith. As Marguerite put it, this was one that he stuck with. After spending the summer with May Maxwell, who later married Shoghi Effendi, Great Grandson of Bahá’u’lláh, founder of the Bahá’í Faith, Marguerite embraced the Faith in 1934 at the age of 21.</p>
+<p>Marguerite met Bill Sears in the little town of Manitowoc, Wisconsin, where she was giving a lecture series concerning her new beloved religion. Bill was working at the station and met her one afternoon when she had just finished a lecture. He converted her to the idea that marriage was a fine thing…she converted him to the Bahá’í Faith.</p>
+<p>Marguerite also worked as a radio engineer, controlling the sound effects for Bill’s shows including such titles as “The Telegram’s Dick Tracy” readings. She learned radio engineering when she worked for the war information office in San Francisco.</p>
+<p>After moving to various states in the United States for the Faith they decided in 1954 to sacrifice their careers in radio and television and set off to Africa with their 2 sons, Michael and Bill Jr.</p>
+<p>When her husband Bill was appointed as a Hand of the Cause for the Bahá’í Faith, they sold their home in Africa so that they could travel anywhere the Faith needed them to go. She continued to support Bill with all his travels and duties as a Hand of the Cause. These travels, often paid out of their own pockets, took them around the work multiple times visiting at least 60 different countries.</p>
+<p>As they got older and traveling became more difficult, and with the help of David Hadden, they settled first in Ontario Canada and then in Arizona. In 1988 Bill began yearly sessions in a Tucson hotel over Thanksgiving weekend. These sessions were called the Desert Rose Bahá’í School.</p>
+<p>After the passing of her beloved husband in 1992, Marguerite continued with the concept of Desert Rose which resulted in her founding the Desert Rose Bahá’í Institute in 1996.</p>
+<p>A lifelong supporter of the arts, she envisioned Desert Rose blossoming into a center for artistic expression and eventually becoming a university.</p>
+<p>(excerpts of the above history were taken from the Salt Lake Telegram, Feb 14, 1946)</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/history/marguerite-sears.md', 0, 14);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('history/shuallah-alai', '/history/shuallah-alai', 'Who was Shu’a’u’llah ‘A’la’i? ', NULL, NULL, 'A brief biography of Shu’a’u’llah ‘A’la’i', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was Shu’a’u’llah ‘A’la’i
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('history/shuallah-alai', '/history/shuallah-alai', 'Who was Shu’a’u’llah ‘A’la’i? ', NULL, NULL, 'A brief biography of Shu’a’u’llah ‘A’la’i', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was Shu’a’u’llah ‘A’la’i
 
 ![Shu’a’u’llah ‘A’la’i](./_alai.webp)
 
@@ -1324,8 +2216,33 @@ Because of the revolution in Iran Shu’a’u’llah ‘A’la’i was forced to
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="who-was-shuaullah-alai">Who was Shu’a’u’llah ‘A’la’i</h2>
+<p><img src="./_alai.webp" alt="Shu’a’u’llah ‘A’la’i"></p>
+<p>(1889-1984) Shu’a’u’llah (which means ‘Light of God’) ‘A’la’i  was an Iranian Hand of the Cause. Born in Tehran into a prominent family: his father was set to become a cleric, but had converted to the Bahá’í Faith, and instead became physician to the royal household. Shu’a’u’llah ‘A’la’i studied accountancy, after which he pursued a distinguished career in various fields of government service, becoming chief controller of army finances (with the rank of general) at a young age. He was elected to the Tehran Bahá’í Local Spiritual Assembly in 1913, and to the very first Iranian Bahá’í National Spiritual Assembly in 1934, often serving as its chairman. Shoghi Effendi appointed him as a Hand of the Cause in 1952, and thereafter he travelled extensively, visiting Bahá’í communities in many parts of the world. He left Iran in 1978, spending the last few years of his life in France and then Arizona, where he is buried.</p>
+<p>This succinct summation of Shu’a’u’llah ‘A’la’i’s life can’t begin to tell you why he was seen to be such an extraordinary man by so many, or why he was selected by Shoghi Effendi to become a Hand of the Cause.  Fortunately, DRBI Board of Directors Chairman Taj Sabet is General A’la’i’s descendant and so we asked him to tell us a few stories about his great-grandfather.  Here is what he said:</p>
+<p>“The words I use to describe Hand of the Cause, General Alai, are loving, unshakable devotion, unwavering certitude, intense love for the cause of Bahá’u’lláh, honesty, integrity, trustworthiness, steadfastness, and devotion to family.</p>
+<p>As a young adult around the age of 21, Shu’a’u’llah ‘A’la’i studied modern accounting principles.  He was soon assigned to work for the chief accountant of the government of Iran. Periodically the government would send people out to the provinces to conduct audits and there was one province that no accountant wanted to visit.  The person in charge was explosive, throwing out anyone who tried to question him.   ‘A’la’i offered to perform the audit if no one else would. When he arrived, he walked straight to the man in question, whose name was Reza Pahlavi, and without a word pulled up a chair, sat down next to him and opened the books. He redlined all the mistakes, closed the books, and left without saying a word.</p>
+<p>Reza Pahlavi was speechless. Months later, he became the Shah of Iran, and began looking for Shu’a’u’llah ‘A’la’i’. The Shah had been so impressed with what ‘A’la’i had done, not only with the province’s books, but in his courage and his professionalism, he offered him the job of chief accountant.  Essentially ‘A’la’i was handed the keys to the vast treasures of the country.  After a few short years, state policy was altered by the Shah to require only one signature on all accounts – Alai’s.</p>
+<p>To be openly Baha’i in the country of Iran is a difficult choice that often ends tragically, even now.</p>
+<p>But Shu’a’u’llah ‘A’la’i never wavered.  In his meetings with high officials and government authorities he did not hesitate to state, fearlessly and without ambiguity the importance of the Cause of God.</p>
+<p>When his brother died tragically, leaving five children ages 6 weeks to 10 years old, Shu’a’u’llah ‘A’la’i took on the added responsibility of raising the children as if they were his own.  He brought them into his home, shared meals and stories with them, ensuring they would never forget their father. Shortly after the death of his brother, A’la’i’s own father passed suddenly of a heart attack, leaving his 2 young siblings without their father. A’la’i again stepped up as the father figure and moved his siblings and his stepmother in with his family, where he could ensure they would feel safe and loved.</p>
+<p>Shu’a’u’llah ‘A’la’i carried a challenging travel schedule and was deeply devoted to his duties as a Hand. That said, his relationships with his family, children and grandchildren were never neglected.  If separated from his beloved wife he wrote her long, detailed letters.  Family dinners were a respected routine. His grandchildren looked forward to the times they could spend with him as he told stories, played games, and read books with them. Stories that even today, are shared with family and friends. As his grandchildren grew and moved on with their lives, he would write letters with words of wisdom on how to navigate the world.</p>
+<p>Because of the revolution in Iran Shu’a’u’llah ‘A’la’i was forced to leave his homeland, eventually settling in Arizona in the last few years of his life.  Even though did not know the language, friends and even strangers were attracted to him by the intense love for humanity that shone from his face.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/history/shuallah-alai.md', 0, 15);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('history/william-sears', '/history/william-sears', 'Who was William Sears? ', NULL, NULL, 'A brief biography of William Bernard Patrick Michael Terrance Sears VII', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was William Sears?
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('history/william-sears', '/history/william-sears', 'Who was William Sears? ', NULL, NULL, 'A brief biography of William Bernard Patrick Michael Terrance Sears VII', NULL, NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '## Who was William Sears?
 
 ![William Sears](./_william-sears.jpg)
 
@@ -1368,14 +2285,47 @@ Bill Sears passed away in 1992, continuing to serve the Baha’i Faith to his la
     border-right: 4px solid #ccc;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
+</style>', '<h2 id="who-was-william-sears">Who was William Sears?</h2>
+<p><img src="./_william-sears.jpg" alt="William Sears"></p>
+<p>William Bernard Patrick Michael Terrance Sears VII, was born on March 28, 1911, in Duluth Minnesota, in Pumpkin Row. His family originally came from Court MacSherry Bay, Ireland. In one of his books he referred to himself as the Seventh Son of a Gun of a Seventh Son of a Gun. At a young age, he dreamt 3 times of a “Shiny white Figure”. He later discovered that the man in his dreams was ‘Abdu’l- Baha’ the son of Baha’u’llah, founder of the Baha’i Faith.</p>
+<p>William, or Bill as he was often called, attended the University of Wisconsin where he studied writing and drama. He wrote plays and won awards in playwriting competitions. He married a beautiful young lady named Kathleen and they had 2 sons, William Jr. and Michael. After Michael’s birth, both Kathleen and Michael became ill and were hospitalized. Bill was 25, living during the depression with no work and little food, his wife Kathleen passed away, he had 2 sons, one in the hospital, the other staying with his sister. This made him wonder “is there a God and do we have souls?” He knew life had to be more than just getting up, going to work, going to bed, and dying.</p>
+<p>Bill met Marguerite Reimer when he was working at WOMT radio station in Manitowoc, Wisconsin where she just happened to be giving a lecture series on the Baha’i Faith. He converted her to the idea that marriage was a fine thing…she converted him to the Baha’i Faith.</p>
+<p>Marguerite was often wanting to move to help spread the Faith and luckily Bill was happy hopping from place to place. He began his career in Television when WCAU radio became WCAU Television. He later worked for CBS with his own shows such as “The Bill Sears” show and “In the Park”. In 1951, Bill was on the Edward R. Murrow program “This I Believe”. On the program Bill stated that “I found that happiness is not a matter of geography, but it is found within myself…I need only to remember one thing: nothing must come between me and my responsibilities to God and to my fellow man…This, I believe, has helped me to look upon each dawn as a new adventure.”</p>
+<p>In 1954 Bill and Marguerite decided to set off to Africa with their 2 sons even though Bill’s career in Television was taking off. Bill continued his radio career with radio SABC, in South Africa.</p>
+<p>In 1957, Bill Sears was elevated to a Hand of the Cause of God for the Baha’i Faith by Shoghi Effendi. They sold their home in Africa so that they could travel anywhere the Faith needed them to go.</p>
+<p>His son Bill Sears Jr wrote: “I believe that anyone close to William Sears, both before after October and November of 1957, had to notice an abrupt change in him. Given the magnitude of the events that had taken place in that brief period of time, change was to be expected. Yet this was really notable, as it was a great change and in so short a time. It was like watching a caterpillar turn directly into a butterfly because there is no time for the cocoon.</p>
+<p>His warm and loving nature, his sense of humor, and that sparkle in his eyes were intact, but there was a new intensity, a singleness of purpose, and you felt that no matter what else it might APPEAR that he was doing, he was really concentrating on what he could do, himself and through the friends, to advance the Faith, and fulfill the responsibilities entrusted to him by Shoghi Effendi.”</p>
+<p>Bill and Marguerite traveled around the world multiple times visiting at least 60 different countries. During his talks he made us laugh and cry, inspiring us to new heights of service to God and mankind.</p>
+<p>Bill and Marguerite also wrote many books. God Loves Laughter and All Flags Flying conveyed moral and life guidance through personal stories.  Others were written about the Heroes and Heroines of the Baha’i Faith.</p>
+<p>With the help of David Hadden, they settled first in Ontario, Canada and then in Arizona and in 1988 Bill and Marguerite started Desert Rose Baha’i School.  The school was held every year at Tucson hotels over Thanksgiving weekend. Their vision continues today with DRBI in Eloy.</p>
+<p>Bill Sears passed away in 1992, continuing to serve the Baha’i Faith to his last breath.</p>
+<style>
+  .prose img {
+    display: block;
+    max-width: 500px;
+    max-height: 300px;
+    width: auto; /* Ensures the image maintains its aspect ratio */
+    height: auto; /* Ensures the image maintains its aspect ratio */
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 8px;
+    border-right: 4px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
 </style>', 'src/pages/history/william-sears.md', 0, 16);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('learning', '/learning', 'Bahá’í Education: Lifelong Learning at DRBI', NULL, NULL, NULL, 'study', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '### Todo:
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('learning', '/learning', 'Bahá’í Education: Lifelong Learning at DRBI', NULL, NULL, NULL, 'study', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'md', 0, 1, '### Todo:
 
 - [ ] Quotes about Baha''i Education
 - [ ] Calendar with Regular workshops & Special Events
 - [ ] Education articles
-- [ ] Fundraising victories & endowments', 'src/pages/learning/index.md', 0, 17);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('privacy', '/privacy', 'Privacy Policy', 'Legal', 'What we collect, why we collect it, and what we never do with it.', 'How Desert Rose Bahá''í Institute collects, uses, and protects personal information on drbi.org.', 'study', NULL, NULL, '03 Sep 2026', '@layouts/MDLayout.astro', 'md', 0, 1, '*Last updated: 3 September 2026*
+- [ ] Fundraising victories & endowments', '<h3 id="todo">Todo:</h3>
+<ul class="contains-task-list">
+<li class="task-list-item"><input type="checkbox" disabled> Quotes about Baha’i Education</li>
+<li class="task-list-item"><input type="checkbox" disabled> Calendar with Regular workshops &#x26; Special Events</li>
+<li class="task-list-item"><input type="checkbox" disabled> Education articles</li>
+<li class="task-list-item"><input type="checkbox" disabled> Fundraising victories &#x26; endowments</li>
+</ul>', 'src/pages/learning/index.md', 0, 17);
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('privacy', '/privacy', 'Privacy Policy', 'Legal', 'What we collect, why we collect it, and what we never do with it.', 'How Desert Rose Bahá''í Institute collects, uses, and protects personal information on drbi.org.', 'study', NULL, NULL, '03 Sep 2026', '@layouts/MDLayout.astro', 'md', 0, 1, '*Last updated: 3 September 2026*
 
 DRBI, Inc. (“Desert Rose,” “we,” “us”) runs drbi.org. We are a small non‑profit
 institute, not an advertising business, and we treat the details you give us
@@ -1480,8 +2430,86 @@ shows the current version.
 [info@drbi.org](mailto:info@drbi.org) · (520) 466‑7961
 
 For any privacy question, write to us or use the [contact form](/contact-us).
-See also our [Terms & Conditions](/terms).', 'src/pages/privacy.md', 0, 18);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('radio', '/radio', 'KURE-LP 106.1 FM', 'Community Radio', 'Broadcasting 24/7 from Desert Rose — serving Eloy, Casa Grande, and Coolidge, and streaming worldwide', 'Listen live to KURE-LP 106.1 FM, broadcasting 24/7 from Desert Rose Bahá''í Institute in Arizona. Our community radio station serves Eloy, Casa Grande, and Coolidge with diverse programming and global reach through online streaming.', 'kure', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'mdx', 1, 1, 'import CdnImage from "@components/CdnImage.astro"
+See also our [Terms & Conditions](/terms).', '<p><em>Last updated: 3 September 2026</em></p>
+<p>DRBI, Inc. (“Desert Rose,” “we,” “us”) runs drbi.org. We are a small non‑profit
+institute, not an advertising business, and we treat the details you give us
+accordingly.</p>
+<p><strong>In short:</strong> we collect only what we need to run our programs and this site. We
+do not sell your personal information, we do not share it with advertisers, and
+we do not use advertising or cross‑site tracking cookies.</p>
+<h2 id="1-what-we-collect">1. What we collect</h2>
+<p><strong>Information you give us.</strong> Your name and email address when you create an
+account, register for an event, subscribe to the newsletter, or write to us;
+the content of your messages, comments, and any memories, tributes, or
+photographs you submit; and details you provide when enquiring about
+volunteering, facility rentals, or the Memorial Gardens.</p>
+<p><strong>Information collected automatically.</strong> Basic, aggregated usage measurements —
+pages viewed, referring site, approximate region, and general device or browser
+type. Our analytics are privacy‑oriented, use no cookies, and do not build a
+profile of you or follow you across other websites.</p>
+<p><strong>Payments.</strong> When you contribute or arrange a Memorial Gardens purchase,
+payment is handled entirely by our payment processor. We may receive a
+confirmation and the amount, but <strong>we never receive or store your card
+number.</strong></p>
+<p>We do not knowingly collect information from children under 13. Where children
+take part in programs, we work through a parent or guardian.</p>
+<h2 id="2-how-we-use-it">2. How we use it</h2>
+<p>To sign you in and keep your session active; to confirm registrations, bookings,
+and contributions; to answer your enquiries; to publish comments and memorial
+submissions you have asked us to publish; to send the newsletter if you asked
+for it; to keep the site secure and working; and to understand, in aggregate,
+which pages are useful.</p>
+<p>We do not sell, rent, or trade your personal information, and we do not use it
+for advertising.</p>
+<h2 id="3-who-we-share-it-with">3. Who we share it with</h2>
+<p>Only the service providers that make the site work, and only as far as each
+needs:</p>
+<ul>
+<li><strong>Cloudflare</strong> — hosting, database, file storage, and privacy‑oriented site analytics</li>
+<li><strong>Google</strong> — optional sign‑in, if you choose it</li>
+<li><strong>ZeptoMail</strong> — sending sign‑in links, confirmations, and newsletters</li>
+<li><strong>Payment processors</strong> — contributions and Memorial Gardens payments</li>
+<li><strong>Event ticketing platforms</strong> — registration for ticketed events</li>
+</ul>
+<p>Each handles your information under its own privacy policy. Beyond these, we
+disclose personal information only when the law requires it, or to protect the
+rights and safety of our community.</p>
+<h2 id="4-cookies-and-similar-technologies">4. Cookies and similar technologies</h2>
+<p>We use a small number of strictly necessary cookies — chiefly to keep you
+signed in and to protect forms against abuse. We do not use advertising or
+cross‑site tracking cookies. Blocking cookies will prevent you from signing in
+but leaves the rest of the site readable.</p>
+<h2 id="5-how-long-we-keep-it">5. How long we keep it</h2>
+<p>Account details are kept while your account is active. Registration, booking,
+and contribution records are kept as long as our accounting and charitable
+reporting obligations require. Published comments and memorial content remain
+until you or we remove them. Newsletter subscriptions last until you
+unsubscribe — every issue carries a link.</p>
+<h2 id="6-your-choices">6. Your choices</h2>
+<p>You may ask us to see, correct, or delete the personal information we hold about
+you; withdraw a memorial submission or comment; unsubscribe from the newsletter
+at any time; or close your account. Write to
+<a href="mailto:info@drbi.org">info@drbi.org</a> and we will respond as promptly as we
+reasonably can. We may need to keep limited records where the law requires it.</p>
+<h2 id="7-security">7. Security</h2>
+<p>Traffic to this site is encrypted in transit. Access to personal information is
+limited to the staff and volunteers who need it, and administrative areas
+require a signed‑in account with an appropriate role. No system is perfectly
+secure, but if a breach affects your information we will tell you promptly.</p>
+<h2 id="8-where-your-information-is-held">8. Where your information is held</h2>
+<p>Desert Rose is in Arizona, USA, and our providers operate globally. If you use
+this site from outside the United States, your information will be processed in
+the United States and other countries where our providers run their services.</p>
+<h2 id="9-changes">9. Changes</h2>
+<p>We will update this page when our practices change, and the date at the top
+shows the current version.</p>
+<h2 id="10-contact">10. Contact</h2>
+<p><strong>DRBI, Inc.</strong>
+1950 W. William Sears Dr., Eloy, AZ 85131
+<a href="mailto:info@drbi.org">info@drbi.org</a> · (520) 466‑7961</p>
+<p>For any privacy question, write to us or use the <a href="/contact-us">contact form</a>.
+See also our <a href="/terms">Terms &#x26; Conditions</a>.</p>', 'src/pages/privacy.md', 0, 18);
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('radio', '/radio', 'KURE-LP 106.1 FM', 'Community Radio', 'Broadcasting 24/7 from Desert Rose — serving Eloy, Casa Grande, and Coolidge, and streaming worldwide', 'Listen live to KURE-LP 106.1 FM, broadcasting 24/7 from Desert Rose Bahá''í Institute in Arizona. Our community radio station serves Eloy, Casa Grande, and Coolidge with diverse programming and global reach through online streaming.', 'kure', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'mdx', 1, 1, 'import CdnImage from "@components/CdnImage.astro"
 
 export const romanimg = "drbi.org/site/people/roman-orona.webp"
 export const melodyimg = "drbi.org/site/people/melody-mel.webp"
@@ -1557,8 +2585,58 @@ How about a musician who, for many years, played professionally with his band al
 Perhaps Chris’ greatest trait is that he isn’t afraid to take risks and learn from his mistakes.  More important, he encourages others to do the same.  Just ask any of the DJ’s who fill the airwaves at KURE LP FM with their eclectic assortment of diverse musical genres.  For some, all they did was walk in the door and express a serious interest in learning the trade. Before they knew it, Chris had them in the chair talking live on the air.   So that leads us to the final must-have quality in a successful Station Manager.  The faith that, with encouragement, others can and will learn to do it just as well, if not better, than you can.   Thank you, Chris.
 
 
-<br /> <br />', 'src/pages/radio/index.mdx', 0, 19);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('terms', '/terms', 'Terms & Conditions', 'Legal', 'The terms that govern your use of drbi.org.', 'Terms and conditions for using drbi.org, the website of Desert Rose Bahá''í Institute in Eloy, Arizona.', 'casas', NULL, NULL, '03 Sep 2026', '@layouts/MDLayout.astro', 'md', 0, 1, '*Last updated: 3 September 2026*
+<br /> <br />', '<p>import CdnImage from “@components/CdnImage.astro”</p>
+<p>export const romanimg = “drbi.org/site/people/roman-orona.webp”
+export const melodyimg = “drbi.org/site/people/melody-mel.webp”
+export const rickimg = “drbi.org/site/people/rick-rock.webp”
+export const helenaimg = “drbi.org/site/people/helena-esaloma.webp”
+export const chrisimg = “drbi.org/site/people/chris-ruhe.webp”</p>
+<audio controls autoplay class="w-full max-w-md mx-auto my-4">
+  <source src="https://stationplaylist.com:7096/listen.aac" type="audio/aac">
+  Your browser does not support the audio element.
+</audio>
+<div class="text-center mb-4">
+  <a href="https://stationplaylist.com:7096/listen.aac" class="inline-flex items-center justify-center px-6 py-2.5 bg-white text-gray-700 rounded-md hover:bg-blue-600 hover:text-white active:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg font-bold no-underline hover:no-underline relative min-w-[250px] border border-gray-200">
+    <span class="absolute -left-2 -top-2 bg-white text-blue-600 rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-sm border-2 border-blue-400">
+      📑
+    </span>
+    Bookmark Direct Stream Link
+  </a>
+</div>
+<h3 id="serving-our-local-and-global-community">Serving our Local and Global Community:</h3>
+<p>KURE-LP (Low Power) 106.1 FM is a non-profit community radio station, broadcasting and streaming 24/7 from Desert Rose Bahá’í Institute, to serve the communities of Eloy, Casa Grande and Coolidge, Arizona. Low-powered (LP) stations educate, involve and inspire people in rural and urban localities all around the world. And now that we’re on the web, you can hear us wherever you are!</p>
+<div class="flex flex-wrap w-full justify-evenly">
+<div class="card w-64 text-center mx-2">
+    <cdnimage src="{romanimg}" alt="Roman Orona" w="{384}" h="{384}" face="" class="rounded-full w-48 h-48 mx-auto mb-2 border-b-4 border-r-4 border-orange-300">
+    <h3 class="name mb-0 mt-0">Roman Orona</h3>
+    <p class="title mt-0 text-sm">Indigenous Cafe</p>
+</cdnimage></div>
+  <div class="card w-64 text-center px-2">
+    <cdnimage src="{melodyimg}" alt="Melvin Banning" w="{384}" h="{384}" face="" class="rounded-full w-48 h-48 mx-auto mb-2 border-b-4 border-r-4 border-orange-300">
+    <h3 class="name mb-0 mt-0"> Melvin Banning </h3> <p class="title mt-0 text-sm"> Classic Rock </p>
+  </cdnimage></div>
+  <div class="card w-64 text-center px-2">
+    <cdnimage src="{rickimg}" alt="Rick Rock" w="{384}" h="{384}" face="" class="rounded-full w-48 h-48 mx-auto mb-2 border-b-4 border-r-4 border-orange-300">
+    <h3 class="name mb-0 mt-0"> Rick Rock </h3> <p class="title mt-0 text-sm"> Club Mix </p>
+  </cdnimage></div>
+  <div class="card w-64 text-center mx-2">
+    <cdnimage src="{helenaimg}" alt="Helena Esaloma" w="{384}" h="{384}" face="" class="rounded-full w-48 h-48 mx-auto mb-2 border-b-4 border-r-4 border-orange-300">
+    <h3 class="name mb-0 mt-0"> Helena Esaloma </h3> <p class="title mt-0 text-sm"> Polynesian Sounds </p>
+  </cdnimage></div>
+</div>
+<p><strong>Local DJ’s fill the airwaves:</strong>    Here at KURE-LP we are particularly proud of the outstanding contributions from our local DJ’s.   They play a diverse selection of music as befits an Institute that embraces people of all ages and backgrounds</p>
+<hr>
+<h3 id="meet-campadre-chris-our-station-manager">Meet ‘Campadre Chris’, our Station Manager</h3>
+  <div class="card w-64 text-center float-right">
+    <cdnimage src="{chrisimg}" alt="Chris Ruhe" w="{384}" h="{384}" face="" class="rounded-full w-48 h-48 mx-auto mb-2 object-cover">
+    <h3 class="name mb-0 mt-0"> Chris Ruhe </h3> <p class="title mt-0 text-sm"> Station Manager </p>
+  </cdnimage></div>
+<p>In Spring 2017, through the work of dedicated volunteers like Virginia Healey and Nancy Sloman, all the red tape and paperwork hurdles had been cleared and DRBI had its own community radio station.  Now, all that remained was to develop an exciting, diverse schedule of music, talk, current events and spiritual offerings; acquire talented artists to fill the time slots, keep elevating the quality and quantity of live programming, involve and inform the community…   The list went on.    Desert Rose needed a Station Manager, and not just any Station Manager would do.</p>
+<p>We needed someone who is a little bit wacky because the station is out in the middle of the desert.  Of course, someone who loved music and had a background in radio would be ideal.  And don’t forget that whoever the candidate was, they must fearlessly face the unknown and be willing to experiment in order to build a loyal, diverse audience base.</p>
+<p>How about a musician who, for many years, played professionally with his band all over New York City?  Or what about someone who, with his wife Janet and their kids, threw caution to the winds and moved to South America to serve the Faith?  Did you know that Chris Ruhe (aka Campadre Chris) had the number 1 show at the number 1 radio station in Santiago, Chile?  And what about the fearlessness required to survive terrorist attacks, run national music festivals, and judge the Miss Chile Contest?  OK maybe not that last one, but it’s still an unmatched list of life experiences that built a unique set of skills.</p>
+<p>Perhaps Chris’ greatest trait is that he isn’t afraid to take risks and learn from his mistakes.  More important, he encourages others to do the same.  Just ask any of the DJ’s who fill the airwaves at KURE LP FM with their eclectic assortment of diverse musical genres.  For some, all they did was walk in the door and express a serious interest in learning the trade. Before they knew it, Chris had them in the chair talking live on the air.   So that leads us to the final must-have quality in a successful Station Manager.  The faith that, with encouragement, others can and will learn to do it just as well, if not better, than you can.   Thank you, Chris.</p>
+<p><br> <br></p>', 'src/pages/radio/index.mdx', 0, 19);
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('terms', '/terms', 'Terms & Conditions', 'Legal', 'The terms that govern your use of drbi.org.', 'Terms and conditions for using drbi.org, the website of Desert Rose Bahá''í Institute in Eloy, Arizona.', 'casas', NULL, NULL, '03 Sep 2026', '@layouts/MDLayout.astro', 'md', 0, 1, '*Last updated: 3 September 2026*
 
 This website is operated by DRBI, Inc. (“Desert Rose,” “we,” “us”), a non‑profit
 Bahá’í educational institute at 1950 W. William Sears Dr., Eloy, Arizona 85131.
@@ -1681,8 +2759,99 @@ governed by the laws of the State of Arizona.
 [info@drbi.org](mailto:info@drbi.org) · (520) 466‑7961
 
 Questions about these terms are welcome — write to us, or use the
-[contact form](/contact-us).', 'src/pages/terms.md', 0, 20);
-INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, source_path, draft, sort_order) VALUES ('the-bahai-faith', '/the-bahai-faith', 'The Bahá''í Faith: Spiritual Solutions for a Divided World', 'The Bahá''í Faith', 'A global religion that champions the unity of humanity, the harmony of science and religion, and the spiritual transformation of the individual.', 'An introduction to the Bahai Faith — its teachings on unity, independent investigation of truth, local governance, and the spiritual transformation of humanity.', 'faith', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'mdx', 1, 1, 'import { Image } from "astro:assets";
+[contact form](/contact-us).', '<p><em>Last updated: 3 September 2026</em></p>
+<p>This website is operated by DRBI, Inc. (“Desert Rose,” “we,” “us”), a non‑profit
+Bahá’í educational institute at 1950 W. William Sears Dr., Eloy, Arizona 85131.
+By using drbi.org you agree to these terms. If you do not agree, please do not
+use the site.</p>
+<h2 id="1-what-this-site-is-for">1. What this site is for</h2>
+<p>Desert Rose is a community‑based centre of learning guided by Bahá’í principles.
+This site exists to share who we are and to let you take part — by reading our
+articles and news, registering for events and programs, enquiring about
+facilities and retreat rentals, learning about the Memorial Gardens, offering
+to volunteer, subscribing to our newsletter, and contributing to our work.</p>
+<p>Our programs are open to people of all backgrounds and beliefs. Nothing on this
+site is an offer of religious membership, and participation carries no
+expectation of it.</p>
+<h2 id="2-accounts">2. Accounts</h2>
+<p>Some features — commenting, event registration, and the admin area — require an
+account. We sign you in with a one‑time link sent to your email address, or
+through Google.</p>
+<p>You are responsible for the security of the email account you sign in with and
+for activity that takes place under your account. Keep your details accurate,
+and tell us at <a href="mailto:info@drbi.org">info@drbi.org</a> if you believe your account
+has been misused. We may suspend or remove an account that is used to break
+these terms.</p>
+<h2 id="3-contributions-from-visitors">3. Contributions from visitors</h2>
+<p>If you post a comment, submit a memory or tribute to the Memorial Gardens, or
+send us photographs or written recollections, you keep ownership of what you
+submit. You grant us a non‑exclusive, royalty‑free licence to publish, store,
+and reproduce it on this site and in related Desert Rose materials, with
+attribution where you have given a name.</p>
+<p>Only submit material that is yours to share. Please do not post anything
+unlawful, misleading, abusive, hateful, or that discloses private information
+about another person — particularly in memorial content, where families are
+involved. We review submissions before publication and may edit or decline any
+of them at our discretion.</p>
+<h2 id="4-events-registration-and-rentals">4. Events, registration, and rentals</h2>
+<p>Event listings show the details we hold at the time of publication. Dates,
+speakers, fees, and capacity can change; where they do, we will make reasonable
+efforts to notify registrants.</p>
+<p>Some events are ticketed through third‑party registration platforms, and
+facility and retreat bookings are confirmed separately by our staff. Those
+bookings are governed by the terms and the cancellation and refund policy given
+to you at the time of booking, which take precedence over this page for the
+booking itself. A listing on this site is not a confirmed reservation until we
+confirm it.</p>
+<h2 id="5-memorial-gardens">5. Memorial Gardens</h2>
+<p>Information about the Memorial Gardens, including plots and interment, is
+provided for guidance. Purchase of a plot is completed through a separate
+written agreement with Desert Rose and is subject to Arizona law and to
+cemetery rules. Payments initiated on this site are handled by our payment
+processor; we do not receive or store your card details. Descriptions and
+prices on this site do not by themselves create a binding sale.</p>
+<h2 id="6-contributions-and-donations">6. Contributions and donations</h2>
+<p>Desert Rose is supported by contributions. Donations made through this site are
+processed by third‑party payment providers and are, unless we state otherwise,
+non‑refundable. If you believe a contribution was made in error, write to
+<a href="mailto:info@drbi.org">info@drbi.org</a> and we will do our best to put it right.
+Contact us for questions about the tax treatment of a gift.</p>
+<h2 id="7-our-content">7. Our content</h2>
+<p>Text, photographs, recordings, and design on this site belong to Desert Rose or
+to the contributors who licensed them to us, except where a source is credited.
+You may read, share, and quote our material for personal, educational, and
+non‑commercial purposes with attribution and a link. Please ask before
+republishing anything in full or using it commercially.</p>
+<p>Sacred texts and quoted passages remain subject to the rights of their
+respective publishers.</p>
+<h2 id="8-acceptable-use">8. Acceptable use</h2>
+<p>Please do not attempt to gain unauthorised access to any part of this site,
+interfere with its operation, scrape it at a scale that degrades service for
+others, or use it to send unsolicited messages.</p>
+<h2 id="9-thirdparty-services-and-links">9. Third‑party services and links</h2>
+<p>This site relies on outside services for hosting, email, payments, event
+ticketing, media, and analytics, and links to sites we do not control. We are
+not responsible for the content or practices of those third parties. Section 3
+of our <a href="/privacy">Privacy Policy</a> explains what is shared with them.</p>
+<h2 id="10-availability-and-liability">10. Availability and liability</h2>
+<p>We offer this site as it is and as it is available. We do not warrant that it
+will be uninterrupted or error‑free, and we may change or withdraw any part of
+it. To the fullest extent permitted by law, Desert Rose is not liable for
+indirect or consequential loss arising from your use of the site. Nothing here
+limits liability that cannot lawfully be limited.</p>
+<p>Information about programs, agriculture, health, and spiritual practice is
+offered for general interest and is not professional advice.</p>
+<h2 id="11-changes-and-governing-law">11. Changes and governing law</h2>
+<p>We may update these terms; the date at the top shows the current version, and
+continued use of the site after a change means you accept it. These terms are
+governed by the laws of the State of Arizona.</p>
+<h2 id="12-contact">12. Contact</h2>
+<p><strong>DRBI, Inc.</strong>
+1950 W. William Sears Dr., Eloy, AZ 85131
+<a href="mailto:info@drbi.org">info@drbi.org</a> · (520) 466‑7961</p>
+<p>Questions about these terms are welcome — write to us, or use the
+<a href="/contact-us">contact form</a>.</p>', 'src/pages/terms.md', 0, 20);
+INSERT OR REPLACE INTO site_pages (slug, route, title, label, subtitle, description, image, image_position, author, date_published, layout, format, has_components, is_route, body, html, source_path, draft, sort_order) VALUES ('the-bahai-faith', '/the-bahai-faith', 'The Bahá''í Faith: Spiritual Solutions for a Divided World', 'The Bahá''í Faith', 'A global religion that champions the unity of humanity, the harmony of science and religion, and the spiritual transformation of the individual.', 'An introduction to the Bahai Faith — its teachings on unity, independent investigation of truth, local governance, and the spiritual transformation of humanity.', 'faith', NULL, NULL, NULL, '@layouts/MDLayout.astro', 'mdx', 1, 1, 'import { Image } from "astro:assets";
 import ImgBlock from "@components/img_block.astro";
 
 ### The Bahá''í Faith: A Balance of Individual Liberty and Global Unity
@@ -1783,7 +2952,72 @@ It calls for a globalization of law to prevent international war -- together wit
 
 ## Conclusion
 
-The Bahá''í Faith offers a unique perspective on addressing the challenges of the modern world. By emphasizing individual responsibility, freedom of speech, local governance, and a universal spiritual identity, it provides a framework for achieving global unity while preserving individual liberty. The Faith''s strong stance on the freedom of conscience and expression is particularly relevant in today''s world, where these fundamental rights are often challenged. As humanity grapples with the complexities of an increasingly interconnected world, the Bahá''í teachings offer insights that resonate with those seeking a balance between personal freedom, open discourse, and collective well-being.', 'src/pages/the-bahai-faith.mdx', 0, 21);
+The Bahá''í Faith offers a unique perspective on addressing the challenges of the modern world. By emphasizing individual responsibility, freedom of speech, local governance, and a universal spiritual identity, it provides a framework for achieving global unity while preserving individual liberty. The Faith''s strong stance on the freedom of conscience and expression is particularly relevant in today''s world, where these fundamental rights are often challenged. As humanity grapples with the complexities of an increasingly interconnected world, the Bahá''í teachings offer insights that resonate with those seeking a balance between personal freedom, open discourse, and collective well-being.', '<p>import { Image } from “astro:assets”;
+import ImgBlock from “@components/img_block.astro”;</p>
+<h3 id="the-baháí-faith-a-balance-of-individual-liberty-and-global-unity">The Bahá’í Faith: A Balance of Individual Liberty and Global Unity</h3>
+<p>The Bahá’í Faith is a global religion that champions individual responsibility and the personal search for truth. It provides a unique model of local yet internationally federated governance, focused on justice while encouraging broad individual initiative. Crucially, the Faith upholds the critical role of freedom of conscience and speech, recognizing these as fundamental human rights and essential elements for societal progress.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[When freedom of conscience, liberty of thought and right of speech prevail — that is to say, when every man according to his own idealization may give expression to his beliefs — development and growth are inevitable.](https://oceanlibrary.com/link/djZfs/promulgation-of-universal-peace_abdul-baha/)" -- ''Abdu''l-Bahá
+</aside>
+<p>These principles of free speech and freedom of conscience are foundational to the Bahá’í approach, which maintains unity in fundamentals while embracing a diversity of perspectives and opinions.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[Let us also remember that at the very root of the Cause lies the principle of the undoubted right of the individual to self-expression, his freedom to declare his conscience and set forth his views.](https://oceanlibrary.com/link/RFKgE/bahai-administration_shoghi-effendi/)" --  Shoghi Effendi
+</aside>
+<h3 id="unity-in-diversity-a-global-perspective-with-local-action">Unity in Diversity: A Global Perspective with Local Action</h3>
+<p>Central to Bahá’í teachings is the concept of unity in diversity. This belief in a universal human identity, the “oneness of humanity,” views all peoples as the children of one God (however differently that Reality might be understood). This universal perspective is balanced with a strong emphasis on local community building and decentralized administration. Bahá’ís envision a future world where political power is almost entirely decentralized to local governing councils whose mandate is the protection of fundamental rights, i.e. “justice”.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[It is not for him to pride himself who loveth his own country, but rather for him who loveth the whole world. The earth is but one country, and mankind its citizens.](https://oceanlibrary.com/link/RfQPU/gleanings-from-the-writings-of-bahaullah/)" - Bahá''u''lláh
+</aside>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[It is very evident that in the future there shall be no centralization in the countries of the world, be they constitutional in government, republican or democratic in form.... To cast aside centralization which promotes despotism is the exigency of the time. This will be productive of international peace.](https://oceanlibrary.com/link/mkyN7/promulgation-of-universal-peace_abdul-baha/)" -- ''Abdu''l-Bahá
+</aside>
+<h3 id="transcending-limited-identities">Transcending Limited Identities</h3>
+<p>The Bahá’í teachings warn against the dangers of prejudice and narrow identities such as those based on race, class, political party or extreme nationalism. Instead, it promotes a sense of world citizenship while still allowing for a sane and legitimate patriotism. Bahá’ís believe that unity is only possible with recognition of our common identity derived from our shared spiritual reality as the children of one God. Clinging to secondary identities leads only to division and conflict.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[Shed the light of a boundless love on every human being whom you meet, whether of your country, your race, your political party, or of any other nation, colour or shade of political opinion. Heaven will support you while you work in this in-gathering of the scattered peoples of the world beneath the shadow of the almighty tent of unity.](https://oceanlibrary.com/link/nLzjm/paris-talks_abdul-baha/)" -- ''Abdu''l-Bahá
+</aside>
+<h3 id="the-independent-investigation-of-truth">The Independent Investigation of Truth</h3>
+<p>A key Bahá’í principle is the independent investigation of truth. Each individual is encouraged to examine beliefs and ideas for themselves, rather than blindly following tradition or authority. One of Bahá’u’lláh’s most challenging teachings concerns the possibility — but great difficulty — of approaching truth.</p>
+<p>Our Western culture is presently struggling with the failings of the Enlightenment myth of default rationality — that education or right information somehow automatically confers the ability to discern truth from falsehood. This myth is belied by experience. Modern man is flooded with more information than ever before — and yet his bias and prejudice against others only grows more entrenched.</p>
+<p>The promise of objective truth is held out to us — but only if we stop blindly following the beliefs of others and seek truth independently. And this is fundamentally a spiritual problem because the human heart is prejudiced by particular love and hate which warps and distorts our ability to discern truth.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[The best beloved of all things in My sight is Justice; turn not away therefrom if thou desirest Me, and neglect it not that I may confide in thee. By its aid thou shalt see with thine own eyes and not through the eyes of others, and shalt know of thine own knowledge and not through the knowledge of thy neighbor.](https://oceanlibrary.com/link/DZ5VC/hidden-words-of-bahaullah/)" -- Bahá''u''lláh
+</aside>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[He must so cleanse his heart that no remnant of either love or hate may linger therein, lest that love blindly incline him to error, or that hate repel him away from the truth. Even as thou dost witness in this day how most of the people, because of such love and hate, are bereft of the immortal Face, have strayed far from the Embodiments of the divine mysteries, and, shepherdless, are roaming through the wilderness of oblivion and error.](https://oceanlibrary.com/link/QwhUD/kitab-i-iqan_bahaullah/)" -- Bahá''u''lláh
+</aside>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[And the breeding ground of all these tragedies is prejudice: prejudice of race and nation, of religion, of political opinion; and the root cause of prejudice is blind imitation of the past — imitation in religion, in racial attitudes, in national bias, in politics. So long as this aping of the past persisteth, just so long will the foundations of the social order be blown to the four winds, just so long will humanity be continually exposed to direst peril.](https://oceanlibrary.com/link/9tjFc/selections-from-the-writings-of-abdul-baha/)" -- ''Abdu''l-Bahá
+</aside>
+<h3 id="addressing-the-spiritual-crisis-of-materialism">Addressing the Spiritual Crisis of Materialism</h3>
+<p>One’s worldview is their religion — their “heaven and earth”. And the greatest crisis of the modern age is the dethronement of God — the often unconscious adoption of materialistic worldviews which put undue emphasis on social wellbeing over spiritual reality. This crisis of materialism is not so much about greed as it is about irreligion — a disease which eats into the vitals of the soul.</p>
+<p>Material worldviews inevitably give birth to false gods — the exaltation of minor identities — which divide us into warring categories and factions along lines such as race, class, gender and nation. Religion is the vital force which alone can serve as the antidote to this poison of materialism.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[This vital force is dying out, this mighty agency has been scorned, this radiant light obscured, this impregnable stronghold abandoned, this beauteous robe discarded. God Himself has indeed been dethroned from the hearts of men, and an idolatrous world passionately and clamorously hails and worships the false gods which its own idle fancies have fatuously created, and its misguided hands so impiously exalted.](https://oceanlibrary.com/link/dNcU9/promised-day-is-come_shoghi-effendi/)" -- Shoghi Effendi
+</aside>
+<p>The three great false gods of the 20th century were identities based on race, class, and nation. And while those ghosts remain with us, the present century has seen no shortage of new identities to further divide us. Unity seems like an impossible, even foolish dream in a divided world where even the attempts to rectify past injustices only have disunity as a tool for action.</p>
+<p>Only a common faith can unite us — a faith in the spiritual reality of the human soul and the divine purpose of our existence. Only the force of renewed religion can act as the antidote to the poison of materialistic worldviews. And that is the work of Bahá’ís everywhere. Evil cannot be fought with evil. The only solution to a spiritual crisis is a spiritual solution.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[The theories and policies, so unsound, so pernicious, which deify the state and exalt the nation above mankind, which seek to subordinate the sister races of the world to one single race, which discriminate between the black and the white, and which tolerate the dominance of one privileged class over all others — these are the dark, the false, and crooked doctrines for which any man or people who believes in them, or acts upon them, must, sooner or later, incur the wrath and chastisement of God.](https://oceanlibrary.com/link/WFtKW/promised-day-is-come_shoghi-effendi/)" -- Shoghi Effendi
+</aside>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[This vital force is dying out, this mighty agency has been scorned, this radiant light obscured, this impregnable stronghold abandoned, this beauteous robe discarded. God Himself has indeed been dethroned from the hearts of men, and an idolatrous world passionately and clamorously hails and worships the false gods which its own idle fancies have fatuously created, and its misguided hands so impiously exalted.](https://oceanlibrary.com/link/dNcU9/promised-day-is-come_shoghi-effendi/)" -- Shoghi Effendi
+</aside>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[Ye observe how the world is divided against itself, how many a land is red with blood and its very dust is caked with human gore.... And the breeding ground of all these tragedies is prejudice: prejudice of race and nation, of religion, of political opinion; and the root cause of prejudice is blind imitation of the past — imitation in religion, in racial attitudes, in national bias, in politics. So long as this aping of the past persisteth, just so long will the foundations of the social order be blown to the four winds, just so long will humanity be continually exposed to direst peril.](https://oceanlibrary.com/link/BsHW6/selections-from-the-writings-of-abdul-baha/)" --  ''Abdu''l-Bahá
+</aside>
+<p>A modern age, with modern false gods, has its false priests and false prophets — the politicians and official spokepersons who direct the thoughts and emotions of their willing subjects.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[The chief idols in the desecrated temple of mankind are none other than the triple gods of Nationalism, Racialism and Communism, at whose altars governments and peoples, whether democratic or totalitarian, at peace or at war, of the East or of the West, Christian or Islámic, are, in various forms and in different degrees, now worshiping. Their high priests are the politicians and the worldly-wise, the so-called sages of the age; their sacrifice, the flesh and blood of the slaughtered multitudes; their incantations outworn shibboleths and insidious and irreverent formulas; their incense, the smoke of anguish that ascends from the lacerated hearts of the bereaved, the maimed, and the homeless.](https://oceanlibrary.com/link/X6Arc/promised-day-is-come_shoghi-effendi/)" -- Shoghi Effendi
+</aside>
+<h3 id="a-unique-approach-to-governance">A Unique Approach to Governance</h3>
+<p>The Bahá’í administrative order is unique in its approach to governance. It eschews clergy and partisan politics, instead utilizing a system of elected local councils with clearly defined scope and purpose. This system aims to harness the power of collective decision-making while avoiding the natural pitfalls of centralization and abuse of power.</p>
+<p>It calls for a globalization of law to prevent international war — together with a decentralization of power to prevent domestic tyranny. It seeks a balance of individual liberty and global unity — a balance of personal responsibility and local governance. Rather than a centralized world tyranny, it envisions a world of small states with a federated system of order similar to the United States’ older model of governance at the beginning of the 20th century.</p>
+<aside class="border-l-4 border-brand pl-4 ml-12">
+"[The United States may be held up as the example of future government — that is to say, each province will be independent in itself, but there will be federal union protecting the interests of the various independent states. It may not be a republican or a democratic form. To cast aside centralization which promotes despotism is the exigency of the time.](https://oceanlibrary.com/link/3zRZ3/promulgation-of-universal-peace_abdul-baha/)" -- ''Abdu''l-Bahá
+</aside>
+<h2 id="conclusion">Conclusion</h2>
+<p>The Bahá’í Faith offers a unique perspective on addressing the challenges of the modern world. By emphasizing individual responsibility, freedom of speech, local governance, and a universal spiritual identity, it provides a framework for achieving global unity while preserving individual liberty. The Faith’s strong stance on the freedom of conscience and expression is particularly relevant in today’s world, where these fundamental rights are often challenged. As humanity grapples with the complexities of an increasingly interconnected world, the Bahá’í teachings offer insights that resonate with those seeking a balance between personal freedom, open discourse, and collective well-being.</p>', 'src/pages/the-bahai-faith.mdx', 0, 21);
 
 
 INSERT OR REPLACE INTO options (name, value) VALUES ('site.site', 'drbi.org');
