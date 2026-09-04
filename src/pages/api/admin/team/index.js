@@ -3,9 +3,10 @@ export const prerender = false;
 import { getTeam, createTeamMember } from '@lib/queries';
 import { collectionHandlers } from '@lib/server/api-resource';
 
+// Mirrors the actual `team` columns — id, name, role, title, bio, image, email,
+// website, twitter, sort_order. Anything outside this list is ignored on write.
 export const TEAM_FIELDS = [
-  'name', 'slug', 'role', 'title', 'bio', 'email', 'image_src', 'image_alt',
-  'sort_order', 'active', 'links',
+  'id', 'name', 'role', 'title', 'bio', 'image', 'email', 'website', 'twitter', 'sort_order',
 ];
 
 export function validateTeam(data, mode) {
