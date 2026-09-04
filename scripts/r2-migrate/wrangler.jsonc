@@ -1,0 +1,12 @@
+// One-off migration Worker: copies cdn-assets/drbi.org/** -> drbi-assets/**
+// Run with `wrangler dev --remote` (real edge bindings, no public deploy).
+// SRC (shared bucket) is READ-ONLY here — this Worker never puts or deletes on it.
+{
+  "name": "drbi-r2-migrate",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-01",
+  "r2_buckets": [
+    { "binding": "SRC", "bucket_name": "cdn-assets" },
+    { "binding": "DST", "bucket_name": "drbi-assets" }
+  ]
+}

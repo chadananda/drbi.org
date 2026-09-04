@@ -1,0 +1,31 @@
+
+ ⛅️ wrangler 4.128.0 (update available 4.129.0)
+───────────────────────────────────────────────
+
+Cloudflare collects anonymous telemetry about your usage of Wrangler. Learn more at https://github.com/cloudflare/workers-sdk/tree/main/packages/wrangler/telemetry.md
+Support for remote bindings in `wrangler dev` is now available as a replacement for `wrangler dev --remote`. Try it out now by running `wrangler dev` with the `remote` option enabled on your resources and let us know how it goes!
+This gives you access to remote resources in development while retaining all the usual benefits of local dev: fast iteration speed, breakpoint debugging, and more.
+
+Refer to https://developers.cloudflare.com/workers/development-testing/#remote-bindings for more information.
+Your Worker has access to the following bindings:
+Binding                    Resource       
+env.SRC (cdn-assets)       R2 Bucket      
+env.DST (drbi-assets)      R2 Bucket      
+
+⎔ Starting remote preview...
+Total Upload: 9.56 KiB / gzip: 2.86 KiB
+[wrangler:info] Ready on http://127.0.0.1:8799
+[wrangler:info] GET / 200 OK (384ms)
+[wrangler:info] GET /count 200 OK (397ms)
+[wrangler:info] GET /copy 200 OK (25522ms)
+[wrangler:info] GET /copy 200 OK (22539ms)
+[wrangler:info] GET /copy 200 OK (25454ms)
+[wrangler:info] GET /copy 200 OK (3841ms)
+[wrangler:info] GET /verify 200 OK (5058ms)
+[wrangler:info] GET /verify 200 OK (3213ms)
+⎔ Starting remote preview...
+⎔ Detected changes, restarted server.
+Total Upload: 9.86 KiB / gzip: 2.92 KiB
+[wrangler:info] GET /keys 200 OK (573ms)
+[wrangler:info] GET /keys 200 OK (347ms)
+[wrangler:info] GET /sample 200 OK (1325ms)
