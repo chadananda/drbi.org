@@ -261,33 +261,66 @@ tables) is already applied and is safe to re-run.
 
 ---
 
-## Content that is *not* in D1 yet
+## Content that is baked into the build
 
-Most content is D1-backed and therefore editable without a deploy: articles,
-news, memorial entries, events, team, categories, topics, comments, media and
+Most content is D1-backed and editable without a deploy: articles, news,
+memorial entries, events, team, categories, topics, comments, media and
 settings. Only `/contribute` is prerendered; everything else is SSR.
 
-**These, however, are baked into the build and need a code change plus a deploy
-to edit.** Nothing here has been migrated — this is a list, not a plan:
+The rest — the Markdown pages, site config, navigation and board bios — used to
+live only in the repo. **Their data is now mirrored into D1** by
+`migrations/0010_site_content.sql` (schema) and `0011_seed_site_content.sql`
+(seed), both applied:
 
-- **22 Markdown/MDX pages under `src/pages/`** — `history/` (7), `arts/` (4),
-  `agriculture/` (3), `learning/`, `events/index`, `radio/index`,
-  `facilities-and-rentals`, `the-bahai-faith`, plus `terms` and `privacy`.
-  These are real editorial pages an editor would reasonably expect to change.
-- **`src/data/site.json`** — imported by 37 files. Address, phone, email,
-  branding, social handles. Changing the phone number today requires a deploy.
-- **`src/data/siteLinks.json`** — site navigation.
-- **Hardcoded copy inside `.astro` pages** — notably `about-us.astro`, which has
-  board-member names, roles and biographies written directly into the template.
+| Table | Rows | From |
+|---|---|---|
+| `site_pages` | 22 | `src/pages/**/*.md` and `*.mdx` |
+| `site_links` | 17 | `src/data/siteLinks.json` (3 menus) |
+| `board_members` | 12 | board + core staff in `about-us.astro` |
+| `options` (`site.*`) | 30 | `src/data/site.json` |
 
-Migrating those into D1 would finish the "content never needs a deploy" promise.
-It is a separate piece of work and wants Chad's call on scope.
+Regenerate the seed from the files at any time:
+
+```
+node scripts/ingest-site-content.mjs          # writes migrations/0011_…sql
+node scripts/ingest-site-content.mjs --dry    # report only
+npx wrangler d1 execute drbi-db --remote --file migrations/0011_seed_site_content.sql
+```
+
+The seed is `INSERT OR REPLACE` throughout and safe to re-run. It emits one
+statement per row on purpose: a single multi-row insert of the page bodies
+exceeds D1's statement limit and fails with `SQLITE_TOOBIG`.
+
+**Ingesting the data is not the same as serving it.** The site still renders
+these pages from the files; nothing about rendering changed, which is why the
+migration carried no risk to the live site. Switching the renderer over is the
+next piece of work, and these are the things it has to deal with:
+
+- **4 pages cannot be served as plain Markdown** and are flagged
+  `has_components = 1`: `events/index.mdx`, `facilities-and-rentals.mdx`,
+  `radio/index.mdx`, `the-bahai-faith.mdx`. They import Astro components
+  (`EventCalendar`, `ImgBlock`, `CdnImage`, `astro:assets`), so they need those
+  replaced with shortcodes or a component-aware renderer. The other 18 are
+  portable.
+- **2 files are not routes** (`is_route = 0`): `agriculture/_haiti-project.md`
+  and `api/_comment-submit.md`. Astro skips underscore-prefixed paths; they are
+  stored for completeness, not for serving.
+- **Relative image paths inside bodies** (e.g. `![William Sears](./_william-sears…)`)
+  resolve relative to the source file. Served from a database row they will need
+  rewriting to absolute CDN URLs.
+- **`site.json` is imported by 37 files** at build time. Reading settings from
+  D1 instead means changing all of those call sites, and nested values
+  (`youtube`, `twitter`, `podcast`) are stored as JSON strings.
+- `src/data/site.json` contains a **duplicate `logo` key** (both `/logo.svg`, so
+  harmless) and several dead `vercel_*` keys, ingested as-is rather than
+  silently dropped. Worth pruning.
+
+Until the renderer moves, treat D1 as the staging copy and the files as the
+source of truth — editing a `site_pages` row will not change the live page yet.
 
 Also worth knowing: `src/pages/memorial/index.astro` calls
 `getCollection('memorial')`, but no file-backed collections remain
 (`src/content.config.ts` keeps schemas for type reference only). Worth a look.
-
----
 
 ## R2: the dedicated bucket
 
