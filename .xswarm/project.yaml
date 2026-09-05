@@ -18,5 +18,26 @@ authority:
   may: [continue_plan, run_tests, run_audits, fix_from_audit]
   escalate: [commit, deploy_production, deploy_staging, migrate_data, outward_facing]
 
+metrics:
+  # PROPOSED 2026-09-05. Correct or replace.
+  # public site — traffic is the starting measure
+  source: cloudflare
+  # Traffic is leading; this is the measure that matters. Progress is
+  # movement toward the goal, not motion.
+  valued_action:
+    name: primary_conversion
+    from: source TBD
+    measures: what the site is meant to cause — enrolment, contact, or donation
+    target: TBD — Chad to name it
+  kpis:
+    - name: weekly_pageloads
+      from: cloudflare
+      measures: 7-day pageloads, requestHost
+      target: 1726 (from a 1151 baseline)
+    - name: weekly_trend
+      from: cloudflare
+      measures: period over previous period
+      target: not negative two periods running
+
 gate:
   visual_paths: ["src/pages/**", "src/components/**"]
