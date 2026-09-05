@@ -1,0 +1,22 @@
+# Entry point for orchestrator agents. Points at what this project
+# already has; project-init moved nothing to create this.
+recipe: marketing-site@1
+mode: active          # review | active | reactive | periodic | parked
+
+docs:
+  runbook: docs/DEPLOY.md
+  router: CLAUDE.md
+  deploy:
+    - scripts/r2-migrate/wrangler.jsonc
+    - wrangler.jsonc
+
+audit:
+  targets: { performance: 90, accessibility: 100, seo: 100 }
+  ratchet: true
+
+authority:
+  may: [continue_plan, run_tests, run_audits, fix_from_audit]
+  escalate: [commit, deploy_production, deploy_staging, migrate_data, outward_facing]
+
+gate:
+  visual_paths: ["src/pages/**", "src/components/**"]
