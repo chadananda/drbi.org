@@ -1,7 +1,7 @@
 ---
 id: "0005"
 title: Ticket link on the events listing, not only the detail page
-state: ready
+state: active
 traces_to: .xswarm/GOAL.md
 priority: P2
 size: S
