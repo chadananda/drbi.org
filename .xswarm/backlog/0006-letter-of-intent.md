@@ -10,6 +10,21 @@ class: never
 acceptance:
   - text: review feedback incorporated
   - text: sent to Danny and Flora
+decision: |
+  The Letter of Intent to Danny and Flora has three reviews in and one
+  outstanding. Bob Martin approved with in-document suggestions, asking "Where
+  would family members take up residence? In apt.s?". Telahoun approved and
+  deferred detail to the committee. Marguerite suggested a replacement on the
+  passage beginning "Outside that, its use and preparation are at...".
+  Taj Sabet has not responded.
+
+  Bob also noted Danny and Flora's own proposal (Taj's Aug 13 forward) contains
+  "Property Management" language you may want reflected.
+
+  CHOOSE ONE:
+    A. Send now, incorporating the three reviews
+    B. Wait for Taj first
+    C. I will handle it myself — close this item
 ---
 
 ## State as of 2026-09-06
