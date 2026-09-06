@@ -6,6 +6,10 @@ dist/
 .vercel
 .aider*
 .claude/*
+# the xswarm Stop gate must travel with the repo -- without it a dispatched
+# worker can end its turn with acceptance criteria failing and nothing notices
+!.claude/hooks/
+!.claude/settings.json
 !.claude/skills/
 !.claude/commands/
 
