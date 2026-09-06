@@ -31,17 +31,22 @@ metrics:
   #   revenue     are they paying, and staying?      revenue, retention
   #
   stage: growth
-  stage_note: reach established — measure whether visitors do anything
+  stage_note: published and steady at ~40/day of apparently real visitors. Confirmed 2026-09-06: the site drives event registrations (via Humanitix) and contributions. Traffic is a genuine leading indicator here because both actions need reach first.
   # PROPOSED 2026-09-05. Correct or replace.
   # public site — traffic is the starting measure
   source: cloudflare
   # Traffic is leading; this is the measure that matters. Progress is
   # movement toward the goal, not motion.
   valued_action:
-    name: primary_conversion
-    from: source TBD
-    measures: what the site is meant to cause — enrolment, contact, or donation
-    target: TBD — Chad to name it
+    name: event_registrations
+    from: Humanitix API
+    measures: tickets sold per event (Adult / Minor tiers)
+    target: TBD per event — Chad sets capacity; dormitory is 20 beds each for men and women
+  secondary_action:
+    name: contributions
+    from: /contribute — handler not yet identified
+    measures: gifts received
+    target: TBD
   kpis:
     - name: weekly_pageloads
       from: cloudflare

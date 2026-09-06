@@ -16,11 +16,30 @@ and the organisation is not held up waiting on the website.
 At ~40 pageloads a day, steady, it is the third-busiest property on the account
 and the traffic looks like real people rather than crawlers.
 
-## Open — Chad to settle
+## What the site should cause — settled 2026-09-06
 
-**What should the site cause?** Enrolment, contact, donation, event attendance?
-Until that is named, there is no way to say whether the site is working. This
-is the one thing blocking a real KPI.
+**Event registrations**, primarily. Two programmes are listed and a third is
+coming:
+
+* *Division, Unity, and the Lord of Books* — Thanksgiving study with
+  Dr. Habib Riazati on the Kitáb-i-Íqán, 26–29 November. $340 adult, $200 minor.
+* *The Dawn-Breakers Challenge 2026* — a week-long reading immersion with
+  Chad Jones and Dr. Nader Saiedi, 25 December – 3 January.
+
+Registration runs through **Humanitix**, so this is measurable rather than
+inferred.
+
+**Contributions**, secondarily, via `/contribute`.
+
+**And traffic matters here** — unlike the internal tools in the portfolio.
+Both actions need reach before they can happen, so pageloads are a genuine
+leading indicator rather than vanity.
+
+## One friction worth fixing
+
+The events listing shows prices — $340, $200 — but no ticket link. "Get
+tickets" only appears on the event detail page. A visitor who has decided from
+the listing has to click through to act.
 
 ## Explicitly not the goal
 
