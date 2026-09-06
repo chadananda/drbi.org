@@ -43,6 +43,22 @@ const hasValidRegistrationUrl = (url: string): boolean => {
   return !normalized.match(/^https?:\/\/(www\.)?drbi\.org\/?$/);
 };
 
+// Send buyers straight to the Humanitix TICKETS page, never the event landing page.
+// Mirrors the same normalisation on src/pages/events/[slug].astro.
+const ticketsUrlFor = (url: string): string => {
+  if (!hasValidRegistrationUrl(url) || !/^https?:\/\//.test(url.trim())) return '';
+  const u = url.trim();
+  return /humanitix\.com/i.test(u)
+    ? u.replace(/[?#].*$/, '').replace(/\/+$/, '').replace(/\/tickets$/i, '') + '/tickets'
+    : u;
+};
+
+// DRBI-side capacity gate: when a program is full the listing points at the detail
+// page's waitlist form rather than handing out the ticket link (Humanitix stays live).
+// A manual override wins over the count. Same rule as the detail page.
+const isFullEvent = (d): boolean => d.waitlistOverride === 'open' ||
+  (d.waitlistOverride !== 'closed' && d.capacity != null && (d.registeredCount ?? 0) >= d.capacity);
+
 // Always use the real current date for filtering
 const referenceDate = new Date();
 
@@ -212,6 +228,10 @@ const displayEvents = upcomingEvents.map(event => {
       dateRange: formatDateRange(d.startDate, d.endDate),
       time: formatTime(d.startDate),
       price: formatPrice(d.price),
+      // Direct ticket link for the listing, so a decided visitor can act without
+      // first clicking into the detail page. Empty when the program is full.
+      ticketsUrl: isFullEvent(d) ? '' : ticketsUrlFor(d.registrationUrl),
+      isFull: isFullEvent(d),
       // Per-type ticket prices for the card (exclude the "any amount" sponsor donation).
       ticketPrices: (Array.isArray(d.price) ? d.price : [])
         .filter((p) => !/sponsor a youth|any amount/i.test(p?.label ?? ''))
@@ -376,16 +396,38 @@ const displayEvents = upcomingEvents.map(event => {
                         {event.display.ticketPrices.length > 0 ? (
                           <div class="meta-item price">
                             <span class="icon" aria-hidden="true">💲</span>
-                            <ul class="ticket-prices">
-                              {event.display.ticketPrices.map((t) => (
-                                <li><span class="ticket-label">{t.label}</span><span class="ticket-amount">{t.amount}</span></li>
-                              ))}
-                            </ul>
+                            <div class="price-body">
+                              <ul class="ticket-prices">
+                                {event.display.ticketPrices.map((t) => (
+                                  <li><span class="ticket-label">{t.label}</span><span class="ticket-amount">{t.amount}</span></li>
+                                ))}
+                              </ul>
+                              {event.display.ticketsUrl && (
+                                <a
+                                  href={event.display.ticketsUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="price-tickets-link"
+                                  aria-label={`Get tickets for ${event.display.name}`}
+                                >Get tickets <span class="btn-icon" aria-hidden="true">→</span></a>
+                              )}
+                            </div>
                           </div>
                         ) : event.data.price && (
                           <div class="meta-item price">
                             <span class="icon" aria-hidden="true">💲</span>
-                            <span>{event.display.price}</span>
+                            <div class="price-body">
+                              <span>{event.display.price}</span>
+                              {event.display.ticketsUrl && (
+                                <a
+                                  href={event.display.ticketsUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  class="price-tickets-link"
+                                  aria-label={`Get tickets for ${event.display.name}`}
+                                >Get tickets <span class="btn-icon" aria-hidden="true">→</span></a>
+                              )}
+                            </div>
                           </div>
                         )}
                         <div class="meta-item organizer">
@@ -418,8 +460,8 @@ const displayEvents = upcomingEvents.map(event => {
                       </div>
                     )}
                   </div>
-                  {event.isMinimal ? (
-                    <div class="list-full-actions">
+                  <div class="list-full-actions">
+                    {event.isMinimal ? (
                       <button
                         type="button"
                         class="show-more-btn"
@@ -431,16 +473,12 @@ const displayEvents = upcomingEvents.map(event => {
                         <span class="btn-text">Show More</span>
                         <span class="btn-icon">↓</span>
                       </button>
-                    </div>
-                  ) : hasValidRegistrationUrl(event.data.registrationUrl) ? (
-                    <div class="list-full-actions">
+                    ) : hasValidRegistrationUrl(event.data.registrationUrl) ? (
                       <a href={`/events/${eventSlug(event)}`} class="read-more-btn">
                         <span class="btn-text">Read More</span>
                         <span class="btn-icon">→</span>
                       </a>
-                    </div>
-                  ) : event.display.isLongDescription && (
-                    <div class="list-full-actions">
+                    ) : event.display.isLongDescription ? (
                       <button
                         type="button"
                         class="show-more-btn"
@@ -452,8 +490,32 @@ const displayEvents = upcomingEvents.map(event => {
                         <span class="btn-text">Show More</span>
                         <span class="btn-icon">↓</span>
                       </button>
-                    </div>
-                  )}
+                    ) : null}
+
+                    {/* Straight to checkout — the listing shows prices, so it must also
+                        let a decided visitor act on them without an extra hop. */}
+                    {event.display.ticketsUrl ? (
+                      <a
+                        href={event.display.ticketsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="get-tickets-btn"
+                        aria-label={`Get tickets for ${event.display.name}`}
+                      >
+                        <span class="btn-text">Get Tickets</span>
+                        <span class="btn-icon">→</span>
+                      </a>
+                    ) : event.display.isFull && (
+                      <a
+                        href={`/events/${eventSlug(event)}`}
+                        class="waitlist-link-btn"
+                        aria-label={`Join the waitlist for ${event.display.name}`}
+                      >
+                        <span class="btn-text">Join the Waitlist</span>
+                        <span class="btn-icon">→</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </article>
             </div>
@@ -1311,8 +1373,98 @@ const displayEvents = upcomingEvents.map(event => {
 
 .list-full-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
   flex-shrink: 0;
+}
+
+/* Primary listing CTA — the amber of the detail page's register button, so the
+   two read as the same action. Sits next to the secondary Read More / Show More. */
+.get-tickets-btn,
+.waitlist-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(180deg, #b07d34 0%, #98651f 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(140, 90, 25, 0.35);
+}
+
+.get-tickets-btn:hover,
+.waitlist-link-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(140, 90, 25, 0.45);
+  background: linear-gradient(180deg, #98651f 0%, #7d5316 100%);
+}
+
+.get-tickets-btn .btn-icon,
+.waitlist-link-btn .btn-icon {
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.get-tickets-btn:hover .btn-icon,
+.waitlist-link-btn:hover .btn-icon {
+  transform: translateX(2px);
+}
+
+/* The waitlist stand-in is a quieter, outlined variant — it is not a purchase. */
+.waitlist-link-btn {
+  background: transparent;
+  color: #8c5a19;
+  border: 1px solid rgba(140, 90, 25, 0.45);
+  box-shadow: none;
+}
+
+.waitlist-link-btn:hover {
+  background: rgba(176, 125, 52, 0.08);
+  color: #7d5316;
+  box-shadow: none;
+}
+
+.price-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+/* Text link sitting directly under the prices, so a quoted price is never a
+   dead end. Quieter than the button in the action bar below it. */
+.price-tickets-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+  color: #8c5a19;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(140, 90, 25, 0.35);
+  padding-bottom: 1px;
+  align-self: flex-start;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.price-tickets-link:hover {
+  color: #7d5316;
+  border-bottom-color: rgba(140, 90, 25, 0.8);
+}
+
+.price-tickets-link .btn-icon {
+  transition: transform 0.2s ease;
+}
+
+.price-tickets-link:hover .btn-icon {
+  transform: translateX(2px);
 }
 
 .read-more-btn {
@@ -1450,9 +1602,28 @@ const displayEvents = upcomingEvents.map(event => {
     align-self: stretch;
   }
   
-  .read-more-btn {
-    flex: 1;
+  .read-more-btn,
+  .show-more-btn,
+  .get-tickets-btn,
+  .waitlist-link-btn {
+    flex: 1 1 10rem;
     justify-content: center;
+  }
+
+  /* The price table's desktop min-width would push the card sideways on a phone. */
+  .ticket-prices {
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+  }
+
+  .meta-item.price {
+    width: 100%;
+  }
+
+  .price-body {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }
 
