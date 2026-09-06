@@ -19,6 +19,19 @@ authority:
   escalate: [commit, deploy_production, deploy_staging, migrate_data, outward_facing]
 
 metrics:
+  # KPIs mature with the product. The measure that matters is the CURRENT
+  # stage's; earlier stages stay as health checks, later ones are not yet
+  # meaningful. Advance a stage when its measure is met for a month.
+  #
+  #   concept     the idea is not settled            no build measure — the work is a decision
+#   pre-launch  not published yet                  progress to launch, not traffic
+#   reach       are people arriving at all?        traffic
+  #   engagement  are they doing the thing?          depth, return visits, actions
+  #   conversion  are they taking the valued action? signups, tickets, enquiries
+  #   revenue     are they paying, and staying?      revenue, retention
+  #
+  stage: growth
+  stage_note: reach established — measure whether visitors do anything
   # PROPOSED 2026-09-05. Correct or replace.
   # public site — traffic is the starting measure
   source: cloudflare
