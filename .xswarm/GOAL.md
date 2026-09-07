@@ -26,6 +26,10 @@ coming:
 * *The Dawn-Breakers Challenge 2026* — a week-long reading immersion with
   Chad Jones and Dr. Nader Saiedi, 25 December – 3 January.
 
+* *The Gift of Teaching* — Ehsan Bayat, Valentine's Day weekend, February 2027.
+  **Not yet set up on Humanitix** (Chad, 2026-09-07) — so it can be mentioned but
+  not yet sold.
+
 Registration runs through **Humanitix**, so this is measurable rather than
 inferred.
 
