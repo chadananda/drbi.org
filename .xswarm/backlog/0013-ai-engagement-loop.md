@@ -45,7 +45,25 @@ you have read — and only then offers to keep the person posted. That ordering 
 the whole difference in conversion, and it also produces a better lead, because
 the question is the segmentation.
 
-## The infrastructure already exists — wire it, don't build it
+## ⚠ THE AGENTS DO NOT EXIST YET
+Chad, 2026-09-07: "We do not yet have the agent functionality for promotion,
+engagement, or editing, but that is the plan for DRBI."
+
+An earlier draft of this item read as though the pieces only needed wiring
+together. They do not. Promotion, engagement and editing agents are **BlogWorks.ai's
+product** — "Website-as-a-Service — Webmaster/Editor/Promoter agents on Astro +
+Cloudflare" — and they are unbuilt.
+
+**BlogWorks.ai has `.xswarm` and ZERO backlog items.** So DRBI's engagement
+plan depends on a keystone project with no plan. That dependency should be
+visible here rather than discovered when someone tries to start.
+
+Until the agents exist, this loop runs MANUALLY: Anis answers, a human sends the
+follow-up, a human segments the list. That is fine and worth doing — a manual
+loop that works is the specification for the agent that automates it. Do not
+wait for the agents to start collecting contacts.
+
+## The infrastructure that DOES exist — wire this part now
 * **Anis widget** — SifterSearch publishes an embeddable chat web component
   (siftersearch 0015). DRBI 0007 already proposes newsletters and Anis on the site.
 * **`@ol/anis`** — the memory layer, holding "seeker identity and the
@@ -85,6 +103,8 @@ predicted.
   layer does not exist yet and gates every automated send here.
 
 ## Dependencies
+* **BlogWorks.ai — the Promoter, Editor and Webmaster agents.** Unbuilt, and the
+  project has no backlog. This is the real dependency and the real risk.
 * DRBI 0007 — engagement plan, newsletters and Anis on the site
 * siftersearch 0015 — unify on the Anis widget
 * siftersearch 0011 — follow-up email after an Anis conversation
