@@ -13,3 +13,15 @@ _Requests to this project's agents. One per `## ` heading._
 ## Re: DRBI web page for Sunday Concert Series
 - **Re: DRBI web page for Sunday Concert Series** — Oraea sent a mockup for the First Sunday Concert Series page and is waiting to send the header image and rose music logo, plus the full-size PDF Chad requested.  
   _oraeav@gmail.com · this week_
+
+## New Form Submission from your Website
+- **New Form Submission from your Website** — A contact-form submission from the DRBI site asks whether the family must use a particular funeral home for a Desert Rose Memorial Cemetery burial or may choose any in the Scottsdale/Phoenix area.  
+  _notify+l0e9xu@web3forms.com (Taraz Samandari) · today_
+
+## Re: Document shared with you: "DRBI-Letter-of-Intent.md"
+- **Re: Document shared with you: "DRBI-Letter-of-Intent.md"** — Pete cannot open the shared DRBI-Letter-of-Intent.md and needs it resent in a format he can read so he can approve it.  
+  _pete@columbiafutures.com · today_
+
+## Disregard previous version DRBI web page for Sunday Concert Series
+- **Disregard previous version DRBI web page for Sunday Concert Series** — Oraea sent the corrected full-size flyer renders and PNG assets to be built into a First Sunday Concert Series page on the DRBI site.  
+  _oraeav@gmail.com · this week_
