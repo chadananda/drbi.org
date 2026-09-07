@@ -1,67 +1,56 @@
-# build output
-dist/
-.astro/
-.wrangler/
-.vercel/
-.vercel
-.aider*
-.claude/*
-# the xswarm Stop gate must travel with the repo -- without it a dispatched
-# worker can end its turn with acceptance criteria failing and nothing notices
+
+!.claude/commands/
 !.claude/hooks/
 !.claude/settings.json
 !.claude/skills/
-!.claude/commands/
-
-# dependencies
-node_modules/
-package-lock.json
-
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# environment variables
+!.env.example
+!src/data/analytics-summary.json
+.aider*
+.astro/
+.claude/*
+.dev.vars
+.DS_Store
 .env
 .env.*
-!.env.example
-.env.production
-
-# analytics data (exclude raw imports but include processed summary)
-src/data/analytics-imports/
-!src/data/analytics-summary.json
 .env.development.local
-
-# macOS / Windows junk files
-.DS_Store
-Thumbs.db
+.env.production
+.vercel
+.vercel/
 .vscode
-
-# auto-generated runtime files
-cron-last-run.json
-
-# misc
-extra/
-public/posts/
-
-# backup and research
-work/
-
-# temp / scratch (screenshots, audits, uploads, local db) — never committed
-tmp/
-cron-last-run.json
-
-# Playwright test outputs
-/test-results/
-/playwright-report/
-/blob-report/
-/playwright/.cache/
-tests/reports/
-.dev.vars
-
-# Dropbox conflict artifacts — these defeat rules anchored on `.env$`
-# (e.g. ".env (Chad's conflicted copy 2026-04-01)") and have leaked keys before.
+.wrangler/
 *conflicted copy*
 *Conflicted Copy*
+/blob-report/
+/playwright-report/
+/playwright/.cache/
+/test-results/
+# (e.g. ".env (Chad's conflicted copy 2026-04-01)") and have leaked keys before.
+# analytics data (exclude raw imports but include processed summary)
+# auto-generated runtime files
+# backup and research
+# build output
+# dependencies
+# Dropbox conflict artifacts — these defeat rules anchored on `.env$`
+# environment variables
+# logs
+# macOS / Windows junk files
+# misc
+# Playwright test outputs
+# temp / scratch (screenshots, audits, uploads, local db) — never committed
+# the xswarm Stop gate must travel with the repo -- without it a dispatched
+# worker can end its turn with acceptance criteria failing and nothing notices
+cron-last-run.json
+dist/
+extra/
+node_modules/
+npm-debug.log*
+package-lock.json
+pnpm-debug.log*
+public/posts/
+src/data/analytics-imports/
+tests/reports/
+Thumbs.db
+tmp/
+work/
+yarn-debug.log*
+yarn-error.log*
