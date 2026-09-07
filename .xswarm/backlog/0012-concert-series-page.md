@@ -11,6 +11,9 @@ acceptance:
   - text: concerts publish as they are confirmed — the page never waits on a complete season
   - text: assets come from R2 via ImageKit, derived from the full-size PDFs, never the emailed PNGs
   - text: local SEO basics are present — Event structured data, venue address, free admission
+  - text: each concert takes RSVPs and captures an email address, with consent to be contacted about future events
+  - text: RSVP is OPTIONAL and never reads as a requirement — the event stays free and open
+  - text: expected attendance per concert is visible without opening another system
 ---
 
 ## Shape
@@ -39,6 +42,38 @@ A free monthly concert is the cheapest way for a local person to set foot on the
 property — so it is the top of the local funnel and deserves real local SEO:
 Event structured data, venue address, explicit free admission, and a page per
 date that can rank on its own.
+
+## RSVP — this is what makes the series strategically valuable
+Chad, 2026-09-07: "The events can be RSVP so we can track people planning to
+come. Try to collect email addresses of participants so we can create an event
+page for each."
+
+A free monthly concert is the cheapest way to meet local people. Without RSVP it
+produces an afternoon; with RSVP it produces **a local list that compounds across
+the season** — and that list is what the paid programmes (Riazati, the
+Dawn-Breakers Challenge, Bayat) currently have no local source for.
+
+### Use Humanitix, with free tickets
+Not a bespoke form. Reasons:
+* It is already the registration system for the paid events, so 0004's
+  registration measurement covers concerts too — one dashboard, one number.
+* It handles capacity and the automatic waitlist the August board report asked
+  for. Hakim Hall is an intimate room; a popular artist can fill it.
+* Emails arrive with consent attached, which a scraped form does not give.
+
+### ⚠ RSVP must not read as a requirement
+The flyer says **"Free & Open to Everyone"** and that promise must survive.
+Frame it as help, not a gate: *"Let us know you're coming so we can set out
+enough chairs."* Walk-ins stay welcome and the page should say so explicitly.
+
+An optional RSVP on a free event typically captures a minority of attendees —
+that is fine. The list is a by-product; filling the room is the goal, and
+inverting those two would cost attendance to gain addresses.
+
+### What to capture
+Name, email, number of seats. Nothing more — every extra field costs
+completions. Consent to hear about future Desert Rose events should be a clear,
+separately-stated opt-in, because that permission is the whole point.
 
 ## Assets
 Source is the full-size PDFs in `tmp/flyer/` (flyer 3.2MB, header 4.5MB, rose

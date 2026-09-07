@@ -33,6 +33,11 @@ coming:
 Registration runs through **Humanitix**, so this is measurable rather than
 inferred.
 
+* *First Sunday Concert Series 2026–27* — free monthly concerts, Hakim Hall,
+  3:00 PM. The only free, recurring, LOCAL event, and therefore the top of the
+  local funnel. RSVP captures emails, building the local list the paid
+  programmes currently lack (Chad, 2026-09-07).
+
 **Contributions**, secondarily, via `/contribute`.
 
 **And traffic matters here** — unlike the internal tools in the portfolio.
