@@ -16,6 +16,19 @@ and the organisation is not held up waiting on the website.
 At ~40 pageloads a day, steady, it is the third-busiest property on the account
 and the traffic looks like real people rather than crawlers.
 
+## DRBI is also a proof of concept — settled 2026-09-07
+
+Chad: "The idea was to separate DRBI from blogworks and develop it as a proof of
+concept example."
+
+Promotion, engagement and editing capability gets built HERE, against real
+events and real registrations, and BlogWorks.ai generalises it afterwards into
+the Webmaster / Editor / Promoter agents that are its product. DRBI is not
+waiting on those agents; it is where they are proved.
+
+That raises what this project is worth: not one institute's website, but the
+core of a SaaS product with a real customer already attached.
+
 ## What the site should cause — settled 2026-09-06
 
 **Event registrations**, primarily. Two programmes are listed and a third is

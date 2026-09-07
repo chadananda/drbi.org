@@ -45,23 +45,37 @@ you have read — and only then offers to keep the person posted. That ordering 
 the whole difference in conversion, and it also produces a better lead, because
 the question is the segmentation.
 
-## ⚠ THE AGENTS DO NOT EXIST YET
+## DRBI IS THE PROOF OF CONCEPT — the dependency runs the other way
 Chad, 2026-09-07: "We do not yet have the agent functionality for promotion,
-engagement, or editing, but that is the plan for DRBI."
+engagement, or editing, but that is the plan for DRBI." And then, correcting an
+earlier draft of this item: "The idea was to separate DRBI from blogworks and
+develop it as a proof of concept example."
 
-An earlier draft of this item read as though the pieces only needed wiring
-together. They do not. Promotion, engagement and editing agents are **BlogWorks.ai's
-product** — "Website-as-a-Service — Webmaster/Editor/Promoter agents on Astro +
-Cloudflare" — and they are unbuilt.
+That draft had it backwards. It said DRBI was BLOCKED on BlogWorks' unbuilt
+agents. It is not blocked — **it is the place the capability gets built.**
+BlogWorks generalises afterwards from what actually worked here.
 
-**BlogWorks.ai has `.xswarm` and ZERO backlog items.** So DRBI's engagement
-plan depends on a keystone project with no plan. That dependency should be
-visible here rather than discovered when someone tries to start.
+The separation is deliberate and it is the right way round:
 
-Until the agents exist, this loop runs MANUALLY: Anis answers, a human sends the
-follow-up, a human segments the list. That is fine and worth doing — a manual
-loop that works is the specification for the agent that automates it. Do not
-wait for the agents to start collecting contacts.
+    DRBI          build promotion, engagement and editing against REAL events,
+                  real people, real registrations. Concrete, bounded, and it
+                  either fills a room or it does not.
+                      ↓ what works, and only what works
+    BlogWorks.ai  generalise into the Webmaster / Editor / Promoter agents that
+                  are the Website-as-a-Service product
+
+Same pattern Chad applied to Star of the West as the laboratory for SifterSearch's
+extraction: prove the hard thing on a bounded real case before generalising, so
+a wrong approach is discovered cheaply.
+
+**Consequence for priority.** This is not site maintenance for one institute. It
+is building the core of a SaaS product with a real customer attached — which
+makes it worth more attention than a single-site engagement plan would justify.
+
+**Consequence for method.** Run the loop MANUALLY first and instrument it: Anis
+answers, a human sends the follow-up, a human segments the list. The manual loop
+is not a stopgap, it is the specification. Automate only the steps that
+demonstrably moved re-attendance.
 
 ## The infrastructure that DOES exist — wire this part now
 * **Anis widget** — SifterSearch publishes an embeddable chat web component
@@ -102,9 +116,10 @@ predicted.
 * **Public-facing copy still goes through the DeepSeek humanising pass.** That
   layer does not exist yet and gates every automated send here.
 
-## Dependencies
-* **BlogWorks.ai — the Promoter, Editor and Webmaster agents.** Unbuilt, and the
-  project has no backlog. This is the real dependency and the real risk.
+## Relationships
+* **BlogWorks.ai** — the DOWNSTREAM beneficiary, not a blocker. Whatever works
+  here becomes the Promoter / Editor / Webmaster agents. Feed findings back;
+  BlogWorks currently has no backlog and this work is what should populate it.
 * DRBI 0007 — engagement plan, newsletters and Anis on the site
 * siftersearch 0015 — unify on the Anis widget
 * siftersearch 0011 — follow-up email after an Anis conversation
