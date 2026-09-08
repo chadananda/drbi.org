@@ -41,3 +41,7 @@ _Requests to this project's agents. One per `## ` heading._
 ## Disregard previous version DRBI web page for Sunday Concert Series
 - **Disregard previous version DRBI web page for Sunday Concert Series** — Oraea sent the corrected full-size flyer renders and PNG assets for the DRBI First Sunday Concert Series page so the page can be built.  
   _oraeav@gmail.com · this week_
+
+## Sunday Series-DRBI.org
+- **Sunday Series-DRBI.org** — Oraea Varis sent the confirmed First Sunday Concert Series schedule (Oct 2026–Mar 2027, plus TBD April/May) with bios and photos where available, asking Chad to build the series landing page and individual concert posts on drbi.org now and add the rest as they firm up.  
+  _oraeav@gmail.com · this week_
