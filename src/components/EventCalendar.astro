@@ -1196,6 +1196,34 @@ const displayEvents = upcomingEvents.map(event => {
   white-space: nowrap;
 }
 
+/* Mobile: the price is the conversion information — it must never be clipped.
+   `min-width: 260px` above, with no mobile override, forced the row wider than a
+   390px viewport; the amounts were pushed past the card's overflow-hidden edge
+   and rendered as "$4", "$3", "$2". Flex children also default to
+   min-width:auto, which stops the label shrinking, so both are reset here. */
+@media (max-width: 640px) {
+  .ticket-prices {
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+  .ticket-prices li {
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .ticket-prices .ticket-label {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-wrap: anywhere;
+  }
+  .ticket-prices .ticket-amount {
+    flex: 0 0 auto;
+  }
+  .meta-item.price {
+    min-width: 0;
+  }
+}
+
 .list-full-highlights {
   display: flex;
   flex-wrap: wrap;
