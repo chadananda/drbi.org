@@ -45,3 +45,11 @@ _Requests to this project's agents. One per `## ` heading._
 ## Sunday Series-DRBI.org
 - **Sunday Series-DRBI.org** — Oraea Varis sent the confirmed First Sunday Concert Series schedule (Oct 2026–Mar 2027, plus TBD April/May) with bios and photos where available, asking Chad to build the series landing page and individual concert posts on drbi.org now and add the rest as they firm up.  
   _oraeav@gmail.com · this week_
+
+## Sunday Series-DRBI.org
+- **Sunday Series-DRBI.org** — Oraea Varis sent the confirmed First Sunday Concert Series schedule and asks Chad to build the series landing page plus an individual post per concert, publishing October–March now and adding April/May later.  
+  _oraeav@gmail.com · this week_
+
+## Reginal request for reserving DRVI for September
+- **Reginal request for reserving DRVI for September** — Telahoun asks Chad to reserve DRBI for the Regional's September activity by contacting Carlos Arboleta and to report back once booked.  
+  _telahounmolla@gmail.com · this week_
