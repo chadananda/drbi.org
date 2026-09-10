@@ -191,24 +191,28 @@ test.describe('Accessibility', () => {
 
 test.describe('Admin Accessibility', () => {
   test('login form should have proper labels', async ({ page }) => {
-    await page.goto('/login');
+    // Sign-in moved into the navbar island: /login now redirects to /?signin=1 and
+    // the form lives in a collapsed dropdown. Its labels are class="sr-only" —
+    // visually hidden on purpose, which is the correct way to label a compact
+    // form, so asserting toBeVisible() penalised the right pattern and failed on
+    // a control that is simply inside a closed menu.
+    //
+    // What matters for accessibility is that each input HAS a label bound to its
+    // id, so that is what is asserted. attached, not visible.
+    await page.goto('/');
 
-    // Username field
     const usernameInput = page.locator('input[type="text"], input[type="email"]').first();
     const usernameId = await usernameInput.getAttribute('id');
 
     if (usernameId) {
-      const usernameLabel = page.locator(`label[for="${usernameId}"]`);
-      await expect(usernameLabel).toBeVisible();
+      await expect(page.locator(`label[for="${usernameId}"]`)).toBeAttached();
     }
 
-    // Password field
-    const passwordInput = page.locator('input[type="password"]');
+    const passwordInput = page.locator('input[type="password"]').first();
     const passwordId = await passwordInput.getAttribute('id');
 
     if (passwordId) {
-      const passwordLabel = page.locator(`label[for="${passwordId}"]`);
-      await expect(passwordLabel).toBeVisible();
+      await expect(page.locator(`label[for="${passwordId}"]`)).toBeAttached();
     }
   });
 
