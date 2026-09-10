@@ -3,7 +3,17 @@
 import { db } from '@lib/db';
 
 const CDN = 'https://cdn.shrtr.com';
-const clean = (s) => String(s ?? '').trim();
+// Trim, and neutralise closing-tag sequences.
+//
+// The admin media page hands these rows to an Astro `define:vars` inline script,
+// and astro 7.3.2 carries an unfixed CRITICAL advisory — XSS via incomplete
+// </script> sanitisation in define:vars. There is no upstream fix to upgrade to,
+// so the vector is closed at the input boundary instead: a filename or AI-written
+// title can otherwise carry `</script>` straight into that page.
+//
+// Only the `</` pair is removed, not `<` on its own, so ordinary prose like
+// "width < height" survives while every closing-tag form is broken.
+const clean = (s) => String(s ?? '').trim().replace(/<\//g, '<');
 
 // slug from a filename → flat, collision-resistant R2 key under drbi.org/media/.
 export function mediaKey(filename) {
