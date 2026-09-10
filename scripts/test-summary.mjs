@@ -11,12 +11,27 @@
 // non-zero exit is propagated, so a failing suite fails the gate.
 
 import { spawn } from 'node:child_process';
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-const child = spawn(
-  process.execPath,
-  ['--test', 'tests/unit/*.test.js'],
-  { shell: true, stdio: ['ignore', 'pipe', 'pipe'] },
-);
+// Expand the glob here rather than handing it to a shell. `shell: true` does not
+// escape arguments, only concatenates them, and node deprecates it for exactly
+// that reason (DEP0190) — a filename with a space or a quote would be split or
+// injected. No shell is involved now.
+const TEST_DIR = 'tests/unit';
+const files = readdirSync(TEST_DIR)
+  .filter((f) => f.endsWith('.test.js'))
+  .sort()
+  .map((f) => join(TEST_DIR, f));
+
+if (files.length === 0) {
+  console.error(`test-summary: no test files found in ${TEST_DIR}`);
+  process.exit(1);
+}
+
+const child = spawn(process.execPath, ['--test', ...files], {
+  stdio: ['ignore', 'pipe', 'pipe'],
+});
 
 let out = '';
 child.stdout.on('data', (d) => { out += d; process.stdout.write(d); });
