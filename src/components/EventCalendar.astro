@@ -505,7 +505,7 @@ const displayEvents = upcomingEvents.map(event => {
                         <span class="btn-text">Get Tickets</span>
                         <span class="btn-icon">→</span>
                       </a>
-                    ) : event.display.isFull && (
+                      ) : event.display.isFull ? (
                       <a
                         href={`/events/${eventSlug(event)}`}
                         class="waitlist-link-btn"
@@ -514,7 +514,21 @@ const displayEvents = upcomingEvents.map(event => {
                         <span class="btn-text">Join the Waitlist</span>
                         <span class="btn-icon">→</span>
                       </a>
-                    )}
+                      ) : (
+                        /* No external ticket link and the event is not full. Without this
+                           the card offered no way to act at all: the visitor had to click
+                           into the detail page to find out there was one. That page carries
+                           the registration and enquiry route, so link it explicitly rather
+                           than invent a checkout URL that does not exist. */
+                        <a
+                          href={`/events/${eventSlug(event)}`}
+                          class="registration-link-btn"
+                          aria-label={`Registration details for ${event.display.name}`}
+                        >
+                          <span class="btn-text">Registration</span>
+                          <span class="btn-icon">→</span>
+                        </a>
+                      )}
                   </div>
                 </div>
               </article>
@@ -1411,7 +1425,8 @@ const displayEvents = upcomingEvents.map(event => {
 /* Primary listing CTA — the amber of the detail page's register button, so the
    two read as the same action. Sits next to the secondary Read More / Show More. */
 .get-tickets-btn,
-.waitlist-link-btn {
+.waitlist-link-btn,
+.registration-link-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -1427,20 +1442,23 @@ const displayEvents = upcomingEvents.map(event => {
 }
 
 .get-tickets-btn:hover,
-.waitlist-link-btn:hover {
+.waitlist-link-btn:hover,
+.registration-link-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(140, 90, 25, 0.45);
   background: linear-gradient(180deg, #98651f 0%, #7d5316 100%);
 }
 
 .get-tickets-btn .btn-icon,
-.waitlist-link-btn .btn-icon {
+.waitlist-link-btn .btn-icon,
+.registration-link-btn .btn-icon {
   font-size: 1rem;
   transition: transform 0.2s ease;
 }
 
 .get-tickets-btn:hover .btn-icon,
-.waitlist-link-btn:hover .btn-icon {
+.waitlist-link-btn:hover .btn-icon,
+.registration-link-btn:hover .btn-icon {
   transform: translateX(2px);
 }
 

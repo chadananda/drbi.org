@@ -1,6 +1,7 @@
 // /events listing must let a decided visitor buy without clicking into the detail page.
-// Backlog 0005. Assertions are per-card, so an empty local D1 proves nothing but never
-// fails falsely; a listing with events is checked in full.
+// Backlog 0005. Every card is checked, and the suite now fails outright when the
+// listing is empty — an assertion loop over zero cards passed while proving nothing,
+// which is how this criterion was first reported as met when it was not.
 import { test, expect } from '@playwright/test';
 
 const CARD = '.event-list-full-item';
@@ -8,22 +9,28 @@ const BAR = '.list-full-bottom';
 
 // What a card offers a visitor who has already decided: tickets, the waitlist when the
 // program is full, or — for a collapsed recurring instance — the control that reveals them.
-const ACTION = '.get-tickets-btn, .waitlist-link-btn, .show-more-btn';
+const ACTION = '.get-tickets-btn, .waitlist-link-btn, .registration-link-btn, .show-more-btn';
 
 test.describe('Events listing — ticket path', () => {
-  test('every priced event offers a direct path to its tickets', async ({ page }) => {
+  test('every event offers a direct path to its tickets', async ({ page }) => {
     await page.goto('/events');
     await page.waitForLoadState('networkidle');
 
     const cards = page.locator(CARD);
     const count = await cards.count();
 
+    // The criterion is "each event", not "each priced event". An event with no
+    // external ticket URL still has a registration route on its detail page, and the
+    // card must surface it — previously such a card rendered no action at all.
+    expect(count, 'no event cards rendered — this assertion would prove nothing').toBeGreaterThan(0);
+
     for (let i = 0; i < count; i++) {
       const card = cards.nth(i);
-      // Only an event that quotes a price is selling something to link to.
-      if ((await card.locator('.meta-item.price').count()) === 0) continue;
       // The CTA lives in the always-visible action bar — no expanding, no navigating.
-      await expect(card.locator(`${BAR} ${ACTION}`).first()).toBeVisible();
+      await expect(
+        card.locator(`${BAR} ${ACTION}`).first(),
+        `card ${i} offers no path to act on`,
+      ).toBeVisible();
     }
   });
 
