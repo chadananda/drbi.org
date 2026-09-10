@@ -39,6 +39,7 @@ const { GET, POST } = collectionHandlers({
     if (collection) { where.push('collection = ?'); args.push(collection); }
     if (draft === 'only') where.push('draft = 1');
     else if (draft !== 'all') where.push('draft = 0');
+    // security-audit-ignore: dangerous-pattern — clauses are literals this function pushes; all caller values are bound via args
     const sql = `SELECT * FROM content ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
                  ORDER BY date_published DESC LIMIT ?`;
     const { rows } = await db.execute({ sql, args: [...args, limit] });

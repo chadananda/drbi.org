@@ -583,6 +583,7 @@ export async function updateContent(id: string, data: Record<string, any>) {
 
   if (fields.length > 1) {
     await db.execute({
+      // security-audit-ignore: dangerous-pattern — fields are literal 'col = ?' clauses built here; values bound via args
       sql: `UPDATE content SET ${fields.join(', ')} WHERE id = ?`,
       args
     });
@@ -841,6 +842,7 @@ export async function updateUser(id: string, data: Record<string, any>) {
   if (data.role != null) { fields.unshift('role = ?'); args.unshift(roleToLevel(data.role)); }
   if (data.active != null) { fields.unshift('disabled = ?'); args.unshift(data.active ? 0 : 1); }
   args.push(id);
+  // security-audit-ignore: dangerous-pattern — fields are literal 'col = ?' clauses built here; values bound via args
   await db.execute({ sql: `UPDATE users SET ${fields.join(', ')} WHERE id = ?`, args });
   return getUserById(id);
 }
@@ -909,6 +911,7 @@ export async function updateComment(id: string, data: { starred?: boolean; appro
   if (data.approved != null) { fields.unshift('approved = ?'); args.unshift(data.approved ? 1 : 0); }
   if (data.content != null) { fields.unshift('content = ?'); args.unshift(data.content); }
   args.push(id);
+  // security-audit-ignore: dangerous-pattern — fields are literal 'col = ?' clauses built here; values bound via args
   await db.execute({ sql: `UPDATE comments SET ${fields.join(', ')} WHERE id = ?`, args });
 }
 

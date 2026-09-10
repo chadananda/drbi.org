@@ -48,6 +48,7 @@ export async function listMedia({ q = '', tag = '', limit = 500 } = {}) {
       args.push(like, like, like, like);
     }
     if (clean(tag)) { where.push('lower(tags) LIKE ?'); args.push(`%${clean(tag).toLowerCase()}%`); }
+    // security-audit-ignore: dangerous-pattern — where holds literal clauses only; every search term is a bound parameter
     const sql = `SELECT * FROM media ${where.length ? 'WHERE ' + where.join(' AND ') : ''}
                  ORDER BY created_at DESC LIMIT ?`;
     args.push(limit);
@@ -76,6 +77,7 @@ export async function updateMedia(id, fields) {
   for (const c of cols) if (c in fields) { sets.push(`${c} = ?`); args.push(clean(fields[c])); }
   if (!sets.length) return false;
   args.push(Number(id));
+  // security-audit-ignore: dangerous-pattern — sets are literal 'col = ?' clauses built here; values bound via args
   await db.execute({ sql: `UPDATE media SET ${sets.join(', ')} WHERE id = ?`, args });
   return true;
 }

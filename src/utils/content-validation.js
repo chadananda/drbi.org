@@ -18,13 +18,17 @@ const __dirname = __filename ? path.dirname(__filename) : '';
 // child_process is Node-only (not available on Cloudflare Workers) — load it lazily
 // so importing this module (e.g. for quickValidate in /api/validate) never crashes.
 let _exec;
-async function exec(cmd, opts) {
+// execFile, not exec: execFile takes an argv array and spawns the binary directly,
+// so nothing is handed to a shell and a project path containing a space or a
+// shell metacharacter cannot alter the command. Working directory is passed as
+// an option rather than by prefixing `cd <path> &&`.
+async function exec(file, args, opts) {
   if (!_exec) {
-    const { exec: execCallback } = await import('child_process');
+    const { execFile: execFileCallback } = await import('child_process');
     const { promisify } = await import('util');
-    _exec = promisify(execCallback);
+    _exec = promisify(execFileCallback);
   }
-  return _exec(cmd, opts);
+  return _exec(file, args, opts);
 }
 
 // Initialize markdown parser
@@ -335,8 +339,9 @@ async function validateBuildCheck(filePath, fileContent) {
 
     // Run quick syntax check (could be expanded to run actual build)
     try {
-      await exec(`cd ${projectRoot} && npx astro check --config astro.config.mjs`, {
-        timeout: 30000 // 30 second timeout
+      await exec('npx', ['astro', 'check', '--config', 'astro.config.mjs'], {
+        cwd: projectRoot,
+        timeout: 30000, // 30 second timeout
       });
     } catch (checkError) {
       if (checkError.stderr && checkError.stderr.includes(testFileName)) {
