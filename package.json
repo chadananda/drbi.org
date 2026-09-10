@@ -110,7 +110,6 @@
     "@markdoc/markdoc": "^0.5.4",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/typography": "^0.5.19",
-    "astro-critical-css": "^0.0.7",
     "axios": "^1.11.0",
     "better-sqlite3": "^13.0.3",
     "chalk": "^6.0.0",
