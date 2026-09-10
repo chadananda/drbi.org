@@ -55,7 +55,7 @@
   "dependencies": {
     "@astrojs/cloudflare": "^14.0.2",
     "@astrojs/markdoc": "^2.0.1",
-    "@astrojs/mdx": "^7.0.0",
+    "@astrojs/mdx": "^8.0.1",
     "@astrojs/react": "^6.0.0",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
@@ -86,8 +86,8 @@
     "jsonwebtoken": "^9.0.2",
     "lightbox2": "^2.11.5",
     "lucia": "^3.2.2",
-    "markdown-it": "^14.1.0",
-    "markdown-it-attrs": "^4.3.1",
+    "markdown-it": "^15.0.1",
+    "markdown-it-attrs": "^5.0.1",
     "markdown-it-classy": "^0.2.0",
     "node-sql-parser": "^5.3.11",
     "oslo": "^1.2.1",
@@ -100,6 +100,7 @@
     "tailwindcss": "^4.3.2"
   },
   "devDependencies": {
+    "@astrojs/markdown-satteri": "^0.4.1",
     "@astrojs/svelte": "^9.0.0",
     "@cucumber/cucumber": "^13.2.1",
     "@fontsource-variable/inter": "^5.2.6",

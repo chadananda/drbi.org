@@ -15,7 +15,7 @@ import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fg from 'fast-glob';
 import matter from 'gray-matter';
-import { createMarkdownProcessor, markdownConfigDefaults } from '@astrojs/markdown-remark';
+import { createSatteriMarkdownProcessor } from '@astrojs/markdown-satteri';
 import { normalizeRenderedHtml } from '../src/lib/page-render.js';
 import { configToRows } from '../src/lib/site-config-format.js';
 
@@ -68,10 +68,14 @@ const usesComponents = (body) =>
   /^import\s+\{[^}]*\}\s+from\s+['"]astro:/m.test(body) ||
   /<[A-Z][A-Za-z0-9]*[\s/>]/.test(body);
 
-// Astro's own processor with the project's (default) markdown config, so the
-// stored HTML matches what Astro produces for the same file. Running it here,
-// at ingest time, keeps ~2.1 MB gzipped of shiki out of the Worker bundle.
-const processor = await createMarkdownProcessor(markdownConfigDefaults);
+// Astro's own processor, so the stored HTML matches what Astro produces for the
+// same file. Running it here, at ingest time, keeps ~2.1 MB gzipped of shiki out
+// of the Worker bundle.
+//
+// astro 7.3 renamed this: @astrojs/markdown-remark -> @astrojs/markdown-satteri.
+// Depend on it explicitly rather than transitively — @astrojs/mdx@8 dropped the
+// old package, which silently broke this script until it was pinned here.
+const processor = await createSatteriMarkdownProcessor({});
 
 async function renderBody(md) {
   const src = String(md ?? '').trim();

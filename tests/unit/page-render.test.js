@@ -5,7 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   hasRelativeImages, relativeImages, baseDirFor, normalisePath,
-  rewriteImagePaths, canRenderFromD1, hasCodeBlock, skipReason, decidePage, resolvePage, normalizeRenderedHtml,
+  rewriteImagePaths, canRenderFromD1, hasCodeBlock, skipReason, decidePage, resolvePage, normalizeRenderedHtml, hasAstroImagePlaceholder,
 } from '../../src/lib/page-render.js';
 
 const CDN = 'https://cdn.example.com/drbi.org';
@@ -298,5 +298,23 @@ test('normalizeRenderedHtml', async (t) => {
   await t.test('is idempotent — re-running the ingest cannot drift', () => {
     const once = normalizeRenderedHtml('<p>A &#x26; B</p>');
     assert.equal(normalizeRenderedHtml(once), once);
+  });
+});
+
+// astro 7.3's markdown processor (@astrojs/markdown-satteri) emits a build-time
+// placeholder for relative images that only Astro's vite plugin can resolve.
+// Served verbatim from a row it would produce an <img> with no src.
+test('hasAstroImagePlaceholder', async (t) => {
+  const ph = '<p><img __ASTRO_IMAGE_="{&quot;src&quot;:&quot;./_a.webp&quot;}"></p>';
+  await t.test('detects the placeholder', () => {
+    assert.equal(hasAstroImagePlaceholder(ph), true);
+  });
+  await t.test('ordinary html is unaffected', () => {
+    assert.equal(hasAstroImagePlaceholder('<p><img src="/documents/x.jpg"></p>'), false);
+    assert.equal(hasAstroImagePlaceholder(''), false);
+  });
+  await t.test('a body carrying one is never servable, even with a CDN base', () => {
+    assert.equal(canRenderFromD1(ph, 'https://cdn.example.com'), false);
+    assert.match(skipReason(ph, 'https://cdn.example.com'), /Astro image placeholder/);
   });
 });

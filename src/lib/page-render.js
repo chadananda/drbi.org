@@ -82,12 +82,25 @@ export function hasCodeBlock(body = '') {
 }
 
 /**
+ * Astro's build-time image placeholder. astro 7.3's markdown processor emits
+ * <img __ASTRO_IMAGE_="{...}"> for relative images and only Astro's own vite
+ * plugin resolves it into a hashed /_astro/ URL. Injected verbatim from a
+ * database row it would render an <img> with no src at all, so a body carrying
+ * one is never servable. The relative-image check already excludes these in
+ * practice; this makes it explicit rather than incidental.
+ */
+export function hasAstroImagePlaceholder(body = '') {
+  return String(body).includes('__ASTRO_IMAGE_');
+}
+
+/**
  * May this row be served from D1?
  * Only when every relative reference can be turned into an absolute URL — i.e.
  * either there are none, or a CDN base is configured to rewrite them against.
  * Otherwise the caller falls back to the file-backed page.
  */
 export function canRenderFromD1(body = '', cdnBase = '') {
+  if (hasAstroImagePlaceholder(body)) return false;
   if (hasCodeBlock(body)) return false;
   return !hasRelativeImages(body) || Boolean(cdnBase);
 }
@@ -95,6 +108,7 @@ export function canRenderFromD1(body = '', cdnBase = '') {
 /** Why a page was skipped, for logging and the status report. */
 export function skipReason(body = '', cdnBase = '') {
   if (canRenderFromD1(body, cdnBase)) return null;
+  if (hasAstroImagePlaceholder(body)) return 'contains an unresolved Astro image placeholder; only the build can resolve it';
   if (hasCodeBlock(body)) return 'contains a code block; would render without syntax highlighting';
   return `unresolvable relative images (${relativeImages(body).length}); set PAGES_CDN_BASE once they are hosted`;
 }
