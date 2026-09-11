@@ -1,14 +1,15 @@
 echo "🔍 Pre-commit checks"
 
-# Fast, reliable gate for every commit: the code must build and unit tests must pass.
-# (Behavioral/E2E tests need real D1 content and run in the pre-push gate against the
-# live site — a local dev server serves an empty local D1, so they can't run here.)
-
-echo "📦 Building..."
-if ! npm run build > /tmp/drbi-precommit-build.log 2>&1; then
-  echo "❌ Build failed. Commit aborted."; tail -20 /tmp/drbi-precommit-build.log; exit 1
-fi
-echo "✅ Build OK"
+# Unit tests only. Deliberately NOT the build.
+#
+# Two reasons the build does not belong here:
+#  1. It needs Cloudflare credentials — the @astrojs/cloudflare vite plugin opens a remote
+#     proxy session. A machine without a token cannot commit AT ALL. That is not a gate,
+#     it is a lockout, and it already blocked real work.
+#  2. pre-push runs the identical build immediately afterwards, so nothing reaches the
+#     remote unbuilt. Running it twice only makes every commit slow enough to route around.
+#
+# Keep this fast. A hook people skip protects nothing.
 
 echo "🧪 Unit tests..."
 if ! npm run test:unit; then
