@@ -1,0 +1,31 @@
+# Local dev secrets for `astro dev` (Miniflare reads this file as the Worker env).
+# Copy to `.dev.vars` (gitignored) and fill in. Placeholders below are safe dummies.
+#
+# Public pages need NONE of these. Login/admin needs the auth block. Seeding local data
+# from the live site needs the dev-seed block.
+
+# ── Auth / admin (needed to log in locally) ─────────────────────────────────────────
+# Any non-empty string works locally; sessions are signed with it (HS256).
+PRIVATE_JWT_SECRET=dev-only-change-me
+# Break-glass admin login (email + password) — use these to sign in at /login locally.
+SITE_ADMIN_EMAIL=you@example.test
+SITE_ADMIN_PASS=dev-local-password
+
+# ── Local dev data (npm run db:pull / auto-seed on npm run dev) ──────────────────────
+# Personal token from an admin: `node scripts/mint-dev-token.mjs "Your Name"`.
+# Pulls a sanitized, PII-free snapshot from the live site into your LOCAL D1.
+DRBI_DEV_TOKEN=
+# Where to pull from (defaults to https://drbi.org if unset).
+# DRBI_SITE_URL=https://drbi.org
+
+# ── Optional integrations (leave blank unless working on that feature) ───────────────
+# Real values live in Cloudflare's secret store in production; these are only for local work.
+# HUMANITIX_API_KEY=
+# ZEPTO_SEND_TOKEN=
+# ZEPTO_HOST=
+# EMAIL_FROM=noreply@drbi.org
+# PAYPAL_CLIENT_ID_SANDBOX=
+# PAYPAL_SECRET_SANDBOX=
+# PAYPAL_ENV=sandbox
+# API_TOKEN=
+# CRON_SECRET=

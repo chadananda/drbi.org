@@ -155,6 +155,14 @@ CREATE TABLE IF NOT EXISTS faqs (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+-- Site settings as name/value rows (site.title, site.email, social URLs, …). Read/written by
+-- src/pages/api/admin/settings.js and seeded by migrations/0011. Was prod-only schema drift —
+-- defined here so a fresh DB (local dev, or any clean rebuild) has it before 0011 runs.
+CREATE TABLE IF NOT EXISTS options (
+  name TEXT PRIMARY KEY,
+  value TEXT
+);
+
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
