@@ -198,10 +198,15 @@ const displayEvents = upcomingEvents.map(event => {
     const e = d.endDate ? parseArizonaDate(d.endDate) : s;
     return !isNaN(+s) && !isNaN(+e) && e.toDateString() !== s.toDateString();
   })();
-  const wouldBeCompact = !event.isPrimary || !isMultiDay;
-  // Emphasize the next one: the first single-session/recurring event renders large, the rest compact.
-  let isMinimal = wouldBeCompact;
-  if (wouldBeCompact && !firstCompactShown) { isMinimal = false; firstCompactShown = true; }
+  // Multi-day programs (weekend retreats, multi-session challenges) always render large.
+  // Single-session/evening events render compact — except the very next one, emphasized large.
+  let isMinimal;
+  if (isMultiDay) {
+    isMinimal = false;
+  } else {
+    isMinimal = firstCompactShown;
+    firstCompactShown = true;
+  }
   const instanceId = event.instanceIndex > 0 ? `${event.id}-${event.instanceIndex}` : event.id;
 
   return {
@@ -233,6 +238,11 @@ const displayEvents = upcomingEvents.map(event => {
       month: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Phoenix' }),
       day: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Phoenix' }),
       weekday: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Phoenix' }),
+      // Multi-day programs show two date boxes (start → end) in the tile badge;
+      // single-session events show one. Same badge style either way.
+      isMultiDay,
+      endMonth: d.endDate ? parseArizonaDate(d.endDate).toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Phoenix' }) : '',
+      endDay: d.endDate ? parseArizonaDate(d.endDate).toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Phoenix' }) : '',
       // Fall back to the branded events image when an event has no photo — avoids a broken <img>.
       mainImage: transformS3Url(d.mainImage || FALLBACK_EVENT_IMG, 450, 300),
       mainImageLarge: transformS3Url(d.mainImage || FALLBACK_EVENT_IMG, 600, 400),
@@ -336,10 +346,24 @@ const displayEvents = upcomingEvents.map(event => {
             <a href={`/events/${eventSlug(event)}`} class={`ev-tile ${event.isMinimal ? 'ev-tile--sm' : 'ev-tile--lg'}`} aria-label={event.display.name}>
               <div class="ev-tile-img" style={`background-image:url(${event.display.mainImageBanner})`}></div>
               <div class="ev-tile-content">
-                <div class="ev-tile-date">
-                  <span class="ev-tile-month">{event.display.month}</span>
-                  <span class="ev-tile-day">{event.display.day}</span>
-                </div>
+                {event.display.isMultiDay ? (
+                  <div class="ev-tile-daterange">
+                    <div class="ev-tile-date">
+                      <span class="ev-tile-month">{event.display.month}</span>
+                      <span class="ev-tile-day">{event.display.day}</span>
+                    </div>
+                    <span class="ev-tile-arrow" aria-hidden="true">→</span>
+                    <div class="ev-tile-date">
+                      <span class="ev-tile-month">{event.display.endMonth}</span>
+                      <span class="ev-tile-day">{event.display.endDay}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div class="ev-tile-date">
+                    <span class="ev-tile-month">{event.display.month}</span>
+                    <span class="ev-tile-day">{event.display.day}</span>
+                  </div>
+                )}
                 <div class="ev-tile-main">
                   <h3 class="ev-tile-title">{event.display.name}</h3>
                   <div class="ev-tile-meta">
@@ -784,11 +808,13 @@ const displayEvents = upcomingEvents.map(event => {
 .ev-tile, .ev-tile .ev-tile-title, .ev-tile .ev-tile-meta, .ev-tile .ev-tile-desc, .ev-tile .ev-tile-cta, .ev-tile .ev-dot { color: #fff; }
 .ev-tile--lg { min-height: 340px; }
 .ev-tile--sm { min-height: 150px; }
+/* De-emphasize secondary one-day events: indent them beneath the emphasized (next + retreat) programs. */
+@media (min-width: 641px) { .ev-tile--sm { margin-left: 3.5rem; } }
 .ev-tile-img { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform .55s ease; }
 .ev-tile:hover .ev-tile-img { transform: scale(1.05); }
 .ev-tile::after {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(15,10,4,.12) 0%, rgba(15,10,4,.5) 52%, rgba(15,10,4,.85) 100%);
+  background: linear-gradient(180deg, rgba(10,7,3,0) 0%, rgba(10,7,3,0) 48%, rgba(10,7,3,.45) 72%, rgba(10,7,3,.9) 100%);
 }
 .ev-tile-content {
   position: relative; z-index: 1; display: flex; align-items: flex-end; gap: 1.1rem;
@@ -802,6 +828,9 @@ const displayEvents = upcomingEvents.map(event => {
 }
 .ev-tile-month { display: block; font-size: .68rem; font-weight: 700; letter-spacing: .12em; color: #a04607; }
 .ev-tile-day { display: block; font-family: 'Merriweather', Georgia, serif; font-size: 1.7rem; font-weight: 700; margin-top: .12rem; }
+.ev-tile-daterange { display: flex; align-items: center; gap: .45rem; align-self: flex-start; }
+.ev-tile-daterange .ev-tile-date { align-self: auto; }
+.ev-tile-arrow { color: #fff; font-weight: 700; font-size: 1.15rem; text-shadow: 0 1px 3px rgba(0,0,0,.55); }
 .ev-tile-main { flex: 1; min-width: 0; }
 .ev-tile-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; line-height: 1.15; margin: 0 0 .4rem; font-size: 1.55rem; text-shadow: 0 1px 4px rgba(0,0,0,.55); }
 .ev-tile--sm .ev-tile-title { font-size: 1.18rem; margin-bottom: .25rem; }

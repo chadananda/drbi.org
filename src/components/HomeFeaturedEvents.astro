@@ -15,7 +15,10 @@ const upcoming = all
   .map((e) => ({ ...e, _start: new Date(e.data.startDate), _end: new Date(e.data.endDate || e.data.startDate) }))
   .filter((e) => !isNaN(e._start) && e._end >= now)
   .sort((a, b) => a._start - b._start)
-  .slice(0, limit);
+  .slice(0, limit)
+  // Emphasis: the NEXT event (first upcoming) and any multi-day program (retreat/intensive)
+  // render large; single-session events after the first render compact.
+  .map((e, i) => ({ ...e, _large: i === 0 || e._end.toDateString() !== e._start.toDateString() }));
 
 const AZ = "America/Phoenix";
 const monthOf = (d) => d.toLocaleDateString("en-US", { month: "short", timeZone: AZ }).toUpperCase();
@@ -54,11 +57,11 @@ const locOf = (ev) => {
 ) : (
   <div class="home-events">
     {upcoming.map((ev) => (
-      <article class="he-card">
+      <article class={`he-card ${ev._large ? "he-card--lg" : "he-card--sm"}`}>
         <a href={`/events/${eventSlug(ev)}`} class="he-media" aria-label={ev.data.name}>
           <img src={imagekitUrl(ev.data.mainImage || FALLBACK_EVENT_IMG, { w: 640, h: 520, face: true })} alt={ev.data.name} loading="lazy" decoding="async" width="640" height="520" />
-          <span class="he-countdown" data-event-start={ev.data.startDate} aria-hidden="true"></span>
         </a>
+        <span class="he-countdown" data-event-start={ev.data.startDate} aria-hidden="true"></span>
 
         <div class="he-body">
           <div class="he-datebox">
@@ -90,23 +93,41 @@ const locOf = (ev) => {
   .he-empty { text-align: center; color: var(--color-muted); font-size: 1rem; }
 
   .he-card {
+    position: relative;
     display: grid; grid-template-columns: 1fr; background: var(--color-surface);
-    border: 1px solid var(--color-line); border-radius: 20px; overflow: hidden;
+    border: 1px solid var(--color-line); border-radius: 20px;
     box-shadow: 0 1px 2px rgba(60,45,20,.05); transition: box-shadow .25s, transform .25s, border-color .25s;
   }
-  @media (min-width: 760px) { .he-card { grid-template-columns: 17rem 1fr; } }
+  @media (min-width: 760px) {
+    .he-card--lg { grid-template-columns: 17rem 1fr; }
+    .he-card--sm { grid-template-columns: 12rem 1fr; }
+  }
   .he-card:hover { box-shadow: 0 26px 50px -26px rgba(70,50,20,.4); transform: translateY(-3px); border-color: #e6d4b4; }
 
-  /* Media + countdown */
-  .he-media { position: relative; display: block; overflow: hidden; background: #f3efe8; min-height: 220px; }
-  @media (min-width: 760px) { .he-media { min-height: 100%; } }
-  .he-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .55s ease; }
+  /* Media — clips its own corners + zoom; image is absolutely filled so the CARD height is
+     driven by the content (the event), never by the raw image's aspect ratio. */
+  .he-media {
+    position: relative; display: block; overflow: hidden; background: #f3efe8;
+    min-height: 220px; border-radius: 20px 20px 0 0;
+  }
+  @media (min-width: 760px) { .he-media { min-height: 0; border-radius: 20px 0 0 20px; } }
+  .he-media img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; object-position: center; display: block; transition: transform .55s ease;
+  }
   .he-card:hover .he-media img { transform: scale(1.05); }
+
+  /* Countdown straddles the image edge (image/body seam on desktop, image bottom on mobile)
+     rather than covering the photo. Lives on the card so the media's clip doesn't crop it. */
   .he-countdown {
-    position: absolute; top: .85rem; left: .85rem; display: inline-flex; align-items: center; gap: .35rem;
+    position: absolute; top: 220px; left: 1.1rem; transform: translateY(-50%);
+    display: inline-flex; align-items: center; gap: .35rem; z-index: 2;
     padding: .32rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .04em;
-    text-transform: uppercase; color: #2a1c0b; background: rgba(255,255,255,.92); backdrop-filter: blur(4px);
-    box-shadow: 0 3px 10px rgba(0,0,0,.18); opacity: 0; transition: opacity .3s;
+    text-transform: uppercase; color: #2a1c0b; background: rgba(255,255,255,.95); backdrop-filter: blur(4px);
+    box-shadow: 0 3px 12px rgba(0,0,0,.22); opacity: 0; transition: opacity .3s; white-space: nowrap;
+  }
+  @media (min-width: 760px) {
+    .he-countdown { top: auto; bottom: 1.3rem; left: 17rem; transform: translateX(-50%); }
   }
   .he-countdown.ready { opacity: 1; }
   .he-countdown.urgent { color: #fff; background: var(--color-brand); }
@@ -141,6 +162,22 @@ const locOf = (ev) => {
   .he-meta { display: inline-flex; align-items: center; gap: .45rem; font-size: .84rem; color: var(--color-muted); }
   .he-dot { color: #cbbfac; }
   .he-price { font-weight: 600; color: var(--color-brand-deep); }
+
+  /* Compact variant — secondary single-session events (smaller image, tighter body, no blurb). */
+  .he-card--sm .he-media { min-height: 150px; }
+  .he-card--sm .he-body { padding: 1.15rem 1.55rem 1.2rem; gap: 1.1rem; }
+  .he-card--sm .he-datebox { min-width: 3.9rem; padding: .55rem .55rem .45rem; }
+  .he-card--sm .he-days { font-size: 1.55rem; }
+  .he-card--sm .he-weekday { margin-bottom: .3rem; }
+  .he-card--sm .he-title { font-size: 1.18rem; }
+  .he-card--sm .he-desc { display: none; }
+  .he-card--sm .he-actions { margin-top: .85rem; }
+  .he-card--sm .he-countdown { top: 150px; }
+  @media (min-width: 760px) {
+    .he-card--sm .he-countdown { top: auto; left: 12rem; }
+    /* Indent secondary one-day events so the emphasized (next + retreat) programs lead. */
+    .he-card--sm { margin-left: 3.5rem; }
+  }
 
   @media (max-width: 480px) {
     .he-body { grid-template-columns: 1fr; gap: 1rem; }

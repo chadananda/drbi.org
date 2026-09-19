@@ -24,6 +24,8 @@ const plainDesc = (d.shortDescription || (d.fullDescription || "").replace(/<[^>
 const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }); } catch { return ""; } };
 const start = d.startDate ? fmtDay(d.startDate) : "";
 const end = d.endDate && d.endDate !== d.startDate ? fmtDay(d.endDate) : "";
+// The "share your photos" section only makes sense once the program is over.
+const isPast = (() => { const t = d.endDate || d.startDate; const dt = t ? new Date(t) : null; return dt && !isNaN(+dt) && dt < new Date(); })();
 const loc = d.location || {};
 const locText = loc.online ? "Online" : [loc.venue, loc.address].filter(Boolean).join(" · ");
 // Exclude the "any amount" sponsor donation from the ticket-price list.
@@ -222,20 +224,21 @@ const eventSchema = (!hidden && d.startDate) ? {
         </aside>
       </div>
 
-      <!-- Post-event photo donation -->
-      <section id="share-photos" class="mx-auto max-w-5xl mt-20 pt-12 share-photos">
-        <div class="max-w-2xl">
-          <p class="reg-eyebrow">After the event</p>
-          <h2 class="share-title">Were you there? Share your photos</h2>
-          <p class="share-body">
-            Participants can contribute photos and a short write-up from this program — we'll add
-            the best ones to this page. Submissions are reviewed before they appear.
-          </p>
-          <a href={`mailto:info@drbi.org?subject=${encodeURIComponent('Photos from ' + title)}`} class="share-link">
-            Email your photos → info@drbi.org
-          </a>
-        </div>
-      </section>
+      {isPast && (
+        <section id="share-photos" class="mx-auto max-w-5xl mt-20 pt-12 share-photos">
+          <div class="max-w-2xl">
+            <p class="reg-eyebrow">After the event</p>
+            <h2 class="share-title">Were you there? Share your photos</h2>
+            <p class="share-body">
+              Participants can contribute photos and a short write-up from this program — we'll add
+              the best ones to this page. Submissions are reviewed before they appear.
+            </p>
+            <a href={`mailto:info@drbi.org?subject=${encodeURIComponent('Photos from ' + title)}`} class="share-link">
+              Email your photos → info@drbi.org
+            </a>
+          </div>
+        </section>
+      )}
     </Container>
   </article>
 </Layout>

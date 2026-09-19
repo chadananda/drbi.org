@@ -54,3 +54,4 @@ tmp/
 work/
 yarn-debug.log*
 yarn-error.log*
+public/dev-events/
