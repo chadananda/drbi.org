@@ -6,6 +6,7 @@ import { eventSlug } from "../lib/event-slug";
 import { imagekitUrl } from "../utils/utils.js";
 
 const { limit = 2 } = Astro.props;
+const FALLBACK_EVENT_IMG = "https://cdn.shrtr.com/drbi.org/site/drbi/events.webp";
 const now = new Date();
 
 const all = await getVisibleEvents().catch(() => []);
@@ -55,9 +56,7 @@ const locOf = (ev) => {
     {upcoming.map((ev) => (
       <article class="he-card">
         <a href={`/events/${eventSlug(ev)}`} class="he-media" aria-label={ev.data.name}>
-          {ev.data.mainImage && (
-            <img src={imagekitUrl(ev.data.mainImage, { w: 640, h: 520, face: true })} alt={ev.data.name} loading="lazy" decoding="async" width="640" height="520" />
-          )}
+          <img src={imagekitUrl(ev.data.mainImage || FALLBACK_EVENT_IMG, { w: 640, h: 520, face: true })} alt={ev.data.name} loading="lazy" decoding="async" width="640" height="520" />
           <span class="he-countdown" data-event-start={ev.data.startDate} aria-hidden="true"></span>
         </a>
 
@@ -72,7 +71,7 @@ const locOf = (ev) => {
             <h3 class="he-title"><a href={`/events/${eventSlug(ev)}`}>{ev.data.name}</a></h3>
             {previewOf(ev) && <p class="he-desc">{previewOf(ev)}</p>}
             <div class="he-actions">
-              <a href={`/events/${eventSlug(ev)}`} class="he-cta">Reserve your spot &rarr;</a>
+              <a href={`/events/${eventSlug(ev)}`} class="he-cta">{ev.data.registrationUrl ? "Reserve your spot" : "See details"} &rarr;</a>
               <span class="he-meta">
                 <span>{locOf(ev)}</span>
                 {priceOf(ev.data.price) && <span class="he-dot">&middot;</span>}

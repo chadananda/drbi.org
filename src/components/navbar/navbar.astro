@@ -330,7 +330,7 @@ const googleClientId = import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || '';
         const fd = new FormData(e.target);
         const r = await fetch('/api/auth/password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: fd.get('email'), password: fd.get('password') }) }).catch(() => null);
         const data = r && await r.json().catch(() => null);
-        if (data && data.ok) { location.href = data.redirect || '/admin'; }
+        if (data && data.ok) { location.reload(); } // stay on the current page; just refresh auth state
         else { setMsg('Invalid email or password.', false); }
       });
     };

@@ -43,6 +43,9 @@ const hasValidRegistrationUrl = (url: string): boolean => {
   return !normalized.match(/^https?:\/\/(www\.)?drbi\.org\/?$/);
 };
 
+// Branded fallback shown when an event has no image (prevents a broken <img>).
+const FALLBACK_EVENT_IMG = 'https://cdn.shrtr.com/drbi.org/site/drbi/events.webp';
+
 // Always use the real current date for filtering
 const referenceDate = new Date();
 
@@ -187,7 +190,14 @@ const stripLeadingTitle = (text, name) => {
 const displayEvents = upcomingEvents.map(event => {
   const d = event.data;
   const hasValidReg = hasValidRegistrationUrl(d.registrationUrl);
-  const isMinimal = !event.isPrimary; // Show secondary instances in minimal form
+  // Multi-day programs (e.g. weekend retreats) render large; single-session/evening events
+  // and recurring secondary instances render compact.
+  const isMultiDay = (() => {
+    const s = parseArizonaDate(d.startDate);
+    const e = d.endDate ? parseArizonaDate(d.endDate) : s;
+    return !isNaN(+s) && !isNaN(+e) && e.toDateString() !== s.toDateString();
+  })();
+  const isMinimal = !event.isPrimary || !isMultiDay;
   const instanceId = event.instanceIndex > 0 ? `${event.id}-${event.instanceIndex}` : event.id;
 
   return {
@@ -219,12 +229,13 @@ const displayEvents = upcomingEvents.map(event => {
       month: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { month: 'short', timeZone: 'America/Phoenix' }),
       day: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { day: 'numeric', timeZone: 'America/Phoenix' }),
       weekday: parseArizonaDate(d.startDate).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'America/Phoenix' }),
-      mainImage: transformS3Url(d.mainImage, 450, 300),
-      mainImageLarge: transformS3Url(d.mainImage, 600, 400),
+      // Fall back to the branded events image when an event has no photo — avoids a broken <img>.
+      mainImage: transformS3Url(d.mainImage || FALLBACK_EVENT_IMG, 450, 300),
+      mainImageLarge: transformS3Url(d.mainImage || FALLBACK_EVENT_IMG, 600, 400),
       // Full-width, face-centered banner via the blogworks resize service (ImageKit).
       // Only R2-hosted images (cdn.shrtr.com) transform; external URLs pass through
       // until the sync caches them to R2. See imagekitUrl + sync-events image caching.
-      mainImageBanner: imagekitUrl(d.mainImage, { w: 1000, h: 340, face: true }),
+      mainImageBanner: imagekitUrl(d.mainImage || FALLBACK_EVENT_IMG, { w: 1000, h: 340, face: true }),
       teacherImage: d.teacherImage ? transformS3Url(d.teacherImage, 200) : null,
       teacherImageLarge: d.teacherImage ? transformS3Url(d.teacherImage, 180) : null,
     }
