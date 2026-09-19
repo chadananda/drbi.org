@@ -163,13 +163,19 @@ CREATE TABLE IF NOT EXISTS options (
   value TEXT
 );
 
+-- EmDash-shaped users (matches src/lib/queries.ts shapeUser/createUser). Role is an INTEGER level
+-- (superadmin=100, admin=40, editor=30, author=20); `disabled`=0 means active; passwordless whitelist
+-- (no hashed_password). The earlier committed shape (role TEXT / active / hashed_password) was drift
+-- and made every local user shape as inactive → login always failed locally.
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
-  hashed_password TEXT NOT NULL,
-  name TEXT NOT NULL,
-  role TEXT NOT NULL DEFAULT 'author',
-  active INTEGER NOT NULL DEFAULT 1,
+  name TEXT,
+  avatar_url TEXT,
+  role INTEGER NOT NULL DEFAULT 20,
+  email_verified INTEGER NOT NULL DEFAULT 0,
+  data TEXT,
+  disabled INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
