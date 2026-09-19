@@ -22,7 +22,7 @@ export const lucia = new Lucia(adapter, {
 	sessionCookie: {
 		attributes: {
 			// set to `true` when using HTTPS
-			secure: import.meta.env.APP_ENV !== 'dev'
+			secure: !import.meta.env.DEV
 		}
 	},
 	getUserAttributes: (attributes) => {

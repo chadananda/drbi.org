@@ -8,7 +8,7 @@ export async function startSession(Astro: any, userId: string, role: string) {
   const session = await lucia.createSession(userId, { role });
   Astro.cookies.set(lucia.sessionCookieName, session.id, {
     httpOnly: true,
-    secure: import.meta.env.APP_ENV !== 'dev',
+    secure: !import.meta.env.DEV, // off under astro dev so the cookie survives on http://localhost
     sameSite: 'lax',
     path: '/',
     expires: session.expiresAt,
