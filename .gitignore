@@ -54,3 +54,6 @@ tmp/
 work/
 yarn-debug.log*
 yarn-error.log*
+
+# dev-only derived wrangler config (AI binding stripped)
+.wrangler.dev.json

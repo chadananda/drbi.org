@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import cloudflare from '@astrojs/cloudflare';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 import remarkAttr from 'remark-attr';
 
@@ -21,6 +22,23 @@ import site from './src/data/site.json'; // for branding
 // import partytown from '@astrojs/partytown';
 // import react from "@astrojs/react";
 const isDev = process.env.NODE_ENV === 'development';
+// Workers AI has no local emulator, so *declaring* the AI binding makes the Cloudflare adapter open a
+// REMOTE proxy session at `astro dev` startup — which needs a Cloudflare login and otherwise crashes
+// the dev server ("exited before becoming ready"). AI is only used by admin/background features
+// (media alt-text, meal summaries), all of which already no-op when the binding is absent. So for
+// local dev we point platformProxy at a copy of wrangler.jsonc with the AI binding stripped, leaving
+// the real config untouched for build/deploy. Lets contributors run the site with zero CF credentials.
+function devPlatformConfigPath() {
+  const cfg = JSON.parse(
+    readFileSync('./wrangler.jsonc', 'utf8')
+      .replace(/^\s*\/\/.*$/gm, '') // drop full-line // comments (jsonc → json)
+      .replace(/,(\s*[}\]])/g, '$1'), // drop trailing commas
+  );
+  delete cfg.ai;
+  const path = './.wrangler.dev.json';
+  writeFileSync(path, JSON.stringify(cfg, null, 2));
+  return path;
+}
 const siteMapConfig = {
   // Exclude admin, API, and login routes — include everything else
   filter: url => {
@@ -66,7 +84,8 @@ export default defineConfig({
   output: 'server', // SSR by default (DB access at request time via D1 binding); truly static pages set prerender=true
   site: site.url,
   adapter: cloudflare({
-    platformProxy: { enabled: true }, // local D1/R2/KV bindings during astro dev
+    // local D1/R2/KV bindings during astro dev; in dev, strip the AI binding (see above)
+    platformProxy: { enabled: true, configPath: isDev ? devPlatformConfigPath() : undefined },
     imageService: 'compile',
   }),
   integrations: [
