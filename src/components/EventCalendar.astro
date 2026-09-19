@@ -187,6 +187,7 @@ const stripLeadingTitle = (text, name) => {
 };
 
 // Prepare display data for all events
+let firstCompactShown = false;
 const displayEvents = upcomingEvents.map(event => {
   const d = event.data;
   const hasValidReg = hasValidRegistrationUrl(d.registrationUrl);
@@ -197,7 +198,10 @@ const displayEvents = upcomingEvents.map(event => {
     const e = d.endDate ? parseArizonaDate(d.endDate) : s;
     return !isNaN(+s) && !isNaN(+e) && e.toDateString() !== s.toDateString();
   })();
-  const isMinimal = !event.isPrimary || !isMultiDay;
+  const wouldBeCompact = !event.isPrimary || !isMultiDay;
+  // Emphasize the next one: the first single-session/recurring event renders large, the rest compact.
+  let isMinimal = wouldBeCompact;
+  if (wouldBeCompact && !firstCompactShown) { isMinimal = false; firstCompactShown = true; }
   const instanceId = event.instanceIndex > 0 ? `${event.id}-${event.instanceIndex}` : event.id;
 
   return {

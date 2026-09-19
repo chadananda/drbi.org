@@ -203,6 +203,8 @@ const eventSchema = (!hidden && d.startDate) ? {
               <a href={ticketsUrl} target="_blank" rel="noopener noreferrer" class="reg-btn">
                 Get tickets
               </a>
+            ) : prices.length === 0 ? (
+              <p class="reg-free">Free &amp; open to everyone — no registration needed.</p>
             ) : (
               <p class="text-sm text-slate-600">Registration opens soon.</p>
             )}
@@ -464,13 +466,14 @@ const eventSchema = (!hidden && d.startDate) ? {
     margin-bottom: .32em;
     border-bottom: 1.5px dotted #ddceb2;
   }
+  .event-detail .reg-free { font-weight: 600; color: #4e7a2e; font-size: .92rem; margin: .1rem 0; }
   .event-detail .flyer-card {
-    display: block; margin-top: 1.1rem; border: 1px solid #e6ddcb; border-radius: 12px;
+    display: block; margin-top: 1.1rem; border-radius: 12px;
     overflow: hidden; text-decoration: none; background: #fff;
-    box-shadow: 0 2px 8px rgba(60,45,20,.06); transition: box-shadow .2s ease, transform .2s ease;
+    box-shadow: 0 6px 18px -6px rgba(60,45,20,.22); transition: box-shadow .2s ease, transform .2s ease;
   }
-  .event-detail .flyer-card:hover { box-shadow: 0 16px 32px -16px rgba(70,50,20,.4); transform: translateY(-2px); }
-  .event-detail .flyer-thumb { display: block; width: 100%; height: auto; border-bottom: 1px solid #efe7d6; }
+  .event-detail .flyer-card:hover { box-shadow: 0 18px 34px -14px rgba(70,50,20,.4); transform: translateY(-2px); }
+  .event-detail .flyer-thumb { display: block; width: 100%; height: auto; }
   .event-detail .flyer-dl {
     display: flex; align-items: center; gap: .5rem; padding: .7rem .9rem;
     font-weight: 600; font-size: .9rem; color: #8a3d08;
