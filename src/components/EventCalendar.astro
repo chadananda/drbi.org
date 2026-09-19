@@ -329,145 +329,30 @@ const displayEvents = upcomingEvents.map(event => {
               )}
             </>
           ) : view === 'list-full' ? (
-            <div class="list-full-wrapper">
-              {event.isMinimal ? (
-                event.display.teacherImageLarge ? (
-                  <div class="teacher-overlay-minimal">
-                    <img src={event.display.teacherImageLarge} alt={`Teacher for ${event.display.name}`} class="teacher-image-minimal" />
-                    <div class="recurring-indicator-overlay">🔄</div>
-                  </div>
-                ) : (
-                  <div class="date-badge-outside opacity-70 text-sm">
-                    <div class="month">{event.display.month}</div>
-                    <div class="day">{event.display.day}</div>
-                    <div class="recurring-indicator">🔄</div>
-                  </div>
-                )
-              ) : (
-                <>
-                  <div class="date-badge-outside">
-                    <div class="month">{event.display.month}</div>
-                    <div class="day">{event.display.day}</div>
-                  </div>
-                  {event.display.teacherImageLarge && (
-                    <div class="teacher-overlay-large">
-                      <img src={event.display.teacherImageLarge} alt={`Teacher for ${event.display.name}`} class="teacher-image-large" />
-                    </div>
-                  )}
-                </>
-              )}
-              <article class={`event-list-full-item ${event.isMinimal ? 'minimal-event' : ''}`}>
-                <div class="card-title-header">
-                  <h3 class={`card-title ${event.isMinimal ? 'text-lg' : ''}`}>
-                    <a href={`/events/${eventSlug(event)}`}>
-                      {event.display.name}
-                    </a>
-                  </h3>
-                  <div class="date-details">
-                    <div class="date-range">{event.display.dateRange}</div>
-                    <div class="time">{event.display.time}</div>
-                  </div>
+            <a href={`/events/${eventSlug(event)}`} class={`ev-tile ${event.isMinimal ? 'ev-tile--sm' : 'ev-tile--lg'}`} aria-label={event.display.name}>
+              <div class="ev-tile-img" style={`background-image:url(${event.display.mainImageBanner})`}></div>
+              <div class="ev-tile-content">
+                <div class="ev-tile-date">
+                  <span class="ev-tile-month">{event.display.month}</span>
+                  <span class="ev-tile-day">{event.display.day}</span>
                 </div>
-
-                {event.isMinimal && event.display.shortDescriptionHtml && (
-                  <div class="compact-short-description" set:html={event.display.shortDescriptionHtml}></div>
-                )}
-
-                <div id={`expandable-${event.instanceId}`} class={`expandable-content ${event.isMinimal ? 'collapsed' : ''}`} data-event-id={event.instanceId}>
-                  <div class="list-full-content">
-                    <div class="list-full-left-column">
-                      <div class="list-full-image-container">
-                        <img src={event.display.mainImageBanner} alt={event.display.name} class="main-image" />
-                      </div>
-                    </div>
-                    <div class="list-full-details">
-                      <div class="list-full-description" set:html={event.display.shortDescriptionHtml || event.display.previewHtml || '<p>No description available</p>'}></div>
-
-                      <div class="list-full-meta">
-                        {event.display.ticketPrices.length > 0 ? (
-                          <div class="meta-item price">
-                            <span class="icon" aria-hidden="true">💲</span>
-                            <ul class="ticket-prices">
-                              {event.display.ticketPrices.map((t) => (
-                                <li><span class="ticket-label">{t.label}</span><span class="ticket-amount">{t.amount}</span></li>
-                              ))}
-                            </ul>
-                          </div>
-                        ) : event.data.price && (
-                          <div class="meta-item price">
-                            <span class="icon" aria-hidden="true">💲</span>
-                            <span>{event.display.price}</span>
-                          </div>
-                        )}
-                        <div class="meta-item organizer">
-                          <span class="icon" aria-hidden="true">👥</span>
-                          <span>{event.data.organizer}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="event-text-preview">
-                    <div
-                      id={`preview-${event.instanceId}`}
-                      class="event-preview-text"
-                      data-event-id={event.instanceId}
-                      data-preview-html={event.display.previewHtml}
-                      data-full-html={event.display.fullDescriptionHtml}
-                      set:html={event.display.previewHtml}
-                    ></div>
-                  </div>
-                </div>
-
-                <div class="list-full-bottom">
-                  <div class="bottom-left">
-                    {event.data.highlights && event.data.highlights.length > 0 && (
-                      <div class="inline-highlights">
-                        {event.data.highlights.map(highlight => (
-                          <span class="highlight-tag">{highlight}</span>
-                        ))}
-                      </div>
+                <div class="ev-tile-main">
+                  <h3 class="ev-tile-title">{event.display.name}</h3>
+                  <div class="ev-tile-meta">
+                    <span>{event.display.dateRange}</span>
+                    <span class="ev-dot" aria-hidden="true">·</span>
+                    <span>{event.display.time}</span>
+                    {event.display.ticketPrices.length > 0 && (
+                      <><span class="ev-dot" aria-hidden="true">·</span><span>from {event.display.ticketPrices[0].amount}</span></>
                     )}
                   </div>
-                  {event.isMinimal ? (
-                    <div class="list-full-actions">
-                      <button
-                        type="button"
-                        class="show-more-btn"
-                        data-event-id={event.instanceId}
-                        aria-expanded="false"
-                        aria-controls={`expandable-${event.instanceId}`}
-                        onclick={`toggleMinimalEvent('${event.instanceId}')`}
-                      >
-                        <span class="btn-text">Show More</span>
-                        <span class="btn-icon">↓</span>
-                      </button>
-                    </div>
-                  ) : hasValidRegistrationUrl(event.data.registrationUrl) ? (
-                    <div class="list-full-actions">
-                      <a href={`/events/${eventSlug(event)}`} class="read-more-btn">
-                        <span class="btn-text">Read More</span>
-                        <span class="btn-icon">→</span>
-                      </a>
-                    </div>
-                  ) : event.display.isLongDescription && (
-                    <div class="list-full-actions">
-                      <button
-                        type="button"
-                        class="show-more-btn"
-                        data-event-id={event.instanceId}
-                        aria-expanded="false"
-                        aria-controls={`preview-${event.instanceId}`}
-                        onclick={`toggleDescription('${event.instanceId}')`}
-                      >
-                        <span class="btn-text">Show More</span>
-                        <span class="btn-icon">↓</span>
-                      </button>
-                    </div>
+                  {!event.isMinimal && event.display.shortDescription && (
+                    <p class="ev-tile-desc">{event.display.shortDescription}</p>
                   )}
                 </div>
-              </article>
-            </div>
+                <span class="ev-tile-cta">See details <span aria-hidden="true">→</span></span>
+              </div>
+            </a>
           ) : (
             <article class={`event-list-item ${event.isMinimal ? 'opacity-70' : ''}`}>
               <div class="list-event">
@@ -881,7 +766,49 @@ const displayEvents = upcomingEvents.map(event => {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 4rem;
+  gap: 1.75rem;
+}
+
+/* Image-backed event tiles (list-full view) — the whole tile links to the detail page. */
+.ev-tile {
+  position: relative; display: block; border-radius: 16px; overflow: hidden;
+  text-decoration: none; color: #fff; box-shadow: 0 12px 30px -14px rgba(0,0,0,.45);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.ev-tile:hover { transform: translateY(-3px); box-shadow: 0 26px 54px -22px rgba(0,0,0,.55); }
+/* Force white text over the image — beats the .prose h3/a/p colors this list is nested inside. */
+.ev-tile, .ev-tile .ev-tile-title, .ev-tile .ev-tile-meta, .ev-tile .ev-tile-desc, .ev-tile .ev-tile-cta, .ev-tile .ev-dot { color: #fff; }
+.ev-tile--lg { min-height: 340px; }
+.ev-tile--sm { min-height: 150px; }
+.ev-tile-img { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform .55s ease; }
+.ev-tile:hover .ev-tile-img { transform: scale(1.05); }
+.ev-tile::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(15,10,4,.12) 0%, rgba(15,10,4,.5) 52%, rgba(15,10,4,.85) 100%);
+}
+.ev-tile-content {
+  position: relative; z-index: 1; display: flex; align-items: flex-end; gap: 1.1rem;
+  min-height: inherit; padding: 1.2rem 1.4rem;
+}
+.ev-tile--lg .ev-tile-content { padding: 1.9rem 2.1rem; }
+.ev-tile-date {
+  flex-shrink: 0; align-self: flex-start; text-align: center; line-height: 1;
+  background: rgba(255,255,255,.95); color: #2a1c0b; border-radius: 12px; padding: .5rem .7rem .45rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+.ev-tile-month { display: block; font-size: .68rem; font-weight: 700; letter-spacing: .12em; color: #a04607; }
+.ev-tile-day { display: block; font-family: 'Merriweather', Georgia, serif; font-size: 1.7rem; font-weight: 700; margin-top: .12rem; }
+.ev-tile-main { flex: 1; min-width: 0; }
+.ev-tile-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; line-height: 1.15; margin: 0 0 .4rem; font-size: 1.55rem; text-shadow: 0 1px 4px rgba(0,0,0,.55); }
+.ev-tile--sm .ev-tile-title { font-size: 1.18rem; margin-bottom: .25rem; }
+.ev-tile-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; font-size: .86rem; opacity: .95; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.ev-dot { opacity: .55; }
+.ev-tile-desc { margin: .65rem 0 0; font-size: .93rem; line-height: 1.5; opacity: .93; max-width: 44rem; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+.ev-tile-cta { flex-shrink: 0; align-self: flex-end; font-weight: 600; font-size: .9rem; white-space: nowrap; text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+@media (max-width: 640px) {
+  .ev-tile-content { flex-direction: column; align-items: flex-start; gap: .8rem; }
+  .ev-tile-cta { align-self: flex-start; }
+  .ev-tile-title { font-size: 1.35rem; }
 }
 
 /* New wrapper for external date badge layout */
