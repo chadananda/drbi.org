@@ -137,6 +137,8 @@ export function shapeEvent(row: EventRow) {
       url: row.url ?? '',
       mainImage: row.main_image ?? '',
       teacherImage: row.teacher_image ?? '',
+      flyerUrl: row.flyer_url ?? '',
+      flyerThumb: row.flyer_thumb ?? '',
       images: parseJson<string[]>(row.images, []),
       highlights: parseJson<string[]>(row.highlights, []),
       eventSchedule: parseJson<any[]>(row.event_schedule, []),

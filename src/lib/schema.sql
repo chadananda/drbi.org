@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS events (
   url TEXT,
   main_image TEXT DEFAULT '',
   teacher_image TEXT DEFAULT '',
+  flyer_url TEXT,
+  flyer_thumb TEXT,
   images TEXT DEFAULT '[]',
   highlights TEXT DEFAULT '[]',
   event_schedule TEXT DEFAULT '[]',
