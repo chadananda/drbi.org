@@ -68,7 +68,7 @@
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
     "argon2": "^0.44.0",
-    "astro": "^7.0.4",
+    "astro": "^7.3.3",
     "astro-feather-icons": "^1.0.2",
     "astro-navbar": "^2.4.0",
     "astro-remote": "^0.3.4",
