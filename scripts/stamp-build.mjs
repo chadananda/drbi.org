@@ -46,5 +46,9 @@ config.vars = {
   // because no fetched page can reveal a dependency version.
   BUILD_DEPS: JSON.stringify({ astro: depVersion('astro'), '@astrojs/cloudflare': depVersion('@astrojs/cloudflare') }),
 };
+// Re-inject the Workers AI binding for production: it's intentionally omitted from wrangler.jsonc so
+// `astro dev` stays keyless (AI has no local emulator → declaring it forces a remote CF connection at
+// dev startup). The deployed worker needs it for media alt-text + meal summaries.
+config.ai = { binding: 'AI' };
 writeFileSync(CONFIG, JSON.stringify(config));
-console.log(`stamped ${config.vars.BUILD_SHA} @ ${config.vars.BUILD_TIME}`);
+console.log(`stamped ${config.vars.BUILD_SHA} @ ${config.vars.BUILD_TIME} (+AI binding)`);
