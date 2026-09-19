@@ -232,7 +232,7 @@ const getEventLocation = (event) => {
               </div>
             )}
             <!-- Left: Large Main Image -->
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 w-full sm:w-48">
               {event.data.mainImage ? (
                 <img
                   src={transformS3Url(event.data.mainImage, 400, 240)}
@@ -573,7 +573,7 @@ const getEventLocation = (event) => {
             ${!isPrimary ? '<div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded-full flex items-center gap-1"><span>🔄</span><span>Additional Date</span></div>' : ''}
             <div class="flex flex-col sm:flex-row gap-6">
               <!-- Left: Large Main Image -->
-              <div class="flex-shrink-0">
+              <div class="flex-shrink-0 w-full sm:w-48">
                 ${event.mainImage ? `
                   <img
                     src="${transformS3Url(event.mainImage, 400, 240)}"
