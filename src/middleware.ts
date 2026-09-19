@@ -65,7 +65,7 @@ export const onRequest = async (context, next) => {
   // content-version token so a Humanitix change flushes them; other pages key by path and
   // rely on the short s-maxage to pick up code deploys. Logged-in users always bypass. ---
   const isEventsPath = EVENTS_CACHE.test(path);
-  const cacheable = context.request.method === 'GET' && !sessionId && !url.searchParams.has('nocache')
+  const cacheable = !import.meta.env.DEV && context.request.method === 'GET' && !sessionId && !url.searchParams.has('nocache')
     && !path.startsWith('/admin') && !path.startsWith('/api') && path !== '/login'
     && !path.startsWith('/_') // skip Astro internal endpoints (e.g. /_image) — their identity
                               // is in the query string, which this cache key drops (would collide)
