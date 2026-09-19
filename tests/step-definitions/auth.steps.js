@@ -90,11 +90,15 @@ Given('I am logged in as an admin', async function () {
   // Fill credentials in the break-glass form
   await this.page.locator(selectors.breakGlassEmailField).first().fill(email);
   await this.page.locator(selectors.breakGlassPasswordField).first().fill(pass);
-  // Submit — client sets location.href='/admin' on success
+  // Submit — login now reloads the page in place (it no longer auto-navigates to /admin,
+  // so a visitor who logs in from a public page stays where they were). Wait for the auth
+  // response, then confirm the session is valid by reaching /admin.
   await Promise.all([
-    this.page.waitForURL(/\/admin/, { timeout: 15000 }),
+    this.page.waitForResponse(r => /\/api\/auth\/password/.test(r.url()), { timeout: 15000 }),
     this.page.locator(selectors.breakGlassSubmit).first().click()
   ]);
+  await this.page.goto(`${this.baseURL}/admin`);
+  await this.page.waitForLoadState('load');
   const url = this.page.url();
   if (!url.includes('/admin')) throw new Error(`Admin login failed — ended up at ${url}`);
 });
