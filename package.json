@@ -10,7 +10,7 @@
   "scripts": {
     "sync-assets": "node ./scripts/syncAssets.js",
     "predev": "node scripts/db-local-auto.mjs",
-    "dev": "npm run sync-assets && astro dev --port 4314",
+    "dev": "npm run sync-assets && astro dev --port 4850",
     "build": "npm run build:analytics && astro build",
     "deploy": "npm run build && node scripts/stamp-build.mjs && wrangler deploy -c dist/server/wrangler.json",
     "build:analytics": "node scripts/build-analytics.js",

@@ -16,7 +16,7 @@ async function forceCron() {
     console.log('🧪 Now testing the cron API...');
     
     // Call the API endpoint
-    const response = await fetch('http://localhost:4322/api/crontasks');
+    const response = await fetch('http://localhost:4850/api/crontasks');
     
     if (response.ok) {
       console.log('✅ Cron API executed successfully!');
@@ -27,7 +27,7 @@ async function forceCron() {
     
   } catch (error) {
     console.error('❌ Error:', error.message);
-    console.log('\n💡 Make sure the dev server is running on http://localhost:4322');
+    console.log('\n💡 Make sure the dev server is running on http://localhost:4850');
   }
 }
 

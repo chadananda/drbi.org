@@ -22,7 +22,7 @@ separate staging, so keep `main` shippable.
 ```bash
 npm install
 cp .dev.vars.example .dev.vars     # then fill in the auth + dev-seed values (see below)
-npm run dev                        # http://localhost:4314
+npm run dev                        # http://localhost:4850
 ```
 
 `npm run dev` auto-seeds your **local** database on first run (and refreshes it if it's >24h old),
