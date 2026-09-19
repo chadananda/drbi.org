@@ -177,6 +177,7 @@ async function loadSqlData(sqlFilePath) {
 
     for (const { name } of tables) {
       const schema = await extractTableSchema(db, name);
+      // security-audit-ignore: dangerous-pattern — one-off local migration script; name comes from the db's own table list, not input
       const records = await query(`SELECT * FROM ${name}`);
       data[name] = { schema, records };
     }

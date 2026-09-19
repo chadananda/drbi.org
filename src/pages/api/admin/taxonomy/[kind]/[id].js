@@ -14,6 +14,7 @@ const OPS = {
 
 const getRow = (table) => async (id) => {
   const { rows } = await db.execute({
+    // security-audit-ignore: dangerous-pattern — table comes from the two-key OPS whitelist, never from input; id is bound
     sql: `SELECT * FROM ${table} WHERE id = ? OR slug = ? LIMIT 1`,
     args: [id, id],
   });

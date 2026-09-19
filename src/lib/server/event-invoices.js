@@ -75,6 +75,7 @@ export async function listOpenInvoices(limit = 40) {
   try {
     const placeholders = CLOSED_STATUSES.map(() => '?').join(',');
     const r = await db.execute({
+      // security-audit-ignore: dangerous-pattern — placeholders is ?,? generated from the CLOSED_STATUSES constant, not input
       sql: `SELECT * FROM event_invoices WHERE paypal_invoice_id IS NOT NULL AND status NOT IN (${placeholders}) ORDER BY created_at ASC LIMIT ?`,
       args: [...CLOSED_STATUSES, limit],
     });

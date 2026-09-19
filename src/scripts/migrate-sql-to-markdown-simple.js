@@ -27,6 +27,7 @@ const log = {
  * Parse SQL INSERT statements using regex
  */
 function parseInsertStatements(sqlContent, tableName) {
+  // security-audit-ignore: dangerous-pattern — builds a RegExp over a local dump file, not SQL; tableName is a caller constant
   const insertRegex = new RegExp(`INSERT INTO ${tableName} VALUES\\((.+?)\\);`, 'g');
   const records = [];
   let match;

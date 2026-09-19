@@ -41,6 +41,7 @@ async function loadSqlData(sqlFilePath) {
     
     for (const table of tables) {
       try {
+        // security-audit-ignore: dangerous-pattern — one-off local migration script; table comes from the db's own table list, not input
         const rows = db.prepare(`SELECT * FROM ${table}`).all();
         data[table] = rows;
       } catch (error) {

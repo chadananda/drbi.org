@@ -44,7 +44,12 @@ dist/
 extra/
 node_modules/
 npm-debug.log*
-package-lock.json
+# package-lock.json is COMMITTED on purpose.
+# Ignoring it means every install can resolve differently, so nobody -- CI, another
+# machine, another agent -- gets the tree that was actually tested. It is also what
+# makes `npm audit` meaningful: an audit of an unpinned tree describes nothing anyone
+# else will install. Two concurrent installs corrupted this repo twice on 2026-09-09
+# for exactly this reason, silently pruning a transitive dependency the build needed.
 pnpm-debug.log*
 public/posts/
 src/data/analytics-imports/
