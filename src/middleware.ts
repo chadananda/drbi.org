@@ -43,6 +43,19 @@ export const onRequest = async (context, next) => {
   // (Astro v6+ removed Astro.locals.runtime.env).
   const url = new URL(context.request.url);
   const path = url.pathname;
+
+  // Permanent (301) redirects for retired URLs that still draw traffic and bots.
+  const RETIRED: Record<string, string> = {
+    '/blog': '/events',
+    '/kure-fm': '/radio',
+    '/donate.html': '/contribute',
+    '/index.php': '/',
+  };
+  const retiredTarget = RETIRED[path.length > 1 ? path.replace(/\/+$/, '') : path];
+  if (retiredTarget) {
+    return new Response(null, { status: 301, headers: { Location: retiredTarget } });
+  }
+
   const isAdmin = path.startsWith('/admin');
   const STAFF = ['superadmin', 'admin', 'editor', 'author'];
 

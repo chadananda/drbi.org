@@ -4,11 +4,14 @@ export const prerender = false;
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import PageHero from "@components/PageHero.astro";
-import { getCollection } from 'astro:content';
+import { getContentByCollection } from '@lib/queries';
 
 let residents: any[] = [];
 try {
-  const allPosts = await getCollection('memorial');
+  // Memorial entries live in D1 (content.config.ts collections are empty — all data is
+  // served from D1 at runtime). getContentByCollection returns the same { data: {...} }
+  // shape the render below expects.
+  const allPosts = await getContentByCollection('memorial');
   residents = allPosts
     .filter((p) => !p.data.draft && p.data.language === 'en')
     .sort((a, b) =>
