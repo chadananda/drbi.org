@@ -3,6 +3,20 @@
 import { getEnv } from './runtime-env';
 
 export async function sendEmail({ to, subject, html, text }) {
+  // Never actually send to reserved/test recipients (RFC 2606). The behavioral suite hits real
+  // endpoints against the LIVE site (e.g. /api/auth/request-link with test@example.com), and a
+  // black-hole address hard-bounces — a 99%+ bounce rate that wrecks the sending domain's
+  // reputation and gets the ZeptoMail account throttled. Short-circuit to a no-op success so
+  // tests still pass and no bounce is generated.
+  const addr = String(to || '').trim().toLowerCase();
+  const domain = addr.split('@')[1] || '';
+  const reserved = !addr.includes('@')
+    || /^(example\.(com|net|org)|localhost)$/.test(domain)
+    || /\.(test|invalid|example|localhost)$/.test(domain);
+  if (reserved) {
+    console.log(`[email] skipped reserved/test recipient: ${addr || '(none)'}`);
+    return true;
+  }
   const host = (getEnv('ZEPTO_HOST') || 'api.zeptomail.com').replace(/^https?:\/\//, '');
   const token = getEnv('ZEPTO_SEND_TOKEN');
   if (!token) throw new Error('ZEPTO_SEND_TOKEN not set');
