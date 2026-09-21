@@ -78,13 +78,18 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
       var DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-      var state = { view: 'week', cursor: startOfDay(new Date()) };
-
       function startOfDay(d) { var x = new Date(d); x.setHours(0,0,0,0); return x; }
       function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate()+n); return x; }
+      function firstOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+      function addMonths(d, n) { return new Date(d.getFullYear(), d.getMonth()+n, 1); }
       function sameYMD(a, b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
       function startOfWeek(d) { var x = startOfDay(d); x.setDate(x.getDate()-x.getDay()); return x; } // Sunday
       function esc(s) { return String(s==null?'':s).replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+      var today = startOfDay(new Date());
+      // Three stacked views on one page: this week, this month, and a rolling 12-month year
+      // (current month → +11). Each navigates independently; a year tile expands inline below.
+      var state = { week: startOfWeek(today), month: firstOfMonth(today), yearStart: firstOfMonth(today), expanded: null, scrollExp: false };
 
       // Entries overlapping a given day (inclusive of multi-day ranges).
       function entriesOn(day) {
@@ -94,134 +99,144 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       function dayState(day) {
         var es = entriesOn(day);
         var resItems = es.filter(function (x) { return x.type === 'reserved'; });
+        // Turnaround/cleaning padding ('airbnb-block') blocks the day but is never labeled — the
+        // public calendar shows events and actual bookings, not housekeeping.
+        var labeled = resItems.filter(function (x) { return x.variant !== 'airbnb-block'; });
         var shown = es.filter(function (x) { return x.type !== 'reserved'; });
-        var past = startOfDay(day) < startOfDay(new Date());
-        var available = !resItems.length && shown.length === 0 && !past;
-        return { es: es, reserved: resItems.length > 0, resItems: resItems, shown: shown, available: available, past: past };
+        var past = startOfDay(day) < today;
+        var reserved = resItems.length > 0;
+        var available = !reserved && shown.length === 0 && !past;
+        var blockOnly = reserved && !labeled.length && !shown.length; // only cleaning/host block
+        return { reserved: reserved, labeled: labeled, shown: shown, available: available, blockOnly: blockOnly, past: past };
       }
-      // A reserved/blocked day's tag carries its real reason (Booked, Unavailable, or a DRBI hold's
-      // name) instead of a generic label; booked stays solid, turnaround/holds read lighter.
-      function resTag(x) {
-        var cls = 'cal-res-tag' + (x.variant === 'airbnb-block' ? ' is-block' : '');
-        return '<span class="' + cls + '" style="--rc:' + x.color + '">' + esc(x.title) + '</span>';
+      function dayClasses(st, isToday) {
+        return (st.blockOnly ? ' is-blocked' : (st.reserved ? ' is-reserved' : '')) +
+               (st.available ? ' is-avail' : '') + (st.past ? ' is-past' : '') + (isToday ? ' is-today' : '');
       }
+      // A booking/hold tag carries its type of use ("Airbnb", or a DRBI hold's title), tinted from
+      // the entry's own color (--rc). Cleaning days produce no tag.
+      function resTag(x) { return '<span class="cal-res-tag" style="--rc:' + x.color + '">' + esc(x.title) + '</span>'; }
       function chip(x) {
         var inner = '<span class="cal-dot" style="background:' + x.color + '"></span>' + esc(x.title);
         return x.url ? '<a class="cal-chip" href="' + esc(x.url) + '">' + inner + '</a>'
                      : '<span class="cal-chip">' + inner + '</span>';
       }
-      function bookLink(day) {
+      function bookLink() {
         if (!AIRBNB) return '<span class="cal-avail">Available</span>';
         return '<a class="cal-avail cal-book" href="' + esc(AIRBNB) + '" target="_blank" rel="noopener">Available — Book →</a>';
       }
 
-      function header(label) {
-        return '<div class="cal-bar">' +
-          '<div class="cal-nav"><button data-nav="prev" aria-label="Previous">‹</button>' +
-          '<button data-nav="today">Today</button>' +
-          '<button data-nav="next" aria-label="Next">›</button></div>' +
-          '<h2 class="cal-title">' + esc(label) + '</h2>' +
-          '<div class="cal-views">' +
-          ['week','month','year'].map(function (v) {
-            return '<button data-view="' + v + '"' + (state.view===v?' class="is-active"':'') + '>' + v.charAt(0).toUpperCase()+v.slice(1) + '</button>';
-          }).join('') + '</div></div>' +
-          '<div class="cal-legend">' +
+      function legend() {
+        return '<div class="cal-legend">' +
           '<span><i style="background:#2563eb"></i>Event / program</span>' +
           '<span><i style="background:#7c3aed"></i>Holy Day</span>' +
-          '<span><i style="background:#b45309"></i>Booked / reserved</span>' +
-          '<span><i style="background:#c9b299"></i>Unavailable (turnaround)</span>' +
-          '<span><i class="cal-legend-avail"></i>Available</span></div>';
+          '<span><i style="background:#b45309"></i>Booked / in use</span>' +
+          '<span><i class="cal-legend-avail"></i>Available to book</span></div>';
+      }
+      function navBtns(scope) {
+        return '<div class="cal-nav">' +
+          '<button data-nav="prev" data-scope="' + scope + '" aria-label="Previous">‹</button>' +
+          '<button data-nav="today" data-scope="' + scope + '">Today</button>' +
+          '<button data-nav="next" data-scope="' + scope + '" aria-label="Next">›</button></div>';
+      }
+      function sectionHead(title, sub, controls) {
+        return '<div class="cal-sec-head"><h2 class="cal-sec-title">' + esc(title) + '</h2>' +
+          (sub ? '<span class="cal-sec-sub">' + esc(sub) + '</span>' : '') + (controls || '') + '</div>';
       }
 
-      function renderWeek() {
-        var start = startOfWeek(state.cursor);
-        var end = addDays(start, 6);
-        var label = MONTHS[start.getMonth()].slice(0,3) + ' ' + start.getDate() + ' – ' + MONTHS[end.getMonth()].slice(0,3) + ' ' + end.getDate() + ', ' + end.getFullYear();
+      function renderWeekRows(start) {
         var html = '<div class="cal-week">';
         for (var i=0;i<7;i++) {
           var day = addDays(start, i);
           var st = dayState(day);
-          var isToday = sameYMD(day, new Date());
-          html += '<div class="cal-wday' + (st.reserved?' is-reserved':'') + (st.past?' is-past':'') + (isToday?' is-today':'') + '">' +
+          html += '<div class="cal-wday' + dayClasses(st, sameYMD(day, today)) + '">' +
             '<div class="cal-wday-head"><span class="cal-wday-dow">' + DOW[day.getDay()] + '</span>' +
             '<span class="cal-wday-num">' + day.getDate() + '</span></div>' +
-            '<div class="cal-wday-body">';
-          html += st.resItems.map(resTag).join('');
-          html += st.shown.map(chip).join('');
-          if (st.available) html += bookLink(day);
-          html += '</div></div>';
+            '<div class="cal-wday-body">' +
+            st.labeled.map(resTag).join('') + st.shown.map(chip).join('') + (st.available ? bookLink() : '') +
+            '</div></div>';
         }
-        html += '</div>';
-        return { label: label, body: html };
+        return html + '</div>';
       }
 
-      function renderMonth() {
-        var y = state.cursor.getFullYear(), m = state.cursor.getMonth();
-        var first = new Date(y, m, 1);
+      function renderMonthGrid(first) {
+        var m = first.getMonth();
         var gridStart = startOfWeek(first);
-        var label = MONTHS[m] + ' ' + y;
         var html = '<div class="cal-month"><div class="cal-month-dow">' + DOW.map(function(d){return '<span>'+d+'</span>';}).join('') + '</div><div class="cal-grid">';
         for (var i=0;i<42;i++) {
           var day = addDays(gridStart, i);
           var out = day.getMonth() !== m;
           var st = dayState(day);
-          var isToday = sameYMD(day, new Date());
-          html += '<div class="cal-cell' + (out?' is-out':'') + (st.reserved?' is-reserved':'') + (st.available?' is-avail':'') + (isToday?' is-today':'') + '"' +
-            (st.available && AIRBNB ? ' data-book="1"' : '') + '>' +
+          var cls = out ? ' is-out' : dayClasses(st, sameYMD(day, today));
+          html += '<div class="cal-cell' + cls + '"' + ((!out && st.available && AIRBNB) ? ' data-book="1"' : '') + '>' +
             '<div class="cal-cell-num">' + day.getDate() + '</div>' +
-            '<div class="cal-cell-body">' + st.resItems.map(resTag).join('') + st.shown.slice(0,3).map(function(x){
+            '<div class="cal-cell-body">' + (out ? '' : (st.labeled.map(resTag).join('') + st.shown.slice(0,3).map(function(x){
               return '<a class="cal-cell-chip" ' + (x.url?('href="'+esc(x.url)+'"'):'') + ' style="border-color:' + x.color + '"><span class="cal-dot" style="background:'+x.color+'"></span>' + esc(x.title) + '</a>';
-            }).join('') + (st.shown.length>3?('<span class="cal-more">+'+(st.shown.length-3)+' more</span>'):'') + '</div></div>';
+            }).join('') + (st.shown.length>3?('<span class="cal-more">+'+(st.shown.length-3)+' more</span>'):''))) + '</div></div>';
         }
-        html += '</div></div>';
-        return { label: label, body: html };
+        return html + '</div></div>';
+      }
+
+      function renderMini(first, offset) {
+        var m = first.getMonth();
+        var gridStart = startOfWeek(first);
+        var html = '<button class="cal-mini' + (state.expanded===offset?' is-exp':'') + '" data-exp="' + offset + '">' +
+          '<div class="cal-mini-h">' + MONTHS[m].slice(0,3) + ' ’' + String(first.getFullYear()).slice(2) + '</div><div class="cal-mini-grid">';
+        for (var i=0;i<42;i++) {
+          var day = addDays(gridStart, i);
+          if (day.getMonth() !== m) { html += '<i class="cal-mini-d is-out"></i>'; continue; }
+          var st = dayState(day);
+          var cls = st.shown.length ? 'is-event' : (st.labeled.length ? 'is-reserved' : (st.blockOnly ? 'is-blocked' : (st.available ? 'is-avail' : '')));
+          html += '<i class="cal-mini-d ' + cls + '"></i>';
+        }
+        return html + '</div></button>';
       }
 
       function renderYear() {
-        var y = state.cursor.getFullYear();
         var html = '<div class="cal-year">';
-        for (var m=0;m<12;m++) {
-          var first = new Date(y, m, 1);
-          var gridStart = startOfWeek(first);
-          html += '<button class="cal-mini" data-month="' + m + '"><div class="cal-mini-h">' + MONTHS[m] + '</div><div class="cal-mini-grid">';
-          for (var i=0;i<42;i++) {
-            var day = addDays(gridStart, i);
-            var out = day.getMonth() !== m;
-            if (out) { html += '<i class="cal-mini-d is-out"></i>'; continue; }
-            var st = dayState(day);
-            var cls = st.reserved ? 'is-reserved' : (st.shown.length ? 'is-event' : (st.available ? 'is-avail' : ''));
-            html += '<i class="cal-mini-d ' + cls + '" title="' + day.getDate() + '"></i>';
-          }
-          html += '</div></button>';
-        }
+        for (var i=0;i<12;i++) html += renderMini(addMonths(state.yearStart, i), i);
         html += '</div>';
-        return { label: String(y), body: html };
+        if (state.expanded != null) {
+          var ef = addMonths(state.yearStart, state.expanded);
+          html += '<div class="cal-year-exp"><div class="cal-exp-head"><span>' + MONTHS[ef.getMonth()] + ' ' + ef.getFullYear() +
+            '</span><button class="cal-exp-close" data-exp-close="1" aria-label="Close">×</button></div>' + renderMonthGrid(ef) + '</div>';
+        }
+        return html;
       }
 
       function render() {
-        var r = state.view === 'month' ? renderMonth() : state.view === 'year' ? renderYear() : renderWeek();
-        root.innerHTML = '<div class="cal">' + header(r.label) + '<div class="cal-body">' + r.body + '</div></div>';
-        wire();
-      }
+        var wStart = state.week, wEnd = addDays(wStart, 6);
+        var wSub = MONTHS[wStart.getMonth()].slice(0,3) + ' ' + wStart.getDate() + ' – ' + MONTHS[wEnd.getMonth()].slice(0,3) + ' ' + wEnd.getDate() + ', ' + wEnd.getFullYear();
+        var yEnd = addMonths(state.yearStart, 11);
+        var ySub = MONTHS[state.yearStart.getMonth()].slice(0,3) + ' ' + state.yearStart.getFullYear() + ' – ' + MONTHS[yEnd.getMonth()].slice(0,3) + ' ' + yEnd.getFullYear();
 
-      function step(dir) {
-        if (state.view === 'week') state.cursor = addDays(state.cursor, 7*dir);
-        else if (state.view === 'month') state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth()+dir, 1);
-        else state.cursor = new Date(state.cursor.getFullYear()+dir, 0, 1);
+        root.innerHTML = '<div class="cal">' + legend() +
+          '<section class="cal-sec">' + sectionHead('This week', wSub, navBtns('week')) + renderWeekRows(wStart) + '</section>' +
+          '<section class="cal-sec">' + sectionHead(MONTHS[state.month.getMonth()] + ' ' + state.month.getFullYear(), '', navBtns('month')) + renderMonthGrid(state.month) + '</section>' +
+          '<section class="cal-sec">' + sectionHead('The year ahead', ySub, '') + '<p class="cal-sec-hint">Tap a month to open it.</p>' + renderYear() + '</section>' +
+          '</div>';
+        wire();
+        if (state.scrollExp && state.expanded != null) {
+          var exp = root.querySelector('.cal-year-exp');
+          if (exp) exp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        state.scrollExp = false;
       }
 
       function wire() {
-        root.querySelectorAll('[data-view]').forEach(function (b) { b.onclick = function () { state.view = b.getAttribute('data-view'); render(); }; });
         root.querySelectorAll('[data-nav]').forEach(function (b) { b.onclick = function () {
-          var n = b.getAttribute('data-nav');
-          if (n === 'today') state.cursor = startOfDay(new Date());
-          else step(n === 'next' ? 1 : -1);
+          var n = b.getAttribute('data-nav'), sc = b.getAttribute('data-scope');
+          if (sc === 'week') state.week = (n === 'today') ? startOfWeek(today) : addDays(state.week, 7*(n==='next'?1:-1));
+          else state.month = (n === 'today') ? firstOfMonth(today) : addMonths(state.month, n==='next'?1:-1);
           render();
         }; });
-        root.querySelectorAll('[data-month]').forEach(function (b) { b.onclick = function () {
-          state.cursor = new Date(state.cursor.getFullYear(), Number(b.getAttribute('data-month')), 1);
-          state.view = 'month'; render();
+        root.querySelectorAll('[data-exp]').forEach(function (b) { b.onclick = function () {
+          var o = Number(b.getAttribute('data-exp'));
+          state.expanded = (state.expanded === o) ? null : o;
+          state.scrollExp = state.expanded != null;
+          render();
         }; });
+        root.querySelectorAll('[data-exp-close]').forEach(function (b) { b.onclick = function () { state.expanded = null; render(); }; });
         root.querySelectorAll('.cal-cell[data-book]').forEach(function (c) { c.onclick = function (ev) {
           if (ev.target.closest('a')) return;
           if (AIRBNB) window.open(AIRBNB, '_blank', 'noopener');
@@ -240,14 +255,16 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
     .cal-muted { color: var(--color-muted, #8b847a); }
 
     .cal { max-width: 68rem; margin: 0 auto; }
-    .cal-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1rem; margin-bottom: .8rem; }
-    .cal-title { flex: 1; text-align: center; font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.45rem; margin: 0; min-width: 12rem; order: 2; }
-    .cal-nav { display: inline-flex; gap: .3rem; order: 1; }
-    .cal-views { display: inline-flex; gap: .3rem; order: 3; }
-    .cal-nav button, .cal-views button { border: 1px solid var(--color-line, #e0d9cc); background: #fff; color: var(--color-ink, #2a1c0b); border-radius: 8px; padding: .4rem .7rem; font-size: .85rem; cursor: pointer; line-height: 1; }
-    .cal-views button.is-active { background: var(--color-brand, #a04607); color: #fff; border-color: var(--color-brand, #a04607); }
-    .cal-nav button:hover, .cal-views button:hover { border-color: var(--color-brand, #a04607); }
-    .cal-legend { width: 100%; display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font-size: .78rem; color: var(--color-muted, #6b6357); margin-bottom: 1.1rem; }
+    /* Stacked sections: week, month, year — each with its own header + nav. */
+    .cal-sec { margin-bottom: 2.75rem; }
+    .cal-sec-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem .9rem; margin-bottom: 1rem; }
+    .cal-sec-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.35rem; margin: 0; }
+    .cal-sec-sub { color: var(--color-muted, #8b847a); font-size: .9rem; }
+    .cal-sec-hint { color: var(--color-muted, #8b847a); font-size: .82rem; margin: 0 0 .8rem; }
+    .cal-nav { display: inline-flex; gap: .3rem; margin-left: auto; }
+    .cal-nav button { border: 1px solid var(--color-line, #e0d9cc); background: #fff; color: var(--color-ink, #2a1c0b); border-radius: 8px; padding: .4rem .7rem; font-size: .85rem; cursor: pointer; line-height: 1; }
+    .cal-nav button:hover { border-color: var(--color-brand, #a04607); }
+    .cal-legend { width: 100%; display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font-size: .78rem; color: var(--color-muted, #6b6357); margin-bottom: 1.6rem; }
     .cal-legend span { display: inline-flex; align-items: center; gap: .35rem; }
     .cal-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
     .cal-legend-avail { background: #ecfdf5; border: 1px solid #6ee7b7; }
@@ -258,7 +275,8 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
     .cal-wday { display: grid; grid-template-columns: 4.5rem 1fr; gap: 1rem; padding: .7rem .9rem; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 12px; }
     .cal-wday.is-today { border-color: var(--color-brand, #a04607); box-shadow: 0 0 0 1px var(--color-brand, #a04607); }
     .cal-wday.is-reserved { background: #fffaf2; }
-    .cal-wday.is-past { opacity: .6; }
+    .cal-wday.is-blocked { background: #f6f5f2; }
+    .cal-wday.is-past { opacity: .55; }
     .cal-wday-head { text-align: center; }
     .cal-wday-dow { display: block; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--color-muted, #8b847a); }
     .cal-wday-num { display: block; font-family: 'Merriweather', Georgia, serif; font-size: 1.6rem; line-height: 1.1; }
@@ -279,6 +297,7 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
     .cal-cell { min-height: 5.2rem; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 8px; padding: .3rem .35rem; overflow: hidden; }
     .cal-cell.is-out { background: #faf8f4; opacity: .55; }
     .cal-cell.is-reserved { background: #fffaf2; border-color: #fcd9a8; }
+    .cal-cell.is-blocked { background: #f6f5f2; border-color: #e7e2d8; }
     .cal-cell.is-avail { background: #f3fdf8; cursor: pointer; }
     .cal-cell.is-today { border-color: var(--color-brand, #a04607); box-shadow: inset 0 0 0 1px var(--color-brand, #a04607); }
     .cal-cell-num { font-size: .78rem; color: var(--color-muted, #6b6357); font-weight: 600; margin-bottom: .2rem; }
@@ -296,11 +315,17 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
     .cal-mini-d.is-out { background: transparent; }
     .cal-mini-d.is-event { background: #2563eb; }
     .cal-mini-d.is-reserved { background: #d98324; }
+    .cal-mini-d.is-blocked { background: #ded8ce; }
     .cal-mini-d.is-avail { background: #a7f3d0; }
+    .cal-mini.is-exp { border-color: var(--color-brand, #a04607); box-shadow: 0 0 0 1px var(--color-brand, #a04607); }
+
+    /* Inline expansion of a year tile into a full month grid, right below the grid. */
+    .cal-year-exp { margin-top: 1.1rem; border: 1px solid var(--color-line, #ece7dd); border-radius: 12px; padding: 1rem 1.1rem 1.2rem; background: #fffdf9; }
+    .cal-exp-head { display: flex; align-items: center; justify-content: space-between; font-family: 'Merriweather', Georgia, serif; font-size: 1.15rem; margin-bottom: .7rem; }
+    .cal-exp-close { border: none; background: none; font-size: 1.5rem; line-height: 1; color: var(--color-muted, #8b847a); cursor: pointer; padding: 0 .3rem; }
+    .cal-exp-close:hover { color: var(--color-brand, #a04607); }
 
     @media (max-width: 720px) {
-      .cal-title { order: 3; width: 100%; }
-      .cal-views { order: 2; }
       .cal-cell { min-height: 3.6rem; }
       .cal-cell-chip { font-size: 0; padding: 3px; }
       .cal-cell-chip .cal-dot { width: 6px; height: 6px; }

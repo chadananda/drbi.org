@@ -50,9 +50,12 @@ export async function getCalendarData() {
   // stay ("booked") and turnaround/host padding ("blocked") stay visually distinct on the calendar.
   for (const b of airbnbBlocks) {
     if (!b?.start) continue;
+    // Actual guest stay → labeled by its source ("Airbnb"). Turnaround/host padding → still blocks
+    // the day (never shown bookable) but carries no label, so the public calendar isn't cluttered
+    // with cleaning days. The client hides the label for the 'airbnb-block' variant.
     entries.push({
       id: `abnb-${b.start}`,
-      title: b.booked ? 'Booked' : 'Unavailable',
+      title: b.booked ? 'Airbnb' : '',
       type: 'reserved',
       variant: b.booked ? 'airbnb-booked' : 'airbnb-block',
       start: b.start,
