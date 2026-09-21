@@ -933,3 +933,70 @@ export async function getCommentStats() {
   const row = result.rows[0] as any;
   return { total: Number(row?.total ?? 0), starred: Number(row?.starred ?? 0), pending: Number(row?.pending ?? 0), recent: Number(row?.recent ?? 0) };
 }
+
+// ── Options (name/value settings) ────────────────────────────────────────────
+export async function getOption(name: string): Promise<string | null> {
+  const r = await db.execute({ sql: 'SELECT value FROM options WHERE name = ? LIMIT 1', args: [name] });
+  return (r.rows[0] as any)?.value ?? null;
+}
+export async function setOption(name: string, value: string): Promise<void> {
+  await db.execute({
+    sql: 'INSERT INTO options (name, value) VALUES (?, ?) ON CONFLICT(name) DO UPDATE SET value = excluded.value',
+    args: [name, value],
+  });
+}
+
+// ── Calendar items (team-managed dated entries for the public /calendar) ──────
+export function shapeCalendarItem(row: any) {
+  return {
+    id: row.id,
+    title: row.title,
+    type: row.type || 'program',
+    start: row.start_date,
+    end: row.end_date || null,
+    allDay: Number(row.all_day) === 1,
+    location: row.location || '',
+    linkUrl: row.link_url || '',
+    color: row.color || '',
+    notes: row.notes || '',
+    visible: Number(row.visible) === 1,
+  };
+}
+
+export async function getCalendarItems() {
+  const r = await db.execute('SELECT * FROM calendar_items WHERE visible = 1 ORDER BY start_date ASC');
+  return (r.rows as any[]).map(shapeCalendarItem);
+}
+
+export async function getAllCalendarItems() {
+  const r = await db.execute('SELECT * FROM calendar_items ORDER BY start_date ASC');
+  return (r.rows as any[]).map(shapeCalendarItem);
+}
+
+export async function getCalendarItem(id: string) {
+  const r = await db.execute({ sql: 'SELECT * FROM calendar_items WHERE id = ? LIMIT 1', args: [id] });
+  const row = r.rows[0] as any;
+  return row ? shapeCalendarItem(row) : null;
+}
+
+export async function upsertCalendarItem(item: any): Promise<string> {
+  const id = item.id || `cal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  await db.execute({
+    sql: `INSERT INTO calendar_items (id, title, type, start_date, end_date, all_day, location, link_url, color, notes, visible, created_by, updated_at)
+          VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))
+          ON CONFLICT(id) DO UPDATE SET
+            title=excluded.title, type=excluded.type, start_date=excluded.start_date, end_date=excluded.end_date,
+            all_day=excluded.all_day, location=excluded.location, link_url=excluded.link_url, color=excluded.color,
+            notes=excluded.notes, visible=excluded.visible, updated_at=datetime('now')`,
+    args: [
+      id, String(item.title || '').trim(), item.type || 'program', item.start, item.end || null,
+      item.allDay ? 1 : 0, item.location || null, item.linkUrl || null, item.color || null,
+      item.notes || null, item.visible === false ? 0 : 1, item.createdBy || null,
+    ],
+  });
+  return id;
+}
+
+export async function deleteCalendarItem(id: string): Promise<void> {
+  await db.execute({ sql: 'DELETE FROM calendar_items WHERE id = ?', args: [id] });
+}

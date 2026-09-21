@@ -1,0 +1,296 @@
+---
+// Public DRBI calendar. Aggregates events (auto) + team-managed calendar_items, rendered as
+// Week (default) / Month / Year views. Custom, dependency-light: SSR embeds the data + a no-JS
+// agenda fallback; a small inline script renders the views client-side (instant switching, no
+// per-view URLs so the edge cache stays simple). Availability (green → Book on Airbnb) is
+// computed per day. See docs/calendar-spec.md.
+export const prerender = false;
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import PageHero from "@components/PageHero.astro";
+import { getCalendarData } from "@lib/calendar";
+
+const { entries, airbnbUrl } = await getCalendarData();
+
+// Server-side agenda fallback (no-JS / SEO): next ~25 upcoming entries.
+const now = new Date();
+const upcoming = entries
+  .filter((e) => new Date(e.end || e.start) >= now)
+  .slice(0, 25);
+const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "America/Phoenix" }); } catch { return ""; } };
+---
+
+<Layout
+  title="Calendar — Desert Rose Bahá'í Institute"
+  description="Upcoming programs, concerts, retreats and events at Desert Rose Bahá'í Institute — and open dates you can book.">
+
+  <PageHero
+    label="What's happening"
+    title="DRBI Calendar"
+    subtitle="Programs, concerts, and retreats — plus open dates available to book for your own gathering."
+    image="drbi.org/site/heroes/memorial-garden-front.jpg"
+    imageAlt="Desert Rose"
+  />
+
+  <section class="py-16 bg-surface">
+    <Container>
+      <div id="cal-root" data-airbnb={airbnbUrl}>
+        <!-- No-JS fallback: a simple upcoming agenda. Replaced by the interactive calendar on load. -->
+        <div class="cal-fallback">
+          <h2 class="cal-fallback-h">Upcoming</h2>
+          {upcoming.length === 0 ? (
+            <p class="cal-muted">No upcoming items.</p>
+          ) : (
+            <ul class="cal-fallback-list">
+              {upcoming.map((e) => (
+                <li>
+                  <span class="cal-fallback-date">{fmtDay(e.start)}</span>
+                  {e.url ? <a href={e.url}>{e.title}</a> : <span>{e.title}</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </Container>
+  </section>
+
+  <script type="application/json" id="cal-data" is:inline set:html={JSON.stringify({ entries, airbnbUrl })}></script>
+
+  <script is:inline>
+    (function () {
+      var root = document.getElementById('cal-root');
+      var data;
+      try { data = JSON.parse(document.getElementById('cal-data').textContent); } catch (e) { return; }
+      var ENTRIES = (data.entries || []).map(function (e) {
+        return { title: e.title, type: e.type, url: e.url || '', color: e.color,
+                 s: new Date(e.start), e: new Date(e.end || e.start) };
+      }).filter(function (x) { return !isNaN(+x.s); });
+      var AIRBNB = data.airbnbUrl || '';
+      var TZ = 'America/Phoenix';
+      var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      var DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+      var state = { view: 'week', cursor: startOfDay(new Date()) };
+
+      function startOfDay(d) { var x = new Date(d); x.setHours(0,0,0,0); return x; }
+      function addDays(d, n) { var x = new Date(d); x.setDate(x.getDate()+n); return x; }
+      function sameYMD(a, b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+      function startOfWeek(d) { var x = startOfDay(d); x.setDate(x.getDate()-x.getDay()); return x; } // Sunday
+      function esc(s) { return String(s==null?'':s).replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+      // Entries overlapping a given day (inclusive of multi-day ranges).
+      function entriesOn(day) {
+        var d0 = startOfDay(day).getTime(), d1 = addDays(d0, 1).getTime();
+        return ENTRIES.filter(function (x) { return startOfDay(x.s).getTime() < d1 && x.e.getTime() >= d0; });
+      }
+      function dayState(day) {
+        var es = entriesOn(day);
+        var reserved = es.some(function (x) { return x.type === 'reserved'; });
+        var shown = es.filter(function (x) { return x.type !== 'reserved'; });
+        var past = startOfDay(day) < startOfDay(new Date());
+        var available = !reserved && shown.length === 0 && !past;
+        return { es: es, reserved: reserved, shown: shown, available: available, past: past };
+      }
+      function chip(x) {
+        var inner = '<span class="cal-dot" style="background:' + x.color + '"></span>' + esc(x.title);
+        return x.url ? '<a class="cal-chip" href="' + esc(x.url) + '">' + inner + '</a>'
+                     : '<span class="cal-chip">' + inner + '</span>';
+      }
+      function bookLink(day) {
+        if (!AIRBNB) return '<span class="cal-avail">Available</span>';
+        return '<a class="cal-avail cal-book" href="' + esc(AIRBNB) + '" target="_blank" rel="noopener">Available — Book →</a>';
+      }
+
+      function header(label) {
+        return '<div class="cal-bar">' +
+          '<div class="cal-nav"><button data-nav="prev" aria-label="Previous">‹</button>' +
+          '<button data-nav="today">Today</button>' +
+          '<button data-nav="next" aria-label="Next">›</button></div>' +
+          '<h2 class="cal-title">' + esc(label) + '</h2>' +
+          '<div class="cal-views">' +
+          ['week','month','year'].map(function (v) {
+            return '<button data-view="' + v + '"' + (state.view===v?' class="is-active"':'') + '>' + v.charAt(0).toUpperCase()+v.slice(1) + '</button>';
+          }).join('') + '</div></div>' +
+          '<div class="cal-legend">' +
+          '<span><i style="background:#2563eb"></i>Event / program</span>' +
+          '<span><i style="background:#7c3aed"></i>Holy Day</span>' +
+          '<span><i style="background:#b45309"></i>DRBI reserved</span>' +
+          '<span><i class="cal-legend-avail"></i>Available</span></div>';
+      }
+
+      function renderWeek() {
+        var start = startOfWeek(state.cursor);
+        var end = addDays(start, 6);
+        var label = MONTHS[start.getMonth()].slice(0,3) + ' ' + start.getDate() + ' – ' + MONTHS[end.getMonth()].slice(0,3) + ' ' + end.getDate() + ', ' + end.getFullYear();
+        var html = '<div class="cal-week">';
+        for (var i=0;i<7;i++) {
+          var day = addDays(start, i);
+          var st = dayState(day);
+          var isToday = sameYMD(day, new Date());
+          html += '<div class="cal-wday' + (st.reserved?' is-reserved':'') + (st.past?' is-past':'') + (isToday?' is-today':'') + '">' +
+            '<div class="cal-wday-head"><span class="cal-wday-dow">' + DOW[day.getDay()] + '</span>' +
+            '<span class="cal-wday-num">' + day.getDate() + '</span></div>' +
+            '<div class="cal-wday-body">';
+          if (st.reserved) html += '<span class="cal-reserved-tag">DRBI reserved</span>';
+          html += st.shown.map(chip).join('');
+          if (st.available) html += bookLink(day);
+          html += '</div></div>';
+        }
+        html += '</div>';
+        return { label: label, body: html };
+      }
+
+      function renderMonth() {
+        var y = state.cursor.getFullYear(), m = state.cursor.getMonth();
+        var first = new Date(y, m, 1);
+        var gridStart = startOfWeek(first);
+        var label = MONTHS[m] + ' ' + y;
+        var html = '<div class="cal-month"><div class="cal-month-dow">' + DOW.map(function(d){return '<span>'+d+'</span>';}).join('') + '</div><div class="cal-grid">';
+        for (var i=0;i<42;i++) {
+          var day = addDays(gridStart, i);
+          var out = day.getMonth() !== m;
+          var st = dayState(day);
+          var isToday = sameYMD(day, new Date());
+          html += '<div class="cal-cell' + (out?' is-out':'') + (st.reserved?' is-reserved':'') + (st.available?' is-avail':'') + (isToday?' is-today':'') + '"' +
+            (st.available && AIRBNB ? ' data-book="1"' : '') + '>' +
+            '<div class="cal-cell-num">' + day.getDate() + '</div>' +
+            '<div class="cal-cell-body">' + st.shown.slice(0,3).map(function(x){
+              return '<a class="cal-cell-chip" ' + (x.url?('href="'+esc(x.url)+'"'):'') + ' style="border-color:' + x.color + '"><span class="cal-dot" style="background:'+x.color+'"></span>' + esc(x.title) + '</a>';
+            }).join('') + (st.shown.length>3?('<span class="cal-more">+'+(st.shown.length-3)+' more</span>'):'') + '</div></div>';
+        }
+        html += '</div></div>';
+        return { label: label, body: html };
+      }
+
+      function renderYear() {
+        var y = state.cursor.getFullYear();
+        var html = '<div class="cal-year">';
+        for (var m=0;m<12;m++) {
+          var first = new Date(y, m, 1);
+          var gridStart = startOfWeek(first);
+          html += '<button class="cal-mini" data-month="' + m + '"><div class="cal-mini-h">' + MONTHS[m] + '</div><div class="cal-mini-grid">';
+          for (var i=0;i<42;i++) {
+            var day = addDays(gridStart, i);
+            var out = day.getMonth() !== m;
+            if (out) { html += '<i class="cal-mini-d is-out"></i>'; continue; }
+            var st = dayState(day);
+            var cls = st.reserved ? 'is-reserved' : (st.shown.length ? 'is-event' : (st.available ? 'is-avail' : ''));
+            html += '<i class="cal-mini-d ' + cls + '" title="' + day.getDate() + '"></i>';
+          }
+          html += '</div></button>';
+        }
+        html += '</div>';
+        return { label: String(y), body: html };
+      }
+
+      function render() {
+        var r = state.view === 'month' ? renderMonth() : state.view === 'year' ? renderYear() : renderWeek();
+        root.innerHTML = '<div class="cal">' + header(r.label) + '<div class="cal-body">' + r.body + '</div></div>';
+        wire();
+      }
+
+      function step(dir) {
+        if (state.view === 'week') state.cursor = addDays(state.cursor, 7*dir);
+        else if (state.view === 'month') state.cursor = new Date(state.cursor.getFullYear(), state.cursor.getMonth()+dir, 1);
+        else state.cursor = new Date(state.cursor.getFullYear()+dir, 0, 1);
+      }
+
+      function wire() {
+        root.querySelectorAll('[data-view]').forEach(function (b) { b.onclick = function () { state.view = b.getAttribute('data-view'); render(); }; });
+        root.querySelectorAll('[data-nav]').forEach(function (b) { b.onclick = function () {
+          var n = b.getAttribute('data-nav');
+          if (n === 'today') state.cursor = startOfDay(new Date());
+          else step(n === 'next' ? 1 : -1);
+          render();
+        }; });
+        root.querySelectorAll('[data-month]').forEach(function (b) { b.onclick = function () {
+          state.cursor = new Date(state.cursor.getFullYear(), Number(b.getAttribute('data-month')), 1);
+          state.view = 'month'; render();
+        }; });
+        root.querySelectorAll('.cal-cell[data-book]').forEach(function (c) { c.onclick = function (ev) {
+          if (ev.target.closest('a')) return;
+          if (AIRBNB) window.open(AIRBNB, '_blank', 'noopener');
+        }; });
+      }
+
+      render();
+    })();
+  </script>
+
+  <style is:global>
+    .cal-fallback-h { font-family: 'Merriweather', Georgia, serif; font-size: 1.4rem; margin: 0 0 1rem; }
+    .cal-fallback-list { list-style: none; padding: 0; margin: 0; max-width: 40rem; }
+    .cal-fallback-list li { display: flex; gap: 1rem; padding: .5rem 0; border-bottom: 1px solid var(--color-line, #e7e2d8); }
+    .cal-fallback-date { color: var(--color-muted, #8b847a); min-width: 7rem; }
+    .cal-muted { color: var(--color-muted, #8b847a); }
+
+    .cal { max-width: 68rem; margin: 0 auto; }
+    .cal-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1rem; margin-bottom: .8rem; }
+    .cal-title { flex: 1; text-align: center; font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.45rem; margin: 0; min-width: 12rem; order: 2; }
+    .cal-nav { display: inline-flex; gap: .3rem; order: 1; }
+    .cal-views { display: inline-flex; gap: .3rem; order: 3; }
+    .cal-nav button, .cal-views button { border: 1px solid var(--color-line, #e0d9cc); background: #fff; color: var(--color-ink, #2a1c0b); border-radius: 8px; padding: .4rem .7rem; font-size: .85rem; cursor: pointer; line-height: 1; }
+    .cal-views button.is-active { background: var(--color-brand, #a04607); color: #fff; border-color: var(--color-brand, #a04607); }
+    .cal-nav button:hover, .cal-views button:hover { border-color: var(--color-brand, #a04607); }
+    .cal-legend { width: 100%; display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font-size: .78rem; color: var(--color-muted, #6b6357); margin-bottom: 1.1rem; }
+    .cal-legend span { display: inline-flex; align-items: center; gap: .35rem; }
+    .cal-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+    .cal-legend-avail { background: #ecfdf5; border: 1px solid #6ee7b7; }
+    .cal-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+    /* Week (agenda-style rows — works at every width) */
+    .cal-week { display: flex; flex-direction: column; gap: .5rem; }
+    .cal-wday { display: grid; grid-template-columns: 4.5rem 1fr; gap: 1rem; padding: .7rem .9rem; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 12px; }
+    .cal-wday.is-today { border-color: var(--color-brand, #a04607); box-shadow: 0 0 0 1px var(--color-brand, #a04607); }
+    .cal-wday.is-reserved { background: #fffaf2; }
+    .cal-wday.is-past { opacity: .6; }
+    .cal-wday-head { text-align: center; }
+    .cal-wday-dow { display: block; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--color-muted, #8b847a); }
+    .cal-wday-num { display: block; font-family: 'Merriweather', Georgia, serif; font-size: 1.6rem; line-height: 1.1; }
+    .cal-wday-body { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; min-height: 1.8rem; }
+    .cal-chip { display: inline-flex; align-items: center; gap: .4rem; background: var(--color-surface, #f7f3ec); border: 1px solid var(--color-line, #e7e2d8); border-radius: 999px; padding: .28rem .7rem; font-size: .85rem; color: var(--color-ink, #2a1c0b); text-decoration: none; }
+    a.cal-chip:hover { border-color: var(--color-brand, #a04607); }
+    .cal-reserved-tag { font-size: .78rem; font-weight: 600; color: #b45309; background: #fff3e0; border: 1px solid #fcd9a8; border-radius: 999px; padding: .25rem .65rem; }
+    .cal-avail { font-size: .8rem; color: #059669; }
+    a.cal-book { text-decoration: none; font-weight: 600; }
+    a.cal-book:hover { text-decoration: underline; }
+
+    /* Month grid */
+    .cal-month-dow { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--color-muted, #8b847a); margin-bottom: .3rem; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+    .cal-cell { min-height: 5.2rem; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 8px; padding: .3rem .35rem; overflow: hidden; }
+    .cal-cell.is-out { background: #faf8f4; opacity: .55; }
+    .cal-cell.is-reserved { background: #fffaf2; border-color: #fcd9a8; }
+    .cal-cell.is-avail { background: #f3fdf8; cursor: pointer; }
+    .cal-cell.is-today { border-color: var(--color-brand, #a04607); box-shadow: inset 0 0 0 1px var(--color-brand, #a04607); }
+    .cal-cell-num { font-size: .78rem; color: var(--color-muted, #6b6357); font-weight: 600; margin-bottom: .2rem; }
+    .cal-cell-body { display: flex; flex-direction: column; gap: 2px; }
+    .cal-cell-chip { display: flex; align-items: center; gap: .3rem; font-size: .72rem; line-height: 1.15; color: var(--color-ink, #2a1c0b); text-decoration: none; border-left: 3px solid; padding: 1px 2px 1px 5px; border-radius: 3px; background: var(--color-surface, #f7f3ec); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cal-more { font-size: .68rem; color: var(--color-muted, #8b847a); }
+
+    /* Year — 12 mini-months */
+    .cal-year { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .cal-mini { text-align: left; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 10px; padding: .7rem; cursor: pointer; }
+    .cal-mini:hover { border-color: var(--color-brand, #a04607); }
+    .cal-mini-h { font-weight: 600; font-size: .9rem; margin-bottom: .4rem; }
+    .cal-mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-mini-d { width: 100%; padding-top: 100%; border-radius: 2px; background: #f0ece4; }
+    .cal-mini-d.is-out { background: transparent; }
+    .cal-mini-d.is-event { background: #2563eb; }
+    .cal-mini-d.is-reserved { background: #d98324; }
+    .cal-mini-d.is-avail { background: #a7f3d0; }
+
+    @media (max-width: 720px) {
+      .cal-title { order: 3; width: 100%; }
+      .cal-views { order: 2; }
+      .cal-cell { min-height: 3.6rem; }
+      .cal-cell-chip { font-size: 0; padding: 3px; }
+      .cal-cell-chip .cal-dot { width: 6px; height: 6px; }
+      .cal-year { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 460px) {
+      .cal-year { grid-template-columns: 1fr; }
+    }
+  </style>
+</Layout>

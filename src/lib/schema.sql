@@ -45,6 +45,29 @@ CREATE TABLE IF NOT EXISTS events (
 CREATE INDEX IF NOT EXISTS idx_events_start_date ON events(start_date);
 CREATE INDEX IF NOT EXISTS idx_events_visible ON events(visible);
 
+-- Public calendar entries, team-managed via /admin/calendar. The public /calendar page
+-- also aggregates the events table (auto), so these are the *extra* dated items events don't
+-- cover: classes, Holy Days, community dates, and multi-day "reserved" holds (DRBI activities,
+-- can be years out). type drives the color/state; link_url optionally points at any page.
+CREATE TABLE IF NOT EXISTS calendar_items (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'program',   -- program | holyday | reserved | event
+  start_date TEXT NOT NULL,               -- ISO date (all-day) or datetime
+  end_date TEXT,                          -- ISO date/datetime; null = single day
+  all_day INTEGER NOT NULL DEFAULT 1,
+  location TEXT,
+  link_url TEXT,                          -- optional link to a page (event, facilities, external)
+  color TEXT,                             -- optional hex override; else derived from type
+  notes TEXT,
+  visible INTEGER NOT NULL DEFAULT 1,
+  created_by TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_calendar_items_start ON calendar_items(start_date);
+CREATE INDEX IF NOT EXISTS idx_calendar_items_visible ON calendar_items(visible);
+
 -- Per-event internal coordination thread (meals, volunteers, logistics). DRBI-only, separate
 -- from the Humanitix-synced event content — any signed-in team member (staff) can read + post.
 CREATE TABLE IF NOT EXISTS event_thread (

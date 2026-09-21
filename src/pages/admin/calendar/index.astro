@@ -1,0 +1,120 @@
+---
+// Team calendar editor. Add/edit/delete calendar_items (classes, Holy Days, community dates,
+// and multi-day "reserved" holds) that show on the public /calendar alongside the events feed.
+// Events themselves stay editable under /admin/events and are shown here read-only.
+export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import { getAllCalendarItems, getCalendarItem, getEvents, getOption } from '@lib/queries';
+
+const items = await getAllCalendarItems();
+const airbnbUrl = (await getOption('airbnb_listing_url')) || '';
+const events = (await getEvents()).filter((e) => e?.data?.visible !== false);
+
+const editId = Astro.url.searchParams.get('edit');
+const editing = editId ? await getCalendarItem(editId) : null;
+const saved = Astro.url.searchParams.get('saved');
+
+const TYPES = [
+  { v: 'program', label: 'Program / class' },
+  { v: 'holyday', label: 'Holy Day' },
+  { v: 'reserved', label: 'DRBI reserved (hold)' },
+  { v: 'event', label: 'Event' },
+];
+const dstr = (s) => (s ? String(s).slice(0, 10) : '');
+const fmt = (s) => { try { return new Date(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return s; } };
+---
+
+<Layout title="Calendar — DRBI Admin">
+  <div style="max-width:56rem;margin:0 auto;padding:1.5rem 1rem;">
+    <h1 style="font-size:1.6rem;font-weight:700;margin:0 0 .3rem;">📅 Calendar</h1>
+    <p style="color:#64748b;margin:0 0 1.5rem;">Add dated items to the public <a href="/calendar" target="_blank">calendar</a> — classes, Holy Days, community dates, and multi-day reserved holds. Events are pulled in automatically (managed under <a href="/admin/events">Events</a>).</p>
+
+    {saved && <p style="background:#dcfce7;border:1px solid #86efac;color:#166534;padding:.5rem .8rem;border-radius:8px;">Saved.</p>}
+
+    <!-- Airbnb listing URL -->
+    <form method="POST" action="/api/admin/calendar" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem;">
+      <input type="hidden" name="op" value="set-airbnb" />
+      <label style="font-weight:600;font-size:.9rem;">Airbnb listing URL <span style="font-weight:400;color:#64748b;">— open/available days on the calendar link here</span></label>
+      <div style="display:flex;gap:.5rem;margin-top:.4rem;">
+        <input type="url" name="airbnb_listing_url" value={airbnbUrl} placeholder="https://www.airbnb.com/rooms/…" style="flex:1;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;" />
+        <button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:8px;padding:.5rem 1rem;font-weight:600;cursor:pointer;">Save</button>
+      </div>
+    </form>
+
+    <!-- Add / edit item -->
+    <form method="POST" action="/api/admin/calendar" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;">
+      <input type="hidden" name="op" value="save" />
+      <input type="hidden" name="id" value={editing?.id || ''} />
+      <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 .9rem;">{editing ? 'Edit item' : 'Add calendar item'}</h2>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;">
+        <label style="grid-column:1/3;">Title
+          <input name="title" required value={editing?.title || ''} style="width:100%;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.2rem;" />
+        </label>
+        <label>Type
+          <select name="type" style="width:100%;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.2rem;">
+            {TYPES.map((t) => <option value={t.v} selected={editing?.type === t.v}>{t.label}</option>)}
+          </select>
+        </label>
+        <label>Link URL (optional)
+          <input name="link_url" value={editing?.linkUrl || ''} placeholder="/events/… or https://…" style="width:100%;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.2rem;" />
+        </label>
+        <label>Start date
+          <input type="date" name="start" required value={dstr(editing?.start)} style="width:100%;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.2rem;" />
+        </label>
+        <label>End date (optional — for a range)
+          <input type="date" name="end" value={dstr(editing?.end)} style="width:100%;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.2rem;" />
+        </label>
+        <label>Location (optional)
+          <input name="location" value={editing?.location || ''} style="width:100%;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.2rem;" />
+        </label>
+        <label>Color (optional hex)
+          <input name="color" value={editing?.color || ''} placeholder="#b45309" style="width:100%;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.2rem;" />
+        </label>
+        <label style="grid-column:1/3;">Notes (optional)
+          <textarea name="notes" rows="2" style="width:100%;padding:.5rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.2rem;">{editing?.notes || ''}</textarea>
+        </label>
+        <label style="display:flex;align-items:center;gap:.4rem;"><input type="checkbox" name="all_day" checked={editing ? editing.allDay : true} /> All day</label>
+        <label style="display:flex;align-items:center;gap:.4rem;"><input type="checkbox" name="visible" checked={editing ? editing.visible : true} /> Visible</label>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:.6rem;">
+        <button type="submit" style="background:#a04607;color:#fff;border:none;border-radius:8px;padding:.55rem 1.3rem;font-weight:600;cursor:pointer;">{editing ? 'Update' : 'Add'}</button>
+        {editing && <a href="/admin/calendar" style="align-self:center;color:#64748b;">Cancel</a>}
+      </div>
+    </form>
+
+    <!-- Existing items -->
+    <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 .6rem;">Calendar items ({items.length})</h2>
+    {items.length === 0 ? (
+      <p style="color:#64748b;">No calendar items yet. Add one above.</p>
+    ) : (
+      <table style="width:100%;border-collapse:collapse;font-size:.9rem;">
+        <thead><tr style="text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">
+          <th style="padding:.5rem;">When</th><th>Title</th><th>Type</th><th></th><th></th>
+        </tr></thead>
+        <tbody>
+          {items.map((it) => (
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td style="padding:.5rem;white-space:nowrap;">{fmt(it.start)}{it.end ? ` – ${fmt(it.end)}` : ''}</td>
+              <td>{it.title}{!it.visible && <span style="color:#b45309;"> (hidden)</span>}</td>
+              <td style="text-transform:capitalize;color:#64748b;">{it.type}</td>
+              <td><a href={`/admin/calendar?edit=${it.id}`}>Edit</a></td>
+              <td>
+                <form method="POST" action="/api/admin/calendar" onsubmit="return confirm('Delete this item?')" style="display:inline;">
+                  <input type="hidden" name="op" value="delete" /><input type="hidden" name="id" value={it.id} />
+                  <button type="submit" style="background:none;border:none;color:#dc2626;cursor:pointer;">Delete</button>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+
+    <!-- Auto-included events (read-only) -->
+    <h2 style="font-size:1.05rem;font-weight:700;margin:2rem 0 .6rem;">Events on the calendar (auto — edit under <a href="/admin/events">Events</a>)</h2>
+    <ul style="color:#475569;font-size:.9rem;line-height:1.7;padding-left:1.1rem;">
+      {events.slice(0, 40).map((e) => <li>{fmt(e.data.startDate)} — {e.data.name || e.data.title}</li>)}
+    </ul>
+  </div>
+</Layout>
