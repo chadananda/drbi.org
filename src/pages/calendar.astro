@@ -87,9 +87,9 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       function esc(s) { return String(s==null?'':s).replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
       var today = startOfDay(new Date());
-      // Three stacked views on one page: this week, this month, and a rolling 12-month year
-      // (current month → +11). Each navigates independently; a year tile expands inline below.
-      var state = { week: startOfWeek(today), month: firstOfMonth(today), yearStart: firstOfMonth(today), expanded: null, scrollExp: false };
+      // Two stacked views on one page: this month, and a rolling 12-month year (current month →
+      // +11). Each navigates independently; a year tile expands inline below.
+      var state = { month: firstOfMonth(today), yearStart: firstOfMonth(today), expanded: null, scrollExp: false };
 
       // Entries overlapping a given day (inclusive of multi-day ranges).
       function entriesOn(day) {
@@ -144,21 +144,6 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
           (sub ? '<span class="cal-sec-sub">' + esc(sub) + '</span>' : '') + (controls || '') + '</div>';
       }
 
-      function renderWeekRows(start) {
-        var html = '<div class="cal-week">';
-        for (var i=0;i<7;i++) {
-          var day = addDays(start, i);
-          var st = dayState(day);
-          html += '<div class="cal-wday' + dayClasses(st, sameYMD(day, today)) + '">' +
-            '<div class="cal-wday-head"><span class="cal-wday-dow">' + DOW[day.getDay()] + '</span>' +
-            '<span class="cal-wday-num">' + day.getDate() + '</span></div>' +
-            '<div class="cal-wday-body">' +
-            st.labeled.map(resTag).join('') + st.shown.map(chip).join('') + (st.available ? bookLink() : '') +
-            '</div></div>';
-        }
-        return html + '</div>';
-      }
-
       function renderMonthGrid(first) {
         var m = first.getMonth();
         var gridStart = startOfWeek(first);
@@ -205,13 +190,10 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       }
 
       function render() {
-        var wStart = state.week, wEnd = addDays(wStart, 6);
-        var wSub = MONTHS[wStart.getMonth()].slice(0,3) + ' ' + wStart.getDate() + ' – ' + MONTHS[wEnd.getMonth()].slice(0,3) + ' ' + wEnd.getDate() + ', ' + wEnd.getFullYear();
         var yEnd = addMonths(state.yearStart, 11);
         var ySub = MONTHS[state.yearStart.getMonth()].slice(0,3) + ' ' + state.yearStart.getFullYear() + ' – ' + MONTHS[yEnd.getMonth()].slice(0,3) + ' ' + yEnd.getFullYear();
 
         root.innerHTML = '<div class="cal">' + legend() +
-          '<section class="cal-sec">' + sectionHead('This week', wSub, navBtns('week')) + renderWeekRows(wStart) + '</section>' +
           '<section class="cal-sec">' + sectionHead(MONTHS[state.month.getMonth()] + ' ' + state.month.getFullYear(), '', navBtns('month')) + renderMonthGrid(state.month) + '</section>' +
           '<section class="cal-sec">' + sectionHead('The year ahead', ySub, '') + '<p class="cal-sec-hint">Tap a month to open it.</p>' + renderYear() + '</section>' +
           '</div>';
@@ -225,9 +207,8 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
 
       function wire() {
         root.querySelectorAll('[data-nav]').forEach(function (b) { b.onclick = function () {
-          var n = b.getAttribute('data-nav'), sc = b.getAttribute('data-scope');
-          if (sc === 'week') state.week = (n === 'today') ? startOfWeek(today) : addDays(state.week, 7*(n==='next'?1:-1));
-          else state.month = (n === 'today') ? firstOfMonth(today) : addMonths(state.month, n==='next'?1:-1);
+          var n = b.getAttribute('data-nav');
+          state.month = (n === 'today') ? firstOfMonth(today) : addMonths(state.month, n==='next'?1:-1);
           render();
         }; });
         root.querySelectorAll('[data-exp]').forEach(function (b) { b.onclick = function () {
