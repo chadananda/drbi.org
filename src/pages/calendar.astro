@@ -28,8 +28,8 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
     label="What's happening"
     title="DRBI Calendar"
     subtitle="Programs, concerts, and retreats — plus open dates available to book for your own gathering."
-    image="drbi.org/site/heroes/memorial-garden-front.jpg"
-    imageAlt="Desert Rose"
+    image="drbi.org/site/drbi/events.webp"
+    imageAlt="A gathering at Desert Rose Bahá'í Institute"
   />
 
   <section class="py-16 bg-surface">
@@ -256,7 +256,7 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
 
     .cal { max-width: 68rem; margin: 0 auto; }
     /* Stacked sections: week, month, year — each with its own header + nav. */
-    .cal-sec { margin-bottom: 2.75rem; }
+    .cal-sec { margin-bottom: 3.5rem; }
     .cal-sec-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem .9rem; margin-bottom: 1rem; }
     .cal-sec-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.35rem; margin: 0; }
     .cal-sec-sub { color: var(--color-muted, #8b847a); font-size: .9rem; }
@@ -306,7 +306,7 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
     .cal-more { font-size: .68rem; color: var(--color-muted, #8b847a); }
 
     /* Year — 12 mini-months */
-    .cal-year { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .cal-year { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem 1.4rem; }
     .cal-mini { text-align: left; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 10px; padding: .7rem; cursor: pointer; }
     .cal-mini:hover { border-color: var(--color-brand, #a04607); }
     .cal-mini-h { font-weight: 600; font-size: .9rem; margin-bottom: .4rem; }
