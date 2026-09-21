@@ -19,6 +19,8 @@ if (!event) return Astro.rewrite("/404");
 const d = event.data;
 const hidden = !d.visible;
 const title = d.title || d.name || "Event";
+// Concerts in the First Sunday series link back to the series landing page.
+const isConcertSeries = (d.categories || []).some((c) => /first sunday concert series/i.test(String(c)));
 const plainDesc = (d.shortDescription || (d.fullDescription || "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim().slice(0, 180);
 
 const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }); } catch { return ""; } };
@@ -165,6 +167,9 @@ const eventSchema = (!hidden && d.startDate) ? {
       <div class="event-grid mx-auto max-w-5xl mt-12 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-10 lg:gap-16 lg:items-start">
         <!-- Description -->
         <div class="min-w-0">
+          {isConcertSeries && (
+            <a href="/concerts" class="inline-block mb-5 text-sm font-medium text-amber-800 hover:underline">← Part of the First Sunday Concert Series</a>
+          )}
           {richDesc ? (
             <div class="event-desc" set:html={richDesc} />
           ) : (

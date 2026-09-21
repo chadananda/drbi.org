@@ -1,0 +1,140 @@
+---
+// First Sunday Concert Series — season landing page. Built to Oraea Varis's design (header art,
+// Rose Music logo, series flyer, three info columns, closing quotes). The lineup is pulled live
+// from D1 (events tagged "First Sunday Concert Series"), so it stays in sync with the event pages.
+export const prerender = false;
+import Layout from "@layouts/Layout.astro";
+import Container from "@components/container.astro";
+import { getEvents } from "@lib/queries";
+import { eventSlug } from "@lib/event-slug";
+import { imagekitUrl } from "../utils/utils.js";
+
+const CDN = "https://cdn.shrtr.com/drbi.org/site/concerts";
+
+const concerts = (await getEvents())
+  .filter((e) => (e.data.categories || []).some((c) => /first sunday concert series/i.test(String(c))))
+  .map((e) => ({ ev: e, d: new Date(e.data.startDate) }))
+  .filter((x) => !isNaN(+x.d))
+  .sort((a, b) => +a.d - +b.d);
+
+const fmtLong = (d) => d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "America/Phoenix" });
+const cleanName = (n) => String(n || "").replace(/\s*[—-]\s*First Sunday Concert.*$/i, "").trim();
+const heroUrl = imagekitUrl(`${CDN}/header.png`, { w: 1800 });
+---
+
+<Layout
+  title="First Sunday Concert Series — Desert Rose Bahá'í Institute"
+  description="Desert Rose Bahá'í Institute's 2026–27 First Sunday Concert Series — outstanding musicians, first Sunday of the month, free and open to everyone, in Hadden Hall.">
+
+  <div class="fscs">
+    <div class="fscs-hero">
+      <img src={heroUrl} alt="Desert Rose Bahá'í Institute — First Sunday Concert Series 2026–27" width="1800" height="640" />
+    </div>
+
+    <section class="fscs-body">
+      <Container>
+        <p class="fscs-lede">
+          Desert Rose Bahá'í Institute invites you to our <strong>2026–27 First Sunday Concert Series</strong> —
+          a second season bringing outstanding musicians to the heart of the Sonoran Desert. Each concert is
+          performed on Desert Rose's magnificent nine-foot <strong>A.B. Chase 1893 concert grand piano</strong>
+          in the intimate setting of <strong>Hadden Hall</strong>, and followed by a Meet-the-Artist reception.
+        </p>
+        <p class="fscs-tag"><em>Music is Light — to Inspire and Bring Us Together.</em></p>
+
+        <!-- Lineup -->
+        <h2 class="fscs-h2">The 2026–27 Season</h2>
+        <ol class="fscs-lineup">
+          {concerts.map(({ ev, d }) => (
+            <li>
+              <a href={`/events/${eventSlug(ev)}`}>
+                <span class="fscs-date"><span class="fscs-mo">{d.toLocaleDateString("en-US", { month: "short", timeZone: "America/Phoenix" })}</span><span class="fscs-day">{d.toLocaleDateString("en-US", { day: "numeric", timeZone: "America/Phoenix" })}</span></span>
+                <span class="fscs-main">
+                  <span class="fscs-name">{cleanName(ev.data.name)}</span>
+                  <span class="fscs-when">{fmtLong(d)} · 3:00 PM</span>
+                  {ev.data.shortDescription && <span class="fscs-desc">{ev.data.shortDescription}</span>}
+                </span>
+                <span class="fscs-cta">Details →</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+
+        <!-- Three info columns (Oraea's layout) -->
+        <div class="fscs-cols">
+          <div>
+            <h3>Free &amp; open to everyone</h3>
+            <p>Concerts are free and open to the public. Each performance is followed by a Meet-the-Artist Q&amp;A reception with light refreshments. Tax-deductible donations are gratefully welcomed.</p>
+          </div>
+          <div>
+            <h3>Concerts begin at 3:00 PM</h3>
+            <p>
+              Hadden Hall, Desert Rose Bahá'í Institute<br />
+              1950 W. William Sears Drive, Eloy, AZ 85131<br />
+              <a href="tel:+15204667961">520-466-7961</a><br />
+              <span class="fscs-muted">About an hour from both Tucson and Phoenix.</span>
+            </p>
+          </div>
+          <div>
+            <h3>A gathering place for the arts</h3>
+            <p>Founded by William and Marguerite Sears, Desert Rose is a center for the arts, agriculture, and Bahá'í education — open to all. The concert series is our invitation to the wider community to come, listen, and belong.</p>
+          </div>
+        </div>
+
+        <!-- Flyer + logo -->
+        <div class="fscs-footerblock">
+          <a class="fscs-flyer" href={`${CDN}/series-flyer.pdf`} download target="_blank" rel="noopener noreferrer">
+            <img src={imagekitUrl(`${CDN}/series-flyer-thumb.png`, { w: 300 })} alt="First Sunday Concert Series flyer" width="300" height="450" loading="lazy" />
+            <span>⬇ Download the season flyer</span>
+          </a>
+          <div class="fscs-quotes">
+            <img class="fscs-logo" src={imagekitUrl(`${CDN}/rose-music-logo.png`, { w: 260 })} alt="Desert Rose Music" width="200" height="200" loading="lazy" />
+            <blockquote>“Music is a ladder for souls to mount to the higher world.”<cite>— ‘Abdu'l-Bahá</cite></blockquote>
+            <p class="fscs-come">Come for the music. Stay for the artists. Leave uplifted.</p>
+          </div>
+        </div>
+      </Container>
+    </section>
+  </div>
+
+  <style>
+    .fscs-hero { width: 100%; line-height: 0; }
+    .fscs-hero img { width: 100%; height: auto; display: block; }
+    .fscs-body { padding: 3rem 0 4rem; background: var(--color-surface, #f8f5ef); }
+    .fscs-lede { max-width: 46rem; margin: 0 auto; text-align: center; font-size: 1.15rem; line-height: 1.7; color: var(--color-body, #3a352c); }
+    .fscs-tag { text-align: center; color: var(--color-brand-deep, #8a4a12); font-family: 'Fraunces', 'Newsreader', Georgia, serif; font-size: 1.15rem; margin: 1rem 0 0; }
+
+    .fscs-h2 { text-align: center; font-family: 'Fraunces', 'Newsreader', Georgia, serif; font-weight: 400; font-size: 1.9rem; margin: 3rem 0 1.5rem; color: var(--color-ink, #2a1c0b); }
+    .fscs-lineup { list-style: none; padding: 0; margin: 0 auto; max-width: 44rem; display: flex; flex-direction: column; gap: .7rem; }
+    .fscs-lineup a { display: grid; grid-template-columns: 4rem 1fr auto; gap: 1.1rem; align-items: center; padding: 1rem 1.3rem; background: #fff; border: 1px solid var(--color-line, #e7e2d8); border-radius: 14px; text-decoration: none; color: inherit; transition: box-shadow .2s, transform .2s, border-color .2s; }
+    .fscs-lineup a:hover { box-shadow: 0 18px 34px -20px rgba(90,60,20,.4); transform: translateY(-2px); border-color: #e6d4b4; }
+    .fscs-date { text-align: center; line-height: 1; }
+    .fscs-mo { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--color-brand, #a04607); }
+    .fscs-day { display: block; font-family: 'Fraunces', 'Newsreader', Georgia, serif; font-size: 1.8rem; }
+    .fscs-main { min-width: 0; }
+    .fscs-name { display: block; font-family: 'Fraunces', 'Newsreader', Georgia, serif; font-size: 1.2rem; line-height: 1.25; color: var(--color-ink, #2a1c0b); }
+    .fscs-when { display: block; font-size: .82rem; color: var(--color-muted, #8b847a); margin-top: .15rem; }
+    .fscs-desc { display: block; font-size: .9rem; color: var(--color-body, #4a4438); margin-top: .4rem; line-height: 1.5; }
+    .fscs-cta { font-weight: 600; font-size: .9rem; color: var(--color-brand, #a04607); white-space: nowrap; }
+
+    .fscs-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 60rem; margin: 3.5rem auto 0; }
+    .fscs-cols h3 { font-family: 'Fraunces', 'Newsreader', Georgia, serif; font-weight: 500; font-size: 1.15rem; color: var(--color-brand-deep, #8a4a12); margin: 0 0 .6rem; }
+    .fscs-cols p { font-size: .95rem; line-height: 1.65; color: var(--color-body, #4a4438); margin: 0; }
+    .fscs-muted { color: var(--color-muted, #8b847a); }
+
+    .fscs-footerblock { display: flex; flex-wrap: wrap; gap: 2.5rem; align-items: center; justify-content: center; max-width: 60rem; margin: 3.5rem auto 0; padding-top: 3rem; border-top: 1px solid var(--color-line, #e7e2d8); }
+    .fscs-flyer { display: inline-flex; flex-direction: column; align-items: center; gap: .6rem; text-decoration: none; color: var(--color-brand-deep, #8a4a12); font-weight: 600; font-size: .92rem; }
+    .fscs-flyer img { width: 240px; height: auto; border-radius: 10px; box-shadow: 0 14px 30px -14px rgba(70,50,20,.5); transition: transform .2s; }
+    .fscs-flyer:hover img { transform: translateY(-3px); }
+    .fscs-quotes { text-align: center; max-width: 24rem; }
+    .fscs-logo { width: 170px; height: auto; margin: 0 auto .5rem; display: block; }
+    .fscs-quotes blockquote { font-family: 'Fraunces', 'Newsreader', Georgia, serif; font-size: 1.25rem; font-style: italic; color: var(--color-ink, #2a1c0b); margin: 0 0 .5rem; line-height: 1.4; }
+    .fscs-quotes cite { display: block; font-size: .85rem; font-style: normal; color: var(--color-muted, #8b847a); margin-top: .4rem; }
+    .fscs-come { font-family: 'Fraunces', 'Newsreader', Georgia, serif; color: var(--color-brand-deep, #8a4a12); font-size: 1.05rem; margin: 1.2rem 0 0; }
+
+    @media (max-width: 780px) {
+      .fscs-cols { grid-template-columns: 1fr; gap: 1.6rem; text-align: center; }
+      .fscs-lineup a { grid-template-columns: 3.4rem 1fr; }
+      .fscs-cta { grid-column: 2; margin-top: .3rem; }
+    }
+  </style>
+</Layout>
