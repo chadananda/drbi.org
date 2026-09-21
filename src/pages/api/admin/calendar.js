@@ -4,6 +4,7 @@
 export const prerender = false;
 import { getAdmin, seeOther } from '@lib/server/admin-guard';
 import { upsertCalendarItem, deleteCalendarItem, setOption } from '@lib/queries';
+import { refreshAirbnbBlocks } from '@lib/airbnb';
 import { getEnv } from '@lib/runtime-env';
 
 const BACK = '/admin/calendar';
@@ -24,6 +25,10 @@ export const POST = async (context) => {
 
   if (op === 'set-airbnb') {
     await setOption('airbnb_listing_url', clamp(form.get('airbnb_listing_url'), 500));
+    const ical = clamp(form.get('airbnb_ical_url'), 1000);
+    await setOption('airbnb_ical_url', ical);
+    // Pull the feed now so the imported-block count is current on the redirect (best-effort).
+    if (ical) { try { await getEnv('SESSION')?.put?.('airbnb:blocks:ts', '0'); await refreshAirbnbBlocks(); } catch {} }
     await bumpEventsCache();
     return seeOther(`${BACK}?saved=airbnb`);
   }

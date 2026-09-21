@@ -4,6 +4,7 @@ import { verifyRequestOrigin as verifyOrig } from "lucia";
 import { ADMIN_NAV, roleLevel } from "./lib/admin-nav";
 import { env } from "cloudflare:workers";
 import { revalidateEventsIfStale } from "./lib/humanitix-sync";
+import { maybeRefreshAirbnb } from "./lib/airbnb";
 import { maybeSendDue } from "./lib/server/newsletters";
 // import { defineMiddleware } from "astro:middleware";
 
@@ -68,6 +69,11 @@ export const onRequest = async (context, next) => {
   // Serves instantly; only touches D1 + flushes the cache if Humanitix actually changed. ---
   if (context.request.method === 'GET' && EVENTS_CACHE.test(path)) {
     await revalidateEventsIfStale(context.locals.cfContext);
+  }
+
+  // Stale-while-revalidate the Airbnb availability import so /calendar reflects real bookings.
+  if (context.request.method === 'GET' && (path === '/calendar' || path === '/calendar.ics')) {
+    await maybeRefreshAirbnb(context.locals.cfContext);
   }
 
   // Traffic-driven scheduled-newsletter processor (self-throttled via KV, ~once/3min).

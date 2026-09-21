@@ -3,16 +3,18 @@
 // across the Week/Month/Year views. Availability (green → Book on Airbnb) is computed per-day in
 // the client from these entries; days with no event and no "reserved" hold are bookable.
 import { getVisibleEvents, getCalendarItems, getOption } from './queries';
+import { getAirbnbBlocks } from './airbnb';
 import { eventSlug } from './event-slug';
 
 // Legend: blue = event/program, purple = Holy Day, amber = DRBI-reserved.
 const TYPE_COLORS = { event: '#2563eb', program: '#0e7490', holyday: '#7c3aed', reserved: '#b45309' };
 
 export async function getCalendarData() {
-  const [events, items, airbnbUrl] = await Promise.all([
+  const [events, items, airbnbUrl, airbnbBlocks] = await Promise.all([
     getVisibleEvents().catch(() => []),
     getCalendarItems().catch(() => []),
     getOption('airbnb_listing_url').catch(() => null),
+    getAirbnbBlocks().catch(() => []),
   ]);
 
   const entries = [];
@@ -40,6 +42,21 @@ export async function getCalendarData() {
       allDay: it.allDay,
       url: it.linkUrl || '',
       color: it.color || TYPE_COLORS[it.type] || TYPE_COLORS.program,
+    });
+  }
+
+  // Airbnb bookings (imported iCal) → reserved holds so a booked date never shows as open.
+  for (const b of airbnbBlocks) {
+    if (!b?.start) continue;
+    entries.push({
+      id: `abnb-${b.start}`,
+      title: b.summary || 'Booked (Airbnb)',
+      type: 'reserved',
+      start: b.start,
+      end: b.end || null,
+      allDay: true,
+      url: '',
+      color: TYPE_COLORS.reserved,
     });
   }
 

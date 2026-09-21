@@ -5,10 +5,14 @@
 export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
 import { getAllCalendarItems, getCalendarItem, getEvents, getOption } from '@lib/queries';
+import { getAirbnbBlocks } from '@lib/airbnb';
 
 const items = await getAllCalendarItems();
 const airbnbUrl = (await getOption('airbnb_listing_url')) || '';
+const airbnbIcal = (await getOption('airbnb_ical_url')) || '';
+const airbnbBlocks = await getAirbnbBlocks().catch(() => []);
 const events = (await getEvents()).filter((e) => e?.data?.visible !== false);
+const exportUrl = new URL('/calendar.ics', Astro.url.origin).href;
 
 const editId = Astro.url.searchParams.get('edit');
 const editing = editId ? await getCalendarItem(editId) : null;
@@ -31,13 +35,28 @@ const fmt = (s) => { try { return new Date(s).toLocaleDateString('en-US', { mont
 
     {saved && <p style="background:#dcfce7;border:1px solid #86efac;color:#166534;padding:.5rem .8rem;border-radius:8px;">Saved.</p>}
 
-    <!-- Airbnb listing URL -->
-    <form method="POST" action="/api/admin/calendar" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.5rem;">
+    <!-- Airbnb availability sync -->
+    <form method="POST" action="/api/admin/calendar" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.1rem 1.2rem;margin-bottom:1.5rem;">
       <input type="hidden" name="op" value="set-airbnb" />
-      <label style="font-weight:600;font-size:.9rem;">Airbnb listing URL <span style="font-weight:400;color:#64748b;">— open/available days on the calendar link here</span></label>
-      <div style="display:flex;gap:.5rem;margin-top:.4rem;">
-        <input type="url" name="airbnb_listing_url" value={airbnbUrl} placeholder="https://www.airbnb.com/rooms/…" style="flex:1;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;" />
-        <button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:8px;padding:.5rem 1rem;font-weight:600;cursor:pointer;">Save</button>
+      <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 .2rem;">🔗 Airbnb availability sync</h2>
+      <p style="color:#64748b;font-size:.85rem;margin:0 0 1rem;">Two-way link so nothing double-books: Airbnb bookings block our calendar, and our events block Airbnb.</p>
+
+      <label style="font-weight:600;font-size:.9rem;">Booking (listing) URL <span style="font-weight:400;color:#64748b;">— open days on the calendar link here to book</span></label>
+      <input type="url" name="airbnb_listing_url" value={airbnbUrl} placeholder="https://www.airbnb.com/rooms/…" style="width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;margin:.35rem 0 1rem;" />
+
+      <label style="font-weight:600;font-size:.9rem;">Import iCal URL <span style="font-weight:400;color:#64748b;">— from Airbnb → Listing → Availability → “Connect calendars” → Export</span></label>
+      <input type="url" name="airbnb_ical_url" value={airbnbIcal} placeholder="https://www.airbnb.com/calendar/ical/…ics" style="width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;margin:.35rem 0 .3rem;" />
+      <p style="color:#64748b;font-size:.8rem;margin:0 0 1rem;">
+        {airbnbIcal
+          ? `Currently importing ${airbnbBlocks.length} blocked date range${airbnbBlocks.length === 1 ? '' : 's'} from Airbnb (refreshes ~every 30 min).`
+          : 'Not set yet — until this is added, the calendar shows only DRBI events and reserved holds.'}
+      </p>
+
+      <button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:8px;padding:.5rem 1.2rem;font-weight:600;cursor:pointer;">Save</button>
+
+      <div style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid #f1f5f9;">
+        <label style="font-weight:600;font-size:.9rem;">Export iCal URL <span style="font-weight:400;color:#64748b;">— add this in Airbnb → “Connect calendars” → Import so DRBI dates block bookings</span></label>
+        <input type="text" readonly value={exportUrl} onclick="this.select()" style="width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.35rem;background:#f8fafc;color:#334155;" />
       </div>
     </form>
 
