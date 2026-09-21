@@ -62,9 +62,16 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       var root = document.getElementById('cal-root');
       var data;
       try { data = JSON.parse(document.getElementById('cal-data').textContent); } catch (e) { return; }
+      // Parse a date value as a LOCAL day. Date-only strings ("2026-09-24") otherwise parse as UTC
+      // midnight — the previous evening in Phoenix — which shifts every all-day block a day early.
+      function parseDate(s) {
+        if (!s) return new Date(NaN);
+        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s));
+        return m ? new Date(+m[1], +m[2]-1, +m[3]) : new Date(s);
+      }
       var ENTRIES = (data.entries || []).map(function (e) {
         return { title: e.title, type: e.type, variant: e.variant || '', url: e.url || '', color: e.color,
-                 s: new Date(e.start), e: new Date(e.end || e.start) };
+                 s: parseDate(e.start), e: parseDate(e.end || e.start) };
       }).filter(function (x) { return !isNaN(+x.s); });
       var AIRBNB = data.airbnbUrl || '';
       var TZ = 'America/Phoenix';
