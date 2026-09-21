@@ -28,7 +28,7 @@ export const POST = async (context) => {
     const ical = clamp(form.get('airbnb_ical_url'), 1000);
     await setOption('airbnb_ical_url', ical);
     // Pull the feed now so the imported-block count is current on the redirect (best-effort).
-    if (ical) { try { await getEnv('SESSION')?.put?.('airbnb:blocks:ts', '0'); await refreshAirbnbBlocks(); } catch {} }
+    if (ical) { try { await refreshAirbnbBlocks(); } catch {} }
     await bumpEventsCache();
     return seeOther(`${BACK}?saved=airbnb`);
   }
