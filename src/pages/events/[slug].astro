@@ -70,7 +70,14 @@ function beautifyDescription(html) {
   });
   return out;
 }
-const richDesc = beautifyDescription(d.fullDescription);
+let richDesc = beautifyDescription(d.fullDescription);
+// Link the first "First Sunday Concert Series" mention in the copy straight to the series page.
+let linkedInText = false;
+if (isConcertSeries && richDesc.includes('First Sunday Concert Series')) {
+  richDesc = richDesc.replace('First Sunday Concert Series',
+    '<a href="/concerts" style="color:#8a4a12;text-decoration:underline;">First Sunday Concert Series</a>');
+  linkedInText = true;
+}
 
 // Event JSON-LD — only emit for visible events with a start date
 const eventSchema = (!hidden && d.startDate) ? {
@@ -167,7 +174,7 @@ const eventSchema = (!hidden && d.startDate) ? {
       <div class="event-grid mx-auto max-w-5xl mt-12 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-10 lg:gap-16 lg:items-start">
         <!-- Description -->
         <div class="min-w-0">
-          {isConcertSeries && (
+          {isConcertSeries && !linkedInText && (
             <a href="/concerts" class="inline-block mb-5 text-sm font-medium text-amber-800 hover:underline">← Part of the First Sunday Concert Series</a>
           )}
           {richDesc ? (
