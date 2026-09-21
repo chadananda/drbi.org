@@ -63,7 +63,7 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       var data;
       try { data = JSON.parse(document.getElementById('cal-data').textContent); } catch (e) { return; }
       var ENTRIES = (data.entries || []).map(function (e) {
-        return { title: e.title, type: e.type, url: e.url || '', color: e.color,
+        return { title: e.title, type: e.type, variant: e.variant || '', url: e.url || '', color: e.color,
                  s: new Date(e.start), e: new Date(e.end || e.start) };
       }).filter(function (x) { return !isNaN(+x.s); });
       var AIRBNB = data.airbnbUrl || '';
@@ -86,11 +86,17 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       }
       function dayState(day) {
         var es = entriesOn(day);
-        var reserved = es.some(function (x) { return x.type === 'reserved'; });
+        var resItems = es.filter(function (x) { return x.type === 'reserved'; });
         var shown = es.filter(function (x) { return x.type !== 'reserved'; });
         var past = startOfDay(day) < startOfDay(new Date());
-        var available = !reserved && shown.length === 0 && !past;
-        return { es: es, reserved: reserved, shown: shown, available: available, past: past };
+        var available = !resItems.length && shown.length === 0 && !past;
+        return { es: es, reserved: resItems.length > 0, resItems: resItems, shown: shown, available: available, past: past };
+      }
+      // A reserved/blocked day's tag carries its real reason (Booked, Unavailable, or a DRBI hold's
+      // name) instead of a generic label; booked stays solid, turnaround/holds read lighter.
+      function resTag(x) {
+        var cls = 'cal-res-tag' + (x.variant === 'airbnb-block' ? ' is-block' : '');
+        return '<span class="' + cls + '" style="--rc:' + x.color + '">' + esc(x.title) + '</span>';
       }
       function chip(x) {
         var inner = '<span class="cal-dot" style="background:' + x.color + '"></span>' + esc(x.title);
@@ -115,7 +121,8 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
           '<div class="cal-legend">' +
           '<span><i style="background:#2563eb"></i>Event / program</span>' +
           '<span><i style="background:#7c3aed"></i>Holy Day</span>' +
-          '<span><i style="background:#b45309"></i>DRBI reserved</span>' +
+          '<span><i style="background:#b45309"></i>Booked / reserved</span>' +
+          '<span><i style="background:#c9b299"></i>Unavailable (turnaround)</span>' +
           '<span><i class="cal-legend-avail"></i>Available</span></div>';
       }
 
@@ -132,7 +139,7 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
             '<div class="cal-wday-head"><span class="cal-wday-dow">' + DOW[day.getDay()] + '</span>' +
             '<span class="cal-wday-num">' + day.getDate() + '</span></div>' +
             '<div class="cal-wday-body">';
-          if (st.reserved) html += '<span class="cal-reserved-tag">DRBI reserved</span>';
+          html += st.resItems.map(resTag).join('');
           html += st.shown.map(chip).join('');
           if (st.available) html += bookLink(day);
           html += '</div></div>';
@@ -155,7 +162,7 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
           html += '<div class="cal-cell' + (out?' is-out':'') + (st.reserved?' is-reserved':'') + (st.available?' is-avail':'') + (isToday?' is-today':'') + '"' +
             (st.available && AIRBNB ? ' data-book="1"' : '') + '>' +
             '<div class="cal-cell-num">' + day.getDate() + '</div>' +
-            '<div class="cal-cell-body">' + st.shown.slice(0,3).map(function(x){
+            '<div class="cal-cell-body">' + st.resItems.map(resTag).join('') + st.shown.slice(0,3).map(function(x){
               return '<a class="cal-cell-chip" ' + (x.url?('href="'+esc(x.url)+'"'):'') + ' style="border-color:' + x.color + '"><span class="cal-dot" style="background:'+x.color+'"></span>' + esc(x.title) + '</a>';
             }).join('') + (st.shown.length>3?('<span class="cal-more">+'+(st.shown.length-3)+' more</span>'):'') + '</div></div>';
         }
@@ -251,7 +258,10 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
     .cal-wday-body { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; min-height: 1.8rem; }
     .cal-chip { display: inline-flex; align-items: center; gap: .4rem; background: var(--color-surface, #f7f3ec); border: 1px solid var(--color-line, #e7e2d8); border-radius: 999px; padding: .28rem .7rem; font-size: .85rem; color: var(--color-ink, #2a1c0b); text-decoration: none; }
     a.cal-chip:hover { border-color: var(--color-brand, #a04607); }
-    .cal-reserved-tag { font-size: .78rem; font-weight: 600; color: #b45309; background: #fff3e0; border: 1px solid #fcd9a8; border-radius: 999px; padding: .25rem .65rem; }
+    /* Reserved/blocked tag: tinted from the entry's own color (--rc). Booked reads solid; a
+       turnaround/host block (.is-block) reads softer so it's clearly not an actual booking. */
+    .cal-res-tag { display: inline-flex; align-items: center; font-size: .78rem; font-weight: 600; color: var(--rc, #b45309); background: color-mix(in srgb, var(--rc, #b45309) 12%, #fff); border: 1px solid color-mix(in srgb, var(--rc, #b45309) 35%, #fff); border-radius: 999px; padding: .25rem .65rem; }
+    .cal-res-tag.is-block { font-weight: 500; font-style: italic; opacity: .9; }
     .cal-avail { font-size: .8rem; color: #059669; }
     a.cal-book { text-decoration: none; font-weight: 600; }
     a.cal-book:hover { text-decoration: underline; }

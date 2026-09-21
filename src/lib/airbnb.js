@@ -31,7 +31,11 @@ export function parseICal(text) {
       d.setUTCDate(d.getUTCDate() - 1);
       end = d.toISOString().slice(0, 10);
     }
-    out.push({ start, end: end && end !== start ? end : null, summary: field('SUMMARY') || 'Booked (Airbnb)' });
+    const summary = field('SUMMARY') || 'Booked (Airbnb)';
+    // Airbnb labels an actual guest stay "Reserved" and everything else (prep/turnaround padding,
+    // host manual blocks) "Airbnb (Not available)". We keep only that distinction — never the
+    // DESCRIPTION (guest phone last-4 + reservation URL), which must not reach the public page.
+    out.push({ start, end: end && end !== start ? end : null, summary, booked: /reserved/i.test(summary) });
   }
   return out;
 }

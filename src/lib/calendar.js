@@ -37,6 +37,7 @@ export async function getCalendarData() {
       id: it.id,
       title: it.title,
       type: it.type,
+      variant: it.type === 'reserved' ? 'drbi' : undefined,
       start: it.start,
       end: it.end,
       allDay: it.allDay,
@@ -45,18 +46,20 @@ export async function getCalendarData() {
     });
   }
 
-  // Airbnb bookings (imported iCal) → reserved holds so a booked date never shows as open.
+  // Airbnb blocks (imported iCal) → reserved so a taken date never shows as open. An actual guest
+  // stay ("booked") and turnaround/host padding ("blocked") stay visually distinct on the calendar.
   for (const b of airbnbBlocks) {
     if (!b?.start) continue;
     entries.push({
       id: `abnb-${b.start}`,
-      title: b.summary || 'Booked (Airbnb)',
+      title: b.booked ? 'Booked' : 'Unavailable',
       type: 'reserved',
+      variant: b.booked ? 'airbnb-booked' : 'airbnb-block',
       start: b.start,
       end: b.end || null,
       allDay: true,
       url: '',
-      color: TYPE_COLORS.reserved,
+      color: b.booked ? TYPE_COLORS.reserved : '#c9b299',
     });
   }
 
