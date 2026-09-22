@@ -3,16 +3,17 @@
 // /calendar (and /events) reflect changes immediately.
 export const prerender = false;
 import { getAdmin, seeOther } from '@lib/server/admin-guard';
-import { upsertCalendarItem, deleteCalendarItem, setOption } from '@lib/queries';
+import { upsertCalendarItem, deleteCalendarItem, getCalendarItem, setOption, setCalendarOverride, deleteCalendarOverride } from '@lib/queries';
 import { refreshAirbnbBlocks } from '@lib/airbnb';
-import { getEnv } from '@lib/runtime-env';
+import { env as cfEnv } from 'cloudflare:workers';
 
 const BACK = '/admin/calendar';
 const clamp = (s, n) => String(s || '').slice(0, n).trim();
 
 async function bumpEventsCache() {
   // Same token the middleware keys /events* on; bumping it flushes the public calendar cache.
-  try { await getEnv('SESSION')?.put?.('edge:events:v', String(Date.now())); } catch {}
+  // KV is a binding object — read it off the cloudflare:workers env, not getEnv() (which stringifies).
+  try { await (cfEnv && cfEnv.SESSION)?.put?.('edge:events:v', String(Date.now())); } catch {}
 }
 
 export const POST = async (context) => {
@@ -39,7 +40,34 @@ export const POST = async (context) => {
     return seeOther(`${BACK}?deleted=1`);
   }
 
-  // save (create or update)
+  // Quick label/link/hide from the unified manager list. Custom items update in place; auto
+  // entries (events, Airbnb) get a layered override keyed by their calendar id.
+  if (op === 'label') {
+    const key = clamp(form.get('entry_key'), 200);
+    if (!key) return seeOther(`${BACK}?error=key#manage`);
+    const kind = clamp(form.get('entry_kind'), 20);
+    const label = clamp(form.get('label'), 200);
+    const link = clamp(form.get('link_url'), 500);
+    const hidden = form.has('hidden');
+    if (kind === 'item') {
+      const item = await getCalendarItem(key);
+      if (item) {
+        await upsertCalendarItem({
+          id: key, title: label || item.title, type: item.type, start: item.start, end: item.end,
+          allDay: item.allDay, location: item.location, linkUrl: link, color: item.color,
+          notes: item.notes, visible: !hidden, createdBy: admin.email || admin.id || null,
+        });
+      }
+    } else if (!label && !link && !hidden) {
+      await deleteCalendarOverride(key); // nothing set → drop the override, revert to source
+    } else {
+      await setCalendarOverride(key, { label, linkUrl: link, hidden });
+    }
+    await bumpEventsCache();
+    return seeOther(`${BACK}?saved=1#manage`);
+  }
+
+  // save (create or update) a custom calendar item
   const title = clamp(form.get('title'), 200);
   if (!title) return seeOther(`${BACK}?error=title`);
   const start = clamp(form.get('start'), 40);
@@ -51,12 +79,12 @@ export const POST = async (context) => {
     type: clamp(form.get('type'), 20) || 'program',
     start,
     end: clamp(form.get('end'), 40) || null,
-    allDay: form.get('all_day') !== 'off',
+    allDay: form.has('all_day'),
     location: clamp(form.get('location'), 200),
     linkUrl: clamp(form.get('link_url'), 500),
     color: clamp(form.get('color'), 20),
     notes: clamp(form.get('notes'), 2000),
-    visible: form.get('visible') !== 'off',
+    visible: form.has('visible'),
     createdBy: admin.email || admin.id || null,
   });
   await bumpEventsCache();

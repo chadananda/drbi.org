@@ -1000,3 +1000,29 @@ export async function upsertCalendarItem(item: any): Promise<string> {
 export async function deleteCalendarItem(id: string): Promise<void> {
   await db.execute({ sql: 'DELETE FROM calendar_items WHERE id = ?', args: [id] });
 }
+
+// ── Calendar overrides (relabel / relink / hide auto entries: events + Airbnb) ────────────────
+// Keyed by the calendar entry id (event id, or "abnb-<start>"). Layered on top of the auto feed
+// so we never mutate the source event or the imported iCal.
+export async function getCalendarOverrides(): Promise<Record<string, { label: string; linkUrl: string; hidden: boolean }>> {
+  const r = await db.execute('SELECT entry_key, label, link_url, hidden FROM calendar_overrides');
+  const map: Record<string, any> = {};
+  for (const row of r.rows as any[]) {
+    map[row.entry_key] = { label: row.label || '', linkUrl: row.link_url || '', hidden: Number(row.hidden) === 1 };
+  }
+  return map;
+}
+
+export async function setCalendarOverride(key: string, o: { label?: string; linkUrl?: string; hidden?: boolean }): Promise<void> {
+  await db.execute({
+    sql: `INSERT INTO calendar_overrides (entry_key, label, link_url, hidden, updated_at)
+          VALUES (?,?,?,?,datetime('now'))
+          ON CONFLICT(entry_key) DO UPDATE SET
+            label=excluded.label, link_url=excluded.link_url, hidden=excluded.hidden, updated_at=datetime('now')`,
+    args: [key, o.label || null, o.linkUrl || null, o.hidden ? 1 : 0],
+  });
+}
+
+export async function deleteCalendarOverride(key: string): Promise<void> {
+  await db.execute({ sql: 'DELETE FROM calendar_overrides WHERE entry_key = ?', args: [key] });
+}

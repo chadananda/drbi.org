@@ -1,15 +1,17 @@
-// Unified calendar feed for the public /calendar page: existing events (auto, from D1) merged
-// with team-managed calendar_items. Each entry is a plain, date-ranged item the client renders
-// across the Week/Month/Year views. Availability (green → Book on Airbnb) is computed per-day in
-// the client from these entries; days with no event and no "reserved" hold are bookable.
-import { getVisibleEvents, getCalendarItems, getOption } from './queries';
+// Unified calendar feed. Merges auto events (D1) + team calendar_items + imported Airbnb blocks
+// into dated entries the /calendar page renders. Team overrides (label / link / hide), managed in
+// /admin/calendar, are layered on top by entry id so events and bookings can be relabeled/linked
+// without touching their source records. Availability (green → Book) is computed per-day client-side.
+import { getVisibleEvents, getCalendarItems, getAllCalendarItems, getOption, getCalendarOverrides } from './queries';
 import { getAirbnbBlocks } from './airbnb';
 import { eventSlug } from './event-slug';
 
-// Legend: blue = event/program, purple = Holy Day, amber = DRBI-reserved.
+// Legend: blue = event/program, purple = Holy Day, amber = booked/in use.
 const TYPE_COLORS = { event: '#2563eb', program: '#0e7490', holyday: '#7c3aed', reserved: '#b45309' };
 
-export async function getCalendarData() {
+// Build the raw, un-overridden entry list (+ airbnbUrl). Each entry has a stable `id` (the override
+// key), a `kind` (event | item | airbnb) for the admin editor, and its base label/link.
+async function buildEntries() {
   const [events, items, airbnbUrl, airbnbBlocks] = await Promise.all([
     getVisibleEvents().catch(() => []),
     getCalendarItems().catch(() => []),
@@ -22,51 +24,77 @@ export async function getCalendarData() {
     const d = ev.data || {};
     if (!d.startDate) continue;
     entries.push({
-      id: ev.id,
+      id: ev.id, kind: 'event', type: 'event',
       title: d.name || d.title || 'Event',
-      type: 'event',
-      start: d.startDate,
-      end: d.endDate || null,
-      allDay: false,
-      url: `/events/${eventSlug(ev)}`,
-      color: TYPE_COLORS.event,
+      start: d.startDate, end: d.endDate || null, allDay: false,
+      url: `/events/${eventSlug(ev)}`, color: TYPE_COLORS.event,
     });
   }
   for (const it of items) {
     entries.push({
-      id: it.id,
-      title: it.title,
-      type: it.type,
+      id: it.id, kind: 'item', type: it.type,
       variant: it.type === 'reserved' ? 'drbi' : undefined,
-      start: it.start,
-      end: it.end,
-      allDay: it.allDay,
-      url: it.linkUrl || '',
-      color: it.color || TYPE_COLORS[it.type] || TYPE_COLORS.program,
+      title: it.title, start: it.start, end: it.end, allDay: it.allDay,
+      url: it.linkUrl || '', color: it.color || TYPE_COLORS[it.type] || TYPE_COLORS.program,
     });
   }
-
-  // Airbnb blocks (imported iCal) → reserved so a taken date never shows as open. An actual guest
-  // stay ("booked") and turnaround/host padding ("blocked") stay visually distinct on the calendar.
+  // Airbnb blocks: an actual stay ("booked") is labeled by source ("Airbnb"); turnaround/host
+  // padding blocks the day but carries no label (kept off the public grid, still not bookable).
   for (const b of airbnbBlocks) {
     if (!b?.start) continue;
-    // Actual guest stay → labeled by its source ("Airbnb"). Turnaround/host padding → still blocks
-    // the day (never shown bookable) but carries no label, so the public calendar isn't cluttered
-    // with cleaning days. The client hides the label for the 'airbnb-block' variant.
     entries.push({
-      id: `abnb-${b.start}`,
-      title: b.booked ? 'Airbnb' : '',
-      type: 'reserved',
+      id: `abnb-${b.start}`, kind: 'airbnb', type: 'reserved',
       variant: b.booked ? 'airbnb-booked' : 'airbnb-block',
-      start: b.start,
-      end: b.end || null,
-      allDay: true,
-      url: '',
-      color: b.booked ? TYPE_COLORS.reserved : '#c9b299',
+      title: b.booked ? 'Airbnb' : '',
+      start: b.start, end: b.end || null, allDay: true,
+      url: '', color: b.booked ? TYPE_COLORS.reserved : '#c9b299',
     });
   }
-
-  // Stable order by start; the client re-buckets by day/week/month.
-  entries.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
   return { entries, airbnbUrl: airbnbUrl || '' };
+}
+
+// Public feed: apply overrides (relabel / relink / hide) and drop hidden entries.
+export async function getCalendarData() {
+  const [{ entries, airbnbUrl }, overrides] = await Promise.all([
+    buildEntries(),
+    getCalendarOverrides().catch(() => ({})),
+  ]);
+  const out = [];
+  for (const e of entries) {
+    const o = overrides[e.id];
+    if (o && o.hidden) continue;
+    out.push({ ...e, title: (o && o.label) ? o.label : e.title, url: (o && o.linkUrl) ? o.linkUrl : e.url });
+  }
+  out.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  return { entries: out, airbnbUrl };
+}
+
+// Admin manager: one row per calendar entry (events + ALL custom items incl. hidden + Airbnb
+// blocks) with its base label/link and any override, so the team can relabel/relink/hide anything.
+export async function getAdminCalendarEntries() {
+  const [events, items, airbnbBlocks, overrides] = await Promise.all([
+    getVisibleEvents().catch(() => []),
+    getAllCalendarItems().catch(() => []),
+    getAirbnbBlocks().catch(() => []),
+    getCalendarOverrides().catch(() => ({})),
+  ]);
+  const rows = [];
+  for (const ev of events) {
+    const d = ev.data || {};
+    if (!d.startDate) continue;
+    rows.push({ id: ev.id, kind: 'event', type: 'event', baseTitle: d.name || d.title || 'Event',
+      baseUrl: `/events/${eventSlug(ev)}`, start: d.startDate, end: d.endDate || null, override: overrides[ev.id] || null });
+  }
+  for (const it of items) {
+    rows.push({ id: it.id, kind: 'item', type: it.type, baseTitle: it.title, baseUrl: it.linkUrl || '',
+      start: it.start, end: it.end, itemHidden: !it.visible, override: null });
+  }
+  for (const b of airbnbBlocks) {
+    if (!b?.start) continue;
+    const id = `abnb-${b.start}`;
+    rows.push({ id, kind: 'airbnb', type: 'reserved', booked: !!b.booked,
+      baseTitle: b.booked ? 'Airbnb booking' : 'Airbnb — unavailable', baseUrl: '',
+      start: b.start, end: b.end || null, override: overrides[id] || null });
+  }
+  return rows.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 }

@@ -68,6 +68,17 @@ CREATE TABLE IF NOT EXISTS calendar_items (
 CREATE INDEX IF NOT EXISTS idx_calendar_items_start ON calendar_items(start_date);
 CREATE INDEX IF NOT EXISTS idx_calendar_items_visible ON calendar_items(visible);
 
+-- Team overrides for AUTO calendar entries (events + imported Airbnb blocks): relabel, relink, or
+-- hide them on the public calendar without mutating the source. Keyed by the entry id shown in the
+-- feed (event id, or "abnb-<start>"). Managed in /admin/calendar.
+CREATE TABLE IF NOT EXISTS calendar_overrides (
+  entry_key TEXT PRIMARY KEY,             -- calendar entry id (event id | abnb-<start>)
+  label TEXT,                             -- display label override (null = keep source)
+  link_url TEXT,                          -- link override (null = keep source)
+  hidden INTEGER NOT NULL DEFAULT 0,      -- 1 = hide from the public calendar
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Per-event internal coordination thread (meals, volunteers, logistics). DRBI-only, separate
 -- from the Humanitix-synced event content — any signed-in team member (staff) can read + post.
 CREATE TABLE IF NOT EXISTS event_thread (

@@ -87,9 +87,9 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       function esc(s) { return String(s==null?'':s).replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
       var today = startOfDay(new Date());
-      // Two stacked views on one page: this month, and a rolling 12-month year (current month →
-      // +11). Each navigates independently; a year tile expands inline below.
-      var state = { month: firstOfMonth(today), yearStart: firstOfMonth(today), expanded: null, scrollExp: false };
+      // Two stacked views on one page: this month (grid), then a rolling 12-month year that starts
+      // the month AFTER this one (this month is already shown above, so we don't repeat it).
+      var state = { month: firstOfMonth(today), yearStart: addMonths(firstOfMonth(today), 1), expanded: null, scrollExp: false };
 
       // Entries overlapping a given day (inclusive of multi-day ranges).
       function entriesOn(day) {

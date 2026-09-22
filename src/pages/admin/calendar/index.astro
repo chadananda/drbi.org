@@ -4,15 +4,29 @@
 // Events themselves stay editable under /admin/events and are shown here read-only.
 export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
-import { getAllCalendarItems, getCalendarItem, getEvents, getOption } from '@lib/queries';
+import { getCalendarItem, getOption } from '@lib/queries';
 import { getAirbnbBlocks } from '@lib/airbnb';
+import { getAdminCalendarEntries } from '@lib/calendar';
 
-const items = await getAllCalendarItems();
 const airbnbUrl = (await getOption('airbnb_listing_url')) || '';
 const airbnbIcal = (await getOption('airbnb_ical_url')) || '';
 const airbnbBlocks = await getAirbnbBlocks().catch(() => []);
-const events = (await getEvents()).filter((e) => e?.data?.visible !== false);
 const exportUrl = new URL('/calendar.ics', Astro.url.origin).href;
+
+// Unified manager rows: events + custom items + Airbnb blocks. Window to recent + future so the
+// list stays focused (drop entries that ended more than ~6 weeks ago).
+const cutoff = Date.now() - 42 * 864e5;
+const manageRows = (await getAdminCalendarEntries().catch(() => []))
+  .filter((r) => new Date(r.end || r.start).getTime() >= cutoff);
+
+const KIND_BADGE = {
+  event: { label: 'Event', bg: '#dbeafe', fg: '#1e40af' },
+  item: { label: 'Item', bg: '#e0f2fe', fg: '#0e7490' },
+  airbnb: { label: 'Airbnb', bg: '#fef3c7', fg: '#b45309' },
+};
+const rowLabelValue = (r) => (r.kind === 'item' ? r.baseTitle : (r.override ? r.override.label : '') || '');
+const rowLinkValue = (r) => (r.kind === 'item' ? r.baseUrl : (r.override ? r.override.linkUrl : '') || '');
+const rowHidden = (r) => (r.kind === 'item' ? !!r.itemHidden : !!(r.override && r.override.hidden));
 
 const editId = Astro.url.searchParams.get('edit');
 const editing = editId ? await getCalendarItem(editId) : null;
@@ -61,7 +75,7 @@ const fmt = (s) => { try { return new Date(s).toLocaleDateString('en-US', { mont
     </form>
 
     <!-- Add / edit item -->
-    <form method="POST" action="/api/admin/calendar" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;">
+    <form id="add" method="POST" action="/api/admin/calendar" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;">
       <input type="hidden" name="op" value="save" />
       <input type="hidden" name="id" value={editing?.id || ''} />
       <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 .9rem;">{editing ? 'Edit item' : 'Add calendar item'}</h2>
@@ -102,38 +116,35 @@ const fmt = (s) => { try { return new Date(s).toLocaleDateString('en-US', { mont
       </div>
     </form>
 
-    <!-- Existing items -->
-    <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 .6rem;">Calendar items ({items.length})</h2>
-    {items.length === 0 ? (
-      <p style="color:#64748b;">No calendar items yet. Add one above.</p>
-    ) : (
-      <table style="width:100%;border-collapse:collapse;font-size:.9rem;">
-        <thead><tr style="text-align:left;color:#64748b;border-bottom:1px solid #e2e8f0;">
-          <th style="padding:.5rem;">When</th><th>Title</th><th>Type</th><th></th><th></th>
-        </tr></thead>
-        <tbody>
-          {items.map((it) => (
-            <tr style="border-bottom:1px solid #f1f5f9;">
-              <td style="padding:.5rem;white-space:nowrap;">{fmt(it.start)}{it.end ? ` – ${fmt(it.end)}` : ''}</td>
-              <td>{it.title}{!it.visible && <span style="color:#b45309;"> (hidden)</span>}</td>
-              <td style="text-transform:capitalize;color:#64748b;">{it.type}</td>
-              <td><a href={`/admin/calendar?edit=${it.id}`}>Edit</a></td>
-              <td>
-                <form method="POST" action="/api/admin/calendar" onsubmit="return confirm('Delete this item?')" style="display:inline;">
-                  <input type="hidden" name="op" value="delete" /><input type="hidden" name="id" value={it.id} />
-                  <button type="submit" style="background:none;border:none;color:#dc2626;cursor:pointer;">Delete</button>
-                </form>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    )}
+    <!-- Unified manager: label / link / hide anything on the calendar -->
+    <h2 id="manage" style="font-size:1.05rem;font-weight:700;margin:0 0 .3rem;">Manage everything on the calendar ({manageRows.length})</h2>
+    <p style="color:#64748b;font-size:.85rem;margin:0 0 1rem;">Rename how any entry appears, point it at a link, or hide it. Events &amp; Airbnb bookings are pulled in automatically — your changes here layer on top without altering the source. Leave a label blank to keep the original.</p>
 
-    <!-- Auto-included events (read-only) -->
-    <h2 style="font-size:1.05rem;font-weight:700;margin:2rem 0 .6rem;">Events on the calendar (auto — edit under <a href="/admin/events">Events</a>)</h2>
-    <ul style="color:#475569;font-size:.9rem;line-height:1.7;padding-left:1.1rem;">
-      {events.slice(0, 40).map((e) => <li>{fmt(e.data.startDate)} — {e.data.name || e.data.title}</li>)}
-    </ul>
+    {manageRows.length === 0 ? (
+      <p style="color:#64748b;">Nothing on the calendar yet.</p>
+    ) : (
+      <div style="display:flex;flex-direction:column;gap:.5rem;">
+        {manageRows.map((r) => (
+          <form method="POST" action="/api/admin/calendar" style={`display:grid;grid-template-columns:8.5rem 1fr 1fr auto auto;gap:.5rem;align-items:center;background:#fff;border:1px solid ${rowHidden(r) ? '#fcd9a8' : '#e2e8f0'};border-radius:10px;padding:.55rem .7rem;`}>
+            <input type="hidden" name="op" value="label" />
+            <input type="hidden" name="entry_key" value={r.id} />
+            <input type="hidden" name="entry_kind" value={r.kind} />
+            <div style="min-width:0;">
+              <div style="font-size:.72rem;color:#64748b;white-space:nowrap;">{fmt(r.start)}{r.end && r.end !== r.start ? ` – ${fmt(r.end)}` : ''}</div>
+              <span style={`display:inline-block;margin-top:.15rem;font-size:.66rem;font-weight:700;padding:.05rem .4rem;border-radius:999px;background:${KIND_BADGE[r.kind].bg};color:${KIND_BADGE[r.kind].fg};`}>{KIND_BADGE[r.kind].label}</span>
+            </div>
+            <input name="label" value={rowLabelValue(r)} placeholder={r.baseTitle || '(label)'} title="Display label" style="min-width:0;padding:.4rem .55rem;border:1px solid #cbd5e1;border-radius:7px;font-size:.85rem;" />
+            <input name="link_url" value={rowLinkValue(r)} placeholder={r.baseUrl || 'link (optional)'} title="Link URL" style="min-width:0;padding:.4rem .55rem;border:1px solid #cbd5e1;border-radius:7px;font-size:.85rem;" />
+            <label style="display:flex;align-items:center;gap:.3rem;font-size:.78rem;color:#64748b;white-space:nowrap;" title="Hide from the public calendar">
+              <input type="checkbox" name="hidden" checked={rowHidden(r)} /> Hide
+            </label>
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:7px;padding:.4rem .8rem;font-size:.82rem;font-weight:600;cursor:pointer;">Save</button>
+              {r.kind === 'item' && <a href={`/admin/calendar?edit=${r.id}#add`} style="font-size:.78rem;color:#64748b;" title="Full edit (dates, type, notes)">Edit</a>}
+            </div>
+          </form>
+        ))}
+      </div>
+    )}
   </div>
 </Layout>
