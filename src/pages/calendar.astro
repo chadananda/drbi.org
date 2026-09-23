@@ -1,28 +1,75 @@
 ---
-// Public DRBI calendar. Aggregates events (auto) + team-managed calendar_items, rendered as
-// Week (default) / Month / Year views. Custom, dependency-light: SSR embeds the data + a no-JS
-// agenda fallback; a small inline script renders the views client-side (instant switching, no
-// per-view URLs so the edge cache stays simple). Availability (green → Book on Airbnb) is
-// computed per day. See docs/calendar-spec.md.
+// Public DRBI calendar — an editorial "what's on" experience, not just a grid. Leads with a
+// featured next event and an image-rich season programme (both SSR, using event photos + pages),
+// then a warm, refined Month + Year availability view (client-rendered from the embedded feed).
+// Design language matches the site's letterpress programme: Fraunces/Newsreader, warm paper, brass.
 export const prerender = false;
 import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import PageHero from "@components/PageHero.astro";
 import { getCalendarData } from "@lib/calendar";
+import { imagekitUrl } from "../utils/utils.js";
 
+const FALLBACK = "https://cdn.shrtr.com/drbi.org/site/drbi/events.webp";
+const AZ = "America/Phoenix";
 const { entries, airbnbUrl } = await getCalendarData();
 
-// Server-side agenda fallback (no-JS / SEO): next ~25 upcoming entries.
+// Grid feed: add a tiny face-cropped thumbnail to event entries so month cells can show a photo.
+const gridEntries = entries.map((e) =>
+  e.type === "event" ? { ...e, thumb: imagekitUrl(e.image || FALLBACK, { w: 96, h: 96, face: true }) } : e
+);
+
+// Showcase: upcoming events, sorted, with parsed dates.
 const now = new Date();
+const sod = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const upcoming = entries
-  .filter((e) => new Date(e.end || e.start) >= now)
-  .slice(0, 25);
-const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "America/Phoenix" }); } catch { return ""; } };
+  .filter((e) => e.type === "event" && e.start)
+  .map((e) => ({ ...e, _s: new Date(e.start), _e: new Date(e.end || e.start) }))
+  .filter((e) => !isNaN(+e._s) && e._e >= now)
+  .sort((a, b) => a._s - b._s);
+
+const feature = upcoming[0] || null;
+const rest = upcoming.slice(1); // the feature is highlighted above; list the remainder
+
+// Group the remainder by month for elegant dividers.
+const groups = [];
+for (const e of rest) {
+  const key = e._s.getFullYear() * 12 + e._s.getMonth();
+  let g = groups[groups.length - 1];
+  if (!g || g.key !== key) { g = { key, label: e._s.toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: AZ }), items: [] }; groups.push(g); }
+  g.items.push(e);
+}
+
+// Date helpers.
+const moAbbr = (d) => d.toLocaleDateString("en-US", { month: "short", timeZone: AZ }).toUpperCase();
+const dayN = (d) => d.toLocaleDateString("en-US", { day: "numeric", timeZone: AZ });
+const isRange = (e) => e._e.toDateString() !== e._s.toDateString();
+const dayStamp = (e) => (isRange(e) ? `${dayN(e._s)}–${dayN(e._e)}` : dayN(e._s));
+const durDays = (e) => Math.round((sod(e._e) - sod(e._s)) / 864e5) + 1;
+const whenLong = (e) => {
+  const s = e._s, en = e._e;
+  const wd = (d) => d.toLocaleDateString("en-US", { weekday: "long", timeZone: AZ });
+  const md = (d) => d.toLocaleDateString("en-US", { month: "long", day: "numeric", timeZone: AZ });
+  if (!isRange(e)) return `${wd(s)}, ${md(s)}`;
+  const sameMonth = s.getMonth() === en.getMonth() && s.getFullYear() === en.getFullYear();
+  return sameMonth ? `${md(s)}–${dayN(en)}, ${en.getFullYear()}` : `${md(s)} – ${md(en)}, ${en.getFullYear()}`;
+};
+const kindLabel = (e) => (isRange(e) ? `${durDays(e)}-day ${/(retreat|intensive|challenge)/i.test(e.title + " " + (e.category || "")) ? "retreat" : "program"}` : "");
+const featImg = (e) => imagekitUrl(e.image || FALLBACK, { w: 1360, h: 760, face: true });
+const rowImg = (e) => imagekitUrl(e.image || FALLBACK, { w: 220, h: 220, face: true });
+
+// No-JS / SEO agenda fallback for the grid area.
+const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: AZ }); } catch { return ""; } };
+const agenda = entries.filter((e) => new Date(e.end || e.start) >= now).slice(0, 20);
 ---
 
 <Layout
   title="Calendar — Desert Rose Bahá'í Institute"
-  description="Upcoming programs, concerts, retreats and events at Desert Rose Bahá'í Institute — and open dates you can book.">
+  description="Upcoming programs, concerts, retreats and events at Desert Rose Bahá'í Institute — and open dates you can book for your own gathering.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" />
 
   <PageHero
     label="What's happening"
@@ -32,38 +79,93 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
     imageAlt="Desert sunset over Desert Rose Bahá'í Institute"
   />
 
-  <section class="py-16 bg-surface">
+  <div class="calx">
     <Container>
-      <div id="cal-root" data-airbnb={airbnbUrl}>
-        <!-- No-JS fallback: a simple upcoming agenda. Replaced by the interactive calendar on load. -->
-        <div class="cal-fallback">
-          <h2 class="cal-fallback-h">Upcoming</h2>
-          {upcoming.length === 0 ? (
-            <p class="cal-muted">No upcoming items.</p>
-          ) : (
-            <ul class="cal-fallback-list">
-              {upcoming.map((e) => (
-                <li>
-                  <span class="cal-fallback-date">{fmtDay(e.start)}</span>
-                  {e.url ? <a href={e.url}>{e.title}</a> : <span>{e.title}</span>}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-    </Container>
-  </section>
 
-  <script type="application/json" id="cal-data" is:inline set:html={JSON.stringify({ entries, airbnbUrl })}></script>
+      {feature && (
+        <section class="cx-block">
+          <p class="cx-kicker">Next at Desert Rose</p>
+          <a class="cxf" href={feature.url}>
+            <div class="cxf-media">
+              <img src={featImg(feature)} alt={feature.title} width="1360" height="760" loading="lazy" decoding="async" />
+            </div>
+            <span class="cxf-stamp"><b>{dayStamp(feature)}</b><i>{moAbbr(feature._s)}</i></span>
+            <div class="cxf-body">
+              {feature.category && <span class="cx-tag">{feature.category}</span>}
+              <h2 class="cxf-title">{feature.title}</h2>
+              <p class="cxf-when">{whenLong(feature)}{isRange(feature) ? ` · ${durDays(feature)} days` : ""} · Desert Rose, Eloy AZ</p>
+              {feature.teaser && <p class="cxf-teaser">{feature.teaser}</p>}
+              <span class="cxf-cta">Explore this gathering →</span>
+            </div>
+          </a>
+        </section>
+      )}
+
+      <section class="cx-block">
+        <p class="cx-kicker">The season ahead</p>
+        <h2 class="cx-h2">Programs, concerts &amp; retreats</h2>
+        {groups.length === 0 ? (
+          <p class="cx-empty">{feature ? "Nothing more on the calendar just yet — check back soon." : "No upcoming programs are scheduled right now — check back soon."}</p>
+        ) : (
+          <div class="cx-season">
+            {groups.map((g) => (
+              <div class="cx-mgroup">
+                <div class="cx-mrule"><span>{g.label}</span></div>
+                {g.items.map((e) => (
+                  <a class="cxr" href={e.url}>
+                    <div class="cxr-date"><span class="cxr-day">{dayStamp(e)}</span><span class="cxr-mo">{moAbbr(e._s)}</span></div>
+                    <div class="cxr-thumb"><img src={rowImg(e)} alt="" width="220" height="220" loading="lazy" decoding="async" /></div>
+                    <div class="cxr-main">
+                      <h3 class="cxr-title">{e.title}</h3>
+                      <div class="cxr-meta">
+                        {e.category && <span class="cx-tag cx-tag--sm">{e.category}</span>}
+                        {kindLabel(e) && <span class="cxr-dur">{kindLabel(e)}</span>}
+                      </div>
+                      {e.teaser && <p class="cxr-teaser">{e.teaser}</p>}
+                    </div>
+                    <span class="cxr-go" aria-hidden="true">→</span>
+                  </a>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section class="cx-block">
+        <p class="cx-kicker">Availability</p>
+        <h2 class="cx-h2">Month &amp; year at a glance</h2>
+        <p class="cx-lede">Green days are open — available to book for your own retreat or gathering. Tap a month in the year view to open it.</p>
+
+        <div id="cal-root" data-airbnb={airbnbUrl}>
+          <div class="cal-fallback">
+            <h3 class="cal-fallback-h">Upcoming</h3>
+            {agenda.length === 0 ? (
+              <p class="cx-muted">No upcoming items.</p>
+            ) : (
+              <ul class="cal-fallback-list">
+                {agenda.map((e) => (
+                  <li>
+                    <span class="cal-fallback-date">{fmtDay(e.start)}</span>
+                    {e.url ? <a href={e.url}>{e.title}</a> : <span>{e.title}</span>}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </section>
+
+    </Container>
+  </div>
+
+  <script type="application/json" id="cal-data" is:inline set:html={JSON.stringify({ entries: gridEntries, airbnbUrl })}></script>
 
   <script is:inline>
     (function () {
       var root = document.getElementById('cal-root');
       var data;
       try { data = JSON.parse(document.getElementById('cal-data').textContent); } catch (e) { return; }
-      // Parse a date value as a LOCAL day. Date-only strings ("2026-09-24") otherwise parse as UTC
-      // midnight — the previous evening in Phoenix — which shifts every all-day block a day early.
       function parseDate(s) {
         if (!s) return new Date(NaN);
         var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s));
@@ -71,10 +173,9 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       }
       var ENTRIES = (data.entries || []).map(function (e) {
         return { title: e.title, type: e.type, variant: e.variant || '', url: e.url || '', color: e.color,
-                 s: parseDate(e.start), e: parseDate(e.end || e.start) };
+                 thumb: e.thumb || '', s: parseDate(e.start), e: parseDate(e.end || e.start) };
       }).filter(function (x) { return !isNaN(+x.s); });
       var AIRBNB = data.airbnbUrl || '';
-      var TZ = 'America/Phoenix';
       var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
       var DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
@@ -83,15 +184,12 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       function firstOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
       function addMonths(d, n) { return new Date(d.getFullYear(), d.getMonth()+n, 1); }
       function sameYMD(a, b) { return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
-      function startOfWeek(d) { var x = startOfDay(d); x.setDate(x.getDate()-x.getDay()); return x; } // Sunday
+      function startOfWeek(d) { var x = startOfDay(d); x.setDate(x.getDate()-x.getDay()); return x; }
       function esc(s) { return String(s==null?'':s).replace(/[&<>"]/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
       var today = startOfDay(new Date());
-      // Two stacked views on one page: this month (grid), then a rolling 12-month year that starts
-      // the month AFTER this one (this month is already shown above, so we don't repeat it).
       var state = { month: firstOfMonth(today), yearStart: addMonths(firstOfMonth(today), 1), expanded: null, scrollExp: false };
 
-      // Entries overlapping a given day (inclusive of multi-day ranges).
       function entriesOn(day) {
         var d0 = startOfDay(day).getTime(), d1 = addDays(d0, 1).getTime();
         return ENTRIES.filter(function (x) { return startOfDay(x.s).getTime() < d1 && x.e.getTime() >= d0; });
@@ -99,27 +197,23 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       function dayState(day) {
         var es = entriesOn(day);
         var resItems = es.filter(function (x) { return x.type === 'reserved'; });
-        // Turnaround/cleaning padding ('airbnb-block') blocks the day but is never labeled — the
-        // public calendar shows events and actual bookings, not housekeeping.
         var labeled = resItems.filter(function (x) { return x.variant !== 'airbnb-block'; });
         var shown = es.filter(function (x) { return x.type !== 'reserved'; });
         var past = startOfDay(day) < today;
         var reserved = resItems.length > 0;
         var available = !reserved && shown.length === 0 && !past;
-        var blockOnly = reserved && !labeled.length && !shown.length; // only cleaning/host block
+        var blockOnly = reserved && !labeled.length && !shown.length;
         return { reserved: reserved, labeled: labeled, shown: shown, available: available, blockOnly: blockOnly, past: past };
       }
       function dayClasses(st, isToday) {
         return (st.blockOnly ? ' is-blocked' : (st.reserved ? ' is-reserved' : '')) +
                (st.available ? ' is-avail' : '') + (st.past ? ' is-past' : '') + (isToday ? ' is-today' : '');
       }
-      // A booking/hold tag carries its type of use ("Airbnb", or a DRBI hold's title), tinted from
-      // the entry's own color (--rc). Cleaning days produce no tag.
       function resTag(x) { return '<span class="cal-res-tag" style="--rc:' + x.color + '">' + esc(x.title) + '</span>'; }
-      function chip(x) {
-        var inner = '<span class="cal-dot" style="background:' + x.color + '"></span>' + esc(x.title);
-        return x.url ? '<a class="cal-chip" href="' + esc(x.url) + '">' + inner + '</a>'
-                     : '<span class="cal-chip">' + inner + '</span>';
+      function eventChip(x) {
+        var media = x.thumb ? '<img class="cal-cell-thumb" src="' + esc(x.thumb) + '" alt="" loading="lazy" decoding="async"/>'
+                            : '<span class="cal-dot" style="background:' + x.color + '"></span>';
+        return '<a class="cal-cell-chip" ' + (x.url ? ('href="' + esc(x.url) + '"') : '') + ' style="--rc:' + x.color + '">' + media + '<span class="cal-cell-nm">' + esc(x.title) + '</span></a>';
       }
       function bookLink() {
         if (!AIRBNB) return '<span class="cal-avail">Available</span>';
@@ -128,19 +222,19 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
 
       function legend() {
         return '<div class="cal-legend">' +
-          '<span><i style="background:#2563eb"></i>Event / program</span>' +
-          '<span><i style="background:#7c3aed"></i>Holy Day</span>' +
-          '<span><i style="background:#b45309"></i>Booked / in use</span>' +
+          '<span><i style="background:#356b63"></i>Event / program</span>' +
+          '<span><i style="background:#7a5a86"></i>Holy Day</span>' +
+          '<span><i style="background:#b0692c"></i>Booked / in use</span>' +
           '<span><i class="cal-legend-avail"></i>Available to book</span></div>';
       }
-      function navBtns(scope) {
+      function navBtns() {
         return '<div class="cal-nav">' +
-          '<button data-nav="prev" data-scope="' + scope + '" aria-label="Previous">‹</button>' +
-          '<button data-nav="today" data-scope="' + scope + '">Today</button>' +
-          '<button data-nav="next" data-scope="' + scope + '" aria-label="Next">›</button></div>';
+          '<button data-nav="prev" aria-label="Previous month">‹</button>' +
+          '<button data-nav="today">Today</button>' +
+          '<button data-nav="next" aria-label="Next month">›</button></div>';
       }
       function sectionHead(title, sub, controls) {
-        return '<div class="cal-sec-head"><h2 class="cal-sec-title">' + esc(title) + '</h2>' +
+        return '<div class="cal-sec-head"><h3 class="cal-sec-title">' + esc(title) + '</h3>' +
           (sub ? '<span class="cal-sec-sub">' + esc(sub) + '</span>' : '') + (controls || '') + '</div>';
       }
 
@@ -155,9 +249,9 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
           var cls = out ? ' is-out' : dayClasses(st, sameYMD(day, today));
           html += '<div class="cal-cell' + cls + '"' + ((!out && st.available && AIRBNB) ? ' data-book="1"' : '') + '>' +
             '<div class="cal-cell-num">' + day.getDate() + '</div>' +
-            '<div class="cal-cell-body">' + (out ? '' : (st.labeled.map(resTag).join('') + st.shown.slice(0,3).map(function(x){
-              return '<a class="cal-cell-chip" ' + (x.url?('href="'+esc(x.url)+'"'):'') + ' style="border-color:' + x.color + '"><span class="cal-dot" style="background:'+x.color+'"></span>' + esc(x.title) + '</a>';
-            }).join('') + (st.shown.length>3?('<span class="cal-more">+'+(st.shown.length-3)+' more</span>'):''))) + '</div></div>';
+            '<div class="cal-cell-body">' + (out ? '' : (st.labeled.map(resTag).join('') + st.shown.slice(0,3).map(eventChip).join('') +
+              (st.shown.length>3?('<span class="cal-more">+'+(st.shown.length-3)+' more</span>'):'') +
+              (st.available && AIRBNB ? '<span class="cal-open">Open</span>' : ''))) + '</div></div>';
         }
         return html + '</div></div>';
       }
@@ -192,10 +286,9 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
       function render() {
         var yEnd = addMonths(state.yearStart, 11);
         var ySub = MONTHS[state.yearStart.getMonth()].slice(0,3) + ' ' + state.yearStart.getFullYear() + ' – ' + MONTHS[yEnd.getMonth()].slice(0,3) + ' ' + yEnd.getFullYear();
-
         root.innerHTML = '<div class="cal">' + legend() +
-          '<section class="cal-sec">' + sectionHead(MONTHS[state.month.getMonth()] + ' ' + state.month.getFullYear(), '', navBtns('month')) + renderMonthGrid(state.month) + '</section>' +
-          '<section class="cal-sec">' + sectionHead('The year ahead', ySub, '') + '<p class="cal-sec-hint">Tap a month to open it.</p>' + renderYear() + '</section>' +
+          '<div class="cal-sec">' + sectionHead(MONTHS[state.month.getMonth()] + ' ' + state.month.getFullYear(), '', navBtns()) + renderMonthGrid(state.month) + '</div>' +
+          '<div class="cal-sec">' + sectionHead('The year ahead', ySub, '') + '<p class="cal-sec-hint">Tap a month to open it.</p>' + renderYear() + '</div>' +
           '</div>';
         wire();
         if (state.scrollExp && state.expanded != null) {
@@ -229,87 +322,145 @@ const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { w
   </script>
 
   <style is:global>
-    .cal-fallback-h { font-family: 'Merriweather', Georgia, serif; font-size: 1.4rem; margin: 0 0 1rem; }
-    .cal-fallback-list { list-style: none; padding: 0; margin: 0; max-width: 40rem; }
-    .cal-fallback-list li { display: flex; gap: 1rem; padding: .5rem 0; border-bottom: 1px solid var(--color-line, #e7e2d8); }
-    .cal-fallback-date { color: var(--color-muted, #8b847a); min-width: 7rem; }
-    .cal-muted { color: var(--color-muted, #8b847a); }
+    /* ── Warm "programme" design system, scoped to the calendar ─────────────────────────── */
+    .calx {
+      --paper: #f6efe2; --card: #fffdf8; --ink: #2b2013; --ink2: #5f5341; --muted: #938674;
+      --line: #e6dcc7; --rose: #a04607; --rose2: #8a4a12; --gold: #bd8a3f; --sage: #6f8a72;
+      --shadow: 0 22px 48px -28px rgba(74,48,20,.55); --shadow-sm: 0 8px 20px -14px rgba(74,48,20,.5);
+      background: var(--paper);
+      background-image: radial-gradient(120% 60% at 50% -10%, rgba(189,138,63,.08), transparent 60%);
+      color: var(--ink);
+      font-family: 'Newsreader', Georgia, serif;
+      padding: clamp(2.5rem, 6vw, 4.5rem) 0 4.5rem;
+    }
+    .calx :where(h2, h3) { font-family: 'Fraunces', Georgia, serif; }
 
-    .cal { max-width: 68rem; margin: 0 auto; }
-    /* Stacked sections: week, month, year — each with its own header + nav. */
-    .cal-sec { margin-bottom: 3.5rem; }
+    .cx-block { margin: 0 auto clamp(3rem, 7vw, 5rem); max-width: 66rem; }
+    .cx-block:last-child { margin-bottom: 0; }
+    .cx-kicker { font-size: .72rem; letter-spacing: .24em; text-transform: uppercase; color: var(--rose); font-family: 'Newsreader', Georgia, serif; font-weight: 600; margin: 0 0 .5rem; }
+    .cx-h2 { font-weight: 400; font-size: clamp(1.6rem, 3.4vw, 2.1rem); line-height: 1.1; color: var(--ink); margin: 0 0 .5rem; letter-spacing: -.01em; }
+    .cx-lede, .cx-empty { color: var(--ink2); font-size: 1.02rem; line-height: 1.6; margin: 0 0 1.6rem; max-width: 44rem; }
+    .cx-muted { color: var(--muted); }
+    .cx-tag { display: inline-block; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; font-family: 'Newsreader', Georgia, serif; font-weight: 600; color: var(--rose2); background: rgba(189,138,63,.14); border-radius: 999px; padding: .22rem .6rem; }
+    .cx-tag--sm { font-size: .62rem; padding: .16rem .5rem; }
+
+    /* Featured next event */
+    .cxf { position: relative; display: block; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); color: #fff; text-decoration: none; isolation: isolate; }
+    .cxf-media { aspect-ratio: 16 / 8.2; background: linear-gradient(135deg, #efe6d4, #e4d7bf); }
+    .cxf-media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .7s cubic-bezier(.2,.7,.2,1); }
+    .cxf:hover .cxf-media img { transform: scale(1.04); }
+    .cxf::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(30,18,6,.86) 8%, rgba(30,18,6,.35) 42%, rgba(30,18,6,.05) 70%); z-index: 1; }
+    .cxf-stamp { position: absolute; top: 1.1rem; left: 1.1rem; z-index: 2; display: grid; justify-items: center; background: rgba(255,253,248,.94); color: var(--rose2); border-radius: 12px; padding: .45rem .7rem; box-shadow: var(--shadow-sm); }
+    .cxf-stamp b { font-family: 'Fraunces', Georgia, serif; font-size: 1.5rem; line-height: 1; font-weight: 500; }
+    .cxf-stamp i { font-style: normal; font-size: .64rem; letter-spacing: .16em; margin-top: .12rem; color: var(--rose); }
+    .cxf-body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: clamp(1.2rem, 3.5vw, 2.4rem); }
+    .cxf-body .cx-tag { color: #fff; background: rgba(255,255,255,.18); backdrop-filter: blur(2px); }
+    .cxf-title { font-weight: 500; font-size: clamp(1.6rem, 4.2vw, 2.9rem); line-height: 1.05; margin: .55rem 0 .35rem; color: #fff; letter-spacing: -.01em; max-width: 24ch; }
+    .cxf-when { font-size: .96rem; color: rgba(255,255,255,.9); margin: 0; }
+    .cxf-teaser { font-size: 1.02rem; line-height: 1.55; color: rgba(255,255,255,.82); margin: .6rem 0 0; max-width: 52ch; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .cxf-cta { display: inline-block; margin-top: 1rem; font-family: 'Newsreader', Georgia, serif; font-weight: 600; font-size: .95rem; color: #fff; border-bottom: 1px solid rgba(255,255,255,.5); padding-bottom: 1px; transition: border-color .2s; }
+    .cxf:hover .cxf-cta { border-color: #fff; }
+
+    /* Season programme list */
+    .cx-mgroup { margin-bottom: 1.6rem; }
+    .cx-mrule { display: flex; align-items: center; gap: 1rem; margin: 0 0 .4rem; }
+    .cx-mrule span { font-family: 'Fraunces', Georgia, serif; font-size: .95rem; color: var(--rose2); white-space: nowrap; }
+    .cx-mrule::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to right, var(--line), transparent); }
+
+    .cxr { display: grid; grid-template-columns: 3.4rem 4.5rem 1fr auto; align-items: center; gap: 1rem; padding: .8rem .6rem; border-radius: 14px; text-decoration: none; color: inherit; transition: background .18s, transform .18s; }
+    .cxr:hover { background: var(--card); box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+    .cxr-date { text-align: center; line-height: 1; }
+    .cxr-day { display: block; font-family: 'Fraunces', Georgia, serif; font-size: 1.45rem; color: var(--ink); font-weight: 500; }
+    .cxr-mo { display: block; font-size: .6rem; letter-spacing: .14em; color: var(--muted); margin-top: .15rem; }
+    .cxr-thumb { width: 4.5rem; height: 4.5rem; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); background: var(--line); }
+    .cxr-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+    .cxr:hover .cxr-thumb img { transform: scale(1.06); }
+    .cxr-main { min-width: 0; }
+    .cxr-title { font-weight: 500; font-size: 1.2rem; line-height: 1.2; color: var(--ink); margin: 0 0 .25rem; }
+    .cxr-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .2rem; }
+    .cxr-dur { font-size: .78rem; color: var(--sage); font-weight: 600; }
+    .cxr-teaser { font-size: .92rem; line-height: 1.5; color: var(--ink2); margin: 0; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .cxr-go { font-size: 1.3rem; color: var(--muted); transition: transform .2s, color .2s; }
+    .cxr:hover .cxr-go { color: var(--rose); transform: translateX(3px); }
+
+    /* ── Grid section (client-rendered) ─────────────────────────────────────────────────── */
+    .cal-fallback-h { font-family: 'Fraunces', Georgia, serif; font-size: 1.3rem; margin: 0 0 1rem; color: var(--ink); }
+    .cal-fallback-list { list-style: none; padding: 0; margin: 0; max-width: 40rem; }
+    .cal-fallback-list li { display: flex; gap: 1rem; padding: .5rem 0; border-bottom: 1px solid var(--line); }
+    .cal-fallback-date { color: var(--muted); min-width: 8rem; }
+    .cal-fallback-list a { color: var(--rose2); }
+
+    .cal { max-width: 66rem; }
+    .cal-sec { margin-bottom: 3rem; }
+    .cal-sec:last-child { margin-bottom: 0; }
     .cal-sec-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem .9rem; margin-bottom: 1rem; }
-    .cal-sec-title { font-family: 'Merriweather', Georgia, serif; font-weight: 400; font-size: 1.35rem; margin: 0; }
-    .cal-sec-sub { color: var(--color-muted, #8b847a); font-size: .9rem; }
-    .cal-sec-hint { color: var(--color-muted, #8b847a); font-size: .82rem; margin: 0 0 .8rem; }
+    .cal-sec-title { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: 1.4rem; margin: 0; color: var(--ink); }
+    .cal-sec-sub { color: var(--muted); font-size: .9rem; }
+    .cal-sec-hint { color: var(--muted); font-size: .82rem; margin: 0 0 .9rem; }
     .cal-nav { display: inline-flex; gap: .3rem; margin-left: auto; }
-    .cal-nav button { border: 1px solid var(--color-line, #e0d9cc); background: #fff; color: var(--color-ink, #2a1c0b); border-radius: 8px; padding: .4rem .7rem; font-size: .85rem; cursor: pointer; line-height: 1; }
-    .cal-nav button:hover { border-color: var(--color-brand, #a04607); }
-    .cal-legend { width: 100%; display: flex; flex-wrap: wrap; gap: .3rem 1.1rem; font-size: .78rem; color: var(--color-muted, #6b6357); margin-bottom: 1.6rem; }
-    .cal-legend span { display: inline-flex; align-items: center; gap: .35rem; }
-    .cal-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
-    .cal-legend-avail { background: #ecfdf5; border: 1px solid #6ee7b7; }
+    .cal-nav button { border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 8px; padding: .38rem .68rem; font-size: .85rem; cursor: pointer; line-height: 1; font-family: inherit; transition: border-color .15s, color .15s; }
+    .cal-nav button:hover { border-color: var(--rose); color: var(--rose); }
+    .cal-legend { display: flex; flex-wrap: wrap; gap: .35rem 1.2rem; font-size: .76rem; color: var(--ink2); margin-bottom: 1.6rem; }
+    .cal-legend span { display: inline-flex; align-items: center; gap: .4rem; }
+    .cal-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+    .cal-legend-avail { background: #e7f1e7; border: 1px solid var(--sage); }
     .cal-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
 
-    /* Week (agenda-style rows — works at every width) */
-    .cal-week { display: flex; flex-direction: column; gap: .5rem; }
-    .cal-wday { display: grid; grid-template-columns: 4.5rem 1fr; gap: 1rem; padding: .7rem .9rem; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 12px; }
-    .cal-wday.is-today { border-color: var(--color-brand, #a04607); box-shadow: 0 0 0 1px var(--color-brand, #a04607); }
-    .cal-wday.is-reserved { background: #fffaf2; }
-    .cal-wday.is-blocked { background: #f6f5f2; }
-    .cal-wday.is-past { opacity: .55; }
-    .cal-wday-head { text-align: center; }
-    .cal-wday-dow { display: block; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--color-muted, #8b847a); }
-    .cal-wday-num { display: block; font-family: 'Merriweather', Georgia, serif; font-size: 1.6rem; line-height: 1.1; }
-    .cal-wday-body { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; min-height: 1.8rem; }
-    .cal-chip { display: inline-flex; align-items: center; gap: .4rem; background: var(--color-surface, #f7f3ec); border: 1px solid var(--color-line, #e7e2d8); border-radius: 999px; padding: .28rem .7rem; font-size: .85rem; color: var(--color-ink, #2a1c0b); text-decoration: none; }
-    a.cal-chip:hover { border-color: var(--color-brand, #a04607); }
-    /* Reserved/blocked tag: tinted from the entry's own color (--rc). Booked reads solid; a
-       turnaround/host block (.is-block) reads softer so it's clearly not an actual booking. */
-    .cal-res-tag { display: inline-flex; align-items: center; font-size: .78rem; font-weight: 600; color: var(--rc, #b45309); background: color-mix(in srgb, var(--rc, #b45309) 12%, #fff); border: 1px solid color-mix(in srgb, var(--rc, #b45309) 35%, #fff); border-radius: 999px; padding: .25rem .65rem; }
-    .cal-res-tag.is-block { font-weight: 500; font-style: italic; opacity: .9; }
-    .cal-avail { font-size: .8rem; color: #059669; }
-    a.cal-book { text-decoration: none; font-weight: 600; }
+    .cal-res-tag { display: inline-flex; align-items: center; font-size: .74rem; font-weight: 600; color: var(--rc, #b0692c); background: color-mix(in srgb, var(--rc, #b0692c) 12%, #fff); border: 1px solid color-mix(in srgb, var(--rc, #b0692c) 32%, #fff); border-radius: 999px; padding: .18rem .55rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cal-avail { font-size: .78rem; color: var(--sage); font-weight: 600; }
+    a.cal-book { text-decoration: none; }
     a.cal-book:hover { text-decoration: underline; }
 
     /* Month grid */
-    .cal-month-dow { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--color-muted, #8b847a); margin-bottom: .3rem; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-    .cal-cell { min-height: 5.2rem; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 8px; padding: .3rem .35rem; overflow: hidden; }
-    .cal-cell.is-out { background: #faf8f4; opacity: .55; }
-    .cal-cell.is-reserved { background: #fffaf2; border-color: #fcd9a8; }
-    .cal-cell.is-blocked { background: #f6f5f2; border-color: #e7e2d8; }
-    .cal-cell.is-avail { background: #f3fdf8; cursor: pointer; }
-    .cal-cell.is-today { border-color: var(--color-brand, #a04607); box-shadow: inset 0 0 0 1px var(--color-brand, #a04607); }
-    .cal-cell-num { font-size: .78rem; color: var(--color-muted, #6b6357); font-weight: 600; margin-bottom: .2rem; }
-    .cal-cell-body { display: flex; flex-direction: column; gap: 2px; }
-    .cal-cell-chip { display: flex; align-items: center; gap: .3rem; font-size: .72rem; line-height: 1.15; color: var(--color-ink, #2a1c0b); text-decoration: none; border-left: 3px solid; padding: 1px 2px 1px 5px; border-radius: 3px; background: var(--color-surface, #f7f3ec); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .cal-more { font-size: .68rem; color: var(--color-muted, #8b847a); }
+    .cal-month-dow { display: grid; grid-template-columns: repeat(7,1fr); text-align: center; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: .4rem; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 5px; }
+    .cal-cell { min-height: 5.6rem; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: .35rem .4rem; overflow: hidden; transition: box-shadow .15s; }
+    .cal-cell.is-out { background: transparent; border-color: transparent; opacity: .45; }
+    .cal-cell.is-reserved { background: #fbf3e8; border-color: #f0dcc0; }
+    .cal-cell.is-blocked { background: #f4f1ea; border-color: var(--line); }
+    .cal-cell.is-avail { background: #f2f7f0; border-color: #d8e6d6; cursor: pointer; }
+    .cal-cell.is-avail:hover { box-shadow: inset 0 0 0 1px var(--sage); }
+    .cal-cell.is-today { border-color: var(--rose); box-shadow: inset 0 0 0 1px var(--rose); }
+    .cal-cell.is-past { opacity: .62; }
+    .cal-cell-num { font-family: 'Fraunces', Georgia, serif; font-size: .92rem; color: var(--ink2); margin-bottom: .25rem; line-height: 1; }
+    .cal-cell.is-today .cal-cell-num { color: var(--rose); font-weight: 600; }
+    .cal-cell-body { display: flex; flex-direction: column; gap: 3px; }
+    .cal-cell-chip { display: flex; align-items: center; gap: .35rem; font-size: .72rem; line-height: 1.15; color: var(--ink); text-decoration: none; padding: 2px 4px 2px 3px; border-radius: 999px; background: color-mix(in srgb, var(--rc, #356b63) 9%, #fff); border: 1px solid color-mix(in srgb, var(--rc, #356b63) 22%, #fff); overflow: hidden; }
+    .cal-cell-chip:hover { background: color-mix(in srgb, var(--rc, #356b63) 16%, #fff); }
+    .cal-cell-thumb { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .cal-cell-nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cal-open { font-size: .66rem; letter-spacing: .06em; color: var(--sage); font-weight: 600; }
+    .cal-more { font-size: .66rem; color: var(--muted); padding-left: 2px; }
 
     /* Year — 12 mini-months */
     .cal-year { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem 1.4rem; }
-    .cal-mini { text-align: left; background: #fff; border: 1px solid var(--color-line, #ece7dd); border-radius: 10px; padding: .7rem; cursor: pointer; }
-    .cal-mini:hover { border-color: var(--color-brand, #a04607); }
-    .cal-mini-h { font-weight: 600; font-size: .9rem; margin-bottom: .4rem; }
+    .cal-mini { text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: .8rem; cursor: pointer; font-family: inherit; transition: border-color .15s, box-shadow .15s, transform .15s; }
+    .cal-mini:hover { border-color: var(--rose); box-shadow: var(--shadow-sm); transform: translateY(-2px); }
+    .cal-mini-h { font-family: 'Fraunces', Georgia, serif; font-size: .92rem; color: var(--ink); margin-bottom: .45rem; }
     .cal-mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-    .cal-mini-d { width: 100%; padding-top: 100%; border-radius: 2px; background: #f0ece4; }
+    .cal-mini-d { width: 100%; padding-top: 100%; border-radius: 2px; background: #efe9dd; }
     .cal-mini-d.is-out { background: transparent; }
-    .cal-mini-d.is-event { background: #2563eb; }
-    .cal-mini-d.is-reserved { background: #d98324; }
-    .cal-mini-d.is-blocked { background: #ded8ce; }
-    .cal-mini-d.is-avail { background: #a7f3d0; }
-    .cal-mini.is-exp { border-color: var(--color-brand, #a04607); box-shadow: 0 0 0 1px var(--color-brand, #a04607); }
+    .cal-mini-d.is-event { background: #356b63; }
+    .cal-mini-d.is-reserved { background: #b0692c; }
+    .cal-mini-d.is-blocked { background: #ddd6c9; }
+    .cal-mini-d.is-avail { background: #a9cba6; }
+    .cal-mini.is-exp { border-color: var(--rose); box-shadow: 0 0 0 1px var(--rose); }
 
-    /* Inline expansion of a year tile into a full month grid, right below the grid. */
-    .cal-year-exp { margin-top: 1.1rem; border: 1px solid var(--color-line, #ece7dd); border-radius: 12px; padding: 1rem 1.1rem 1.2rem; background: #fffdf9; }
-    .cal-exp-head { display: flex; align-items: center; justify-content: space-between; font-family: 'Merriweather', Georgia, serif; font-size: 1.15rem; margin-bottom: .7rem; }
-    .cal-exp-close { border: none; background: none; font-size: 1.5rem; line-height: 1; color: var(--color-muted, #8b847a); cursor: pointer; padding: 0 .3rem; }
-    .cal-exp-close:hover { color: var(--color-brand, #a04607); }
+    .cal-year-exp { margin-top: 1.2rem; border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem 1.2rem 1.3rem; background: var(--card); box-shadow: var(--shadow-sm); }
+    .cal-exp-head { display: flex; align-items: center; justify-content: space-between; font-family: 'Fraunces', Georgia, serif; font-size: 1.2rem; color: var(--ink); margin-bottom: .8rem; }
+    .cal-exp-close { border: none; background: none; font-size: 1.5rem; line-height: 1; color: var(--muted); cursor: pointer; padding: 0 .3rem; }
+    .cal-exp-close:hover { color: var(--rose); }
 
     @media (max-width: 720px) {
-      .cal-cell { min-height: 3.6rem; }
-      .cal-cell-chip { font-size: 0; padding: 3px; }
-      .cal-cell-chip .cal-dot { width: 6px; height: 6px; }
+      .cxr { grid-template-columns: 3rem 3.6rem 1fr; gap: .8rem; }
+      .cxr-go { display: none; }
+      .cxr-thumb { width: 3.6rem; height: 3.6rem; }
+      .cxr-teaser { display: none; }
+      .cal-cell { min-height: 4rem; padding: .25rem; }
+      .cal-cell-chip { font-size: 0; gap: 0; padding: 2px; border-radius: 50%; }
+      .cal-cell-chip .cal-cell-nm { display: none; }
+      .cal-cell-chip .cal-dot { width: 7px; height: 7px; }
+      .cal-open { font-size: 0; }
       .cal-year { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 460px) {

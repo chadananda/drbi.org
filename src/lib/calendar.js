@@ -6,8 +6,16 @@ import { getVisibleEvents, getCalendarItems, getAllCalendarItems, getOption, get
 import { getAirbnbBlocks } from './airbnb';
 import { eventSlug } from './event-slug';
 
-// Legend: blue = event/program, purple = Holy Day, amber = booked/in use.
-const TYPE_COLORS = { event: '#2563eb', program: '#0e7490', holyday: '#7c3aed', reserved: '#b45309' };
+// Warm legend palette: pine = event, teal = program, plum = Holy Day, terracotta = booked/in use.
+const TYPE_COLORS = { event: '#356b63', program: '#4a7d75', holyday: '#7a5a86', reserved: '#b0692c' };
+
+const stripHtml = (s) => String(s || '').replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+::\s+/g, ' — ').replace(/\s+/g, ' ').trim();
+const teaserOf = (d) => {
+  let t = stripHtml(d.shortDescription || d.fullDescription || '');
+  const n = (d.name || '').trim();
+  if (n && t.toLowerCase().startsWith(n.toLowerCase())) t = t.slice(n.length).replace(/^[\s:·—–-]+/, '');
+  return t.length > 150 ? t.slice(0, 150).replace(/\s+\S*$/, '') + '…' : t;
+};
 
 // Build the raw, un-overridden entry list (+ airbnbUrl). Each entry has a stable `id` (the override
 // key), a `kind` (event | item | airbnb) for the admin editor, and its base label/link.
@@ -28,6 +36,8 @@ async function buildEntries() {
       title: d.name || d.title || 'Event',
       start: d.startDate, end: d.endDate || null, allDay: false,
       url: `/events/${eventSlug(ev)}`, color: TYPE_COLORS.event,
+      // Rich fields for the visual showcase + grid thumbnails (overrides still apply to title/url).
+      image: d.mainImage || '', category: (d.categories || [])[0] || '', teaser: teaserOf(d),
     });
   }
   for (const it of items) {
