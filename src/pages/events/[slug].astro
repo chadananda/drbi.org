@@ -193,7 +193,7 @@ const eventSchema = (!hidden && d.startDate) ? {
                 {prices.map((p) => (
                   <li>
                     <span class="lbl">{p.label}</span>
-                    <span class="amt">{p.amount ? `$${p.amount}` : "Free"}</span>
+                    <span class="amt">{p.amount ? `$${p.amount}` : (p.tba ? "TBA" : "Free")}</span>
                   </li>
                 ))}
               </ul>
