@@ -51,6 +51,8 @@ export const onRequest = async (context, next) => {
     '/kure-fm': '/radio',
     '/donate.html': '/contribute',
     '/index.php': '/',
+    // Oct 4 2026 concert: Dr. Linder injured, replaced by Jin Jing — renaming moved the slug.
+    '/events/dr-daniel-linder-piano-first-sunday-concert-2026': '/events/jin-jing-pianist-first-sunday-concert-2026',
   };
   const retiredTarget = RETIRED[path.length > 1 ? path.replace(/\/+$/, '') : path];
   if (retiredTarget) {
