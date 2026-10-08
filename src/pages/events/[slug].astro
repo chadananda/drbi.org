@@ -47,6 +47,16 @@ const isFull = d.waitlistOverride === 'open' ||
 const heroImage = imagekitUrl(d.mainImage, { w: 1600, h: 640, face: true });
 const ogImage = imagekitUrl(d.mainImage, { w: 1200, h: 630, face: true });
 
+// Post-event recap ("A look back"): an artsy Polaroid wall + short write-up, shown at the TOP of
+// the page once a program is over. recap = { summary (HTML), credit, photos:[{src, caption}] }.
+const recap = (d.recap && ((d.recap.photos && d.recap.photos.length) || d.recap.summary)) ? d.recap : null;
+const ROT = [-5, 4, -3, 6, -4, 3, -6, 2, -3, 5];
+const polaroids = (recap?.photos || []).map((p, i) => ({
+  src: imagekitUrl(p.src, { w: 620, h: 620 }),
+  caption: p.caption || "",
+  rot: ROT[i % ROT.length],
+}));
+
 // Refine the raw Humanitix HTML into a well-set programme:
 //  - drop the leading <h2> that just repeats the title, and empty spacer <p>s
 //  - "TIME :: ACTIVITY"  -> schedule rows
@@ -130,10 +140,33 @@ const eventSchema = (!hidden && d.startDate) ? {
   {eventSchema && <script type="application/ld+json" set:html={JSON.stringify(eventSchema)} />}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&display=swap" />
 
   <article class="event-detail pb-24">
+    {recap && (
+      <section class="ev-recap">
+        <Container>
+          <div class="ev-recap-head mx-auto max-w-5xl">
+            <p class="ev-recap-kicker">A look back</p>
+            <h1 class="ev-recap-title">{title}</h1>
+            <p class="ev-recap-meta">{start}{end ? ` – ${end}` : ""}{locText ? ` · ${locText}` : ""}</p>
+            {recap.summary && <div class="ev-recap-summary" set:html={recap.summary} />}
+          </div>
+          <div class="ev-polas">
+            {polaroids.map((p) => (
+              <figure class="ev-pola" style={`--r:${p.rot}`}>
+                <div class="ev-pola-img"><img src={p.src} alt={p.caption || title} loading="lazy" decoding="async" width="620" height="620" /></div>
+                <figcaption>{p.caption || "Desert Rose"}</figcaption>
+              </figure>
+            ))}
+          </div>
+          {recap.credit && <p class="ev-recap-credit">{recap.credit}</p>}
+        </Container>
+      </section>
+    )}
+
     <!-- Hero -->
+    {!recap && (
     <div class="relative">
       {d.mainImage ? (
         <div class="event-hero relative h-[46vh] min-h-[320px] w-full overflow-hidden">
@@ -159,6 +192,7 @@ const eventSchema = (!hidden && d.startDate) ? {
         </Container>
       )}
     </div>
+    )}
 
     {hidden && (
       <Container>
@@ -188,6 +222,12 @@ const eventSchema = (!hidden && d.startDate) ? {
         <aside>
           <div class="reg-card lg:sticky lg:top-24">
             <p class="reg-eyebrow">Registration</p>
+            {isPast ? (
+              <div class="reg-concluded">
+                <p class="reg-done">This gathering has concluded.</p>
+                <a href="/events" class="reg-btn reg-btn--ghost">See what's coming up →</a>
+              </div>
+            ) : (<Fragment>
             {prices.length > 0 && (
               <ul class="reg-prices">
                 {prices.map((p) => (
@@ -222,6 +262,7 @@ const eventSchema = (!hidden && d.startDate) ? {
             ) : (
               <p class="text-sm text-slate-600">Registration opens soon.</p>
             )}
+            </Fragment>)}
             <div class="reg-meta">
               {start && <p>{start}{end ? ` – ${end}` : ""}</p>}
               {locText && <p>{locText}</p>}
@@ -236,7 +277,7 @@ const eventSchema = (!hidden && d.startDate) ? {
         </aside>
       </div>
 
-      {isPast && (
+      {isPast && !recap && (
         <section id="share-photos" class="mx-auto max-w-5xl mt-20 pt-12 share-photos">
           <div class="max-w-2xl">
             <p class="reg-eyebrow">After the event</p>
@@ -553,6 +594,36 @@ const eventSchema = (!hidden && d.startDate) ? {
   .event-detail .wl-msg { font-family: 'Newsreader', Georgia, serif; font-size: .9rem; margin: .2rem 0 0; }
   .event-detail .wl-msg.ok { color: #2f7d4f; }
   .event-detail .wl-msg.err { color: #b4462e; }
+
+  /* ---------- "A look back" recap (Polaroid wall) ---------- */
+  .event-detail .ev-recap {
+    background: radial-gradient(120% 80% at 50% -10%, rgba(189,138,63,.10), transparent 60%), var(--paper);
+    padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(2rem, 4vw, 3rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  .event-detail .ev-recap-head { text-align: center; }
+  .event-detail .ev-recap-kicker { font-family: 'Newsreader', Georgia, serif; font-weight: 600; font-size: .72rem; letter-spacing: .28em; text-transform: uppercase; color: var(--brass-deep); margin: 0 0 .55rem; }
+  .event-detail .ev-recap-title { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: clamp(1.9rem, 4.5vw, 3rem); line-height: 1.05; color: var(--ink); margin: 0 0 .5rem; letter-spacing: -.01em; }
+  .event-detail .ev-recap-meta { font-family: 'Newsreader', Georgia, serif; color: var(--body); font-size: 1rem; margin: 0 0 1.2rem; }
+  .event-detail .ev-recap-summary { max-width: 42rem; margin: 0 auto; font-family: 'Newsreader', Georgia, serif; font-size: 1.18rem; line-height: 1.65; color: var(--body); }
+  .event-detail .ev-recap-summary p { margin: 0 0 1rem; }
+  .event-detail .ev-recap-summary em { font-style: italic; color: var(--ink); }
+
+  .event-detail .ev-polas { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: clamp(.7rem, 2vw, 1.5rem); margin: clamp(1.8rem, 4vw, 3rem) auto 0; max-width: 62rem; }
+  .event-detail .ev-pola { --r: 0; margin: 0; background: #fffdf8; padding: 10px 10px 2.5rem; border-radius: 2px; box-shadow: 0 10px 26px -12px rgba(50,35,15,.5), 0 2px 5px rgba(50,35,15,.18); transform: rotate(calc(var(--r) * 1deg)); transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s; width: clamp(9.5rem, 23vw, 13.5rem); position: relative; }
+  .event-detail .ev-pola::before { content: ""; position: absolute; top: -9px; left: 50%; width: 3.6rem; height: 1.15rem; transform: translateX(-50%) rotate(calc(var(--r) * -1deg)); background: rgba(200,162,92,.32); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+  .event-detail .ev-pola-img { overflow: hidden; background: #e9e1d2; aspect-ratio: 1 / 1; }
+  .event-detail .ev-pola img { width: 100%; height: 100%; object-fit: cover; display: block; filter: saturate(1.03) contrast(1.02); }
+  .event-detail .ev-pola figcaption { position: absolute; left: 10px; right: 10px; bottom: .45rem; text-align: center; font-family: 'Caveat', cursive; font-size: 1.2rem; line-height: 1.05; color: #4a4036; }
+  .event-detail .ev-pola:hover { transform: rotate(0deg) scale(1.05); z-index: 3; box-shadow: 0 22px 42px -14px rgba(50,35,15,.55), 0 3px 8px rgba(50,35,15,.25); }
+  .event-detail .ev-recap-credit { text-align: center; margin: clamp(1.6rem, 4vw, 2.4rem) 0 0; font-family: 'Newsreader', Georgia, serif; font-style: italic; color: var(--brass-deep); font-size: .95rem; }
+
+  /* Concluded registration state */
+  .event-detail .reg-done { font-family: 'Fraunces', Georgia, serif; color: var(--ink); font-size: 1.05rem; margin: 0 0 .8rem; }
+  .event-detail .reg-btn--ghost { background: transparent; color: var(--brass-deep); border: 1px solid var(--rule); }
+  .event-detail .reg-btn--ghost:hover { border-color: var(--brass); color: var(--brass); }
+
+  @media (max-width: 640px) { .event-detail .ev-pola { width: 8.6rem; } }
 </style>
 
 <script>

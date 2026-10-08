@@ -137,6 +137,7 @@ export function shapeEvent(row: EventRow) {
       url: row.url ?? '',
       mainImage: row.main_image ?? '',
       teacherImage: row.teacher_image ?? '',
+      recap: parseJson<any>((row as any).recap, null), // post-event "how it went" {summary, credit, photos}
       flyerUrl: row.flyer_url ?? '',
       flyerThumb: row.flyer_thumb ?? '',
       images: parseJson<string[]>(row.images, []),

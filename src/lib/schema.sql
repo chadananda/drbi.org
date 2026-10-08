@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS events (
   flyer_url TEXT,
   flyer_thumb TEXT,
   images TEXT DEFAULT '[]',
+  recap TEXT,                              -- JSON {summary, credit, photos:[{src,caption}]} — post-event "how it went"
   highlights TEXT DEFAULT '[]',
   event_schedule TEXT DEFAULT '[]',
   refund_policy TEXT,
