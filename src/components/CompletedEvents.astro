@@ -1,0 +1,82 @@
+---
+// "Recently at Desert Rose" — a Polaroid wall of just-past gatherings linking to their event
+// pages (which now lead with the recap). Drives FOMO for upcoming programs. Thumbnail = the
+// event's first recap photo when it has one, else its main image.
+import { getVisibleEvents } from "@lib/queries";
+import { eventSlug } from "@lib/event-slug";
+import { imagekitUrl } from "../utils/utils.js";
+
+const AZ = "America/Phoenix";
+const now = new Date();
+const FALLBACK = "https://cdn.shrtr.com/drbi.org/site/drbi/events.webp";
+const cutoffMs = now.getTime() - 420 * 864e5; // ~14 months back, keep it current
+const ROT = [-4, 3, -5, 2, -3, 4, -2, 5];
+const cleanName = (t) =>
+  String(t || "")
+    .replace(/\s*[—–-]\s*First Sunday Concert.*$/i, "")
+    .replace(/^First Sunday Concert Series\s*[:\-–]?\s*/i, "")
+    .replace(/\s*\(.*?\)\s*$/, "")
+    .trim();
+
+const past = (await getVisibleEvents().catch(() => []))
+  .map((e) => ({ e, s: new Date(e.data.startDate), end: new Date(e.data.endDate || e.data.startDate) }))
+  .filter((x) => !isNaN(+x.end) && x.end < now && x.s.getTime() > cutoffMs)
+  .sort((a, b) => b.s - a.s)
+  .slice(0, 8)
+  .map((x, i) => {
+    const d = x.e.data;
+    const recapPhoto = d.recap && d.recap.photos && d.recap.photos[0] && d.recap.photos[0].src;
+    return {
+      url: `/events/${eventSlug(x.e)}`,
+      name: cleanName(d.name || d.title) || "Gathering",
+      month: x.s.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: AZ }),
+      img: imagekitUrl(recapPhoto || d.mainImage || FALLBACK, { w: 520, h: 520, face: !recapPhoto }),
+      hasRecap: !!recapPhoto,
+      rot: ROT[i % ROT.length],
+    };
+  });
+---
+
+{past.length > 0 && (
+  <section class="ce not-prose">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Newsreader:ital,wght@0,400;0,500;1,400&display=swap" />
+    <div class="ce-head">
+      <p class="ce-kicker">Recently at Desert Rose</p>
+      <h2 class="ce-title">You should have been here</h2>
+      <p class="ce-lede">A glimpse of gatherings just past — concerts, retreats, and evenings of community. Tap through for the photos… then don't miss the next one.</p>
+    </div>
+    <div class="ce-wall">
+      {past.map((p) => (
+        <a class="ce-pola" href={p.url} style={`--r:${p.rot}`} aria-label={`${p.name}, ${p.month}`}>
+          <div class="ce-img"><img src={p.img} alt={p.name} loading="lazy" decoding="async" width="520" height="520" /></div>
+          {p.hasRecap && <span class="ce-badge">see photos</span>}
+          <figcaption class="ce-cap">
+            <span class="ce-nm">{p.name}</span>
+            <span class="ce-mo">{p.month}</span>
+          </figcaption>
+        </a>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .ce { max-width: 66rem; margin: 5rem auto 0; text-align: center; }
+  .ce-kicker { font-family: 'Newsreader', Georgia, serif; font-weight: 600; font-size: .72rem; letter-spacing: .26em; text-transform: uppercase; color: #8a4a12; margin: 0 0 .5rem; }
+  .ce-title { font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-size: clamp(1.7rem, 4vw, 2.5rem); line-height: 1.08; color: #2b2620; margin: 0 0 .6rem; letter-spacing: -.01em; }
+  .ce-lede { font-family: 'Newsreader', Georgia, serif; font-size: 1.08rem; line-height: 1.6; color: #423b31; max-width: 40rem; margin: 0 auto; }
+
+  .ce-wall { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: clamp(.7rem, 2vw, 1.3rem); margin-top: clamp(1.8rem, 4vw, 2.8rem); }
+  .ce-pola { --r: 0; display: block; text-decoration: none; background: #fffdf8; padding: 9px 9px 2.3rem; border-radius: 2px; box-shadow: 0 10px 24px -12px rgba(50,35,15,.5), 0 2px 5px rgba(50,35,15,.16); transform: rotate(calc(var(--r) * 1deg)); transition: transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s; width: clamp(9rem, 22vw, 12.5rem); position: relative; }
+  .ce-pola::before { content: ""; position: absolute; top: -8px; left: 50%; width: 3.2rem; height: 1rem; transform: translateX(-50%) rotate(calc(var(--r) * -1deg)); background: rgba(200,162,92,.3); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+  .ce-img { aspect-ratio: 1 / 1; overflow: hidden; background: #e9e1d2; }
+  .ce-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; filter: saturate(1.03); }
+  .ce-badge { position: absolute; top: calc(9px + .35rem); right: calc(9px + .35rem); background: rgba(160,70,20,.92); color: #fff; font-size: .58rem; letter-spacing: .08em; text-transform: uppercase; padding: .14rem .42rem; border-radius: 3px; }
+  .ce-cap { position: absolute; left: 9px; right: 9px; bottom: .4rem; text-align: center; }
+  .ce-nm { display: block; font-family: 'Caveat', cursive; font-size: 1.14rem; line-height: 1.02; color: #4a4036; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ce-mo { display: block; font-size: .58rem; letter-spacing: .14em; text-transform: uppercase; color: #8a4a12; margin-top: .15rem; }
+  .ce-pola:hover { transform: rotate(0deg) scale(1.05); z-index: 3; box-shadow: 0 20px 38px -14px rgba(50,35,15,.55), 0 3px 8px rgba(50,35,15,.22); }
+  .ce-pola:hover .ce-img img { transform: scale(1.06); }
+
+  @media (max-width: 640px) { .ce-pola { width: 8.4rem; } }
+</style>

@@ -8,12 +8,15 @@ image: events
 ---
 
 import EventCalendar from "@components/EventCalendar.astro";
+import CompletedEvents from "@components/CompletedEvents.astro";
 
 <EventCalendar view="list-full" />
 
 <p class="text-center not-prose mt-8">
   <a href="/calendar" class="inline-flex items-center gap-2 text-brand font-medium hover:underline">📅 View the full calendar (month &amp; year views, and open dates to book)</a>
 </p>
+
+<CompletedEvents />
 
 <div class="mt-20 py-12 bg-amber-50 rounded-2xl text-center not-prose">
   <p class="text-xs uppercase tracking-[0.25em] text-amber-700 mb-3">Stay informed</p>
