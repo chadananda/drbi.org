@@ -119,7 +119,7 @@ const spec = {
         },
       },
       Post: { type: 'object', properties: { id: { type: 'string' }, collection: { type: 'string' }, slug: { type: 'string' }, content: { type: 'string' }, frontmatter: { $ref: '#/components/schemas/PostFrontmatter' } } },
-      PostFrontmatter: { type: 'object', properties: { title: { type: 'string' }, description: { type: 'string' }, draft: { type: 'boolean' }, author: { type: 'string' }, topics: { type: 'array', items: { type: 'string' } }, keywords: { type: 'array', items: { type: 'string' } }, datePublished: { type: 'string' }, image: { type: 'object', properties: { src: { type: 'string' }, alt: { type: 'string' } } } } },
+      PostFrontmatter: { type: 'object', properties: { title: { type: 'string' }, description: { type: 'string' }, draft: { type: 'boolean' }, author: { type: 'string' }, topics: { type: 'array', items: { type: 'string' } }, keywords: { type: 'array', items: { type: 'string' } }, datePublished: { type: 'string' }, image: { type: 'object', description: 'Hero image. Give src for an already-hosted URL, OR data (base64 / data: URL) to upload it to R2 in the same call.', properties: { src: { type: 'string', description: 'Existing CDN URL (cdn.shrtr.com/drbi.org/...).' }, alt: { type: 'string' }, data: { type: 'string', description: 'Base64 or data: URL of the image bytes; uploaded server-side when src is absent.' }, filename: { type: 'string', description: 'Optional R2 filename (default <slug>-hero.jpg).' }, mimeType: { type: 'string' } } } } },
     },
   },
 };

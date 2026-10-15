@@ -1,7 +1,10 @@
 // Content posts API — read from Turso, write via cms-utils (filesystem + Turso sync)
 export const prerender = false;
 
-import { lucia } from "../../lib/auth";
+import { requireApi, apiError } from '../../lib/server/admin-guard';
+import { env } from 'cloudflare:workers';
+import { uploadR2 } from '../../utils/r2-upload.js';
+import { guessContentType } from '@utils/utils.js';
 import {
   getAllContent,
   getContentByCollection,
@@ -11,6 +14,29 @@ import {
   updateContent,
   deleteContent,
 } from "../../lib/queries";
+
+// Resolve a post's hero image. Accepts either an already-hosted URL
+// (frontmatter.image.src) or inline bytes (frontmatter.image.data = base64 or a
+// data: URL), which are uploaded to R2 server-side so an agent can publish an
+// article and its image in a single call. Returns { src, alt } — src is
+// undefined when no image was supplied, so callers can leave existing art alone.
+async function resolveImage(frontmatter, slug) {
+  const image = frontmatter?.image;
+  if (!image) return { src: undefined, alt: undefined };
+  const { src, alt = null, data, filename, mimeType } = image;
+  if (src) return { src, alt };
+  if (data) {
+    const b64 = data.includes(',') ? data.split(',')[1] : data;
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const fname = filename || `${slug}-hero.jpg`;
+    const mime = mimeType || guessContentType(fname);
+    const url = await uploadR2(env.R2, `uploads/${fname}`, bytes, mime);
+    return { src: url, alt };
+  }
+  return { src: undefined, alt: undefined };
+}
 
 // Map Turso content row to the shape cms-utils returns for compatibility
 function toPostShape(row) {
@@ -96,27 +122,16 @@ export async function GET({ request }) {
   }
 }
 
-async function requireAuth(request, locals) {
-  const body = await request.json().catch(() => ({}));
-  // Prefer the login cookie the middleware already validated; fall back to a
-  // JWT session token in the body for API-token / programmatic callers.
-  let user = locals?.user ?? null;
-  if (!user) {
-    const { sessionid } = body;
-    if (!sessionid) return { error: 'Authentication required', status: 401 };
-    ({ user } = await lucia.validateSession(sessionid));
-  }
-  if (!user || !['superadmin', 'admin', 'editor', 'author'].includes(user.role)) {
-    return { error: 'Unauthorized', status: 403 };
-  }
-  return { user, body };
-}
+export async function POST(context) {
+  // Cookie session, D1 API token (Authorization: Bearer / X-API-Key), the legacy
+  // service token, or a Lucia session JWT — all handled centrally, rate-limited.
+  const gate = await requireApi(context, { role: 'author' });
+  if (gate.response) return gate.response;
 
-export async function POST({ request, locals }) {
-  const auth = await requireAuth(request.clone(), locals);
-  if (auth.error) return new Response(auth.error, { status: auth.status });
-
-  const { action, sessionid, ...data } = auth.body;
+  let body;
+  try { body = await context.request.json(); }
+  catch { return apiError(400, 'Invalid JSON body'); }
+  const { action, ...data } = body;
 
   try {
     switch (action) {
@@ -126,8 +141,10 @@ export async function POST({ request, locals }) {
             status: 400, headers: { 'Content-Type': 'application/json' }
           });
         }
+        const slug = data.slug ?? data.title.toLowerCase().replace(/\s+/g, '-');
+        const img = await resolveImage(data.frontmatter, slug);
         const result = await createContent({
-          slug: data.slug ?? data.title.toLowerCase().replace(/\s+/g, '-'),
+          slug,
           collection: data.type ?? 'articles',
           title: data.title,
           body: data.content,
@@ -137,10 +154,10 @@ export async function POST({ request, locals }) {
           topics: data.frontmatter?.topics ?? [],
           keywords: data.frontmatter?.keywords ?? [],
           date_published: data.frontmatter?.datePublished ?? null,
-          image_src: data.frontmatter?.image?.src ?? null,
-          image_alt: data.frontmatter?.image?.alt ?? null,
+          image_src: img.src ?? null,
+          image_alt: img.alt ?? null,
         });
-        return new Response(JSON.stringify({ success: true, id: result.id }), {
+        return new Response(JSON.stringify({ success: true, id: result.id, slug, image: img.src ?? null }), {
           status: 201, headers: { 'Content-Type': 'application/json' }
         });
       }
@@ -170,21 +187,21 @@ export async function POST({ request, locals }) {
   }
 }
 
-export async function PUT({ request, locals }) {
-  const url = new URL(request.url);
+export async function PUT(context) {
+  const url = new URL(context.request.url);
   const id = url.searchParams.get('id');
-  if (!id) {
-    return new Response(JSON.stringify({ error: 'Post ID required' }), {
-      status: 400, headers: { 'Content-Type': 'application/json' }
-    });
-  }
+  if (!id) return apiError(400, 'Post ID required');
 
-  const auth = await requireAuth(request.clone(), locals);
-  if (auth.error) return new Response(auth.error, { status: auth.status });
+  const gate = await requireApi(context, { role: 'author' });
+  if (gate.response) return gate.response;
 
-  const { sessionid, ...data } = auth.body;
+  let body;
+  try { body = await context.request.json(); }
+  catch { return apiError(400, 'Invalid JSON body'); }
+  const data = body;
 
   try {
+    const img = await resolveImage(data.frontmatter, id);
     await updateContent(id, {
       title: data.title,
       body: data.content,
@@ -195,8 +212,8 @@ export async function PUT({ request, locals }) {
       keywords: data.frontmatter?.keywords,
       date_published: data.frontmatter?.datePublished,
       date_modified: new Date().toISOString(),
-      image_src: data.frontmatter?.image?.src,
-      image_alt: data.frontmatter?.image?.alt,
+      image_src: img.src,
+      image_alt: img.alt,
     });
     return new Response(JSON.stringify({ success: true }), {
       status: 200, headers: { 'Content-Type': 'application/json' }

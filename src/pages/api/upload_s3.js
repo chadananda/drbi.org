@@ -1,48 +1,38 @@
-// post /api/upload_s3 — receives base64 file data, uploads to R2, returns public path
+// post /api/upload_s3 — receives base64 file data, uploads to R2, returns public path.
+// Auth is handled by the shared content-API guard: cookie session, a D1 API token
+// (Authorization: Bearer / X-API-Key), the legacy service token, or a Lucia JWT.
 export const prerender = false;
 
 import { uploadR2 } from '../../utils/r2-upload.js';
-import { getTeamMemberBySlug, guessContentType } from '@utils/utils.js';
-import { lucia } from "../../lib/auth";
+import { guessContentType } from '@utils/utils.js';
+import { requireApi } from '../../lib/server/admin-guard';
 import { env } from 'cloudflare:workers';
 
-export const POST = async ({ request, locals }) => {
-  if (request.headers.get("Content-Type")?.includes("application/json")) {
-    try {
-      const body = await request.json();
-      let {filedata, mimeType, s3key, sessionid} = body;
-      mimeType = mimeType || guessContentType(s3key);
-
-      // Authenticate from the login cookie the middleware already validated;
-      // fall back to a JWT session token in the body for programmatic callers.
-      let user = locals?.user ?? null;
-      if (!user && sessionid) ({ user } = await lucia.validateSession(sessionid));
-      if (!user || !['superadmin', 'admin', 'editor', 'writer'].includes(user.role)) {
-        return new Response('User authentication failed', { status: 403 });
-      }
-      // verify team member (admins are trusted without a team row)
-      if (!['superadmin', 'admin'].includes(user.role) && !(await getTeamMemberBySlug(user.id)))
-        return new Response('User not found', { status: 404 });
-      // make sure we have file data
-      if (!filedata) return new Response('No filedata provided', { status: 400 });
-
-      // decode base64 → Uint8Array for R2
-      const binaryStr = atob(filedata.includes(',') ? filedata.split(',')[1] : filedata);
-      const bytes = new Uint8Array(binaryStr.length);
-      for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
-
-      const r2 = env.R2;
-      console.log('uploading to R2:', s3key, mimeType, filedata.length);
-      const s3url = await uploadR2(r2, s3key, bytes, mimeType);
-
-      return s3url ? new Response(JSON.stringify({s3url}), { status: 200 })
-                   : new Response('R2 upload failed', { status: 500 });
-
-    } catch (error) {
-      console.error('Error processing request:', error);
-      return new Response('Server error', { status: 500 });
-    }
-  } else {
+export const POST = async (context) => {
+  const { request } = context;
+  if (!request.headers.get('Content-Type')?.includes('application/json'))
     return new Response('Invalid Content-Type', { status: 415 });
+
+  const gate = await requireApi(context, { role: 'author' });
+  if (gate.response) return gate.response;
+
+  try {
+    const body = await request.json();
+    let { filedata, mimeType, s3key } = body;
+    mimeType = mimeType || guessContentType(s3key);
+    if (!filedata) return new Response('No filedata provided', { status: 400 });
+
+    // decode base64 → Uint8Array for R2
+    const binaryStr = atob(filedata.includes(',') ? filedata.split(',')[1] : filedata);
+    const bytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+    const s3url = await uploadR2(env.R2, s3key, bytes, mimeType);
+    return s3url
+      ? new Response(JSON.stringify({ s3url }), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      : new Response('R2 upload failed', { status: 500 });
+  } catch (error) {
+    console.error('Error processing request:', error);
+    return new Response('Server error', { status: 500 });
   }
 };
