@@ -57,7 +57,7 @@ function toPostShape(row) {
       keywords: row.data?.keywords ?? [],
       datePublished: row.data?.datePublished ?? null,
       dateModified: row.data?.dateModified ?? null,
-      image: row.data?.image_src ? { src: row.data.image_src, alt: row.data.image_alt ?? '' } : null,
+      image: row.data?.image ?? (row.data?.image_src ? { src: row.data.image_src, alt: row.data.image_alt ?? '' } : null),
       audio: row.data?.audio ?? null,
       narrator: row.data?.narrator ?? null,
     },
