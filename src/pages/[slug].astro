@@ -10,7 +10,9 @@ import AuthorBio from "src/components/article/authorCard.astro";
 import { mainLanguages, generateArticleImage, baseURL, buildToc } from "@utils/utils.js";
 import TOC from "src/components/article/TOC.astro";
 import MarkDownRenderer from "src/components/md/MarkDownRenderer.astro";
-import { getContentBySlug, getAllContent, getTeam, getCategories, getTopics } from "@lib/queries";
+import { getContentBySlug, getAllContent, getTeam, getCategories, getTopics, getUpcomingEvents } from "@lib/queries";
+import { eventSlug } from "@lib/event-slug";
+import { imagekitUrl } from "../utils/utils.js";
 
 const { slug } = Astro.params;
 
@@ -58,6 +60,19 @@ const hasCover = !!post.data?.image?.src;
 const toc = buildToc(post);
 const hasToc = Array.isArray(toc) && toc.length > 0;
 const hasRelated = (related?.length ?? 0) > 0 || (translations?.length ?? 0) > 0;
+
+// Upcoming educational events to surface in the side rail.
+const upcomingEvents = (await getUpcomingEvents().catch(() => []))
+  .slice(0, 3)
+  .map((ev) => ({
+    url: `/events/${eventSlug(ev)}`,
+    title: (ev.data?.title || ev.data?.name || 'Event').replace(/\s*[—–-]\s*First Sunday Concert.*$/i, '').trim(),
+    when: ev.data?.startDate
+      ? new Date(ev.data.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'America/Phoenix' })
+      : null,
+    img: imagekitUrl(ev.data?.mainImage || ev.data?.teacherImage || '', { w: 320, h: 200 }),
+  }));
+const hasEvents = upcomingEvents.length > 0;
 
 const prettyDate = post.data?.datePublished
   ? new Date(post.data.datePublished).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -128,10 +143,33 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
     </article>
 
     <aside class="art-aside art-aside--right">
-      {hasRelated && (
+      {(hasEvents || hasRelated) && (
         <div class="art-sticky">
-          <p class="art-aside__label">Related reading</p>
-          <RelatedArticles {related} {translations} />
+          {hasEvents && (
+            <section class="art-events">
+              <p class="art-aside__label">Upcoming at Desert Rose</p>
+              <ul class="art-events__list">
+                {upcomingEvents.map((e) => (
+                  <li>
+                    <a href={e.url} class="art-event">
+                      {e.img && <span class="art-event__thumb"><img src={e.img} alt={e.title} loading="lazy" width="320" height="200" /></span>}
+                      <span class="art-event__body">
+                        {e.when && <time class="art-event__when">{e.when}</time>}
+                        <span class="art-event__title">{e.title}</span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <a href="/events" class="art-events__all">See all programs &rarr;</a>
+            </section>
+          )}
+          {hasRelated && (
+            <section class:list={[{ "art-rel--spaced": hasEvents }]}>
+              <p class="art-aside__label">Related reading</p>
+              <RelatedArticles {related} {translations} />
+            </section>
+          )}
         </div>
       )}
     </aside>
@@ -329,25 +367,49 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
   .art-aside .art-sticky { padding-top: clamp(1.75rem, 4.5vh, 3rem); }
   @media (min-width: 768px) { .art-aside .art-sticky { position: sticky; top: 5.5rem; } }
 
-  /* Table of contents */
+  /* Table of contents — numbered two-level outline */
   .art-aside--left :global(#tableofcontents) { position: static; }
   .art-aside--left :global(#desktop-toc) { width: auto; padding-top: 0; }
   .art-aside--left :global(#desktop-toc ul) { list-style: none; margin: 0; padding: 0; }
-  .art-aside--left :global(#desktop-toc li) {
-    line-height: 1.3; padding: .28rem 0 .28rem .75rem;
-    margin: 0; border-left: 2px solid #ece3d2; border-radius: 0;
-    transition: border-color .15s, background .15s;
+  .art-aside--left :global(#desktop-toc a) { text-decoration: none; transition: color .15s; }
+
+  /* Top-level (H2) sections — numbered */
+  .art-aside--left :global(#desktop-toc > ul) { counter-reset: toc; }
+  .art-aside--left :global(#desktop-toc > ul > li) {
+    counter-increment: toc; position: relative;
+    padding: .2rem 0 .6rem 2.1rem; margin: 0; border: 0; line-height: 1.22;
   }
-  .art-aside--left :global(#desktop-toc a) {
-    font-family: 'Merriweather', Georgia, serif; font-size: .9rem;
-    color: #6b5e4b; text-decoration: none; transition: color .15s;
+  .art-aside--left :global(#desktop-toc > ul > li)::before {
+    content: counter(toc, decimal-leading-zero);
+    position: absolute; left: 0; top: .3rem;
+    font-family: 'Fraunces', serif; font-weight: 600; font-size: .72rem;
+    color: #c9a95f; letter-spacing: .04em;
   }
-  .art-aside--left :global(#desktop-toc a:hover) { color: #356b63; text-decoration: none; }
+  .art-aside--left :global(#desktop-toc > ul > li > a) {
+    font-family: 'Fraunces', Georgia, serif; font-size: .96rem; font-weight: 450;
+    color: #2b2219;
+  }
+  .art-aside--left :global(#desktop-toc > ul > li > a:hover) { color: #356b63; }
+
+  /* Sub-level (H3) */
+  .art-aside--left :global(#desktop-toc ul ul) { margin: .45rem 0 .15rem; padding: 0; }
+  .art-aside--left :global(#desktop-toc ul ul li) {
+    position: relative; padding: .22rem 0 .22rem .95rem; margin: 0;
+    border-left: 1px solid #e7ddc9;
+  }
+  .art-aside--left :global(#desktop-toc ul ul a) {
+    font-family: 'Merriweather', Georgia, serif; font-size: .82rem; color: #7c6f5a;
+  }
+  .art-aside--left :global(#desktop-toc ul ul a:hover) { color: #356b63; }
+
+  /* Active section marker */
   .art-aside--left :global(#desktop-toc li.visible) {
-    border-left-color: #356b63 !important; background: #f2f7f5 !important;
-    box-shadow: none !important; padding-left: .75rem !important;
+    background: transparent !important; box-shadow: none !important;
+    border-left-color: #356b63 !important; padding-left: .95rem;
   }
-  .art-aside--left :global(#desktop-toc li.visible a) { color: #2b574f; }
+  .art-aside--left :global(#desktop-toc > ul > li.visible) { padding-left: 2.1rem; }
+  .art-aside--left :global(#desktop-toc > ul > li.visible)::before { color: #356b63; }
+  .art-aside--left :global(#desktop-toc li.visible > a) { color: #2b574f !important; font-weight: 600; }
 
   /* Related reading cards */
   .art-aside--right :global(#carouselTargetList) { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem; }
@@ -359,6 +421,27 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
   }
   .art-aside--right :global(#carouselTargetList li) { transition: transform .2s; }
   .art-aside--right :global(#carouselTargetList li:hover) { transform: translateY(-2px); }
+
+  /* Upcoming educational events */
+  .art-events__list { list-style: none; margin: 0 0 .85rem; padding: 0; display: grid; gap: 1rem; }
+  .art-events__list li { margin: 0; }
+  .art-event { display: grid; grid-template-columns: 4.4rem 1fr; gap: .75rem; align-items: center; text-decoration: none; }
+  .art-event__thumb { display: block; border-radius: .45rem; overflow: hidden; background: #ece3d2; aspect-ratio: 16 / 10; }
+  .art-event__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s; }
+  .art-event:hover .art-event__thumb img { transform: scale(1.06); }
+  .art-event__body { min-width: 0; }
+  .art-event__when {
+    display: block; font-family: 'Fraunces', serif; font-size: .62rem;
+    letter-spacing: .12em; text-transform: uppercase; color: #9a5516; margin-bottom: .18rem;
+  }
+  .art-event__title {
+    display: block; font-family: 'Merriweather', Georgia, serif;
+    font-size: .85rem; line-height: 1.25; color: #2b2219;
+  }
+  .art-event:hover .art-event__title { color: #356b63; }
+  .art-events__all { display: inline-block; font-size: .78rem; font-weight: 600; color: #356b63; text-decoration: none; }
+  .art-events__all:hover { text-decoration: underline; }
+  .art-rel--spaced { margin-top: 2.4rem; padding-top: 1.7rem; border-top: 1px solid #ece3d2; }
 
   .art-cta {
     display: inline-block;
