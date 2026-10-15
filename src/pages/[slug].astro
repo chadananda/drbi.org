@@ -7,7 +7,7 @@ import PodcastPlayer from "src/components/article/PodcastPlayer.astro";
 import PostComments from "src/components/article/PostComments.astro";
 import RelatedArticles from "src/components/article/relatedArticles.astro";
 import AuthorBio from "src/components/article/authorCard.astro";
-import { mainLanguages, generateArticleImage, baseURL } from "@utils/utils.js";
+import { mainLanguages, generateArticleImage, baseURL, buildToc } from "@utils/utils.js";
 import TOC from "src/components/article/TOC.astro";
 import MarkDownRenderer from "src/components/md/MarkDownRenderer.astro";
 import { getContentBySlug, getAllContent, getTeam, getCategories, getTopics } from "@lib/queries";
@@ -55,6 +55,10 @@ const base_url = baseURL(Astro);
 const cover_image = await generateArticleImage(post.data?.image?.src, post, base_url, 1600, 760, 'webp', 90);
 const hasCover = !!post.data?.image?.src;
 
+const toc = buildToc(post);
+const hasToc = Array.isArray(toc) && toc.length > 0;
+const hasRelated = (related?.length ?? 0) > 0 || (translations?.length ?? 0) > 0;
+
 const prettyDate = post.data?.datePublished
   ? new Date(post.data.datePublished).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
   : null;
@@ -90,7 +94,12 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
   <!-- Body — the side columns flank the TEXT, not the hero -->
   <div class="art-grid">
     <aside class="art-aside art-aside--left">
-      <div class="art-sticky"><TOC {post} /></div>
+      {hasToc && (
+        <div class="art-sticky">
+          <p class="art-aside__label">In this piece</p>
+          <TOC {post} />
+        </div>
+      )}
     </aside>
 
     <article class="art-main" lang={language} dir={dir}>
@@ -119,7 +128,12 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
     </article>
 
     <aside class="art-aside art-aside--right">
-      <div class="art-sticky"><RelatedArticles {related} {translations} /></div>
+      {hasRelated && (
+        <div class="art-sticky">
+          <p class="art-aside__label">Related reading</p>
+          <RelatedArticles {related} {translations} />
+        </div>
+      )}
     </aside>
   </div>
 
@@ -303,6 +317,48 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
     }
     .art-aside--right { display: block; }
   }
+
+  /* ── Sidebars ──────────────────────────────────────────────────── */
+  .art-aside__label {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: .7rem; letter-spacing: .22em; text-transform: uppercase;
+    color: #9a5516; margin: 0 0 .9rem;
+    padding-bottom: .5rem; border-bottom: 1px solid #e7ddc9;
+  }
+  .art-aside .art-sticky { padding-top: clamp(1.75rem, 4.5vh, 3rem); }
+  @media (min-width: 768px) { .art-aside .art-sticky { position: sticky; top: 5.5rem; } }
+
+  /* Table of contents */
+  .art-aside--left :global(#tableofcontents) { position: static; }
+  .art-aside--left :global(#desktop-toc) { width: auto; padding-top: 0; }
+  .art-aside--left :global(#desktop-toc ul) { list-style: none; margin: 0; padding: 0; }
+  .art-aside--left :global(#desktop-toc li) {
+    line-height: 1.3; padding: .28rem 0 .28rem .75rem;
+    margin: 0; border-left: 2px solid #ece3d2; border-radius: 0;
+    transition: border-color .15s, background .15s;
+  }
+  .art-aside--left :global(#desktop-toc a) {
+    font-family: 'Merriweather', Georgia, serif; font-size: .9rem;
+    color: #6b5e4b; text-decoration: none; transition: color .15s;
+  }
+  .art-aside--left :global(#desktop-toc a:hover) { color: #356b63; text-decoration: none; }
+  .art-aside--left :global(#desktop-toc li.visible) {
+    border-left-color: #356b63 !important; background: #f2f7f5 !important;
+    box-shadow: none !important; padding-left: .75rem !important;
+  }
+  .art-aside--left :global(#desktop-toc li.visible a) { color: #2b574f; }
+
+  /* Related reading cards */
+  .art-aside--right :global(#carouselTargetList) { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.4rem; }
+  .art-aside--right :global(#carouselTargetList img) { border-radius: .5rem; }
+  .art-aside--right :global(#carouselTargetList a),
+  .art-aside--right :global(#carouselTargetList h3),
+  .art-aside--right :global(#carouselTargetList h4) {
+    font-family: 'Fraunces', Georgia, serif; color: #2b2219; line-height: 1.2;
+  }
+  .art-aside--right :global(#carouselTargetList li) { transition: transform .2s; }
+  .art-aside--right :global(#carouselTargetList li:hover) { transform: translateY(-2px); }
 
   .art-cta {
     display: inline-block;
