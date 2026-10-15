@@ -220,9 +220,72 @@ Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, 
   .art-sticky { position: static; }
   .art-main { min-width: 0; }
   .art-col { max-width: 44rem; margin-inline: auto; }
+
+  /* ── Editorial prose ──────────────────────────────────────────── */
   .art-prose {
+    max-width: 40rem;
     padding-top: clamp(1.75rem, 4.5vh, 3rem);
     font-family: 'Merriweather', Georgia, serif;
+    font-size: 1.16rem;
+    line-height: 1.85;
+    color: #2d2821;
+    --rule: #d8a657;
+    --accent: #356b63;
+    --link: #9a5516;
+  }
+  .art-prose :global(p) { margin: 0 0 1.4em; }
+  .art-prose :global(a) {
+    color: var(--link); text-decoration: underline;
+    text-decoration-thickness: 1px; text-underline-offset: 3px;
+    text-decoration-color: rgba(154,85,22,.38); transition: color .15s, text-decoration-color .15s;
+  }
+  .art-prose :global(a:hover) { color: #7a4211; text-decoration-color: #7a4211; }
+  .art-prose :global(strong) { font-weight: 700; color: #231d16; }
+  .art-prose :global(em) { color: #4a4036; }
+
+  /* Standfirst — the opening byline/bio paragraph */
+  .art-prose > :global(p:first-of-type) {
+    font-size: 1.3rem; line-height: 1.68; color: #554b3e;
+    padding-left: 1.1rem; border-left: 3px solid var(--rule);
+  }
+
+  /* Interview speaker labels: a bold name at the start of a line */
+  .art-prose :global(p > strong:first-child) {
+    color: var(--accent); font-weight: 700; letter-spacing: .005em;
+  }
+
+  /* Section headings — quoted phrases, set in Fraunces */
+  .art-prose :global(h2) {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 450;
+    font-size: clamp(1.55rem, 3.4vw, 2.05rem); line-height: 1.14;
+    letter-spacing: -.012em; color: #241c15; margin: 2.6em 0 .2em;
+  }
+  .art-prose :global(h2)::after {
+    content: ''; display: block; width: 2.4rem; height: 2px;
+    background: var(--rule); margin-top: .7rem; border-radius: 2px;
+  }
+  .art-prose :global(h3) {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 500;
+    font-size: 1.32rem; color: #2b2219; margin: 1.9em 0 .4em;
+  }
+
+  .art-prose :global(blockquote) {
+    font-style: italic; color: #4a4036;
+    border-left: 3px solid var(--rule); padding: .2rem 0 .2rem 1.3rem;
+    margin: 1.7em 0;
+  }
+  .art-prose :global(ul), .art-prose :global(ol) { margin: 1.2em 0 1.4em; padding-left: 1.4em; }
+  .art-prose :global(li) { margin: .45em 0; }
+  .art-prose :global(li)::marker { color: var(--rule); }
+
+  /* Elegant centered divider */
+  .art-prose :global(hr) {
+    border: 0; width: 42%; height: auto; margin: 2.6em auto;
+    text-align: center; overflow: visible;
+  }
+  .art-prose :global(hr)::before {
+    content: '❧'; color: var(--rule); font-size: 1.3rem;
+    display: block; line-height: 0;
   }
 
   @media (min-width: 768px) {

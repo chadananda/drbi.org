@@ -5,9 +5,11 @@
  import { mainLanguages as langs } from '@utils/utils.js';
  const lang = data.language;
  const dir =  langs[lang].dir;
-
+ // Don't render an empty "Description:" box when there's nothing to show.
+ const hasContent = !!(data.abstract && String(data.abstract).trim()) || !!ref?.link;
 ---
 
+{hasContent && (
 <div lang="en" dir="ltr"
 class="tldr text-base font-normal text-gray-600 italic my-5 p-3 bg-gray-100 rounded-lg border border-4 border-gray-300">
    <div class="tldr-title text-lg sm:text-xl font-bold text-[#6c6b8b] normal-case m-0 p-0 pb-1">Description:</div>
@@ -18,4 +20,5 @@ class="tldr text-base font-normal text-gray-600 italic my-5 p-3 bg-gray-100 roun
    <!-- tailwind clear  -->
    <div class="clear-both"></div>
 </div>
+)}
 
