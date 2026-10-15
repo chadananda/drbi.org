@@ -2,7 +2,6 @@
 export const prerender = false;
 
 import Layout from "@layouts/ArticleLayout.astro";
-import Container from "src/components/container.astro";
 import TLDR from "src/components/article/TLDR.astro";
 import PodcastPlayer from "src/components/article/PodcastPlayer.astro";
 import PostComments from "src/components/article/PostComments.astro";
@@ -52,86 +51,202 @@ const isCemeteryArticle = postTopics.some(t => burialTopics.includes(t));
 const dir = mainLanguages[language]?.dir ?? 'ltr';
 const base_url = baseURL(Astro);
 
-const cover_image = await generateArticleImage(post.data?.image?.src, post, base_url, 957, 384, 'webp', 90);
+// Wide hero for the full-bleed header (cropped responsively with object-cover).
+const cover_image = await generateArticleImage(post.data?.image?.src, post, base_url, 1600, 760, 'webp', 90);
+const hasCover = !!post.data?.image?.src;
+
+const prettyDate = post.data?.datePublished
+  ? new Date(post.data.datePublished).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  : null;
 
 // Cache published content at edge for 5 min, stale-while-revalidate 1 hour
 Astro.response.headers.set('Cache-Control', 'public, max-age=300, s-maxage=300, stale-while-revalidate=3600');
 ---
 <Layout {post} {author} {category} {language}>
 
-<div class="grid grid-cols-[5px_auto_5px] md:grid-cols-[240px_auto_5px] lg:grid-cols-[240px_auto_220px] relative ">
-<div class="left-column relative ">
-  <TOC {post}/>
-</div>
-<div class="content relative " lang={language} dir={dir}>
+  {hasCover && <link rel="preload" as="image" href={cover_image?.src} />}
 
-  <Container class="max-w-screen">
-
-    <div class="mx-auto max-w-3xl text-center mt-3">
-      <span class="text-blue-500 uppercase tracking-wider text-sm font-medium">
-        <a href={`/categories/${category?.id}`}>{category?.data?.category}</a>
-      </span>
-      <h1 class="text-3xl lg:text-4xl font-bold lg:tracking-tight mt-1 lg:leading-tight"> {post.data?.title} </h1>
-      <div class="flex gap-2 mt-3 items-center justify-center text-sm flex-wrap">
-        {!!author && (
-          <div class="name-date">
-            <span class="text-slate-600">
-              <a href={`/authors/${author?.id}`}> {author?.data?.name} </a>
-            </span>
-          </div>
-        )}
-        <div class="w-full md:w-auto flex flex-wrap justify-center gap-1 p-0 m-0 !line-clamp-2">
-          {topics && topics?.map((topic) => (
-            <span class="text-sm text-slate-600">
-              #<a href={`/topics/${topic?.id}`}>{topic?.data?.topic}</a>
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    <div class="mx-auto max-w-10xl">
-      <div class="relative pt-[40%] rounded-xl mt-6 overflow-hidden shadow-xl border border-gray-200" >
-        <img {...cover_image} alt={cover_image?.alt ?? post.data?.title} class="cover-image absolute top-0 left-0 w-full h-full object-cover" />
-      </div>
-     </div>
-
-     <div class="max-w-3xl mx-auto">
-       <TLDR {post}  />
-     </div>
-
-     <div class="max-w-3xl mx-auto">
-       {!!post.data?.audio && <PodcastPlayer {post} {author} />  }
-     </div>
-
-     <div class="prose-lg mx-auto mt-6 max-w-3xl prose-headings:mb-2 prose-headings:mt-8">
-     <MarkDownRenderer {post} />
-    </div>
-
-    {!!author && (
-      <div class="max-w-3xl mx-auto"> <AuthorBio size="bio" {author} /> </div>
+  <!-- Full-bleed editorial hero with the title overlaid -->
+  <header class:list={["art-hero", { "art-hero--plain": !hasCover }]} dir={dir}>
+    {hasCover && (
+      <img {...cover_image} alt={cover_image?.alt ?? post.data?.title} class="art-hero__img" fetchpriority="high" />
     )}
-
-    <div class="hidden md:block max-w-3xl mx-auto relative">
-      {isCemeteryArticle ? (
-        <div class="mt-12 mb-8 text-center">
-          <a href="/how-to-purchase-a-plot"
-             class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xl py-4 px-8 rounded-lg transition-colors shadow-lg">
-            How to Purchase a Plot &rarr;
-          </a>
-        </div>
-      ) : (
-        <PostComments {post} />
+    <div class="art-hero__scrim" aria-hidden="true"></div>
+    <div class="art-hero__inner">
+      {category?.data?.category && (
+        <a href={`/categories/${category?.id}`} class="art-hero__kicker">{category?.data?.category}</a>
       )}
+      <h1 class="art-hero__title">{post.data?.title}</h1>
+      <div class="art-hero__meta">
+        {!!author && <a href={`/authors/${author?.id}`} class="art-hero__author">{author?.data?.name}</a>}
+        {prettyDate && <time class="art-hero__dot">{prettyDate}</time>}
+        {topics?.map((topic) => (
+          <a href={`/topics/${topic?.id}`} class="art-hero__topic">#{topic?.data?.topic}</a>
+        ))}
+      </div>
     </div>
+  </header>
 
-  </Container>
+  <!-- Body — the side columns flank the TEXT, not the hero -->
+  <div class="art-grid">
+    <aside class="art-aside art-aside--left">
+      <div class="art-sticky"><TOC {post} /></div>
+    </aside>
 
-</div>
-<div class="right-column text-center relative ">
-  <div class="hidden lg:block ">
-    <RelatedArticles {related} {translations} />
+    <article class="art-main" lang={language} dir={dir}>
+      <div class="art-col">
+        <TLDR {post} />
+        {!!post.data?.audio && <PodcastPlayer {post} {author} />}
+      </div>
+
+      <div class="art-col art-prose prose prose-lg max-w-none mt-2 prose-headings:mt-10 prose-headings:mb-3">
+        <MarkDownRenderer {post} />
+      </div>
+
+      {!!author && (
+        <div class="art-col"><AuthorBio size="bio" {author} /></div>
+      )}
+
+      <div class="art-col hidden md:block">
+        {isCemeteryArticle ? (
+          <div class="my-12 text-center">
+            <a href="/how-to-purchase-a-plot" class="art-cta">How to Purchase a Plot &rarr;</a>
+          </div>
+        ) : (
+          <PostComments {post} />
+        )}
+      </div>
+    </article>
+
+    <aside class="art-aside art-aside--right">
+      <div class="art-sticky"><RelatedArticles {related} {translations} /></div>
+    </aside>
   </div>
-</div>
-</div>
+
 </Layout>
+
+<style>
+  /* Self-hosted display face (already in /public/fonts) */
+  @font-face {
+    font-family: 'Fraunces';
+    src: url('/fonts/fraunces-vf.woff2') format('woff2');
+    font-weight: 100 900; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Fraunces';
+    src: url('/fonts/fraunces-italic-vf.woff2') format('woff2');
+    font-weight: 100 900; font-style: italic; font-display: swap;
+  }
+
+  /* ── Full-bleed hero ───────────────────────────────────────────── */
+  .art-hero {
+    position: relative;
+    width: 100%;
+    min-height: clamp(340px, 58vh, 560px);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    background: #241c15;
+    isolation: isolate;
+  }
+  .art-hero__img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    z-index: -2;
+  }
+  .art-hero__scrim {
+    position: absolute; inset: 0; z-index: -1;
+    background:
+      linear-gradient(to top, rgba(20,15,10,.90) 0%, rgba(20,15,10,.55) 32%, rgba(20,15,10,.18) 60%, rgba(20,15,10,.05) 100%),
+      linear-gradient(to right, rgba(20,15,10,.45) 0%, rgba(20,15,10,0) 55%);
+  }
+  .art-hero__inner {
+    position: relative;
+    width: 100%; max-width: 72rem;
+    margin: 0 auto;
+    padding: 3rem clamp(1.1rem, 5vw, 3.25rem) clamp(2rem, 5.5vh, 3.75rem);
+    color: #fff;
+  }
+  .art-hero__kicker {
+    display: inline-block;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: .74rem; letter-spacing: .26em; text-transform: uppercase;
+    color: #f0cf98; text-decoration: none; margin-bottom: 1rem;
+  }
+  .art-hero__kicker:hover { color: #f7e2bd; }
+  .art-hero__title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 440;
+    font-size: clamp(2.05rem, 5.1vw, 3.75rem);
+    line-height: 1.04; letter-spacing: -.015em;
+    max-width: 20ch; text-wrap: balance;
+    margin: 0;
+    text-shadow: 0 2px 30px rgba(0,0,0,.4);
+  }
+  .art-hero__meta {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    gap: .35rem 1.1rem; margin-top: 1.25rem;
+    font-size: .92rem; color: rgba(255,255,255,.82);
+  }
+  .art-hero__author { color: #fff; font-weight: 600; text-decoration: none; }
+  .art-hero__author:hover { text-decoration: underline; }
+  .art-hero__dot { color: rgba(255,255,255,.68); }
+  .art-hero__topic { color: #f0cf98; text-decoration: none; font-size: .84rem; }
+  .art-hero__topic:hover { color: #f7e2bd; }
+
+  /* Plain variant when the post has no cover image */
+  .art-hero--plain {
+    background: radial-gradient(130% 120% at 18% 0%, #f8f2e7 0%, #efe7d6 52%, #e7dcc7 100%);
+    min-height: clamp(240px, 34vh, 360px);
+  }
+  .art-hero--plain .art-hero__scrim { display: none; }
+  .art-hero--plain .art-hero__title { color: #29231b; text-shadow: none; }
+  .art-hero--plain .art-hero__kicker { color: #9a5516; }
+  .art-hero--plain .art-hero__meta { color: #6f6150; }
+  .art-hero--plain .art-hero__author { color: #29231b; }
+  .art-hero--plain .art-hero__dot { color: #8a7a64; }
+  .art-hero--plain .art-hero__topic { color: #9a5516; }
+
+  /* ── Body grid: columns beside the TEXT ───────────────────────── */
+  .art-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 82rem; margin: 0 auto;
+    padding: 0 1.1rem;
+  }
+  .art-aside { display: none; }
+  .art-sticky { position: static; }
+  .art-main { min-width: 0; }
+  .art-col { max-width: 44rem; margin-inline: auto; }
+  .art-prose {
+    padding-top: clamp(1.75rem, 4.5vh, 3rem);
+    font-family: 'Merriweather', Georgia, serif;
+  }
+
+  @media (min-width: 768px) {
+    .art-grid {
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 2rem; padding: 0 1.5rem;
+    }
+    .art-aside--left { display: block; }
+    .art-sticky { position: sticky; top: 5rem; }
+  }
+  @media (min-width: 1024px) {
+    .art-grid {
+      grid-template-columns: 220px minmax(0, 1fr) 220px;
+      gap: 2.75rem;
+    }
+    .art-aside--right { display: block; }
+  }
+
+  .art-cta {
+    display: inline-block;
+    background: #356b63; color: #fff; font-weight: 600; font-size: 1.15rem;
+    padding: .95rem 2rem; border-radius: .6rem;
+    text-decoration: none; box-shadow: 0 10px 24px -10px rgba(53,107,99,.6);
+    transition: background .2s, transform .2s;
+  }
+  .art-cta:hover { background: #2b574f; transform: translateY(-1px); }
+</style>
