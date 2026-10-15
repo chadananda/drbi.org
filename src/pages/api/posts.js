@@ -96,19 +96,24 @@ export async function GET({ request }) {
   }
 }
 
-async function requireAuth(request) {
-  const body = await request.json();
-  const { sessionid } = body;
-  if (!sessionid) return { error: 'Session ID required', status: 401 };
-  const { user } = await lucia.validateSession(sessionid);
+async function requireAuth(request, locals) {
+  const body = await request.json().catch(() => ({}));
+  // Prefer the login cookie the middleware already validated; fall back to a
+  // JWT session token in the body for API-token / programmatic callers.
+  let user = locals?.user ?? null;
+  if (!user) {
+    const { sessionid } = body;
+    if (!sessionid) return { error: 'Authentication required', status: 401 };
+    ({ user } = await lucia.validateSession(sessionid));
+  }
   if (!user || !['superadmin', 'admin', 'editor', 'author'].includes(user.role)) {
     return { error: 'Unauthorized', status: 403 };
   }
   return { user, body };
 }
 
-export async function POST({ request }) {
-  const auth = await requireAuth(request.clone());
+export async function POST({ request, locals }) {
+  const auth = await requireAuth(request.clone(), locals);
   if (auth.error) return new Response(auth.error, { status: auth.status });
 
   const { action, sessionid, ...data } = auth.body;
@@ -165,7 +170,7 @@ export async function POST({ request }) {
   }
 }
 
-export async function PUT({ request }) {
+export async function PUT({ request, locals }) {
   const url = new URL(request.url);
   const id = url.searchParams.get('id');
   if (!id) {
@@ -174,7 +179,7 @@ export async function PUT({ request }) {
     });
   }
 
-  const auth = await requireAuth(request.clone());
+  const auth = await requireAuth(request.clone(), locals);
   if (auth.error) return new Response(auth.error, { status: auth.status });
 
   const { sessionid, ...data } = auth.body;

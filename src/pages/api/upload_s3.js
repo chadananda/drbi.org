@@ -6,20 +6,23 @@ import { getTeamMemberBySlug, guessContentType } from '@utils/utils.js';
 import { lucia } from "../../lib/auth";
 import { env } from 'cloudflare:workers';
 
-export const POST = async ({ request }) => {
-  if (request.headers.get("Content-Type").includes("application/json")) {
+export const POST = async ({ request, locals }) => {
+  if (request.headers.get("Content-Type")?.includes("application/json")) {
     try {
       const body = await request.json();
       let {filedata, mimeType, s3key, sessionid} = body;
       mimeType = mimeType || guessContentType(s3key);
 
-      // verify session and role
-      const { user } = await lucia.validateSession(sessionid);
+      // Authenticate from the login cookie the middleware already validated;
+      // fall back to a JWT session token in the body for programmatic callers.
+      let user = locals?.user ?? null;
+      if (!user && sessionid) ({ user } = await lucia.validateSession(sessionid));
       if (!user || !['superadmin', 'admin', 'editor', 'writer'].includes(user.role)) {
         return new Response('User authentication failed', { status: 403 });
       }
-      // verify team member
-      if (!(await getTeamMemberBySlug(user.id))) return new Response('User not found', { status: 404 });
+      // verify team member (admins are trusted without a team row)
+      if (!['superadmin', 'admin'].includes(user.role) && !(await getTeamMemberBySlug(user.id)))
+        return new Response('User not found', { status: 404 });
       // make sure we have file data
       if (!filedata) return new Response('No filedata provided', { status: 400 });
 
