@@ -144,6 +144,7 @@ export async function POST(context) {
         const slug = data.slug ?? data.title.toLowerCase().replace(/\s+/g, '-');
         const img = await resolveImage(data.frontmatter, slug);
         const result = await createContent({
+          id: data.id ?? slug,
           slug,
           collection: data.type ?? 'articles',
           title: data.title,
