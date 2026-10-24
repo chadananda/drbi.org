@@ -500,6 +500,13 @@ const agenda = entries.filter((e) => new Date(e.end || e.start) >= now).slice(0,
 
     @media (max-width: 720px) {
       .cxr { grid-template-columns: 3rem 3.6rem 1fr; gap: .8rem; }
+      /* Featured next event: give the card enough height for its text so the date stamp, tag and title never collide. */
+      .cxf-media { aspect-ratio: auto; min-height: 26rem; }
+      .cxf-media img { position: absolute; inset: 0; }
+      .cxf-title { font-size: 1.6rem; max-width: none; }
+      .cxf-body { padding: 1.1rem; }
+      .cxf-stamp { top: .9rem; left: .9rem; }
+      .cxf-teaser { -webkit-line-clamp: 3; }
       .cxr-go { display: none; }
       .cxr-thumb { width: 3.6rem; height: 3.6rem; }
       .cxr-teaser { display: none; }
