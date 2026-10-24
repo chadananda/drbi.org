@@ -39,6 +39,17 @@ async function buildEntries() {
       // Rich fields for the visual showcase + grid thumbnails (overrides still apply to title/url).
       image: d.mainImage || '', category: (d.categories || [])[0] || '', teaser: teaserOf(d),
     });
+    // Recurring series (e.g. monthly firesides) keep later sessions in additionalDates: one entry each.
+    (Array.isArray(d.additionalDates) ? d.additionalDates : []).forEach((a, i) => {
+      if (!a?.startDate) return;
+      entries.push({
+        id: `${ev.id}#${i + 1}`, kind: 'event', type: 'event',
+        title: d.name || d.title || 'Event',
+        start: a.startDate, end: a.endDate || null, allDay: false,
+        url: `/events/${eventSlug(ev)}`, color: TYPE_COLORS.event,
+        image: d.mainImage || '', category: (d.categories || [])[0] || '', teaser: teaserOf(d),
+      });
+    });
   }
   for (const it of items) {
     entries.push({
