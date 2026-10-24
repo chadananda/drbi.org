@@ -21,15 +21,19 @@ const upcoming = all
   .map((e, i) => ({ ...e, _large: i === 0 || e._end.toDateString() !== e._start.toDateString() }));
 
 const AZ = "America/Phoenix";
-const monthOf = (d) => d.toLocaleDateString("en-US", { month: "short", timeZone: AZ }).toUpperCase();
+// Arizona-time calendar parts (the Worker runs in UTC, so getDate()/toDateString() would be a day off for evening events).
+const azPart = (d, opt) => d.toLocaleDateString("en-US", { ...opt, timeZone: AZ });
+const azKey = (d) => azPart(d, { year: "numeric", month: "numeric", day: "numeric" });
+const azDay = (d) => Number(azPart(d, { day: "numeric" }));
+const monthOf = (d) => azPart(d, { month: "short" }).toUpperCase();
 const dayRange = (s, e) => {
-  if (!e || +e === +s || e.toDateString() === s.toDateString()) return String(s.getDate());
-  const sameMonth = s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear();
-  return sameMonth ? `${s.getDate()}–${e.getDate()}` : `${s.getDate()} ${monthOf(s)} – ${e.getDate()} ${monthOf(e)}`;
+  if (!e || +e === +s || azKey(e) === azKey(s)) return String(azDay(s));
+  const sameMonth = azPart(s, { month: "numeric", year: "numeric" }) === azPart(e, { month: "numeric", year: "numeric" });
+  return sameMonth ? `${azDay(s)}–${azDay(e)}` : `${azDay(s)} ${monthOf(s)} – ${azDay(e)} ${monthOf(e)}`;
 };
 const weekdayOf = (s, e) => {
   const w = (d) => d.toLocaleDateString("en-US", { weekday: "long", timeZone: AZ });
-  if (!e || e.toDateString() === s.toDateString()) return w(s);
+  if (!e || azKey(e) === azKey(s)) return w(s);
   return `${w(s)}–${e.toLocaleDateString("en-US", { weekday: "short", timeZone: AZ })}`;
 };
 const stripHtml = (s) => (s || "").replace(/<[^>]+>/g, " ").replace(/&[a-z]+;/gi, " ").replace(/\s+/g, " ").trim();
