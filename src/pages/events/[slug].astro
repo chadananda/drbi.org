@@ -23,7 +23,7 @@ const title = d.title || d.name || "Event";
 const isConcertSeries = (d.categories || []).some((c) => /first sunday concert series/i.test(String(c)));
 const plainDesc = (d.shortDescription || (d.fullDescription || "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim().slice(0, 180);
 
-const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }); } catch { return ""; } };
+const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: "America/Phoenix" }); } catch { return ""; } };
 const start = d.startDate ? fmtDay(d.startDate) : "";
 const end = d.endDate && d.endDate !== d.startDate ? fmtDay(d.endDate) : "";
 // The "share your photos" section only makes sense once the program is over.
