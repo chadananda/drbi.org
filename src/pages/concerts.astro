@@ -17,8 +17,13 @@ const concerts = (await getEvents())
   .filter((x) => !isNaN(+x.d))
   .sort((a, b) => +a.d - +b.d);
 
+// Season split: the 2026–27 lineup vs. last season's archive (programs live on each event page).
+const SEASON_START = new Date("2026-09-01T00:00:00-07:00");
+const lineup = concerts.filter((x) => x.d >= SEASON_START);
+const archive = concerts.filter((x) => x.d < SEASON_START);
+
 const fmtLong = (d) => d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", timeZone: "America/Phoenix" });
-const cleanName = (n) => String(n || "").replace(/\s*[—-]\s*First Sunday Concert.*$/i, "").trim();
+const cleanName = (n) => String(n || "").replace(/^\s*(1st|first) sunday concert series:\s*/i, "").replace(/\s*[—-]\s*First Sunday Concert.*$/i, "").trim();
 const heroUrl = imagekitUrl(`${CDN}/header.png`, { w: 1800 });
 ---
 
@@ -44,7 +49,7 @@ const heroUrl = imagekitUrl(`${CDN}/header.png`, { w: 1800 });
         <!-- Lineup -->
         <h2 class="fscs-h2">The 2026–27 Season</h2>
         <ol class="fscs-lineup">
-          {concerts.map(({ ev, d }) => (
+          {lineup.map(({ ev, d }) => (
             <li>
               <a href={`/events/${eventSlug(ev)}`}>
                 <span class="fscs-date"><span class="fscs-mo">{d.toLocaleDateString("en-US", { month: "short", timeZone: "America/Phoenix" })}</span><span class="fscs-day">{d.toLocaleDateString("en-US", { day: "numeric", timeZone: "America/Phoenix" })}</span></span>
@@ -58,6 +63,26 @@ const heroUrl = imagekitUrl(`${CDN}/header.png`, { w: 1800 });
             </li>
           ))}
         </ol>
+
+        {archive.length > 0 && (
+          <>
+            <h2 class="fscs-h2 fscs-h2--archive">Last Season, 2025–26</h2>
+            <ol class="fscs-lineup">
+              {archive.map(({ ev, d }) => (
+                <li>
+                  <a href={`/events/${eventSlug(ev)}`}>
+                    <span class="fscs-date"><span class="fscs-mo">{d.toLocaleDateString("en-US", { month: "short", timeZone: "America/Phoenix" })}</span><span class="fscs-day">{d.toLocaleDateString("en-US", { day: "numeric", timeZone: "America/Phoenix" })}</span></span>
+                    <span class="fscs-main">
+                      <span class="fscs-name">{cleanName(ev.data.name)}</span>
+                      <span class="fscs-when">{fmtLong(d)} · 3:00 PM</span>
+                    </span>
+                    <span class="fscs-cta">Program →</span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
 
         <!-- Three info columns (Oraea's layout) -->
         <div class="fscs-cols">
@@ -104,6 +129,7 @@ const heroUrl = imagekitUrl(`${CDN}/header.png`, { w: 1800 });
     .fscs-tag { text-align: center; color: var(--color-brand-deep, #8a4a12); font-family: 'Fraunces', 'Newsreader', Georgia, serif; font-size: 1.15rem; margin: 1rem 0 0; }
 
     .fscs-h2 { text-align: center; font-family: 'Fraunces', 'Newsreader', Georgia, serif; font-weight: 400; font-size: 1.9rem; margin: 3rem 0 1.5rem; color: var(--color-ink, #2a1c0b); }
+    .fscs-h2--archive { font-size: 1.5rem; margin-top: 3rem; }
     .fscs-lineup { list-style: none; padding: 0; margin: 0 auto; max-width: 44rem; display: flex; flex-direction: column; gap: .7rem; }
     .fscs-lineup a { display: grid; grid-template-columns: 4rem 1fr auto; gap: 1.1rem; align-items: center; padding: 1rem 1.3rem; background: #fff; border: 1px solid var(--color-line, #e7e2d8); border-radius: 14px; text-decoration: none; color: inherit; transition: box-shadow .2s, transform .2s, border-color .2s; }
     .fscs-lineup a:hover { box-shadow: 0 18px 34px -20px rgba(90,60,20,.4); transform: translateY(-2px); border-color: #e6d4b4; }
