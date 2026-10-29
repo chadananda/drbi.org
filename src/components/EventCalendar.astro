@@ -4,6 +4,7 @@ import { transformS3Url, imagekitUrl } from '../utils/utils.js';
 import MarkdownIt from 'markdown-it';
 import { getVisibleEvents } from '../lib/queries';
 import { eventSlug } from '../lib/event-slug';
+import { byEventData } from '../lib/event-order';
 
 // Initialize markdown renderer. html:true because event descriptions come from our own D1
 // (admin-entered or synced from OUR Humanitix account, which stores HTML) — trusted content.
@@ -105,7 +106,7 @@ events.forEach(event => {
 
 // Sort all expanded events by date
 let upcomingEvents = expandedEvents
-  .sort((a, b) => parseArizonaDate(a.data.startDate).getTime() - parseArizonaDate(b.data.startDate).getTime());
+  .sort(byEventData);
 
 const { view = 'cards', limit } = Astro.props; // 'cards', 'list', or 'list-full', optional limit
 

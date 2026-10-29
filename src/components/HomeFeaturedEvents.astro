@@ -3,6 +3,7 @@
 // and a strong "reserve" CTA. Enticing sign-ups is the homepage's primary job.
 import { getVisibleEvents } from "../lib/queries";
 import { eventSlug } from "../lib/event-slug";
+import { compareEvents } from "../lib/event-order";
 import { imagekitUrl } from "../utils/utils.js";
 
 const { limit = 2 } = Astro.props;
@@ -14,7 +15,7 @@ const upcoming = all
   .filter((e) => e?.data?.visible !== false)
   .map((e) => ({ ...e, _start: new Date(e.data.startDate), _end: new Date(e.data.endDate || e.data.startDate) }))
   .filter((e) => !isNaN(e._start) && e._end >= now)
-  .sort((a, b) => a._start - b._start)
+  .sort((a, b) => compareEvents(a._start, a._end, b._start, b._end))
   .slice(0, limit)
   // Emphasis: the NEXT event (first upcoming) and any multi-day program (retreat/intensive)
   // render large; single-session events after the first render compact.

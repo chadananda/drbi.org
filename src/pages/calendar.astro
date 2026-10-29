@@ -8,6 +8,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import PageHero from "@components/PageHero.astro";
 import { getCalendarData } from "@lib/calendar";
+import { compareEvents } from "@lib/event-order";
 import { imagekitUrl } from "../utils/utils.js";
 
 const FALLBACK = "https://cdn.shrtr.com/drbi.org/site/drbi/events.webp";
@@ -26,7 +27,7 @@ const upcoming = entries
   .filter((e) => e.type === "event" && e.start)
   .map((e) => ({ ...e, _s: new Date(e.start), _e: new Date(e.end || e.start) }))
   .filter((e) => !isNaN(+e._s) && e._e >= now)
-  .sort((a, b) => a._s - b._s);
+  .sort((a, b) => compareEvents(a._s, a._e, b._s, b._e));
 
 const feature = upcoming[0] || null;
 const rest = upcoming.slice(1); // the feature is highlighted above; list the remainder
