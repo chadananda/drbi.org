@@ -107,9 +107,9 @@ const heroUrl = imagekitUrl(`${CDN}/header.png`, { w: 1800 });
 
         <!-- Flyer + logo -->
         <div class="fscs-footerblock">
-          <a class="fscs-flyer" href={`${CDN}/series-flyer.pdf`} download target="_blank" rel="noopener noreferrer">
-            <img src={imagekitUrl(`${CDN}/series-flyer-thumb.png`, { w: 300 })} alt="First Sunday Concert Series flyer" width="300" height="450" loading="lazy" />
-            <span>⬇ Download the season flyer</span>
+          <a class="fscs-flyer" href={`${CDN}/season-poster-2026-27.pdf`} download target="_blank" rel="noopener noreferrer">
+            <img src={imagekitUrl(`${CDN}/season-poster-2026-27.png`, { w: 300 })} srcset={[300, 450, 600].map((w) => `${imagekitUrl(`${CDN}/season-poster-2026-27.png`, { w })} ${w}w`).join(", ")} sizes="240px" alt="First Sunday Concert Series 2026–27 season poster" width="300" height="464" loading="lazy" />
+            <span>⬇ Download the 2026–27 season poster</span>
           </a>
           <div class="fscs-quotes">
             <img class="fscs-logo" src={imagekitUrl(`${CDN}/rose-music-logo.png`, { w: 260 })} alt="Desert Rose Music" width="200" height="200" loading="lazy" />
