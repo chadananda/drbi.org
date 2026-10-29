@@ -45,10 +45,11 @@ export const onRequest = async (context, next) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
 
-  // One canonical host: www.* → apex, path + query kept.
-  if (url.hostname.startsWith('www.')) {
-    url.hostname = url.hostname.slice(4);
-    return new Response(null, { status: 301, headers: { Location: url.toString() } });
+  // One canonical host: www.* → apex, path + query kept. Read the Host header — Astro
+  // rebuilds request.url from `site`, so url.hostname is always the apex.
+  const host = (context.request.headers.get('host') || '').toLowerCase();
+  if (host.startsWith('www.')) {
+    return new Response(null, { status: 301, headers: { Location: `https://${host.slice(4)}${path}${url.search}` } });
   }
 
   // Permanent (301) redirects for retired URLs that still draw traffic and bots.
