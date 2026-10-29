@@ -45,6 +45,12 @@ export const onRequest = async (context, next) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
 
+  // One canonical host: www.* → apex, path + query kept.
+  if (url.hostname.startsWith('www.')) {
+    url.hostname = url.hostname.slice(4);
+    return new Response(null, { status: 301, headers: { Location: url.toString() } });
+  }
+
   // Permanent (301) redirects for retired URLs that still draw traffic and bots.
   const RETIRED: Record<string, string> = {
     '/blog': '/events',
