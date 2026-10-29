@@ -1,6 +1,7 @@
 import { Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import selectors from '../support/selectors.js';
+import { toMs, azDayKey } from '../../src/lib/event-order.js';
 
 Then('I should see the events section', async function () {
   const section = this.page.locator(selectors.eventsSection);
@@ -45,11 +46,12 @@ Then('the events response should be sorted by date ascending', async function ()
   const events = Array.isArray(body) ? body : body.events ?? body.data ?? [];
   if (events.length < 2) return;
 
+  // Ordered by Arizona start *day* (then end), so same-day events may differ in start time.
   for (let i = 1; i < events.length; i++) {
-    const prev = new Date(events[i-1].data?.startDate ?? events[i-1].startDate);
-    const curr = new Date(events[i].data?.startDate ?? events[i].startDate);
-    if (!isNaN(prev.getTime()) && !isNaN(curr.getTime())) {
-      expect(curr.getTime()).toBeGreaterThanOrEqual(prev.getTime());
+    const prev = toMs(events[i-1].data?.startDate ?? events[i-1].startDate);
+    const curr = toMs(events[i].data?.startDate ?? events[i].startDate);
+    if (!isNaN(prev) && !isNaN(curr)) {
+      expect(azDayKey(new Date(curr).toISOString())).toBeGreaterThanOrEqual(azDayKey(new Date(prev).toISOString()));
     }
   }
 });
