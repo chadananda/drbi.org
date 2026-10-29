@@ -9,6 +9,7 @@ import Layout from "@layouts/Layout.astro";
 import Container from "@components/container.astro";
 import { getEvents } from "@lib/queries";
 import { eventSlug } from "@lib/event-slug";
+import { azDayKey, toMs } from "@lib/event-order";
 import { imagekitUrl } from "../../utils/utils.js";
 
 const { slug } = Astro.params;
@@ -24,8 +25,11 @@ const isConcertSeries = (d.categories || []).some((c) => /first sunday concert s
 const plainDesc = (d.shortDescription || (d.fullDescription || "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim().slice(0, 180);
 
 const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: "America/Phoenix" }); } catch { return ""; } };
-const start = d.startDate ? fmtDay(d.startDate) : "";
-const end = d.endDate && d.endDate !== d.startDate ? fmtDay(d.endDate) : "";
+// One-day events show the day + start time; multi-day programs show the day range.
+const oneDay = !d.endDate || azDayKey(d.endDate) === azDayKey(d.startDate);
+const fmtTime = (s) => new Date(toMs(s)).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/Phoenix" });
+const start = d.startDate ? fmtDay(d.startDate) + (oneDay && /T/.test(d.startDate) ? ` · ${fmtTime(d.startDate)}` : "") : "";
+const end = !oneDay ? fmtDay(d.endDate) : "";
 // The "share your photos" section only makes sense once the program is over.
 const isPast = (() => { const t = d.endDate || d.startDate; const dt = t ? new Date(t) : null; return dt && !isNaN(+dt) && dt < new Date(); })();
 const loc = d.location || {};
@@ -270,7 +274,7 @@ const eventSchema = (!hidden && d.startDate) ? {
           </div>
           {d.flyerUrl && (
             <a class="flyer-card" href={d.flyerUrl} download target="_blank" rel="noopener noreferrer">
-              <img src={d.flyerThumb || d.flyerUrl} alt={`${title} flyer`} class="flyer-thumb" loading="lazy" decoding="async" />
+              <img src={imagekitUrl(d.flyerThumb || d.flyerUrl, { w: 300 })} srcset={[300, 450, 600].map((w) => `${imagekitUrl(d.flyerThumb || d.flyerUrl, { w })} ${w}w`).join(", ")} sizes="240px" alt={`${title} flyer`} class="flyer-thumb" loading="lazy" decoding="async" />
               <span class="flyer-dl"><span class="flyer-ico" aria-hidden="true">⬇</span> Download the flyer</span>
             </a>
           )}

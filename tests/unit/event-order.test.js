@@ -25,3 +25,9 @@ test("zoneless strings are Arizona time", () => {
   assert.ok(compareEvents("2026-11-26T20:00", "2026-11-26T21:00", "2026-11-26T23:00Z", "2026-11-29T19:00Z") < 0);
   assert.equal(compareEvents("2026-11-26", null, "2026-11-26T07:00Z", null), 0);
 });
+
+test("azDayKey: a 4–7 pm Arizona event is one day even though it crosses UTC midnight", async () => {
+  const { azDayKey } = await import("../../src/lib/event-order.js");
+  assert.equal(azDayKey("2026-11-26T23:00:00.600Z"), azDayKey("2026-11-27T02:00:00.600Z"));
+  assert.notEqual(azDayKey("2026-11-26T23:00:00Z"), azDayKey("2026-11-29T19:00:00Z"));
+});

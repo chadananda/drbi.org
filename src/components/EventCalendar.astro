@@ -4,7 +4,7 @@ import { transformS3Url, imagekitUrl } from '../utils/utils.js';
 import MarkdownIt from 'markdown-it';
 import { getVisibleEvents } from '../lib/queries';
 import { eventSlug } from '../lib/event-slug';
-import { byEventData } from '../lib/event-order';
+import { byEventData, azDayKey } from '../lib/event-order';
 
 // Initialize markdown renderer. html:true because event descriptions come from our own D1
 // (admin-entered or synced from OUR Humanitix account, which stores HTML) — trusted content.
@@ -213,7 +213,7 @@ const displayEvents = upcomingEvents.map(event => {
   const isMultiDay = (() => {
     const s = parseArizonaDate(d.startDate);
     const e = d.endDate ? parseArizonaDate(d.endDate) : s;
-    return !isNaN(+s) && !isNaN(+e) && e.toDateString() !== s.toDateString();
+    return !isNaN(+s) && !isNaN(+e) && azDayKey(e) !== azDayKey(s);  // Arizona days, not UTC
   })();
   // Multi-day programs (weekend retreats, multi-session challenges) always render large.
   // Single-session/evening events render compact — except the very next one, emphasized large.

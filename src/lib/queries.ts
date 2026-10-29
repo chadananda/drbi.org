@@ -424,7 +424,7 @@ export async function upsertSyncedEvent(data: Record<string, any>) {
         data.startDate ?? '', data.endDate ?? '',
         JSON.stringify(data.additionalDates ?? []), JSON.stringify(data.location ?? {}),
         data.price ? JSON.stringify(data.price) : null,
-        data.registrationUrl ?? '', data.url ?? '', data.mainImage ?? '',
+        data.registrationUrl ?? '', data.url ?? '', data.mainImage || existing.data.mainImage || '', // no Humanitix banner → keep a site-set hero
         JSON.stringify(data.images ?? []), data.organizer ?? 'DRBI',
         JSON.stringify(data.categories ?? []), source, data.externalId ?? null,
         sourcePublished, now, data.lastModified ?? null, now, id,
