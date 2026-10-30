@@ -85,6 +85,16 @@ function beautifyDescription(html) {
   return out;
 }
 let richDesc = beautifyDescription(d.fullDescription);
+
+// Site-owned extras (the Humanitix sync never touches these columns):
+//  highlights    -> string[] shown as stamped badges under the hero
+//  eventSchedule -> [{time, title, note}] shown as a timeline after the description
+const highlights = (d.highlights || []).filter(Boolean);
+const schedule = (d.eventSchedule || []).filter((s) => s && s.title);
+// With a timeline on the page, the synced "When: …" line just repeats it.
+if (schedule.length) richDesc = richDesc.replace(/<p>\s*When:[\s\S]*?<\/p>/i, "");
+const startHour = d.startDate ? +new Date(toMs(d.startDate)).toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: "America/Phoenix" }) : 0;
+const scheduleTitle = !oneDay ? "Schedule" : startHour >= 16 ? "Order of the evening" : "Order of the day";
 // Link the first "First Sunday Concert Series" mention in the copy straight to the series page.
 let linkedInText = false;
 if (isConcertSeries && richDesc.includes('First Sunday Concert Series')) {
@@ -208,6 +218,14 @@ const eventSchema = (!hidden && d.startDate) ? {
       </Container>
     )}
 
+    {highlights.length > 0 && (
+      <Container>
+        <ul class="ev-stamps mx-auto max-w-5xl">
+          {highlights.map((h) => <li>{h}</li>)}
+        </ul>
+      </Container>
+    )}
+
     <Container>
       <div class="event-grid mx-auto max-w-5xl mt-12 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_20rem] gap-10 lg:gap-16 lg:items-start">
         <!-- Description -->
@@ -219,6 +237,22 @@ const eventSchema = (!hidden && d.startDate) ? {
             <div class="event-desc" set:html={richDesc} />
           ) : (
             <p class="text-slate-600">Details coming soon.</p>
+          )}
+          {schedule.length > 0 && (
+            <section class="ev-sched" aria-label={scheduleTitle}>
+              <h2 class="ev-sched-h">{scheduleTitle}</h2>
+              <ol>
+                {schedule.map((s) => (
+                  <li>
+                    <span class="ev-sched-t">{s.time}</span>
+                    <span class="ev-sched-b">
+                      <span class="ev-sched-title">{s.title}</span>
+                      {s.note && <span class="ev-sched-note">{s.note}</span>}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </section>
           )}
         </div>
 
@@ -539,6 +573,61 @@ const eventSchema = (!hidden && d.startDate) ? {
     font-weight: 600; font-size: .9rem; color: #8a3d08;
   }
   .event-detail .flyer-ico { font-size: 1.05rem; }
+
+  /* ---------- Highlights: stamped badges under the hero ---------- */
+  .event-detail .ev-stamps {
+    list-style: none; padding: 0; margin-top: 2rem; margin-bottom: 0;
+    display: flex; flex-wrap: wrap; gap: .7rem;
+  }
+  .event-detail .ev-stamps li {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: .98rem; line-height: 1.2;
+    color: var(--brass-deep); background: #fff;
+    padding: .55rem 1.05rem; border-radius: 999px;
+    border: 1.5px dashed #d8b98a;
+    box-shadow: 0 0 0 4px #fff, 0 6px 16px -10px rgba(90,60,20,.45);
+    transform: rotate(var(--r, 0deg));
+  }
+  .event-detail .ev-stamps li:nth-child(3n+1) { --r: -1deg; }
+  .event-detail .ev-stamps li:nth-child(3n+2) { --r: .8deg; }
+  .event-detail .ev-stamps li:first-child { background: var(--brass-deep); color: #fff7ea; border-color: #f0d6aa; }
+
+  /* ---------- Schedule timeline ---------- */
+  .event-detail .ev-sched { margin-top: 2.6rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+  .event-detail .ev-sched-h {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 400; font-style: italic;
+    font-size: 1.7rem; color: var(--ink); margin: 0 0 1.4rem;
+  }
+  .event-detail .ev-sched ol { list-style: none; margin: 0; padding: 0; position: relative; }
+  .event-detail .ev-sched ol::before {
+    content: ""; position: absolute; left: 8.35rem; top: .7rem; bottom: .7rem;
+    border-left: 2px dotted #d6bf98;
+  }
+  .event-detail .ev-sched li {
+    display: grid; grid-template-columns: 7.6rem 1fr; gap: 1.6rem; align-items: baseline;
+    padding: .55rem 0 1.1rem; position: relative;
+  }
+  .event-detail .ev-sched li::before {
+    content: ""; position: absolute; left: calc(8.35rem - 6px); top: 1.05rem;
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--paper); border: 2.5px solid var(--brass);
+  }
+  .event-detail .ev-sched-t {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: .95rem;
+    letter-spacing: .02em; color: var(--brass-deep); text-align: right; white-space: nowrap;
+  }
+  .event-detail .ev-sched-title {
+    display: block; font-family: 'Fraunces', Georgia, serif; font-size: 1.3rem; line-height: 1.25; color: var(--ink);
+  }
+  .event-detail .ev-sched-note {
+    display: block; margin-top: .2rem; font-family: 'Newsreader', Georgia, serif;
+    font-size: 1.08rem; line-height: 1.5; color: var(--muted);
+  }
+  @media (max-width: 520px) {
+    .event-detail .ev-sched ol::before { left: .45rem; }
+    .event-detail .ev-sched li { grid-template-columns: 1fr; gap: .15rem; padding-left: 1.9rem; }
+    .event-detail .ev-sched li::before { left: 0; top: .78rem; }
+    .event-detail .ev-sched-t { text-align: left; }
+  }
   .event-detail .reg-btn {
     display: block;
     text-align: center;
