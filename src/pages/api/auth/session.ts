@@ -6,7 +6,7 @@ export const prerender = false;
 import type { APIContext } from 'astro';
 import { adminNavForRole } from '@lib/admin-nav';
 
-const STAFF = ['superadmin', 'admin', 'editor', 'author'];
+const STAFF = ['superadmin', 'admin', 'editor', 'author', 'coordinator'];
 
 export const GET = async ({ locals }: APIContext) => {
   const headers = { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' };

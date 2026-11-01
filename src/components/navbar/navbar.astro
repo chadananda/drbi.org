@@ -11,7 +11,7 @@ const currentPath = Astro.url.pathname;
 // Auth state (set on every request by middleware.ts). Sign-in happens right here in
 // the navbar popover — there is no login page.
 const user = Astro.locals?.user ?? null;
-const isStaff = !!user && ['superadmin', 'admin', 'editor', 'author'].includes(user.role);
+const isStaff = !!user && ['superadmin', 'admin', 'editor', 'author', 'coordinator'].includes(user.role);
 const avatarUrl = (user as any)?.avatar || '';
 const adminLinks = isStaff ? adminNavForRole(user!.role) : [];
 const email = (user as any)?.email || '';

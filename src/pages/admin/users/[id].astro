@@ -17,7 +17,7 @@ if (!isNew && !userData) return Astro.redirect('/admin/users');
 let errorMsg = '';
 let successMsg = '';
 
-const ROLES = ['author', 'editor', 'admin', 'superadmin'];
+const ROLES = ['coordinator', 'author', 'editor', 'admin', 'superadmin'];
 const availableRoles = currentUser.role === 'superadmin' ? ROLES : ROLES.filter(r => r !== 'superadmin');
 
 if (Astro.request.method === 'POST') {

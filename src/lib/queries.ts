@@ -774,12 +774,13 @@ export async function getFaqs() {
 // `user` = signed-in non-anonymous visitor (can comment; NO admin-panel access).
 // Staff roles (author+) are granted by the whitelist. Admin access gate lives in
 // middleware.ts (['superadmin','admin','editor','author']) — 'user' is intentionally excluded.
-const ROLE_TO_LEVEL: Record<string, number> = { superadmin: 100, admin: 40, editor: 30, author: 20, user: 10 };
+const ROLE_TO_LEVEL: Record<string, number> = { superadmin: 100, admin: 40, editor: 30, author: 20, coordinator: 15, user: 10 };
 function levelToRole(level: number): string {
   if (level >= 100) return 'superadmin';
   if (level >= 40) return 'admin';
   if (level >= 30) return 'editor';
   if (level >= 20) return 'author';
+  if (level >= 15) return 'coordinator'; // Roundhouse-only admin (see admin-scope.js)
   return 'user';
 }
 function roleToLevel(role: string): number { return ROLE_TO_LEVEL[role] ?? 10; }
@@ -1027,4 +1028,53 @@ export async function setCalendarOverride(key: string, o: { label?: string; link
 
 export async function deleteCalendarOverride(key: string): Promise<void> {
   await db.execute({ sql: 'DELETE FROM calendar_overrides WHERE entry_key = ?', args: [key] });
+}
+
+// ── Roundhouse community events (/admin/roundhouse → /calendar#roundhouse) ────
+export function shapeRoundhouseEvent(row: any) {
+  return {
+    id: row.id,
+    title: row.title,
+    date: row.date,
+    startTime: row.start_time || '',
+    endTime: row.end_time || '',
+    repeat: row.repeat === 'weekly' ? 'weekly' : 'none',
+    repeatUntil: row.repeat_until || '',
+    organizer: row.organizer || '',
+    notes: row.notes || '',
+    visible: Number(row.visible) === 1,
+  };
+}
+
+export async function getRoundhouseEvents(includeHidden = false) {
+  const r = await db.execute(`SELECT * FROM roundhouse_events ${includeHidden ? '' : 'WHERE visible = 1'} ORDER BY date ASC, start_time ASC`);
+  return (r.rows as any[]).map(shapeRoundhouseEvent);
+}
+
+export async function getRoundhouseEvent(id: string) {
+  const r = await db.execute({ sql: 'SELECT * FROM roundhouse_events WHERE id = ? LIMIT 1', args: [id] });
+  const row = r.rows[0] as any;
+  return row ? shapeRoundhouseEvent(row) : null;
+}
+
+export async function upsertRoundhouseEvent(ev: any): Promise<string> {
+  const id = ev.id || `rh-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  await db.execute({
+    sql: `INSERT INTO roundhouse_events (id, title, date, start_time, end_time, repeat, repeat_until, organizer, notes, visible, created_by, updated_at)
+          VALUES (?,?,?,?,?,?,?,?,?,?,?,datetime('now'))
+          ON CONFLICT(id) DO UPDATE SET
+            title=excluded.title, date=excluded.date, start_time=excluded.start_time, end_time=excluded.end_time,
+            repeat=excluded.repeat, repeat_until=excluded.repeat_until, organizer=excluded.organizer,
+            notes=excluded.notes, visible=excluded.visible, updated_at=datetime('now')`,
+    args: [
+      id, String(ev.title || '').trim(), ev.date, ev.startTime || null, ev.endTime || null,
+      ev.repeat === 'weekly' ? 'weekly' : 'none', ev.repeatUntil || null, ev.organizer || null,
+      ev.notes || null, ev.visible === false ? 0 : 1, ev.createdBy || null,
+    ],
+  });
+  return id;
+}
+
+export async function deleteRoundhouseEvent(id: string): Promise<void> {
+  await db.execute({ sql: 'DELETE FROM roundhouse_events WHERE id = ?', args: [id] });
 }

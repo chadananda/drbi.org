@@ -8,7 +8,7 @@ const role = (user?.role || "staff").replace(/^\w/, (c: string) => c.toUpperCase
 const initials = String(name).trim().split(/\s+/).map((s: string) => s[0]).slice(0, 2).join("").toUpperCase() || "A";
 
 const on = (p: string, exact = false) => exact ? path === p : path.startsWith(p);
-const sections = [
+const allSections = [
   { label: null, items: [
     { title: "Dashboard", icon: "dashboard", href: "/admin", active: path === "/admin" },
     { title: "Analytics", icon: "analytics", href: "/admin/analytics", active: on("/admin/analytics") },
@@ -17,6 +17,7 @@ const sections = [
     { title: "Content", icon: "content", href: "/admin/posts", active: on("/admin/posts") || on("/admin/memorial") || on("/admin/news") || on("/admin/articles") },
     { title: "Events", icon: "events", href: "/admin/events", active: on("/admin/events") },
     { title: "Calendar", icon: "events", href: "/admin/calendar", active: on("/admin/calendar") },
+    { title: "Roundhouse", icon: "calendar-plus", href: "/admin/roundhouse", active: on("/admin/roundhouse") },
     { title: "Media", icon: "media", href: "/admin/media", active: on("/admin/media") },
     { title: "Organization", icon: "organization", items: [
       { title: "Categories", href: "/admin/categories", active: on("/admin/categories") },
@@ -44,6 +45,10 @@ const sections = [
     { title: "Settings", icon: "settings", href: "/admin/settings", active: path === "/admin/settings" },
   ]},
 ];
+// Coordinators (Roundhouse-only, see lib/admin-scope.js) see just their one section.
+const sections = user?.role === "coordinator"
+  ? [{ label: null, items: [{ title: "Roundhouse", icon: "calendar-plus", href: "/admin/roundhouse", active: true }] }]
+  : allSections;
 ---
 <aside class="admin-sidebar" id="adminSidebar">
   <a href="/admin" class="a-brand">

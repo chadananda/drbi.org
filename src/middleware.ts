@@ -2,6 +2,7 @@
 import { lucia } from "./lib/auth";
 import { verifyRequestOrigin as verifyOrig } from "lucia";
 import { ADMIN_NAV, roleLevel } from "./lib/admin-nav";
+import { scopedAdminRedirect } from "./lib/admin-scope.js";
 import { env } from "cloudflare:workers";
 import { revalidateEventsIfStale } from "./lib/humanitix-sync";
 import { maybeRefreshAirbnb } from "./lib/airbnb";
@@ -67,7 +68,7 @@ export const onRequest = async (context, next) => {
   }
 
   const isAdmin = path.startsWith('/admin');
-  const STAFF = ['superadmin', 'admin', 'editor', 'author'];
+  const STAFF = ['superadmin', 'admin', 'editor', 'author', 'coordinator'];
 
   // Validate the session on EVERY page so the navbar can show login/account state
   // anywhere. Sign-in happens via the navbar popover — there is no login page.
@@ -136,6 +137,8 @@ export const onRequest = async (context, next) => {
     // Per-section role enforcement: only for known admin-nav sections (e.g. /admin/users
     // = superadmin, /admin/team|settings|analytics = admin+). Paths NOT in the matrix
     // (e.g. /admin/articles) stay open to any staff so content editing isn't blocked.
+    const scoped = scopedAdminRedirect(user.role, path);
+    if (scoped) return new Response(null, { status: 302, headers: { Location: scoped } });
     const match = ADMIN_NAV
       .filter((i) => i.href !== '/admin' && (path === i.href || path.startsWith(i.href + '/')))
       .sort((a, b) => b.href.length - a.href.length)[0];

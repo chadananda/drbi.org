@@ -12,10 +12,10 @@ const users = await getUsers();
 
 // A superadmin may grant admin; an admin may grant up to editor.
 const grantable = user.role === 'superadmin'
-  ? [{ v: 'admin', l: 'Admin — all content + team + settings' }, { v: 'editor', l: 'Editor — all content + comments' }, { v: 'author', l: 'Author — own content only' }]
-  : [{ v: 'editor', l: 'Editor — all content + comments' }, { v: 'author', l: 'Author — own content only' }];
+  ? [{ v: 'admin', l: 'Admin — all content + team + settings' }, { v: 'editor', l: 'Editor — all content + comments' }, { v: 'author', l: 'Author — own content only' }, { v: 'coordinator', l: 'Roundhouse coordinator — Roundhouse events only' }]
+  : [{ v: 'editor', l: 'Editor — all content + comments' }, { v: 'author', l: 'Author — own content only' }, { v: 'coordinator', l: 'Roundhouse coordinator — Roundhouse events only' }];
 
-const badge = (r: string) => r === 'superadmin' ? 'a-badge-red' : r === 'admin' ? 'a-badge-blue' : r === 'editor' ? 'a-badge-blue' : r === 'author' ? 'a-badge-green' : 'a-badge-muted';
+const badge = (r: string) => r === 'superadmin' ? 'a-badge-red' : r === 'admin' ? 'a-badge-blue' : r === 'editor' ? 'a-badge-blue' : r === 'author' || r === 'coordinator' ? 'a-badge-green' : 'a-badge-muted';
 const fmtDate = (s: any) => { try { return new Date(s).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return ''; } };
 ---
 

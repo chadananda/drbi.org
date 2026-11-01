@@ -1,6 +1,6 @@
 // Single source of truth for admin navigation + role-based visibility.
 // Role levels mirror queries.ts: superadmin 100, admin 40, editor 30, author 20, user 10.
-export const ROLE_LEVEL: Record<string, number> = { superadmin: 100, admin: 40, editor: 30, author: 20, user: 10 };
+export const ROLE_LEVEL: Record<string, number> = { superadmin: 100, admin: 40, editor: 30, author: 20, coordinator: 15, user: 10 };
 
 export interface AdminNavItem { title: string; href: string; icon: string; minLevel: number; }
 
@@ -24,6 +24,7 @@ export function roleLevel(role: string | undefined | null): number {
 
 /** Admin nav items the given role may access. */
 export function adminNavForRole(role: string | undefined | null): AdminNavItem[] {
+  if (role === 'coordinator') return [{ title: 'Roundhouse', href: '/admin/roundhouse', icon: 'calendar-plus', minLevel: 15 }];
   const level = roleLevel(role);
   return ADMIN_NAV.filter((i) => level >= i.minLevel);
 }

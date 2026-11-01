@@ -14,7 +14,7 @@ async function requireRole(request: Request, minRole: string) {
   const { user } = await lucia.validateSession(sessionid);
   if (!user) return { error: 'Invalid session', status: 401 };
   const idx = (r: string) => ROLES.indexOf(r);
-  if (idx(user.role) > idx(minRole)) return { error: 'Insufficient permissions', status: 403 };
+  if (idx(user.role) < 0 || idx(user.role) > idx(minRole)) return { error: 'Insufficient permissions', status: 403 };
   return { user };
 }
 

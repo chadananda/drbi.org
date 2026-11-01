@@ -1,0 +1,122 @@
+---
+// Roundhouse community events editor (Kitty's calendar). One-off or weekly events in the Roundhouse,
+// shown on the public /calendar "Roundhouse" tab. Flags anything outside the Mon-evening→Thu-evening ask.
+export const prerender = false;
+import Layout from '@layouts/AdminLayout.astro';
+import { getRoundhouseEvents, getRoundhouseEvent } from '@lib/queries';
+import { inMidweekWindow } from '@lib/roundhouse.js';
+
+const events = await getRoundhouseEvents(true).catch(() => []);
+const editId = Astro.url.searchParams.get('edit');
+const editing = editId ? await getRoundhouseEvent(editId) : null;
+const saved = Astro.url.searchParams.get('saved');
+const deleted = Astro.url.searchParams.get('deleted');
+const error = Astro.url.searchParams.get('error');
+
+const today = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Phoenix' });
+const current = events.filter((e) => (e.repeat === 'weekly' ? !e.repeatUntil || e.repeatUntil >= today : e.date >= today));
+const past = events.filter((e) => !current.includes(e)).reverse();
+const savedEv = saved ? events.find((e) => e.id === saved) : null;
+const savedOutside = savedEv && !inMidweekWindow(savedEv.date, savedEv.startTime);
+
+const fmtDate = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const fmtTime = (t) => { if (!t) return ''; const [h, m] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h < 12 ? 'am' : 'pm'}`; };
+const weekday = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' });
+const when = (e) => {
+  const t = e.startTime ? ` · ${fmtTime(e.startTime)}${e.endTime ? `–${fmtTime(e.endTime)}` : ''}` : '';
+  return e.repeat === 'weekly'
+    ? `Every ${weekday(e.date)}${t} · from ${fmtDate(e.date)}${e.repeatUntil ? ` to ${fmtDate(e.repeatUntil)}` : ''}`
+    : `${fmtDate(e.date)}${t}`;
+};
+const input = 'width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;margin:.35rem 0 1rem;font:inherit;';
+const label = 'font-weight:600;font-size:.9rem;';
+---
+
+<Layout title="Roundhouse — DRBI Admin">
+  <div style="max-width:56rem;margin:0 auto;padding:1.5rem 1rem;">
+    <h1 style="font-size:1.6rem;font-weight:700;margin:0 0 .3rem;">Roundhouse community events</h1>
+    <p style="color:#64748b;margin:0 0 1.5rem;">Regular and one-off community activities in the Roundhouse. They show on the <a href="/calendar#roundhouse" target="_blank">Roundhouse tab</a> of the public calendar. Please plan for <b>Monday evening through Thursday evening</b> and check the <a href="/calendar" target="_blank">facility calendar</a> for retreats and rentals first.</p>
+
+    {savedEv && <p style="background:#dcfce7;border:1px solid #86efac;color:#166534;padding:.5rem .8rem;border-radius:8px;">Saved “{savedEv.title}”.</p>}
+    {savedOutside && <p style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;padding:.5rem .8rem;border-radius:8px;">Heads-up: this falls outside the Monday-evening to Thursday-evening window, so it may clash with weekend rentals. It is saved; check the facility calendar or talk with Flanny.</p>}
+    {deleted && <p style="background:#f1f5f9;border:1px solid #cbd5e1;padding:.5rem .8rem;border-radius:8px;">Deleted.</p>}
+    {error && <p style="background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;padding:.5rem .8rem;border-radius:8px;">{error === 'time' ? 'Times need the form HH:MM.' : 'A title and a date are required.'}</p>}
+
+    <form id="add" method="POST" action="/api/admin/roundhouse" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;">
+      <input type="hidden" name="op" value="save" />
+      <input type="hidden" name="id" value={editing?.id || ''} />
+      <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 1rem;">{editing ? `Edit “${editing.title}”` : 'Add an event'}</h2>
+
+      <label style={label}>Title</label>
+      <input name="title" required maxlength="200" value={editing?.title || ''} placeholder="Devotional gathering" style={input} />
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:0 1rem;">
+        <div><label style={label}>Date <span style="font-weight:400;color:#64748b;">(first one, if weekly)</span></label>
+          <input type="date" name="date" required value={editing?.date || ''} style={input} /></div>
+        <div><label style={label}>Starts</label>
+          <input type="time" name="start_time" value={editing?.startTime || ''} style={input} /></div>
+        <div><label style={label}>Ends</label>
+          <input type="time" name="end_time" value={editing?.endTime || ''} style={input} /></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:0 1rem;">
+        <div><label style={label}>Repeats</label>
+          <select name="repeat" style={input}>
+            <option value="none" selected={editing?.repeat !== 'weekly'}>Does not repeat</option>
+            <option value="weekly" selected={editing?.repeat === 'weekly'}>Every week</option>
+          </select></div>
+        <div><label style={label}>Repeat until <span style="font-weight:400;color:#64748b;">(blank = ongoing)</span></label>
+          <input type="date" name="repeat_until" value={editing?.repeatUntil || ''} style={input} /></div>
+      </div>
+
+      <label style={label}>Organizer or contact <span style="font-weight:400;color:#64748b;">(shown publicly)</span></label>
+      <input name="organizer" maxlength="200" value={editing?.organizer || ''} placeholder="Eloy Bahá'í community" style={input} />
+
+      <label style={label}>Notes <span style="font-weight:400;color:#64748b;">(shown publicly)</span></label>
+      <textarea name="notes" rows="2" maxlength="1000" style={input}>{editing?.notes || ''}</textarea>
+
+      <label style="display:flex;gap:.5rem;align-items:center;font-size:.9rem;margin:-.4rem 0 1rem;">
+        <input type="checkbox" name="hidden" checked={editing ? !editing.visible : false} /> Hide from the public calendar
+      </label>
+
+      <button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:8px;padding:.5rem 1.2rem;font-weight:600;cursor:pointer;">{editing ? 'Save changes' : 'Add event'}</button>
+      {editing && <a href="/admin/roundhouse" style="margin-left:.8rem;color:#64748b;">Cancel</a>}
+    </form>
+
+    <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 .6rem;">Upcoming and ongoing ({current.length})</h2>
+    {current.length === 0 && <p style="color:#64748b;">Nothing yet. Add the first event above.</p>}
+    <ul style="list-style:none;padding:0;margin:0 0 2rem;display:grid;gap:.6rem;">
+      {current.map((e) => (
+        <li style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:.8rem 1rem;display:flex;gap:1rem;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;">
+          <div style="min-width:0;flex:1 1 18rem;">
+            <div style="font-weight:600;">{e.title}
+              {e.repeat === 'weekly' && <span style="background:#e0f2fe;color:#0e7490;font-size:.72rem;font-weight:600;padding:.1rem .45rem;border-radius:999px;margin-left:.4rem;">Weekly</span>}
+              {!e.visible && <span style="background:#f1f5f9;color:#475569;font-size:.72rem;font-weight:600;padding:.1rem .45rem;border-radius:999px;margin-left:.4rem;">Hidden</span>}
+              {!inMidweekWindow(e.date, e.startTime) && <span title="Outside Mon-evening to Thu-evening" style="background:#fef3c7;color:#92400e;font-size:.72rem;font-weight:600;padding:.1rem .45rem;border-radius:999px;margin-left:.4rem;">Outside midweek</span>}
+            </div>
+            <div style="color:#475569;font-size:.88rem;">{when(e)}</div>
+            {e.organizer && <div style="color:#64748b;font-size:.85rem;">{e.organizer}</div>}
+          </div>
+          <div style="display:flex;gap:.5rem;align-items:center;">
+            <a href={`/admin/roundhouse?edit=${encodeURIComponent(e.id)}#add`} style="padding:.35rem .8rem;border:1px solid #cbd5e1;border-radius:8px;color:#0f172a;text-decoration:none;font-size:.85rem;">Edit</a>
+            <form method="POST" action="/api/admin/roundhouse" onsubmit="return confirm('Delete this event?')" style="margin:0;">
+              <input type="hidden" name="op" value="delete" /><input type="hidden" name="id" value={e.id} />
+              <button type="submit" style="padding:.35rem .8rem;border:1px solid #fca5a5;background:#fff;color:#b91c1c;border-radius:8px;font-size:.85rem;cursor:pointer;">Delete</button>
+            </form>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    {past.length > 0 && (
+      <details>
+        <summary style="cursor:pointer;color:#64748b;">Past events ({past.length})</summary>
+        <ul style="list-style:none;padding:0;margin:.6rem 0 0;display:grid;gap:.4rem;">
+          {past.map((e) => (
+            <li style="color:#64748b;font-size:.88rem;">{e.title} · {when(e)} · <a href={`/admin/roundhouse?edit=${encodeURIComponent(e.id)}#add`}>edit</a></li>
+          ))}
+        </ul>
+      </details>
+    )}
+  </div>
+</Layout>

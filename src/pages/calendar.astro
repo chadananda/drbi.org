@@ -10,6 +10,8 @@ import PageHero from "@components/PageHero.astro";
 import { getCalendarData } from "@lib/calendar";
 import { compareEvents } from "@lib/event-order";
 import { imagekitUrl } from "../utils/utils.js";
+import { getRoundhouseEvents } from "@lib/queries";
+import { expandOccurrences } from "@lib/roundhouse.js";
 
 const FALLBACK = "https://cdn.shrtr.com/drbi.org/site/drbi/events.webp";
 const AZ = "America/Phoenix";
@@ -62,6 +64,22 @@ const rowImg = (e) => imagekitUrl(e.image || FALLBACK, { w: 220, h: 220, face: t
 // No-JS / SEO agenda fallback for the grid area.
 const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: AZ }); } catch { return ""; } };
 const agenda = entries.filter((e) => new Date(e.end || e.start) >= now).slice(0, 20);
+
+// Roundhouse tab: community events in the Roundhouse (managed at /admin/roundhouse), next 6 weeks.
+const rhAll = await getRoundhouseEvents().catch(() => []);
+const rhToday = now.toLocaleDateString("en-CA", { timeZone: AZ });
+const rhTo = new Date(Date.parse(rhToday + "T00:00:00Z") + 42 * 864e5).toISOString().slice(0, 10);
+const rhWeekly = rhAll.filter((e) => e.repeat === "weekly" && (!e.repeatUntil || e.repeatUntil >= rhToday));
+const rhGroups = [];
+for (const o of expandOccurrences(rhAll, rhToday, rhTo)) {
+  const label = new Date(o.date + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  let g = rhGroups[rhGroups.length - 1];
+  if (!g || g.label !== label) { g = { label, items: [] }; rhGroups.push(g); }
+  g.items.push(o);
+}
+const rhD = (d, o) => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { ...o, timeZone: "UTC" });
+const rhT = (t) => { if (!t) return ""; const [h, m] = t.split(":").map(Number); return `${((h + 11) % 12) + 1}${m ? ":" + String(m).padStart(2, "0") : ""} ${h < 12 ? "am" : "pm"}`; };
+const rhTimes = (e) => (e.startTime ? rhT(e.startTime) + (e.endTime ? `–${rhT(e.endTime)}` : "") : "");
 ---
 
 <Layout
@@ -82,6 +100,13 @@ const agenda = entries.filter((e) => new Date(e.end || e.start) >= now).slice(0,
 
   <div class="calx">
     <Container>
+
+      <nav class="cx-tabs" aria-label="Calendars">
+        <a class="cx-tab" href="#facility" data-tab="facility">Facility calendar</a>
+        <a class="cx-tab" href="#roundhouse" data-tab="roundhouse">Roundhouse</a>
+      </nav>
+
+      <div class="cx-panel" id="facility" data-panel="facility">
 
       {feature && (
         <section class="cx-block">
@@ -156,9 +181,79 @@ const agenda = entries.filter((e) => new Date(e.end || e.start) >= now).slice(0,
           </div>
         </div>
       </section>
+      </div>
+
+      <div class="cx-panel" id="roundhouse" data-panel="roundhouse">
+        <section class="cx-block">
+          <p class="cx-kicker">Community use</p>
+          <h2 class="cx-h2">The Roundhouse</h2>
+          <p class="cx-lede">Regular community gatherings in the Roundhouse. The facility calendar shows retreats and rentals of the whole campus. Please plan Roundhouse activities from Monday evening to Thursday evening, and check both calendars before you plan. Kitty Lutness coordinates Roundhouse scheduling.</p>
+
+          {rhWeekly.length > 0 && (
+            <div class="rh-weekly">
+              <div class="cx-mrule"><span>Every week</span></div>
+              <ul>
+                {rhWeekly.map((e) => (
+                  <li>
+                    <b>{rhD(e.date, { weekday: "long" })}s</b>
+                    {rhTimes(e) && <span class="rh-time">{rhTimes(e)}</span>}
+                    <span class="rh-title">{e.title}</span>
+                    {e.organizer && <span class="rh-org">{e.organizer}</span>}
+                    {e.notes && <span class="rh-notes">{e.notes}</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {rhGroups.length === 0 ? (
+            <p class="cx-empty">No Roundhouse events are posted yet. Check back soon.</p>
+          ) : (
+            <div class="cx-season">
+              {rhGroups.map((g) => (
+                <div class="cx-mgroup">
+                  <div class="cx-mrule"><span>{g.label}</span></div>
+                  {g.items.map((o) => (
+                    <div class="rhr">
+                      <div class="cxr-date"><span class="cxr-day">{rhD(o.date, { day: "numeric" })}</span><span class="cxr-mo">{rhD(o.date, { weekday: "short" }).toUpperCase()}</span></div>
+                      <div class="cxr-main">
+                        <h3 class="cxr-title">{o.title}</h3>
+                        <div class="cxr-meta">
+                          {rhTimes(o) && <span class="cxr-dur">{rhTimes(o)}</span>}
+                          {o.repeat === "weekly" && <span class="cx-tag cx-tag--sm">Weekly</span>}
+                          {o.organizer && <span class="rh-org">{o.organizer}</span>}
+                        </div>
+                        {o.notes && o.repeat !== "weekly" && <p class="cxr-teaser">{o.notes}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
 
     </Container>
   </div>
+
+  <script is:inline>
+    // Tabs: hash-synced (#facility / #roundhouse). Without JS both panels simply show in order.
+    (function () {
+      var root = document.querySelector('.calx'); if (!root) return;
+      root.classList.add('cx-tabbed');
+      function show() {
+        var t = location.hash === '#roundhouse' ? 'roundhouse' : 'facility';
+        root.querySelectorAll('[data-panel]').forEach(function (p) { p.hidden = p.dataset.panel !== t; });
+        root.querySelectorAll('[data-tab]').forEach(function (a) { a.setAttribute('aria-current', a.dataset.tab === t ? 'page' : 'false'); });
+      }
+      root.querySelectorAll('[data-tab]').forEach(function (a) {
+        a.addEventListener('click', function (e) { e.preventDefault(); history.replaceState(null, '', '#' + a.dataset.tab); show(); });
+      });
+      window.addEventListener('hashchange', show);
+      show();
+    })();
+  </script>
 
   <script type="application/json" id="cal-data" is:inline set:html={JSON.stringify({ entries: gridEntries, airbnbUrl })}></script>
 
@@ -492,6 +587,23 @@ const agenda = entries.filter((e) => new Date(e.end || e.start) >= now).slice(0,
     .cal-mini-evs b { font-family: 'Fraunces', Georgia, serif; font-weight: 500; color: var(--ink); flex-shrink: 0; }
     .cme-nm { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
     .cme-more { color: var(--muted); font-size: .72rem; padding-left: 1.8rem; }
+    /* Calendar tabs (Facility | Roundhouse) */
+    .cx-tabs { display: none; max-width: 66rem; margin: 0 auto 2.2rem; gap: .4rem; border-bottom: 1px solid var(--line); }
+    .cx-tabbed .cx-tabs { display: flex; }
+    .cx-tab { font-family: 'Fraunces', Georgia, serif; font-size: 1.05rem; color: var(--ink2); text-decoration: none; padding: .55rem 1rem .7rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+    .cx-tab:hover { color: var(--rose); }
+    .cx-tab[aria-current="page"] { color: var(--ink); border-bottom-color: var(--rose); }
+    .cx-tab:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+    .rh-weekly { margin-bottom: 2rem; }
+    .rh-weekly ul { list-style: none; margin: .6rem 0 0; padding: 0; display: grid; gap: .5rem; }
+    .rh-weekly li { display: flex; flex-wrap: wrap; gap: .3rem .8rem; align-items: baseline; padding: .7rem .9rem; background: var(--card); border: 1px solid var(--line); border-radius: 12px; }
+    .rh-weekly b { font-family: 'Fraunces', Georgia, serif; font-weight: 500; color: var(--ink); }
+    .rh-time { color: var(--sage); font-weight: 600; font-size: .9rem; }
+    .rh-title { color: var(--ink); }
+    .rh-org { color: var(--muted); font-size: .88rem; }
+    .rh-notes { flex-basis: 100%; color: var(--ink2); font-size: .92rem; }
+    .rhr { display: grid; grid-template-columns: 3.4rem 1fr; align-items: center; gap: 1rem; padding: .7rem .6rem; }
+
     .cal-mini-none { margin: .1rem 0 0; font-size: .78rem; color: var(--muted); font-style: italic; }
 
     .cal-year-exp { margin-top: 1.2rem; border: 1px solid var(--line); border-radius: 14px; padding: 1.1rem 1.2rem 1.3rem; background: var(--card); box-shadow: var(--shadow-sm); }
