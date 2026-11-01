@@ -1,44 +1,20 @@
-// Airbnb availability import. Fetches the listing's iCal export (admin-set airbnb_ical_url),
-// parses the blocked date ranges (real bookings + host blocks), and caches them in KV. The
-// public calendar merges these as "reserved" so a date booked on Airbnb never shows as open.
+// Airbnb availability import, all listings. Fetches each listing's iCal export (admin list
+// airbnb_feeds; legacy single airbnb_ical_url = whole facility), tags blocks with feed + space,
+// and caches them in KV. Airbnb is the source of truth for rentals; /calendar reads the cache.
 // Refreshed traffic-driven (SWR, ~30 min) — the calendar page kicks a background refresh.
 // KV is a binding *object* — read it off the cloudflare:workers env proxy directly. (getEnv()
 // stringifies its value, which is right for string secrets but turns a binding into
 // "[object Object]"; that proxy also stays valid inside waitUntil, where the refresh runs.)
 import { env as cfEnv } from 'cloudflare:workers';
 import { getOption } from './queries';
+import { parseICal, resolveFeeds, mergeFeedBlocks } from './airbnb-feeds.js';
 
 const KV_BLOCKS = 'airbnb:blocks';
 const KV_TS = 'airbnb:blocks:ts';
 const REFRESH_MS = 30 * 60 * 1000;
 const kv = () => (cfEnv && cfEnv.SESSION) || null;
 
-const isoFromICal = (v) => { const m = String(v || '').match(/(\d{4})(\d{2})(\d{2})/); return m ? `${m[1]}-${m[2]}-${m[3]}` : null; };
-
-// Minimal VEVENT parser → [{ start:'YYYY-MM-DD', end:'YYYY-MM-DD'|null, summary }].
-// Airbnb blocks are all-day ranges with an *exclusive* DTEND, so we step back a day for display.
-export function parseICal(text) {
-  const out = [];
-  const events = String(text || '').split('BEGIN:VEVENT').slice(1);
-  for (const chunk of events) {
-    const seg = chunk.split('END:VEVENT')[0];
-    const field = (k) => { const m = seg.match(new RegExp(k + '[^:\\r\\n]*:([^\\r\\n]+)')); return m ? m[1].trim() : ''; };
-    const start = isoFromICal(field('DTSTART'));
-    if (!start) continue;
-    let end = isoFromICal(field('DTEND'));
-    if (end && end !== start) {
-      const d = new Date(end + 'T00:00:00Z');
-      d.setUTCDate(d.getUTCDate() - 1);
-      end = d.toISOString().slice(0, 10);
-    }
-    const summary = field('SUMMARY') || 'Booked (Airbnb)';
-    // Airbnb labels an actual guest stay "Reserved" and everything else (prep/turnaround padding,
-    // host manual blocks) "Airbnb (Not available)". We keep only that distinction — never the
-    // DESCRIPTION (guest phone last-4 + reservation URL), which must not reach the public page.
-    out.push({ start, end: end && end !== start ? end : null, summary, booked: /reserved/i.test(summary) });
-  }
-  return out;
-}
+export { parseICal };
 
 export async function getAirbnbBlocks() {
   try {
@@ -47,14 +23,21 @@ export async function getAirbnbBlocks() {
   } catch { return []; }
 }
 
+export async function getAirbnbFeeds() {
+  const [json, legacy] = await Promise.all([getOption('airbnb_feeds').catch(() => null), getOption('airbnb_ical_url').catch(() => null)]);
+  return resolveFeeds(json, legacy);
+}
+
 export async function refreshAirbnbBlocks() {
-  const url = await getOption('airbnb_ical_url').catch(() => null);
-  if (!url) return;
+  const feeds = await getAirbnbFeeds();
+  if (!feeds.length) return;
+  const fetchFeed = async (feed) => {
+    try { const res = await fetch(feed.url, { cf: { cacheTtl: 300 } }); return { feed, blocks: res.ok ? parseICal(await res.text()) : null }; }
+    catch { return { feed, blocks: null }; }
+  };
   try {
-    const res = await fetch(url, { cf: { cacheTtl: 300 } });
-    if (!res.ok) return;
-    const blocks = parseICal(await res.text());
-    await kv()?.put(KV_BLOCKS, JSON.stringify(blocks));
+    const results = await Promise.all(feeds.map(fetchFeed));
+    await kv()?.put(KV_BLOCKS, JSON.stringify(mergeFeedBlocks(await getAirbnbBlocks(), results)));
     await kv()?.put(KV_TS, String(Date.now()));
   } catch { /* fail soft — keep the last good cache */ }
 }

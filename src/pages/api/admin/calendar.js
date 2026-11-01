@@ -1,10 +1,11 @@
-// Calendar admin actions: save/update/delete a calendar_item, and set the Airbnb listing URL.
+// Calendar admin actions: save/update/delete a calendar_item, and set the Airbnb listing URL + listing iCal feeds.
 // Form-POST from /admin/calendar. Staff-only. Bumps the events edge-cache token so the public
 // /calendar (and /events) reflect changes immediately.
 export const prerender = false;
 import { getAdmin, seeOther } from '@lib/server/admin-guard';
 import { upsertCalendarItem, deleteCalendarItem, getCalendarItem, setOption, setCalendarOverride, deleteCalendarOverride } from '@lib/queries';
 import { refreshAirbnbBlocks } from '@lib/airbnb';
+import { parseFeedLines } from '@lib/airbnb-feeds.js';
 import { env as cfEnv } from 'cloudflare:workers';
 
 const BACK = '/admin/calendar';
@@ -26,10 +27,10 @@ export const POST = async (context) => {
 
   if (op === 'set-airbnb') {
     await setOption('airbnb_listing_url', clamp(form.get('airbnb_listing_url'), 500));
-    const ical = clamp(form.get('airbnb_ical_url'), 1000);
-    await setOption('airbnb_ical_url', ical);
-    // Pull the feed now so the imported-block count is current on the redirect (best-effort).
-    if (ical) { try { await refreshAirbnbBlocks(); } catch {} }
+    const feeds = parseFeedLines(String(form.get('airbnb_feeds') || '').slice(0, 20000));
+    await setOption('airbnb_feeds', JSON.stringify(feeds));
+    // Pull the feeds now so the imported-block counts are current on the redirect (best-effort).
+    if (feeds.length) { try { await refreshAirbnbBlocks(); } catch {} }
     await bumpEventsCache();
     return seeOther(`${BACK}?saved=airbnb`);
   }

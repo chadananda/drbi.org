@@ -62,9 +62,9 @@ async function buildEntries() {
   // Airbnb blocks: an actual stay ("booked") is labeled by source ("Airbnb"); turnaround/host
   // padding blocks the day but carries no label (kept off the public grid, still not bookable).
   for (const b of airbnbBlocks) {
-    if (!b?.start) continue;
+    if (!b?.start || b.space === 'lodging') continue; // apartment/studio stays don't occupy the facility
     entries.push({
-      id: `abnb-${b.start}`, kind: 'airbnb', type: 'reserved',
+      id: b.feed ? `abnb-${b.feed}-${b.start}` : `abnb-${b.start}`, kind: 'airbnb', type: 'reserved',
       variant: b.booked ? 'airbnb-booked' : 'airbnb-block',
       title: b.booked ? 'Airbnb' : '',
       start: b.start, end: b.end || null, allDay: true,
@@ -111,10 +111,10 @@ export async function getAdminCalendarEntries() {
       start: it.start, end: it.end, itemHidden: !it.visible, override: null });
   }
   for (const b of airbnbBlocks) {
-    if (!b?.start) continue;
-    const id = `abnb-${b.start}`;
+    if (!b?.start || b.space === 'lodging') continue;
+    const id = b.feed ? `abnb-${b.feed}-${b.start}` : `abnb-${b.start}`;
     rows.push({ id, kind: 'airbnb', type: 'reserved', booked: !!b.booked,
-      baseTitle: b.booked ? 'Airbnb booking' : 'Airbnb — unavailable', baseUrl: '',
+      baseTitle: (b.booked ? 'Airbnb booking' : 'Airbnb — unavailable') + (b.feed ? ` · ${b.feed}` : ''), baseUrl: '',
       start: b.start, end: b.end || null, override: overrides[id] || null });
   }
   return rows.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());

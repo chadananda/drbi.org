@@ -5,12 +5,14 @@
 export const prerender = false;
 import Layout from '@layouts/AdminLayout.astro';
 import { getCalendarItem, getOption } from '@lib/queries';
-import { getAirbnbBlocks } from '@lib/airbnb';
+import { getAirbnbBlocks, getAirbnbFeeds } from '@lib/airbnb';
+import { feedsToLines } from '@lib/airbnb-feeds.js';
 import { getAdminCalendarEntries } from '@lib/calendar';
 
 const airbnbUrl = (await getOption('airbnb_listing_url')) || '';
-const airbnbIcal = (await getOption('airbnb_ical_url')) || '';
+const airbnbFeeds = await getAirbnbFeeds().catch(() => []);
 const airbnbBlocks = await getAirbnbBlocks().catch(() => []);
+const blockCount = (label) => airbnbBlocks.filter((b) => (b.feed || 'Desert Rose Retreat Center') === label).length;
 const exportUrl = new URL('/calendar.ics', Astro.url.origin).href;
 
 // Unified manager rows: events + custom items + Airbnb blocks. Window to recent + future so the
@@ -58,18 +60,17 @@ const fmt = (s) => { try { return new Date(s).toLocaleDateString('en-US', { mont
       <label style="font-weight:600;font-size:.9rem;">Booking (listing) URL <span style="font-weight:400;color:#64748b;">— open days on the calendar link here to book</span></label>
       <input type="url" name="airbnb_listing_url" value={airbnbUrl} placeholder="https://www.airbnb.com/rooms/…" style="width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;margin:.35rem 0 1rem;" />
 
-      <label style="font-weight:600;font-size:.9rem;">Import iCal URL <span style="font-weight:400;color:#64748b;">— from Airbnb → Listing → Availability → “Connect calendars” → Export</span></label>
-      <input type="url" name="airbnb_ical_url" value={airbnbIcal} placeholder="https://www.airbnb.com/calendar/ical/…ics" style="width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;margin:.35rem 0 .3rem;" />
-      <p style="color:#64748b;font-size:.8rem;margin:0 0 1rem;">
-        {airbnbIcal
-          ? `Currently importing ${airbnbBlocks.length} blocked date range${airbnbBlocks.length === 1 ? '' : 's'} from Airbnb (refreshes ~every 30 min).`
-          : 'Not set yet — until this is added, the calendar shows only DRBI events and reserved holds.'}
-      </p>
+      <label style="font-weight:600;font-size:.9rem;">Listings to import <span style="font-weight:400;color:#64748b;">— one per line: <code>Label | space | iCal URL</code>. Space is <b>facility</b> (whole campus), <b>roundhouse</b>, <b>hall</b> or <b>lodging</b> (apartments/studios). iCal URL: Airbnb → Listing → Availability → “Connect calendars” → Export</span></label>
+      <textarea name="airbnb_feeds" rows="5" placeholder="Desert Rose Retreat Center | facility | https://www.airbnb.com/calendar/ical/…ics&#10;Apartment 2 | lodging | https://www.airbnb.com/calendar/ical/…ics" style="width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;margin:.35rem 0 .3rem;font:12px/1.5 ui-monospace,monospace;">{feedsToLines(airbnbFeeds)}</textarea>
+      {airbnbFeeds.length
+        ? <ul style="color:#64748b;font-size:.8rem;margin:0 0 1rem;padding-left:1.1rem;">{airbnbFeeds.map((f) => <li>{f.label} ({f.space}): {blockCount(f.label)} blocked range{blockCount(f.label) === 1 ? '' : 's'}</li>)}</ul>
+        : <p style="color:#64748b;font-size:.8rem;margin:0 0 1rem;">No listings yet — until one is added, the calendar shows only DRBI events and holds.</p>}
+      <p style="color:#64748b;font-size:.8rem;margin:0 0 1rem;">Refreshes about every 30 minutes. Bookings on <b>facility</b> or <b>roundhouse</b> listings mark the Roundhouse as rented on the community calendar; <b>lodging</b> stays are imported but not shown publicly.</p>
 
       <button type="submit" style="background:#0f172a;color:#fff;border:none;border-radius:8px;padding:.5rem 1.2rem;font-weight:600;cursor:pointer;">Save</button>
 
       <div style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid #f1f5f9;">
-        <label style="font-weight:600;font-size:.9rem;">Export iCal URL <span style="font-weight:400;color:#64748b;">— add this in Airbnb → “Connect calendars” → Import so DRBI dates block bookings</span></label>
+        <label style="font-weight:600;font-size:.9rem;">Export iCal URL <span style="font-weight:400;color:#64748b;">— add this in Airbnb → “Connect calendars” → Import on the facility listing(s) so DRBI dates block bookings</span></label>
         <input type="text" readonly value={exportUrl} onclick="this.select()" style="width:100%;padding:.5rem .7rem;border:1px solid #cbd5e1;border-radius:8px;margin-top:.35rem;background:#f8fafc;color:#334155;" />
       </div>
     </form>
