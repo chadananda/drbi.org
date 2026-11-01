@@ -273,7 +273,7 @@ const getEventLocation = (event) => {
                     )}
                     {event.data.visible === false && (
                       <span class="hidden-badge inline-flex items-center px-2 py-1 text-xs font-bold text-orange-700 bg-orange-100 border border-orange-300 rounded">
-                        🙈 DRAFT
+                        🙈 Hidden on drbi.org
                       </span>
                     )}
                     {eventStats.get(event.id) && (
@@ -800,7 +800,7 @@ const getEventLocation = (event) => {
               } else if (!result.visible && !existingBadge) {
                 const badge = document.createElement('span');
                 badge.className = 'hidden-badge inline-flex items-center px-2 py-1 text-xs font-bold text-orange-700 bg-orange-100 border border-orange-300 rounded';
-                badge.innerHTML = '🙈 HIDDEN';
+                badge.innerHTML = '🙈 Hidden on drbi.org';
                 titleContainer.appendChild(badge);
               }
             }
