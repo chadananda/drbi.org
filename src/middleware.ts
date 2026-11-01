@@ -3,6 +3,8 @@ import { lucia } from "./lib/auth";
 import { verifyRequestOrigin as verifyOrig } from "lucia";
 import { ADMIN_NAV, roleLevel } from "./lib/admin-nav";
 import { scopedAdminRedirect } from "./lib/admin-scope.js";
+import { needsRenewal } from "./lib/session-policy.js";
+import { renewSession } from "./lib/session";
 import { env } from "cloudflare:workers";
 import { revalidateEventsIfStale } from "./lib/humanitix-sync";
 import { maybeRefreshAirbnb } from "./lib/airbnb";
@@ -119,6 +121,7 @@ export const onRequest = async (context, next) => {
       if (session && user) {
         context.locals.session = session;
         context.locals.user = user;
+        if (needsRenewal(session.expiresAt)) await renewSession(context.cookies, user.id, (user as any).role).catch(() => {});
       }
     } catch (error) {
       // Invalid/expired token — clear the cookie and continue as anonymous.

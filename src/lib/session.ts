@@ -14,3 +14,11 @@ export async function startSession(Astro: any, userId: string, role: string) {
     expires: session.expiresAt,
   });
 }
+
+// Sliding renewal: re-issue a long-lived token for an active user (cookies = Astro cookies API).
+export async function renewSession(cookies: any, userId: string, role: string) {
+  const session = await lucia.createSession(userId, { role });
+  cookies.set(lucia.sessionCookieName, session.id, {
+    httpOnly: true, secure: !import.meta.env.DEV, sameSite: 'lax', path: '/', expires: session.expiresAt,
+  });
+}

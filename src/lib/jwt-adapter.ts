@@ -57,11 +57,11 @@ export class JWTAdapter implements Adapter {
   async deleteExpiredSessions(): Promise<void> {}
 
   async createSessionToken(sessionData: any): Promise<string> {
-    const { expiresAt: _exp, ...payload } = sessionData;
+    const { expiresAt, ...payload } = sessionData;
     return await new SignJWT(payload)
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
-      .setExpirationTime('7d')
+      .setExpirationTime(Math.floor(new Date(expiresAt).getTime() / 1000))
       .sign(this.secretKey());
   }
 }

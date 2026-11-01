@@ -3,6 +3,7 @@ import { Lucia } from "lucia";
 import { JWTAdapter } from "./jwt-adapter";
 import type { DatabaseUser } from "lucia";
 import site from '@data/site.json';
+import { sessionExpiry } from './session-policy.js';
 
 // Create admin user from environment variables
 const adminUser: DatabaseUser = {
@@ -40,7 +41,7 @@ export const lucia = new Lucia(adapter, {
 const originalCreateSession = lucia.createSession.bind(lucia);
 lucia.createSession = async (userId: string, attributes?: Record<string, any>) => {
 	const sessionId = Math.random().toString(36).substring(2, 15);
-	const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7); // 7 days
+	const expiresAt = sessionExpiry();
 	const expiresAtSeconds = Math.floor(expiresAt.getTime() / 1000); // JWT exp in seconds
 	
 	const sessionData = {
@@ -50,7 +51,7 @@ lucia.createSession = async (userId: string, attributes?: Record<string, any>) =
 	};
 	
 	// Create JWT token
-	const jwtToken = await adapter.createSessionToken(sessionData);
+	const jwtToken = await adapter.createSessionToken({ ...sessionData, expiresAt });
 	
 	// Return session with JWT token as ID
 	return {
