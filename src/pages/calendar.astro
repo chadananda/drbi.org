@@ -1,7 +1,7 @@
 ---
-// Public DRBI calendar, community-first. Default tab = Community: the next 6 weeks of Roundhouse
-// gatherings + DRBI events + facility rentals (Airbnb, the source of truth) week by week, flagging
-// Roundhouse events whose night is rented. Second tab = programs/retreats showcase + availability grid.
+// Public DRBI calendar, community-first. Default tab = Community: month grids (this month + 5) of
+// Roundhouse gatherings + DRBI events + facility rentals (Airbnb, the source of truth), flagging
+// Roundhouse events whose night is rented; JS pages one month at a time, mobile adds a day list. Second tab = programs/retreats showcase + availability grid.
 // Design language matches the site's letterpress programme: Fraunces/Newsreader, warm paper, brass.
 export const prerender = false;
 import Layout from "@layouts/Layout.astro";
@@ -68,32 +68,49 @@ const rowImg = (e) => imagekitUrl(e.image || FALLBACK, { w: 220, h: 220, face: t
 const fmtDay = (s) => { try { return new Date(s).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: AZ }); } catch { return ""; } };
 const agenda = entries.filter((e) => new Date(e.end || e.start) >= now).slice(0, 20);
 
-// Roundhouse tab: community events in the Roundhouse (managed at /admin/roundhouse), next 6 weeks.
+// Community tab: Roundhouse events (managed at /admin/roundhouse) + DRBI events + whole-facility/Roundhouse
+// rentals, laid out as Sunday-start month grids from the 1st of this month through 6 months.
 const rhAll = await getRoundhouseEvents().catch(() => []);
 const rhToday = now.toLocaleDateString("en-CA", { timeZone: AZ });
-const rhTo = new Date(Date.parse(rhToday + "T00:00:00Z") + 42 * 864e5).toISOString().slice(0, 10);
 const rhWeekly = rhAll.filter((e) => e.repeat === "weekly" && (!e.repeatUntil || e.repeatUntil >= rhToday));
-// Community agenda: Roundhouse occurrences + DRBI events + whole-facility/Roundhouse rentals, by week.
 const blocks = await getAirbnbBlocks().catch(() => []);
 const azDay = (d) => new Date(d).toLocaleDateString("en-CA", { timeZone: AZ });
-const rentals = blocks.filter((b) => b.booked && (b.space === "facility" || b.space === "roundhouse") && (b.end || b.start) >= rhToday && b.start <= rhTo);
-const agendaItems = [
-  ...expandOccurrences(rhAll, rhToday, rhTo).map((o) => ({ kind: "rh", date: o.date, sort: o.startTime || "", o, rented: roundhouseConflict(o.date, blocks) })),
-  ...upcoming.filter((e) => azDay(e._s) <= rhTo).map((e) => ({ kind: "drbi", date: azDay(e._s) < rhToday ? rhToday : azDay(e._s), sort: "", e })),
-  ...rentals.map((b) => ({ kind: "rental", date: b.start < rhToday ? rhToday : b.start, sort: "", b })),
-].sort((x, y) => (x.date + x.sort).localeCompare(y.date + y.sort));
-const weekOf = (d) => { const t = Date.parse(d + "T00:00:00Z"); const dow = (new Date(t).getUTCDay() + 6) % 7; return new Date(t - dow * 864e5).toISOString().slice(0, 10); };
-const weeks = [];
-for (const it of agendaItems) {
-  const k = weekOf(it.date);
-  let w = weeks[weeks.length - 1];
-  if (!w || w.key !== k) { w = { key: k, items: [] }; weeks.push(w); }
-  w.items.push(it);
+const ymd = (t) => new Date(t).toISOString().slice(0, 10);
+const addDays = (d, n) => ymd(Date.parse(d + "T00:00:00Z") + n * 864e5);
+const [cy, cm] = rhToday.split("-").map(Number);
+const monthStart = (i) => ymd(Date.UTC(cy, cm - 1 + i, 1));
+const rhFrom = monthStart(0), rhTo = addDays(monthStart(6), -1);
+const byDay = {};
+const put = (d, it) => (byDay[d] ||= []).push(it);
+for (const o of expandOccurrences(rhAll, rhFrom, rhTo)) put(o.date, { kind: "rh", sort: o.startTime || "", o, rented: roundhouseConflict(o.date, blocks) });
+for (const e of entries) {
+  if (e.type !== "event" || !e.start) continue;
+  const s = azDay(e.start), en = azDay(e.end || e.start);
+  if (en < rhFrom || s > rhTo) continue;
+  const ev = { ...e, _s: new Date(e.start), _e: new Date(e.end || e.start) };
+  for (let d = s < rhFrom ? rhFrom : s; d <= en && d <= rhTo; d = addDays(d, 1)) put(d, { kind: "drbi", sort: "", e: ev, lead: d === s });
 }
+for (const b of blocks) {
+  if (!b.booked || (b.space !== "facility" && b.space !== "roundhouse") || (b.end || b.start) < rhFrom || b.start > rhTo) continue;
+  for (let d = b.start < rhFrom ? rhFrom : b.start; d <= (b.end || b.start) && d <= rhTo; d = addDays(d, 1)) put(d, { kind: "rental", sort: "~", b, lead: d === b.start });
+}
+for (const d in byDay) byDay[d].sort((x, y) => x.sort.localeCompare(y.sort));
+// One rental per day is enough; a stay can span several listings.
+for (const d in byDay) { let seen = false; byDay[d] = byDay[d].filter((it) => it.kind !== "rental" || (!seen && (seen = true))); }
+const months = Array.from({ length: 6 }, (_, i) => {
+  const first = monthStart(i), last = addDays(monthStart(i + 1), -1);
+  const lead = new Date(first + "T00:00:00Z").getUTCDay();
+  const cells = [];
+  for (let d = addDays(first, -lead); d <= last || cells.length % 7; d = addDays(d, 1)) cells.push({ d, out: d < first || d > last, items: byDay[d] || [] });
+  const days = Object.keys(byDay).filter((d) => d >= first && d <= last && d >= rhToday).sort();
+  return { key: first.slice(0, 7), label: new Date(first + "T12:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" }), cells, days };
+});
+const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const rhD = (d, o) => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { ...o, timeZone: "UTC" });
 const rhT = (t) => { if (!t) return ""; const [h, m] = t.split(":").map(Number); return `${((h + 11) % 12) + 1}${m ? ":" + String(m).padStart(2, "0") : ""} ${h < 12 ? "am" : "pm"}`; };
 const rhTimes = (e) => (e.startTime ? rhT(e.startTime) + (e.endTime ? `–${rhT(e.endTime)}` : "") : "");
-const weekLabel = (k) => k <= weekOf(rhToday) ? "This week" : `Week of ${rhD(k, { month: "long", day: "numeric" })}`;
+const chipLabel = (it) => it.kind === "rh" ? it.o.title : it.kind === "drbi" ? it.e.title : "Facility rented";
+const chipTitle = (it) => it.kind === "rh" ? [rhTimes(it.o), it.o.title, it.o.organizer, it.rented ? "Roundhouse rented this night; may move" : "", it.o.notes].filter(Boolean).join(" · ") : it.kind === "drbi" ? it.e.title : `Facility rented · ${rentalSpan(it.b)}`;
 const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday: "short", month: "short", day: "numeric" })} – ${rhD(b.end, { weekday: "short", month: "short", day: "numeric" })} nights` : `${rhD(b.start, { weekday: "short", month: "short", day: "numeric" })} night`;
 ---
 
@@ -124,7 +141,7 @@ const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday
       <div class="cx-panel" id="community" data-panel="community">
         <section class="cx-block">
           <p class="cx-kicker">The Roundhouse &amp; community</p>
-          <h2 class="cx-h2">What's on, week by week</h2>
+          <h2 class="cx-h2">What's on this month</h2>
           <p class="cx-lede">Community gatherings in the Roundhouse run Monday evening to Thursday evening. Paying facility rentals come first: when the Roundhouse is rented, a gathering may move to the Casa Gazebo or a nearby home, so check with its organizer. Kitty Lutness coordinates the Roundhouse. To rent the facility, visit <a href="https://desertrosehost.com">desertrosehost.com</a>.</p>
 
           {rhWeekly.length > 0 && (
@@ -144,22 +161,48 @@ const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday
             </div>
           )}
 
-          {weeks.length === 0 ? (
-            <p class="cx-empty">Nothing is posted for the next few weeks yet. Check back soon.</p>
-          ) : (
-            <div class="cx-season">
-              {weeks.map((w) => (
-                <div class="cx-mgroup">
-                  <div class="cx-mrule"><span>{weekLabel(w.key)}</span></div>
-                  {w.items.map((it) => it.kind === "rh" ? (
+          <div class="cal-legend">
+            <span><i class="cm-k cm-k--rh"></i>Roundhouse &amp; community</span>
+            <span><i class="cm-k cm-k--drbi"></i>DRBI program</span>
+            <span><i class="cm-k cm-k--rental"></i>Facility rented</span>
+          </div>
+          <div class="cm-months">
+            {months.map((m, mi) => (
+              <section class="cm-month" data-cm={mi}>
+                <div class="cal-sec-head">
+                  <h3 class="cal-sec-title">{m.label}</h3>
+                  <div class="cal-nav cm-nav">
+                    <button type="button" data-cm-go="-1" disabled={mi === 0} aria-label="Previous month">‹</button>
+                    <button type="button" data-cm-go="1" disabled={mi === months.length - 1} aria-label="Next month">›</button>
+                  </div>
+                </div>
+                <div class="cal-month-dow">{DOW.map((d) => <span>{d}</span>)}</div>
+                <div class="cal-grid">
+                  {m.cells.map((c) => (
+                    <div class:list={["cal-cell", "cm-cell", { "is-out": c.out, "is-today": c.d === rhToday, "is-past": c.d < rhToday, "is-rented": c.items.some((it) => it.kind === "rental") }]}>
+                      <div class="cal-cell-num">{Number(c.d.slice(8))}</div>
+                      {!c.out && (
+                        <div class="cal-cell-body">
+                          {c.items.map((it) => it.kind === "drbi" ? (
+                            <a class:list={["cm-chip", "cm-chip--drbi", { "is-cont": !it.lead && new Date(c.d + "T12:00:00Z").getUTCDay() !== 0 }]} href={it.e.url} title={chipTitle(it)}><span>{chipLabel(it)}</span></a>
+                          ) : (
+                            <span class:list={["cm-chip", `cm-chip--${it.kind}`, { "is-moved": it.rented }]} title={chipTitle(it)}>
+                              {it.kind === "rh" && rhT(it.o.startTime) && <b>{rhT(it.o.startTime).replace(" ", "")}</b>}<span>{chipLabel(it)}</span>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div class="cm-list">
+                  {m.days.length === 0 ? <p class="cx-empty">Nothing else is posted for {m.label} yet.</p> : m.days.map((d) => byDay[d].filter((it) => it.lead !== false).map((it) => it.kind === "rh" ? (
                     <div class="rhr">
-                      <div class="cxr-date"><span class="cxr-day">{rhD(it.date, { day: "numeric" })}</span><span class="cxr-mo">{rhD(it.date, { weekday: "short" }).toUpperCase()}</span></div>
+                      <div class="cxr-date"><span class="cxr-day">{rhD(d, { day: "numeric" })}</span><span class="cxr-mo">{rhD(d, { weekday: "short" }).toUpperCase()}</span></div>
                       <div class="cxr-main">
-                        <h3 class="cxr-title">{it.o.title}</h3>
+                        <h4 class="cxr-title">{it.o.title}</h4>
                         <div class="cxr-meta">
                           {rhTimes(it.o) && <span class="cxr-dur">{rhTimes(it.o)}</span>}
-                          <span class="cx-tag cx-tag--sm">Roundhouse</span>
-                          {it.o.repeat === "weekly" && <span class="cx-tag cx-tag--sm">Weekly</span>}
                           {it.o.organizer && <span class="rh-org">{it.o.organizer}</span>}
                         </div>
                         {it.rented && <p class="rh-moved">The Roundhouse is rented this night. This gathering may move; check with the organizer.</p>}
@@ -170,23 +213,20 @@ const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday
                     <a class="rhr rhr--link" href={it.e.url}>
                       <div class="cxr-date"><span class="cxr-day">{dayStamp(it.e)}</span><span class="cxr-mo">{moAbbr(it.e._s)}</span></div>
                       <div class="cxr-main">
-                        <h3 class="cxr-title">{it.e.title}</h3>
-                        <div class="cxr-meta">
-                          <span class="cx-tag cx-tag--sm">DRBI</span>
-                          {kindLabel(it.e) && <span class="cxr-dur">{kindLabel(it.e)}</span>}
-                        </div>
+                        <h4 class="cxr-title">{it.e.title}</h4>
+                        <div class="cxr-meta"><span class="cx-tag cx-tag--sm">DRBI</span>{kindLabel(it.e) && <span class="cxr-dur">{kindLabel(it.e)}</span>}</div>
                       </div>
                     </a>
                   ) : (
                     <div class="rhr rhr--rental">
-                      <div class="cxr-date"><span class="cxr-day">{rhD(it.date, { day: "numeric" })}</span><span class="cxr-mo">{rhD(it.date, { weekday: "short" }).toUpperCase()}</span></div>
+                      <div class="cxr-date"><span class="cxr-day">{rhD(d, { day: "numeric" })}</span><span class="cxr-mo">{rhD(d, { weekday: "short" }).toUpperCase()}</span></div>
                       <p class="rh-rental"><b>Facility rented</b> · {rentalSpan(it.b)} · Roundhouse unavailable</p>
                     </div>
-                  ))}
+                  )))}
                 </div>
-              ))}
-            </div>
-          )}
+              </section>
+            ))}
+          </div>
         </section>
       </div>
 
@@ -285,6 +325,11 @@ const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday
       });
       window.addEventListener('hashchange', show);
       show();
+      // Community months: one at a time with ‹ › (no JS = all stacked).
+      var ms = root.querySelectorAll('.cm-month'), cur = 0;
+      function page(i) { cur = Math.max(0, Math.min(ms.length - 1, i)); ms.forEach(function (m, j) { m.hidden = j !== cur; }); }
+      root.querySelectorAll('[data-cm-go]').forEach(function (b) { b.addEventListener('click', function () { page(cur + Number(b.dataset.cmGo)); }); });
+      if (ms.length) page(0);
     })();
   </script>
 
@@ -645,6 +690,23 @@ const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday
     .rh-rental b { font-weight: 600; }
     .rh-moved { margin: .3rem 0 0; font-size: .88rem; color: #8a5a2b; font-style: italic; }
     .calx .cx-lede a { color: var(--rose); }
+    .cm-k { --rc: var(--sage); }
+    .cm-k--rh, .cm-chip--rh { --rc: var(--sage); }
+    .cm-k--drbi, .cm-chip--drbi { --rc: var(--rose); }
+    .cm-k--rental, .cm-chip--rental { --rc: #b0692c; }
+    .cal-legend .cm-k { background: var(--rc); }
+    .cm-month { margin-bottom: 2.6rem; }
+    .cm-cell { min-height: 6.4rem; }
+    .cm-cell.is-rented:not(.is-out) { background: #fbf3e8; border-color: #f0dcc0; }
+    .cm-chip { display: flex; gap: 3px; align-items: baseline; min-width: 0; padding: 2px 5px; border-left: 3px solid var(--rc); border-radius: 0 5px 5px 0; background: color-mix(in srgb, var(--rc) 10%, #fff); font-family: 'Fraunces', Georgia, serif; font-size: .72rem; line-height: 1.25; color: var(--ink); text-decoration: none; }
+    .cm-chip span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+    .cm-chip.is-cont span { -webkit-line-clamp: 1; }
+    .cm-chip b { font-family: 'Newsreader', Georgia, serif; font-weight: 600; font-size: .66rem; color: color-mix(in srgb, var(--rc) 80%, #000); flex-shrink: 0; }
+    a.cm-chip:hover { background: color-mix(in srgb, var(--rc) 22%, #fff); }
+    .cm-chip.is-cont span { opacity: .55; }
+    .cm-chip.is-moved { text-decoration: line-through; text-decoration-color: #b0692c; }
+    .cm-chip--rental { color: #8a5a2b; font-style: italic; }
+    .cm-list { display: none; margin-top: 1.2rem; }
 
     .cal-mini-none { margin: .1rem 0 0; font-size: .78rem; color: var(--muted); font-style: italic; }
 
@@ -671,6 +733,12 @@ const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday
       .cxm-ev-nm { display: none; }
       .cal-open { font-size: 0; }
       .cal-year { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      /* Community month: cells shrink to coloured ticks; the day list below carries the detail. */
+      .cm-cell { min-height: 3.6rem; }
+      .cm-cell .cal-cell-body { flex-direction: row; flex-wrap: wrap; gap: 2px; }
+      .cm-chip { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: var(--rc); }
+      .cm-chip b, .cm-chip span { display: none; }
+      .cm-list { display: block; }
     }
     @media (max-width: 520px) {
       .cal-year { grid-template-columns: minmax(0, 1fr); }
