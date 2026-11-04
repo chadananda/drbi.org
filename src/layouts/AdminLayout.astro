@@ -1,6 +1,6 @@
 ---
 // Admin shell: dedicated CMS chrome — dark warm sidebar rail + slim top bar + content canvas.
-// Under 900px the sidebar is hidden; admin sections live in the navbar avatar menu.
+// Under 900px the sidebar becomes a drawer, opened by a floating icon button (bottom-left).
 // Design system (tokens + component classes) is the global <style> below, scoped to .admin-root.
 export const prerender = false;
 
@@ -29,11 +29,15 @@ const user = Astro.props.user ?? Astro.locals.user ?? null;
   <div class="admin-shell">
     <AdminSidebar user={user} />
     <div class="admin-main">
+      <button id="adminMobileMenu" type="button" class="admin-mobile-menu" aria-label="Admin menu">
+        <span class="admin-mobile-bars"><span></span><span></span><span></span></span>
+      </button>
       <main class="admin-content">
         <slot />
       </main>
     </div>
   </div>
+  <div id="sidebarOverlay" class="admin-overlay"></div>
 
   <style is:global>
     .admin-root {
@@ -140,7 +144,22 @@ const user = Astro.props.user ?? Astro.locals.user ?? null;
     .a-icon { flex-shrink: 0; }
 
     @media (max-width: 900px) { .admin-content { padding: 1.25rem 1rem 3rem; } }
+    /* Mobile: sidebar drawer toggled by a floating icon (no full-width row) */
+    .admin-mobile-menu { display: none; position: fixed; left: 1rem; bottom: 1rem; z-index: 45; width: 3rem; height: 3rem; border-radius: 50%; align-items: center; justify-content: center; background: var(--a-side); border: 0; box-shadow: 0 8px 24px rgba(20,16,8,.35); cursor: pointer; }
+    .admin-mobile-bars { display: inline-flex; flex-direction: column; gap: 4px; }
+    .admin-mobile-bars span { width: 18px; height: 2px; background: #ece4d6; border-radius: 2px; }
+    @media (max-width: 900px) { .admin-mobile-menu { display: inline-flex; } }
+    .admin-overlay { position: fixed; inset: 0; background: rgba(20,16,8,.5); z-index: 40; opacity: 0; visibility: hidden; transition: opacity .25s; }
+    .admin-overlay.active { opacity: 1; visibility: visible; }
   </style>
 
+  <script>
+    const sb = document.getElementById('adminSidebar');
+    const ov = document.getElementById('sidebarOverlay');
+    const close = () => { sb?.classList.remove('mobile-open'); ov?.classList.remove('active'); };
+    document.getElementById('adminMobileMenu')?.addEventListener('click', () => { sb?.classList.add('mobile-open'); ov?.classList.add('active'); });
+    ov?.addEventListener('click', close);
+    sb?.querySelectorAll('a[href]').forEach((a) => a.addEventListener('click', close));
+  </script>
 </body>
 </html>
