@@ -1,6 +1,7 @@
 {
  "menuLinks": [
    {"title": "Events", "path": "/events", "children": null},
+   {"title": "Calendar", "path": "/calendar", "children": null},
    {"title": "Arts", "path": "/arts", "children": null},
    {"title": "Agriculture", "path": "/agriculture", "children": null},
    {"title": "Volunteer", "path": "/working-with-us", "children": null},
