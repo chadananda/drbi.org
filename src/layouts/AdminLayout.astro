@@ -1,5 +1,6 @@
 ---
 // Admin shell: dedicated CMS chrome — dark warm sidebar rail + slim top bar + content canvas.
+// Under 900px the sidebar is hidden; admin sections live in the navbar avatar menu.
 // Design system (tokens + component classes) is the global <style> below, scoped to .admin-root.
 export const prerender = false;
 
@@ -28,15 +29,11 @@ const user = Astro.props.user ?? Astro.locals.user ?? null;
   <div class="admin-shell">
     <AdminSidebar user={user} />
     <div class="admin-main">
-      <button id="adminMobileMenu" type="button" class="admin-mobile-menu" aria-label="Open menu">
-        <span class="admin-mobile-bars"><span></span><span></span><span></span></span> Menu
-      </button>
       <main class="admin-content">
         <slot />
       </main>
     </div>
   </div>
-  <div id="sidebarOverlay" class="admin-overlay"></div>
 
   <style is:global>
     .admin-root {
@@ -86,10 +83,6 @@ const user = Astro.props.user ?? Astro.locals.user ?? null;
     .admin-shell { display: flex; min-height: calc(100vh - 3.5rem); }
     .admin-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
     .admin-content { flex: 1; padding: 2rem clamp(1rem, 3vw, 2.75rem) 4rem; max-width: 1400px; width: 100%; }
-    .admin-mobile-menu { display: none; align-items: center; gap: .5rem; margin: 1rem 0 -.5rem 1rem; padding: .5rem .8rem; font-size: .85rem; font-weight: 600; color: var(--a-ink-2); background: var(--a-panel); border: 1px solid var(--a-line); border-radius: 999px; cursor: pointer; }
-    .admin-mobile-bars { display: inline-flex; flex-direction: column; gap: 3px; }
-    .admin-mobile-bars span { width: 14px; height: 1.5px; background: var(--a-ink-2); border-radius: 2px; }
-    @media (max-width: 900px) { .admin-mobile-menu { display: inline-flex; } }
 
     /* Typography helpers */
     .admin-root h1, .admin-root h2, .admin-root h3 { margin: 0; }
@@ -146,21 +139,8 @@ const user = Astro.props.user ?? Astro.locals.user ?? null;
 
     .a-icon { flex-shrink: 0; }
 
-    /* Overlay for mobile drawer */
-    .admin-overlay { position: fixed; inset: 0; background: rgba(20,16,8,.5); z-index: 40; opacity: 0; visibility: hidden; transition: opacity .25s; }
-    .admin-overlay.active { opacity: 1; visibility: visible; }
     @media (max-width: 900px) { .admin-content { padding: 1.25rem 1rem 3rem; } }
   </style>
 
-  <script>
-    const sb = document.getElementById('adminSidebar');
-    const ov = document.getElementById('sidebarOverlay');
-    const openBtn = document.getElementById('adminMobileMenu');
-    const open = () => { sb?.classList.add('mobile-open'); ov?.classList.add('active'); };
-    const close = () => { sb?.classList.remove('mobile-open'); ov?.classList.remove('active'); };
-    openBtn?.addEventListener('click', open);
-    ov?.addEventListener('click', close);
-    sb?.querySelectorAll('a[href]').forEach((a) => a.addEventListener('click', close));
-  </script>
 </body>
 </html>
