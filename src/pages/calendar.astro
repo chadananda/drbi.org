@@ -109,8 +109,12 @@ const DOW = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const rhD = (d, o) => new Date(d + "T12:00:00Z").toLocaleDateString("en-US", { ...o, timeZone: "UTC" });
 const rhT = (t) => { if (!t) return ""; const [h, m] = t.split(":").map(Number); return `${((h + 11) % 12) + 1}${m ? ":" + String(m).padStart(2, "0") : ""} ${h < 12 ? "am" : "pm"}`; };
 const rhTimes = (e) => (e.startTime ? rhT(e.startTime) + (e.endTime ? `–${rhT(e.endTime)}` : "") : "");
+// Compact grid times: "6:30–8p", "11a–1p", "7p"; one meridiem when both ends share it.
+const hm = (t) => { const [h, m] = t.split(":").map(Number); return { n: `${((h + 11) % 12) + 1}${m ? ":" + String(m).padStart(2, "0") : ""}`, ap: h < 12 ? "a" : "p" }; };
+const tShort = (a, b) => { if (!a) return ""; const x = hm(a); if (!b) return x.n + x.ap; const y = hm(b); return x.ap === y.ap ? `${x.n}–${y.n}${y.ap}` : `${x.n}${x.ap}–${y.n}${y.ap}`; };
+const azHM = (d) => d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: AZ });
+const drbiTime = (e) => { const a = azHM(e._s), b = azHM(e._e); if (a === "00:00") return ""; return isRange(e) ? tShort(a) : tShort(a, b === a ? "" : b); };
 const chipLabel = (it) => it.kind === "rh" ? it.o.title : it.kind === "drbi" ? it.e.title : "Facility rented";
-const chipTitle = (it) => it.kind === "rh" ? [rhTimes(it.o), it.o.title, it.o.organizer, it.rented ? "Roundhouse rented this night; may move" : "", it.o.notes].filter(Boolean).join(" · ") : it.kind === "drbi" ? it.e.title : `Facility rented · ${rentalSpan(it.b)}`;
 const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday: "short", month: "short", day: "numeric" })} – ${rhD(b.end, { weekday: "short", month: "short", day: "numeric" })} nights` : `${rhD(b.start, { weekday: "short", month: "short", day: "numeric" })} night`;
 ---
 
@@ -184,10 +188,16 @@ const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday
                       {!c.out && (
                         <div class="cal-cell-body">
                           {c.items.map((it) => it.kind === "drbi" ? (
-                            <a class:list={["cm-chip", "cm-chip--drbi", { "is-cont": !it.lead && new Date(c.d + "T12:00:00Z").getUTCDay() !== 0 }]} href={it.e.url} title={chipTitle(it)}><span>{chipLabel(it)}</span></a>
+                            <a class:list={["cm-chip", "cm-chip--drbi", { "is-cont": !it.lead && new Date(c.d + "T12:00:00Z").getUTCDay() !== 0 }]} href={it.e.url}>{it.lead && drbiTime(it.e) && <b>{drbiTime(it.e)}</b>}<span>{chipLabel(it)}</span>
+                              <span class="cm-pop" role="tooltip"><strong>{it.e.title}</strong><em>{whenLong(it.e)}{drbiTime(it.e) ? ` · ${drbiTime(it.e)}` : ""}</em>{kindLabel(it.e) && <i>{kindLabel(it.e)}</i>}<u>View event →</u></span></a>
                           ) : (
-                            <span class:list={["cm-chip", `cm-chip--${it.kind}`, { "is-moved": it.rented }]} title={chipTitle(it)}>
-                              {it.kind === "rh" && rhT(it.o.startTime) && <b>{rhT(it.o.startTime).replace(" ", "")}</b>}<span>{chipLabel(it)}</span>
+                            <span class:list={["cm-chip", `cm-chip--${it.kind}`, { "is-moved": it.rented }]} tabindex="0">
+                              {it.kind === "rh" && it.o.startTime && <b>{tShort(it.o.startTime, it.o.endTime)}</b>}<span>{chipLabel(it)}</span>
+                              {it.kind === "rh" ? (
+                                <span class="cm-pop" role="tooltip"><strong>{it.o.title}</strong><em>{rhD(c.d, { weekday: "short", month: "short", day: "numeric" })}{rhTimes(it.o) ? ` · ${rhTimes(it.o)}` : ""}</em><i>Roundhouse{it.o.organizer ? ` · ${it.o.organizer}` : ""}</i>{it.rented && <span class="cm-pop-warn">The Roundhouse is rented this night. This gathering may move; check with the organizer.</span>}{it.o.notes && <span>{it.o.notes}</span>}</span>
+                              ) : (
+                                <span class="cm-pop" role="tooltip"><strong>Facility rented</strong><em>{rentalSpan(it.b)}</em><span>The Roundhouse is unavailable.</span></span>
+                              )}
                             </span>
                           ))}
                         </div>
@@ -707,6 +717,20 @@ const rentalSpan = (b) => b.end && b.end !== b.start ? `${rhD(b.start, { weekday
     .cm-chip.is-moved { text-decoration: line-through; text-decoration-color: #b0692c; }
     .cm-chip--rental { color: #8a5a2b; font-style: italic; }
     .cm-list { display: none; margin-top: 1.2rem; }
+    /* Hover/focus detail popup (desktop; mobile uses the day list). Cells stop clipping so it can overflow. */
+    .cm-cell { overflow: visible; position: relative; }
+    .cm-cell:hover, .cm-cell:focus-within { z-index: 20; opacity: 1; }
+    .cm-chip { position: relative; cursor: default; }
+    a.cm-chip { cursor: pointer; }
+    .cm-chip span.cm-pop { display: none; position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; width: 16rem; padding: .7rem .85rem; background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--rc); border-radius: 10px; box-shadow: var(--shadow); font-family: 'Newsreader', Georgia, serif; font-size: .88rem; line-height: 1.4; color: var(--ink2); white-space: normal; -webkit-line-clamp: unset; text-decoration: none; font-style: normal; flex-direction: column; gap: .2rem; }
+    .cm-cell:nth-child(7n) .cm-pop, .cm-cell:nth-child(7n-1) .cm-pop { left: auto; right: 0; }
+    .cm-chip:hover .cm-pop, .cm-chip:focus-visible .cm-pop, .cm-chip:focus .cm-pop { display: flex; }
+    .cm-pop strong { font-family: 'Fraunces', Georgia, serif; font-weight: 500; font-size: 1rem; color: var(--ink); }
+    .cm-pop em { font-style: normal; color: color-mix(in srgb, var(--rc) 80%, #000); font-weight: 600; font-size: .82rem; }
+    .cm-pop i { font-style: normal; color: var(--muted); font-size: .82rem; }
+    .cm-pop u { text-decoration: none; color: var(--rose); font-weight: 600; font-size: .82rem; margin-top: .2rem; }
+    .cm-pop span { display: block; -webkit-line-clamp: unset; overflow: visible; opacity: 1; }
+    .cm-pop .cm-pop-warn { color: #8a5a2b; font-style: italic; }
 
     .cal-mini-none { margin: .1rem 0 0; font-size: .78rem; color: var(--muted); font-style: italic; }
 
