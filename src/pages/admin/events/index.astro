@@ -51,7 +51,9 @@ try {
     }
   });
 
-  events = expandedEvents.sort((a, b) => new Date(a.data.startDate).getTime() - new Date(b.data.startDate).getTime());
+  // By end date (soonest-finishing first), then start: a long program lists after what ends before it.
+  const endMs = (e) => new Date(e.data.endDate || e.data.startDate).getTime();
+  events = expandedEvents.sort((a, b) => endMs(a) - endMs(b) || new Date(a.data.startDate).getTime() - new Date(b.data.startDate).getTime());
 } catch (e) {
   error = e.message;
   console.error('Error loading events from Turso:', e);
@@ -83,15 +85,10 @@ const invoiceTotals = await invoiceTotalsByEvent();
 try { Astro.locals?.cfContext?.waitUntil?.(refreshOpenInvoices(20)); } catch { /* not on CF (dev) */ }
 const money = (cents) => `$${(Math.round(cents) / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
-// Filter old events by default (more than 1 week past)
-const oneWeekAgo = new Date();
-oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
+// Past events (already ended) are hidden by default; "Show Past Events" brings them back.
+const nowMs = Date.now();
 const allEvents = [...events];
-const filteredEvents = events.filter(event => {
-  const eventDate = new Date(event.data.endDate || event.data.startDate);
-  return eventDate >= oneWeekAgo;
-});
+const filteredEvents = events.filter(event => new Date(event.data.endDate || event.data.startDate).getTime() >= nowMs);
 
 
 const formatDate = (dateStr) => {
@@ -171,7 +168,7 @@ const getEventLocation = (event) => {
         )}
         <button id="toggle-old-events" class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
           <span>📅</span>
-          <span class="toggle-text">Show Old Events</span>
+          <span class="toggle-text">Show Past Events</span>
         </button>
         <button id="sync-now" title="Pull the latest from Humanitix now (title, image, dates, price). Does not change hide/show." class="bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center gap-2">
           <span id="sync-icon">🔄</span>
@@ -464,7 +461,7 @@ const getEventLocation = (event) => {
   </div>
 
   <!-- Hidden data for client-side filtering -->
-  <script type="application/json" id="events-data" set:html={JSON.stringify(filteredEvents.map(event => ({
+  <script type="application/json" id="events-data" set:html={JSON.stringify(allEvents.map(event => ({
     id: event.data.id,
     name: event.data.name,
     startDate: event.data.startDate,
@@ -550,12 +547,7 @@ const getEventLocation = (event) => {
       return highlights.includes('Virtual') ? 'online' : 'onsite';
     };
     
-    const isEventOld = (event) => {
-      const oneWeekAgo = new Date();
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-      const eventDate = new Date(event.endDate || event.startDate);
-      return eventDate < oneWeekAgo;
-    };
+    const isEventOld = (event) => new Date(event.endDate || event.startDate) < new Date();
     
     const renderEventsTable = (events) => {
       const container = document.getElementById('events-list');
@@ -713,12 +705,12 @@ const getEventLocation = (event) => {
       if (showingOldEvents) {
         // Show all events
         renderEventsTable(allEventsData);
-        toggleText.textContent = 'Hide Old Events';
+        toggleText.textContent = 'Hide Past Events';
       } else {
         // Filter out old events
         const filteredEvents = allEventsData.filter(event => !isEventOld(event));
         renderEventsTable(filteredEvents);
-        toggleText.textContent = 'Show Old Events';
+        toggleText.textContent = 'Show Past Events';
       }
     });
 
